@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跨市场期权EV分析 — CFFEX + US + CN商品 | 2026-05-31</title>
+<style>
+  :root {
+    --bg:#0f1117; --card:#1a1d27; --card2:#141620; --border:#2a2d3a;
+    --text:#e2e8f0; --muted:#8892a4;
+    --green:#34d399; --red:#f87171; --yellow:#fbbf24;
+    --blue:#60a5fa; --purple:#a78bfa; --teal:#2dd4bf;
+    --orange:#fb923c; --indigo:#818cf8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);
+    font-family:'SF Pro Text',-apple-system,'Segoe UI',sans-serif;
+    font-size:14px;line-height:1.65;padding:36px 28px;max-width:1200px;margin:0 auto;}
+  h1{font-size:23px;font-weight:700;color:#fff;margin-bottom:5px;}
+  h2{font-size:16px;font-weight:600;color:var(--blue);margin:36px 0 14px;
+     border-bottom:1px solid var(--border);padding-bottom:6px;}
+  h3{font-size:13px;font-weight:600;color:var(--purple);margin:18px 0 10px;}
+  .meta{color:var(--muted);font-size:12px;margin-bottom:30px;}
+  .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.4px;}
+  .tg-key{background:#042f2e;color:var(--teal);border:1px solid #0f766e;}
+  .tg-pass{background:#052e16;color:var(--green);border:1px solid #166534;}
+  .tg-warn{background:#2d1a00;color:var(--yellow);border:1px solid #92400e;}
+  .tg-info{background:#1e1b4b;color:var(--purple);border:1px solid #4c1d95;}
+  .tg-red{background:#2d0d0d;color:var(--red);border:1px solid #7f1d1d;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0 22px;}
+  th{background:#12141e;color:var(--muted);font-weight:500;text-align:right;
+     padding:8px 10px;border-bottom:1px solid var(--border);font-size:11px;white-space:nowrap;}
+  th.L{text-align:left;}
+  td{padding:7px 10px;border-bottom:1px solid #1e2130;text-align:right;vertical-align:middle;}
+  td:first-child{text-align:left;}
+  tr:hover td{background:#1e2130;}
+  tr.kr td{background:#04211f;}
+  tr.kr:hover td{background:#063330;}
+  tr.wk td{opacity:.65;}
+  .pos{color:var(--green);font-weight:600;}
+  .neg{color:var(--red);font-weight:600;}
+  .neu{color:var(--yellow);}
+  .dim{color:var(--muted);font-size:11px;}
+  .ins{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin:18px 0;}
+  .ins.ki{border-color:#0f766e;background:#041f1e;}
+  .ins.wn{border-color:#78350f;background:#1a0f00;}
+  .ins h4{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--teal);}
+  .ins.wn h4{color:var(--orange);}
+  .ins p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:7px;}
+  .ins p:last-child{margin-bottom:0;}
+  .ins p b{color:var(--text);}
+  .ins ul{margin:6px 0 0 16px;}
+  .ins li{font-size:13px;color:var(--muted);line-height:1.75;}
+  .ins li b{color:var(--text);}
+  .note{font-size:11px;color:var(--muted);font-style:italic;margin:-6px 0 14px;}
+
+  /* Cross-market hero grid */
+  .pool-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0 28px;}
+  .pc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .pc.hi{border-color:#0f766e;background:#041f1e;}
+  .pc .pt{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
+  .pc .pn{font-size:11px;color:var(--muted);margin-bottom:10px;}
+  .pc .big{font-size:26px;font-weight:800;line-height:1;margin-bottom:3px;}
+  .pc .kv{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-top:1px solid var(--border);}
+  .pc .kv .k{color:var(--muted);}
+  .pc .kv .v{font-weight:600;}
+
+  /* OTM heatmap table */
+  .hm td.l0{background:#0a2e2a;color:var(--teal);}
+  .hm td.l1{background:#0a2620;color:#4ade80;}
+  .hm td.l2{background:#0d2a10;color:#86efac;}
+  .hm td.l3{background:#162210;color:#bbf7d0;}
+  .hm td.neg1{background:#2a1010;color:#fca5a5;}
+  .hm td.neg2{background:#200c0c;color:#f87171;}
+
+  /* OTM sweep grid */
+  .otm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 22px;}
+  .otm-card{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+  .otm-card .ot{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
+                 letter-spacing:.4px;margin-bottom:10px;}
+  .otm-card .ev{font-size:24px;font-weight:800;line-height:1;margin-bottom:2px;}
+  .otm-card .sub{font-size:11px;color:var(--muted);}
+  .otm-card .kv2{display:flex;justify-content:space-between;font-size:11px;
+                  padding:3px 0;border-top:1px solid var(--border);margin-top:6px;}
+  .otm-card .kv2 .k{color:var(--muted);}
+  .otm-card .kv2 .v{font-weight:600;}
+  .otm-card.best{border-color:#0f766e;}
+
+  /* Tradeoff viz */
+  .tradeoff{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0;}
+  .tv-panel{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
+  .tv-panel h4{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.4px;}
+
+  /* Budget bar */
+  .budget-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .budget-row .lbl{width:100px;font-size:12px;color:var(--muted);text-align:right;flex-shrink:0;}
+  .budget-row .bar-wrap{flex:1;background:#1e2130;border-radius:4px;height:24px;position:relative;overflow:hidden;}
+  .budget-row .bar{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;
+                   font-size:11px;font-weight:700;white-space:nowrap;}
+  .budget-row .stat{width:80px;font-size:11px;color:var(--muted);text-align:right;flex-shrink:0;}
+
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<h1>跨市场期权EV分析 — 一致性验证 + 虚值档位扫描</h1>
+<div class="meta">
+  生成日期: 2026-05-31 &nbsp;|&nbsp;
+  信号: MACD底部背离 × h=opposing（1h趋势反向）&nbsp;|&nbsp;
+  定价: Black期货期权模型 · HV20 · T=17d &nbsp;|&nbsp;
+  止损: 肖老师4-tick规则 vs 标准ATR止损 &nbsp;|&nbsp;
+  5个池 · 94笔 bottom×opp信号 · 4个行权价档位
+</div>
+
+<!-- ===== 一、跨市场概览 ===== -->
+<h2>一、跨市场一致性验证（ATM平值期权）</h2>
+<p class="note">所有结果为 bottom×h=opposing 信号，买入平值认购期权，剩余T=17个交易日，4-tick止损</p>
+
+<div class="pool-cards">
+  <div class="pc">
+    <div class="pt">CN_INDEX</div>
+    <div class="pn">IF / IH / IC（CFFEX指数）</div>
+    <div class="big pos">+27.5%</div>
+    <div class="kv"><span class="k">n</span><span class="v">13</span></div>
+    <div class="kv"><span class="k">获利率</span><span class="v neu">54%</span></div>
+    <div class="kv"><span class="k">tp1_tp2率</span><span class="v neu">54%</span></div>
+    <div class="kv"><span class="k">标的EV</span><span class="v pos">+0.643R</span></div>
+    <div class="kv"><span class="k">中位权利金</span><span class="v">2.03%F</span></div>
+  </div>
+  <div class="pc">
+    <div class="pt">CN_AGRI</div>
+    <div class="pn">农产品/化工（ZCE/DCE）</div>
+    <div class="big pos">+32.8%</div>
+    <div class="kv"><span class="k">n</span><span class="v">23</span></div>
+    <div class="kv"><span class="k">获利率</span><span class="v pos">70%</span></div>
+    <div class="kv"><span class="k">tp1_tp2率</span><span class="v pos">70%</span></div>
+    <div class="kv"><span class="k">标的EV</span><span class="v pos">+0.814R</span></div>
+    <div class="kv"><span class="k">中位权利金</span><span class="v">3.19%F</span></div>
+  </div>
+  <div class="pc hi">
+    <div class="pt">CN_METAL</div>
+    <div class="pn">金属/能源（SHFE/INE）</div>
+    <div class="big" style="color:var(--teal)">+42.1%</div>
+    <div class="kv"><span class="k">n</span><span class="v">18</span></div>
+    <div class="kv"><span class="k">获利率</span><span class="v pos">78%</span></div>
+    <div class="kv"><span class="k">tp1_tp2率</span><span class="v neu">56%</span></div>
+    <div class="kv"><span class="k">标的EV</span><span class="v pos">+0.836R</span></div>
+    <div class="kv"><span class="k">中位权利金</span><span class="v">2.69%F</span></div>
+  </div>
+  <div class="pc">
+    <div class="pt">US_EQUITY</div>
+    <div class="pn">SPY/QQQ/IWM/DIA/XLF/XLK/NVDA</div>
+    <div class="big pos">+31.3%</div>
+    <div class="kv"><span class="k">n</span><span class="v">27</span></div>
+    <div class="kv"><span class="k">获利率</span><span class="v pos">74%</span></div>
+    <div class="kv"><span class="k">tp1_tp2率</span><span class="v pos">74%</span></div>
+    <div class="kv"><span class="k">标的EV</span><span class="v pos">+0.889R</span></div>
+    <div class="kv"><span class="k">中位权利金</span><span class="v">2.22%F</span></div>
+  </div>
+  <div class="pc">
+    <div class="pt">US_MACRO</div>
+    <div class="pn">GLD / GDX / TLT</div>
+    <div class="big pos">+25.8%</div>
+    <div class="kv"><span class="k">n</span><span class="v">13</span></div>
+    <div class="kv"><span class="k">获利率</span><span class="v pos">77%</span></div>
+    <div class="kv"><span class="k">tp1_tp2率</span><span class="v pos">69%</span></div>
+    <div class="kv"><span class="k">标的EV</span><span class="v pos">+1.125R</span></div>
+    <div class="kv"><span class="k">中位权利金</span><span class="v">2.04%F</span></div>
+  </div>
+</div>
+
+<div class="ins ki">
+  <h4>一致性结论：所有5个池子在bottom×h=opposing信号下期权EV均为正</h4>
+  <p>跨越3个市场（中国商品期货、中国股指期货、美国ETF），期权EV范围 <b>+25.8%</b> 到 <b>+42.1%</b>，
+  标的底层EV范围 <b>+0.643R</b> 到 <b>+1.125R</b>。这证明 <b>h=opposing滤波器的有效性不依赖单一市场</b>。
+  结合Black模型4-tick止损定价，跨市场的信号一致性是此框架的核心优势。</p>
+  <p>特别注意：<b>US_MACRO（GLD/GDX/TLT）在13笔bottom×opp中无一触发全止损（n_fs=0）</b>。
+  这意味着h=opposing过滤后，US宏观类ETF的胜率极高，期权损耗完全来自tp1_stop和max_hold路径，
+  4-tick止损对这组的改善可忽略。</p>
+</div>
+
+<!-- Cross-market table -->
+<table class="hm">
+  <thead>
+    <tr>
+      <th class="L">池 / 市场</th>
+      <th>n</th>
+      <th>底层EV(R)</th>
+      <th>期权EV(4tk)</th>
+      <th>期权EV(ATR)</th>
+      <th>获利率</th>
+      <th>tp1_tp2率</th>
+      <th>中位HV20</th>
+      <th>中位权利金</th>
+      <th>全止损4tk损耗</th>
+      <th>tp1_tp2收益</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CN_INDEX — 沪深300/上证50/中证500</td>
+      <td>13</td><td class="pos">+0.643R</td>
+      <td class="pos">+27.5%</td><td class="pos">+20.5%</td>
+      <td class="neu">54%</td><td class="neu">54%</td>
+      <td>~18%</td><td>2.03%F</td>
+      <td class="neg">-6.8%</td><td class="pos">+59.4%</td>
+    </tr>
+    <tr>
+      <td>CN_AGRI — 郑糖/豆粕/PTA/甲醇/铁矿</td>
+      <td>23</td><td class="pos">+0.814R</td>
+      <td class="pos">+32.8%</td><td class="pos">+26.2%</td>
+      <td class="pos">70%</td><td class="pos">70%</td>
+      <td>~31%</td><td>3.19%F</td>
+      <td class="neg">-8.7%</td><td class="pos">+54.9%</td>
+    </tr>
+    <tr class="kr">
+      <td><span class="tag tg-key">最强</span> CN_METAL — 螺纹/沪铜/沪金/原油</td>
+      <td>18</td><td class="pos">+0.836R</td>
+      <td class="pos">+42.1%</td><td class="pos">+39.8%</td>
+      <td class="pos">78%</td><td class="neu">56%</td>
+      <td>~27%</td><td>2.69%F</td>
+      <td class="neg">-8.9%</td><td class="pos">+88.5%</td>
+    </tr>
+    <tr>
+      <td>US_EQUITY — SPY/QQQ/IWM/DIA等</td>
+      <td>27</td><td class="pos">+0.889R</td>
+      <td class="pos">+31.3%</td><td class="pos">+24.3%</td>
+      <td class="pos">74%</td><td class="pos">74%</td>
+      <td>~21%</td><td>2.22%F</td>
+      <td class="neg">-7.4%</td><td class="pos">+45.1%</td>
+    </tr>
+    <tr>
+      <td>US_MACRO — GLD/GDX/TLT</td>
+      <td>13</td><td class="pos">+1.125R</td>
+      <td class="pos">+25.8%</td><td class="pos">+25.8%</td>
+      <td class="pos">77%</td><td class="pos">69%</td>
+      <td>~16%</td><td>2.04%F</td>
+      <td class="dim">n_fs=0</td><td class="pos">+37.2%</td>
+    </tr>
+    <tr style="background:#12141e;">
+      <td><b>全池合并 (n=94)</b></td>
+      <td><b>94</b></td><td>—</td>
+      <td class="pos"><b>+32.5%</b></td><td class="pos">+27.4%</td>
+      <td class="pos">71%</td><td class="pos">66%</td>
+      <td>~22%</td><td>2.33%F</td>
+      <td class="neg">-7.8%</td><td class="pos">+55.1%</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ===== 二、OTM参数扫描 ===== -->
+<h2>二、虚值档位扫描（ATM → 虚2 → 虚3 → 虚4）</h2>
+<p class="note">一档 ≈ 标的价格F的1%。虚2(+2%) / 虚3(+3%) / 虚4(+4%) 对应行权价偏移。全池合并，n=94笔信号。</p>
+
+<div class="otm-grid">
+  <div class="otm-card best">
+    <div class="ot">ATM 平值</div>
+    <div class="ev pos">+32.5%</div>
+    <div class="sub">权利金 EV | δ≈0.51</div>
+    <div class="kv2"><span class="k">获利率</span><span class="v pos">71%</span></div>
+    <div class="kv2"><span class="k">tp1_tp2率</span><span class="v pos">66%</span></div>
+    <div class="kv2"><span class="k">中位权利金</span><span class="v">2.33%F</span></div>
+    <div class="kv2"><span class="k">EV×权利金 (绝对)</span><span class="v pos">+0.76‰F</span></div>
+    <div class="kv2"><span class="k">全止损4tick损耗</span><span class="v neu">-7.8%</span></div>
+    <div class="kv2"><span class="k">tp1_tp2收益</span><span class="v pos">+55.1%</span></div>
+  </div>
+  <div class="otm-card">
+    <div class="ot">虚2（+2%）</div>
+    <div class="ev pos">+35.6%</div>
+    <div class="sub">权利金 EV | δ≈0.38</div>
+    <div class="kv2"><span class="k">获利率</span><span class="v pos">67%</span></div>
+    <div class="kv2"><span class="k">tp1_tp2率</span><span class="v pos">66%</span></div>
+    <div class="kv2"><span class="k">中位权利金</span><span class="v">1.49%F</span></div>
+    <div class="kv2"><span class="k">EV×权利金 (绝对)</span><span class="v neu">+0.53‰F</span></div>
+    <div class="kv2"><span class="k">全止损4tick损耗</span><span class="v neu">-10.9%</span></div>
+    <div class="kv2"><span class="k">tp1_tp2收益</span><span class="v pos">+65.3%</span></div>
+  </div>
+  <div class="otm-card">
+    <div class="ot">虚3（+3%）</div>
+    <div class="ev pos">+37.8%</div>
+    <div class="sub">权利金 EV | δ≈0.32</div>
+    <div class="kv2"><span class="k">获利率</span><span class="v pos">65%</span></div>
+    <div class="kv2"><span class="k">tp1_tp2率</span><span class="v pos">66%</span></div>
+    <div class="kv2"><span class="k">中位权利金</span><span class="v">1.16%F</span></div>
+    <div class="kv2"><span class="k">EV×权利金 (绝对)</span><span class="v neg">+0.44‰F</span></div>
+    <div class="kv2"><span class="k">全止损4tick损耗</span><span class="v neg">-12.7%</span></div>
+    <div class="kv2"><span class="k">tp1_tp2收益</span><span class="v pos">+70.4%</span></div>
+  </div>
+  <div class="otm-card">
+    <div class="ot">虚4（+4%）</div>
+    <div class="ev pos">+39.9%</div>
+    <div class="sub">权利金 EV | δ≈0.26</div>
+    <div class="kv2"><span class="k">获利率</span><span class="v pos">62%</span></div>
+    <div class="kv2"><span class="k">tp1_tp2率</span><span class="v pos">66%</span></div>
+    <div class="kv2"><span class="k">中位权利金</span><span class="v">0.89%F</span></div>
+    <div class="kv2"><span class="k">EV×权利金 (绝对)</span><span class="v neg">+0.36‰F</span></div>
+    <div class="kv2"><span class="k">全止损4tick损耗</span><span class="v neg">-14.6%</span></div>
+    <div class="kv2"><span class="k">tp1_tp2收益</span><span class="v pos">+75.5%</span></div>
+  </div>
+</div>
+
+<!-- OTM detailed table -->
+<table>
+  <thead>
+    <tr>
+      <th class="L">档位</th><th>n</th>
+      <th>获利率↓</th><th>tp1_tp2率</th>
+      <th>EV(4tk)↑</th><th>EV(ATR)</th>
+      <th>中位权利金</th><th>中位Delta</th>
+      <th>绝对EV<br>(EV×权利金)</th>
+      <th>全止损4tk</th><th>tp1_tp2收益</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="kr">
+      <td><b>ATM（平值）</b></td><td>94</td>
+      <td class="pos">71%</td><td class="pos">66%</td>
+      <td class="pos">+32.5%</td><td class="pos">+27.4%</td>
+      <td>2.33%F</td><td>0.51</td>
+      <td class="pos"><b>+0.76‰F</b></td>
+      <td class="neg">-7.8%</td><td class="pos">+55.1%</td>
+    </tr>
+    <tr>
+      <td>虚2（+2%）</td><td>94</td>
+      <td class="neu">67%</td><td class="pos">66%</td>
+      <td class="pos">+35.6%</td><td class="pos">+30.1%</td>
+      <td>1.49%F</td><td>0.38</td>
+      <td class="neu">+0.53‰F</td>
+      <td class="neg">-10.9%</td><td class="pos">+65.3%</td>
+    </tr>
+    <tr>
+      <td>虚3（+3%）</td><td>94</td>
+      <td class="neu">65%</td><td class="pos">66%</td>
+      <td class="pos">+37.8%</td><td class="pos">+32.0%</td>
+      <td>1.16%F</td><td>0.32</td>
+      <td class="neg">+0.44‰F</td>
+      <td class="neg">-12.7%</td><td class="pos">+70.4%</td>
+    </tr>
+    <tr>
+      <td>虚4（+4%）</td><td>94</td>
+      <td class="neg">62%</td><td class="pos">66%</td>
+      <td class="pos">+39.9%</td><td class="pos">+34.0%</td>
+      <td>0.89%F</td><td>0.26</td>
+      <td class="neg">+0.36‰F</td>
+      <td class="neg">-14.6%</td><td class="pos">+75.5%</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="ins ki">
+  <h4>OTM扫描核心发现：EV%反转，但绝对收益单调递减</h4>
+  <p><b>权利金EV%（相对）随OTM深度增加</b>（+32.5% → +39.9%），这是杠杆效应：便宜的权利金分母缩小，
+  而tp1_tp2时的大涨幅（+55% → +76%）对EV有更高权重。</p>
+  <p><b>绝对EV（EV×权利金，即实际利润相对F）单调递减</b>（+0.76‰ → +0.36‰）。
+  如果你的目标是最大化每笔信号的绝对预期利润，<b>ATM是最优选择</b>。</p>
+  <p>tp1_tp2率在所有档位保持不变（66%）。这说明<b>行权价的选择不改变"标的是否到达TP"的概率</b>，
+  只影响在TP时期权本身的盈利幅度。获利率从71%降至62%，因为部分"小赢"（tp1_max/tp1_stop在ATM能盈利）
+  在OTM时因权利金更快衰减而变成小亏。</p>
+</div>
+
+<!-- ===== 三、同等资本预算 ===== -->
+<h2>三、同等资本预算分析：买更多虚值合约能赢过ATM吗？</h2>
+<p class="note">假设每笔信号投入等量资本（以ATM权利金2.33%F为基准）</p>
+
+<div class="tradeoff">
+  <div class="tv-panel">
+    <h4>各档位可买合约数（同等资本预算）</h4>
+    <div class="budget-row">
+      <div class="lbl">ATM(2.33%F)</div>
+      <div class="bar-wrap">
+        <div class="bar" style="width:38.5%;background:linear-gradient(90deg,#065f46,#059669)">
+          <span style="color:#d1fae5">1.00× · EV=+0.76‰F/合约</span>
+        </div>
+      </div>
+      <div class="stat" style="color:var(--teal)">总EV: +0.76‰F</div>
+    </div>
+    <div class="budget-row">
+      <div class="lbl">虚2(1.49%F)</div>
+      <div class="bar-wrap">
+        <div class="bar" style="width:60%;background:linear-gradient(90deg,#14532d,#16a34a)">
+          <span style="color:#bbf7d0">1.57× · EV=+0.53‰F/合约</span>
+        </div>
+      </div>
+      <div class="stat" style="color:var(--green)">总EV: +0.83‰F</div>
+    </div>
+    <div class="budget-row">
+      <div class="lbl">虚3(1.16%F)</div>
+      <div class="bar-wrap">
+        <div class="bar" style="width:77%;background:linear-gradient(90deg,#1a3a0a,#22c55e)">
+          <span style="color:#dcfce7">2.01× · EV=+0.44‰F/合约</span>
+        </div>
+      </div>
+      <div class="stat" style="color:var(--green)">总EV: +0.88‰F</div>
+    </div>
+    <div class="budget-row">
+      <div class="lbl">虚4(0.89%F)</div>
+      <div class="bar-wrap">
+        <div class="bar" style="width:100%;background:linear-gradient(90deg,#1e3a0a,#4ade80)">
+          <span style="color:#f0fdf4">2.61× · EV=+0.36‰F/合约</span>
+        </div>
+      </div>
+      <div class="stat" style="color:var(--green)">总EV: +0.94‰F</div>
+    </div>
+    <p style="margin-top:10px;font-size:12px;color:var(--muted)">
+      注：合约数量按比例增加，但同一信号下所有合约高度相关，不增加独立性。
+      总EV轻微提升是数学意义上的（多头寸均值相等），实际体验是同样胜负但收益/损失各按倍数放大。
+    </p>
+  </div>
+  <div class="tv-panel">
+    <h4>EV%-权利金-获利率 三角权衡</h4>
+    <table style="margin:0;">
+      <thead>
+        <tr>
+          <th class="L">档位</th>
+          <th>EV%↑</th><th>权利金↓</th><th>获利率↓</th><th>绝对EV↓</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="kr"><td>ATM</td><td class="pos">+32.5%</td><td>2.33%F</td><td class="pos">71%</td><td class="pos">+0.76‰F</td></tr>
+        <tr><td>虚2</td><td class="pos">+35.6%</td><td>1.49%F</td><td class="neu">67%</td><td class="neu">+0.53‰F</td></tr>
+        <tr><td>虚3</td><td class="pos">+37.8%</td><td>1.16%F</td><td class="neu">65%</td><td class="neg">+0.44‰F</td></tr>
+        <tr><td>虚4</td><td class="pos">+39.9%</td><td>0.89%F</td><td class="neu">62%</td><td class="neg">+0.36‰F</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px;font-size:12px;color:var(--muted)">
+      <b style="color:var(--text)">结论：ATM在绝对EV上最优，OTM在EV%上更高但绝对收益更低。</b><br>
+      同等资本预算时虚3/虚4稍胜（因为tp1_tp2路径的非线性杠杆），但差距微小（+0.76 vs +0.94‰F），
+      且来自更低的获利率和更高的单笔volatility——不建议为此牺牲胜率。
+    </p>
+  </div>
+</div>
+
+<!-- ===== 四、分池OTM最优 ===== -->
+<h2>四、各池 OTM 最优分析</h2>
+
+<!-- Per-pool heatmap -->
+<table class="hm">
+  <thead>
+    <tr>
+      <th class="L">池 (n)</th>
+      <th>底层EV</th>
+      <th colspan="2">ATM(平值)</th>
+      <th colspan="2">虚2(+2%)</th>
+      <th colspan="2">虚3(+3%)</th>
+      <th colspan="2">虚4(+4%)</th>
+      <th>OTM建议</th>
+    </tr>
+    <tr>
+      <th class="L"></th><th></th>
+      <th>EV%</th><th>胜率</th>
+      <th>EV%</th><th>胜率</th>
+      <th>EV%</th><th>胜率</th>
+      <th>EV%</th><th>胜率</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CN_INDEX (n=13)</td><td class="pos">+0.643R</td>
+      <td class="pos">+27.5%</td><td class="neu">54%</td>
+      <td class="pos">+31.3%</td><td class="neu">54%</td>
+      <td class="pos">+32.9%</td><td class="neu">54%</td>
+      <td class="pos">+34.3%</td><td class="neu">54%</td>
+      <td><span class="tag tg-info">n太小</span></td>
+    </tr>
+    <tr>
+      <td>CN_AGRI (n=23)</td><td class="pos">+0.814R</td>
+      <td class="pos">+32.8%</td><td class="pos">70%</td>
+      <td class="pos">+42.7%</td><td class="pos">70%</td>
+      <td class="pos">+49.6%</td><td class="pos">70%</td>
+      <td class="pos">+56.9%</td><td class="pos">70%</td>
+      <td><span class="tag tg-warn">OTM可考虑</span></td>
+    </tr>
+    <tr class="kr">
+      <td><b>CN_METAL (n=18)</b></td><td class="pos">+0.836R</td>
+      <td class="pos"><b>+42.1%</b></td><td class="pos"><b>78%</b></td>
+      <td class="pos">+38.1%</td><td class="neu">61%</td>
+      <td class="pos">+38.3%</td><td class="neu">61%</td>
+      <td class="pos">+38.8%</td><td class="neu">56%</td>
+      <td><span class="tag tg-key">坚持ATM</span></td>
+    </tr>
+    <tr>
+      <td>US_EQUITY (n=27)</td><td class="pos">+0.889R</td>
+      <td class="pos">+31.3%</td><td class="pos">74%</td>
+      <td class="pos">+33.9%</td><td class="pos">70%</td>
+      <td class="pos">+34.8%</td><td class="pos">67%</td>
+      <td class="pos">+35.4%</td><td class="neu">63%</td>
+      <td><span class="tag tg-pass">ATM或虚2</span></td>
+    </tr>
+    <tr>
+      <td>US_MACRO (n=13)</td><td class="pos">+1.125R</td>
+      <td class="pos">+25.8%</td><td class="pos">77%</td>
+      <td class="pos">+27.4%</td><td class="pos">77%</td>
+      <td class="pos">+27.4%</td><td class="pos">69%</td>
+      <td class="pos">+26.7%</td><td class="neu">62%</td>
+      <td><span class="tag tg-pass">ATM或虚2</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="ins">
+  <h4>CN_AGRI — OTM虚值有独特优势</h4>
+  <p>CN_AGRI是唯一一个 <b>OTM深度增加时获利率不下降（保持70%）的池子</b>。
+  这是因为该池的赢家（tp1_tp2）都是高波动品种（I/SC/SA，HV≈35-44%），
+  标的的TP1/TP2移动（1-2×ATR）足够大，即使行权价偏移2-4%，期权仍能大幅盈利。
+  输家的损失（full_stop）则按ATM比例放大不多。</p>
+  <p>实际含义：CN_AGRI bottom×opp信号，<b>可以考虑买虚2甚至虚3</b>，
+  用同等权利金成本买入更多合约，EV%从+32.8% → +49.6%，而胜率不变（70%）。
+  这是该池特有的OTM"free lunch"效应（受限于n=23，需持续监控）。</p>
+</div>
+
+<div class="ins">
+  <h4>CN_METAL — ATM显著优于OTM</h4>
+  <p>CN_METAL的获利率从ATM的 <b>78% 跌至虚4的56%</b>。这是因为该池包含一批"TP1后小赢"交易
+  （RB/AU的tp1_max/tp1_stop路径），在ATM时期权有正回报，但移到OTM后这些
+  "小幅标的移动"已不足以让虚值期权盈利。</p>
+  <p>结论：<b>CN_METAL坚持ATM，获利率和EV均最优</b>（+42.1% EV, 78% win rate）。</p>
+</div>
+
+<!-- ===== 五、4-tick止损在各市场的效果 ===== -->
+<h2>五、4-tick 止损效果：跨市场对比</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th class="L">市场 / 品种特征</th>
+      <th>典型F</th><th>tick大小</th><th>4tick/F</th>
+      <th>ATM期权<br>中位权利金</th>
+      <th>4tick/权利金</th>
+      <th>ATR止损<br>期权损耗</th>
+      <th>4tick止损<br>期权损耗</th>
+      <th>节省</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CN_INDEX (IF, 0.2pt tick)</td>
+      <td>4200</td><td>0.2pt</td>
+      <td class="dim">0.019%F</td>
+      <td>2.03%F</td><td class="dim">~0.9%</td>
+      <td class="neg">-37.5%</td><td class="pos">-6.8%</td>
+      <td class="pos">+30.7pp</td>
+    </tr>
+    <tr>
+      <td>CN_AGRI (SR, 1元tick; I, 0.5pt)</td>
+      <td>~5000</td><td>1元</td>
+      <td class="dim">0.008-0.02%F</td>
+      <td>3.19%F</td><td class="dim">~0.5%</td>
+      <td class="neg">-39.2%</td><td class="pos">-8.7%</td>
+      <td class="pos">+30.5pp</td>
+    </tr>
+    <tr class="kr">
+      <td>CN_METAL (RB 1元; CU 10元; AU 0.02元)</td>
+      <td>~3500</td><td>1元</td>
+      <td class="dim">0.003-0.03%F</td>
+      <td>2.69%F</td><td class="dim">~0.7%</td>
+      <td class="neg">-51.4%</td><td class="pos">-8.9%</td>
+      <td class="pos">+42.5pp</td>
+    </tr>
+    <tr>
+      <td>US_EQUITY (SPY/QQQ, $0.01 tick)</td>
+      <td>~$480</td><td>$0.01</td>
+      <td class="dim">0.008%F</td>
+      <td>2.22%F</td><td class="dim">~0.4%</td>
+      <td class="neg">-38.8%</td><td class="pos">-7.4%</td>
+      <td class="pos">+31.4pp</td>
+    </tr>
+    <tr>
+      <td>US_MACRO (GLD/TLT, $0.01 tick)</td>
+      <td>~$200</td><td>$0.01</td>
+      <td class="dim">0.020%F</td>
+      <td>2.04%F</td><td class="dim">~1.0%</td>
+      <td class="dim">n_fs=0</td><td class="dim">n_fs=0</td>
+      <td class="dim">—</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="ins wn">
+  <h4>US_EQUITY的4-tick止损：概念不直接迁移</h4>
+  <p>对SPY（$480）而言，4 ticks = $0.04 = 0.008%F。期权Delta≈0.5，
+  所以4-tick止损导致的期权价值变化仅约 <b>$0.02</b>。相比ATM权利金约 <b>$10.66</b>（2.22%F），
+  这是 <b>0.2%</b> 的损耗——几乎为零。</p>
+  <p>实际上US_EQUITY的"4-tick止损"在模型中等价于"几乎立即平仓"，
+  所以 <b>-7.4% 损耗主要来自2天的theta衰减</b>，而非标的移动。
+  肖老师的4-tick概念在US_EQUITY场景下应理解为：
+  <b>"若入场后2天内标的没有开始上行，则主动平仓止损"</b>，而不是字面意义的$0.04止损。</p>
+</div>
+
+<!-- ===== 六、CFFEX专项 ===== -->
+<h2>六、CFFEX指数期货期权专项分析</h2>
+<p class="note">IF(IO期权) / IH(HO期权) / IC(MO期权)，底部背离×h=opposing，n=13</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="L">品种</th>
+      <th>n_bot_opp</th>
+      <th>标的EV</th>
+      <th>ATM EV(4tk)</th>
+      <th>虚2 EV</th>
+      <th>虚3 EV</th>
+      <th>中位HV20</th>
+      <th>中位权利金</th>
+      <th>对应期权</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>IF</b> 沪深300期货</td>
+      <td>4</td>
+      <td class="pos">~+0.5R</td>
+      <td class="pos">+27.5%*</td>
+      <td class="pos">+31.3%*</td>
+      <td class="pos">+32.9%*</td>
+      <td>~19%</td>
+      <td>~2.0%F</td>
+      <td>IO (CFFEX)</td>
+    </tr>
+    <tr>
+      <td><b>IH</b> 上证50期货</td>
+      <td>7</td>
+      <td class="pos">~+0.7R</td>
+      <td class="pos">+27.5%*</td>
+      <td class="pos">+31.3%*</td>
+      <td class="pos">+32.9%*</td>
+      <td>~20%</td>
+      <td>~2.1%F</td>
+      <td>HO (CFFEX) / 50ETF期权</td>
+    </tr>
+    <tr class="wk">
+      <td><b>IC</b> 中证500期货</td>
+      <td>2</td>
+      <td class="dim">n=2</td>
+      <td class="dim">n=2</td>
+      <td class="dim">n=2</td>
+      <td class="dim">n=2</td>
+      <td>~17%</td>
+      <td>~2.0%F</td>
+      <td>MO (CFFEX, 2022-12)</td>
+    </tr>
+  </tbody>
+</table>
+<p class="note">* CFFEX池合并显示，个别品种n过小，EV数字仅供参考</p>
+
+<div class="ins wn">
+  <h4>CFFEX期权的特殊约束</h4>
+  <ul>
+    <li><b>IO上市时间</b>：2019-12，IH对应HO上市2022-10，IC对应MO上市2022-12。
+      回测数据覆盖2021-2026，有效数据窗口仅3-4年，且早期流动性差。</li>
+    <li><b>行权价粒度</b>：IO行权价间距50点（IF在4000时≈1.25%），
+      本报告用1%档位（虚2=+2%约等于1.6个行权价档），实际需取最近标准行权价。</li>
+    <li><b>n=13过小</b>：CN_INDEX结论置信度最低，需等至n≥30后再决策。
+      <b>优先用IH对应的50ETF期权</b>（流动性更好）。</li>
+    <li><b>IC(MO)流动性差</b>：MO成立不到3年，当月合约持仓量和流动性远不如IO/HO，
+      慎用。建议等n≥10独立验证。</li>
+  </ul>
+</div>
+
+<!-- ===== 七、综合建议 ===== -->
+<h2>七、跨市场执行建议</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+  <div class="ins">
+    <h4 style="color:var(--green)">优先执行（高置信度）</h4>
+    <ul>
+      <li><b>CN_METAL bottom×opp，ATM认购</b>：RB/AU最稳定，n=18，EV=+42.1%，获利率78%。坚持ATM，不下沉虚值。</li>
+      <li><b>US_EQUITY bottom×opp，ATM或虚2认购</b>：SPY/QQQ/IWM，n=27，EV=+31.3%。OTM到虚2时胜率仅降4%（74%→70%），可接受。</li>
+      <li><b>US_MACRO bottom×opp，ATM认购</b>：GLD/TLT，无全止损记录，稳定性最高。n=13，需等更多样本确认虚值是否有优势。</li>
+    </ul>
+  </div>
+  <div class="ins">
+    <h4 style="color:var(--yellow)">谨慎执行（数据支持有限）</h4>
+    <ul>
+      <li><b>CN_AGRI bottom×opp，ATM或虚2</b>：n=23，OTM有轻微优势，但需持续观察是否为噪声。</li>
+      <li><b>CN_INDEX bottom×opp</b>：n=13，IH(50ETF期权)流动性最好。IC的MO期权流动性差，建议跳过。</li>
+      <li><b>US_EQUITY虚3/虚4</b>：EV%提升但绝对EV降低，获利率跌至65-62%。仅在资本受限时考虑（买多份合约）。</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ins ki" style="margin-top:16px;">
+  <h4>OTM选择总结：哪个市场用哪个档位？</h4>
+  <p>
+    <b>CN_METAL → ATM</b>：获利率在ATM最高（78%），OTM后急速跌至56%。不值得。<br>
+    <b>CN_AGRI → ATM或虚2</b>：OTM获利率不变（70%），虚2 EV从+32.8%升至+42.7%，可尝试。<br>
+    <b>CN_INDEX → ATM（暂时）</b>：样本太小，等n≥30后评估。优先50ETF期权（IH对应）。<br>
+    <b>US_EQUITY → ATM或虚2</b>：绝对EV下降但胜率还可接受（74%→70%），虚2提供更高杠杆。<br>
+    <b>US_MACRO → ATM</b>：无全止损，4-tick优化无意义。ATM最稳，EV+25.8%，获利率77%。
+  </p>
+</div>
+
+<footer>
+  跨市场期权EV分析 · 2026-05-31 &nbsp;|&nbsp;
+  定价：Black期货期权模型，HV20 IV代理，r=2.5%，T=17d，4-tick底层止损 &nbsp;|&nbsp;
+  5个池：CN_INDEX(13) + CN_AGRI(23) + CN_METAL(18) + US_EQUITY(27) + US_MACRO(13) = 94笔 bottom×h=opposing &nbsp;|&nbsp;
+  OTM档位：每档=标的F的1%，虚2/3/4对应+2%/+3%/+4%行权价 &nbsp;|&nbsp;
+  仅供研究参考，不构成投资建议
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.huhan.trading.macd-momentum.refresh-cn-options</string>
+
+    <!-- 10:30 CST = 02:30 UTC — CN options refresh; Sina Finance data available by morning -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>10</integer>
+        <key>Minute</key>
+        <integer>30</integer>
+    </dict>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/huhan/workspace/trading/macd-momentum/src/.venv/bin/python</string>
+        <string>/Users/huhan/workspace/trading/macd-momentum/src/scripts/refresh_daily.py</string>
+        <string>--cn-options-only</string>
+        <string>--lookback</string>
+        <string>30</string>
+        <string>--expiry-window</string>
+        <string>90</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/huhan/workspace/trading/macd-momentum/src</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/huhan/Library/Logs/trading/macd-momentum-refresh-cn-options.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/huhan/Library/Logs/trading/macd-momentum-refresh-cn-options.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

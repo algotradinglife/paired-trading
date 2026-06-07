@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>macd-momentum — architecture design (2026-05-27, v0.1)</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #1a1a1a;
+    --muted: #666;
+    --accent: #0066cc;
+    --warn: #d73a49;
+    --good: #1a7f37;
+    --code-bg: #f0f0f0;
+    --border: #ddd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --fg: #e6e6e6;
+      --muted: #aaa;
+      --accent: #4a9eff;
+      --warn: #f87171;
+      --good: #4ade80;
+      --code-bg: #2a2a2a;
+      --border: #333;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 6rem;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    line-height: 1.65;
+  }
+  header { border-bottom: 2px solid var(--accent); padding-bottom: 1rem; margin-bottom: 2rem; }
+  header h1 { margin: 0 0 .4rem; }
+  header .meta { color: var(--muted); font-size: .9rem; }
+  nav.toc { background: var(--code-bg); border-radius: 6px; padding: 1rem 1.5rem; margin-bottom: 2rem; }
+  nav.toc strong { display: block; margin-bottom: .5rem; }
+  nav.toc ol { margin: 0; padding-left: 1.5rem; }
+  nav.toc li { margin: .15rem 0; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  section { margin: 2.5rem 0; scroll-margin-top: 1rem; }
+  h2 { border-bottom: 1px solid var(--border); padding-bottom: .3rem; margin-top: 3rem; }
+  h3 { margin-top: 2rem; }
+  h4 { margin-top: 1.4rem; color: var(--muted); }
+  code, pre, .mono { font-family: ui-monospace, "SF Mono", Consolas, "Liberation Mono", monospace; font-size: .9em; }
+  code { background: var(--code-bg); padding: .1em .3em; border-radius: 3px; }
+  pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; line-height: 1.4; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .92em; }
+  th, td { border: 1px solid var(--border); padding: .5rem .75rem; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); }
+  .warn { color: var(--warn); font-weight: 600; }
+  .good { color: var(--good); font-weight: 600; }
+  .accent { color: var(--accent); }
+  .muted { color: var(--muted); }
+  blockquote {
+    margin: 1rem 0;
+    padding: .5rem 1rem;
+    border-left: 4px solid var(--accent);
+    color: var(--muted);
+  }
+  .out-of-scope {
+    border: 2px dashed var(--warn);
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+    background: rgba(215, 58, 73, 0.05);
+  }
+  .out-of-scope h4 { margin-top: 0; color: var(--warn); }
+  .ascii-diagram {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    white-space: pre;
+    background: var(--code-bg);
+    padding: 1rem;
+    border-radius: 6px;
+    font-size: .8rem;
+    line-height: 1.3;
+    overflow-x: auto;
+  }
+  .layer {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    margin: .75rem 0;
+    background: var(--code-bg);
+  }
+  .layer h4 { margin: 0 0 .5rem; color: var(--accent); }
+  .layer-tag {
+    display: inline-block;
+    font-size: .7rem;
+    background: var(--accent);
+    color: white;
+    padding: .1rem .5rem;
+    border-radius: 3px;
+    margin-left: .5rem;
+    vertical-align: middle;
+  }
+  .step {
+    border-left: 3px solid var(--accent);
+    padding: .5rem 1rem;
+    margin: 1rem 0;
+    background: rgba(0, 102, 204, 0.04);
+  }
+  .step h4 { margin: 0 0 .3rem; color: var(--fg); }
+  .step .effort { font-size: .8rem; color: var(--muted); }
+  .footer { color: var(--muted); margin-top: 4rem; font-size: .85rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>macd-momentum — architecture design</h1>
+  <div class="meta">
+    Version 0.3 · 2026-05-28 · Status: <span class="good">FROZEN baseline</span> ·
+    All codex review items resolved (see §14 decisions + §15 changelog)<br>
+    Author: Han (with Claude · codex)
+  </div>
+</header>
+
+<nav class="toc">
+  <strong>目录</strong>
+  <ol>
+    <li><a href="#purpose">1. 目的与适用范围</a></li>
+    <li><a href="#triggers">2. 触发原因</a></li>
+    <li><a href="#scope">3. In Scope / Out of Scope</a></li>
+    <li><a href="#overview">4. 架构总览</a></li>
+    <li><a href="#layers">5. 各层契约</a></li>
+    <li><a href="#abstractions">6. 关键抽象</a></li>
+    <li><a href="#constraints">7. 类型层强制约束</a></li>
+    <li><a href="#migration">8. 迁移路径（10 步）</a></li>
+    <li><a href="#test-migration">9. 测试迁移</a></li>
+    <li><a href="#example">10. 一个端到端示例</a></li>
+    <li><a href="#antipatterns">11. 反模式清单</a></li>
+    <li><a href="#open">12. 未决问题</a></li>
+    <li><a href="#glossary">13. 术语表</a></li>
+    <li><a href="#pending-decisions">14. 决策记录（codex M2/M3/M5 收口）</a></li>
+    <li><a href="#changelog">15. 变更历史</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<section id="purpose">
+<h2>1. 目的与适用范围</h2>
+
+<p>这份文档是 macd-momentum 项目在 2026-05-27 时点的目标架构 design doc。它不是阐述当前代码的现状，而是描述<strong>下一阶段重构要达到的状态</strong>，作为未来 1-2 周（可能更长）的工作参考。</p>
+
+<p>读者: 项目作者 Han，以及任何参与重构 review 的协作者（Claude / Codex）。</p>
+
+<p>这份文档是<strong>意见可改的</strong>。任何 section 都可以被 codex review 或后续讨论推翻。版本号会随实质变更递增。</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="triggers">
+<h2>2. 触发原因</h2>
+
+<p>当前架构在 2026-05 累积了几个具体痛点，重构需要正面回应：</p>
+
+<ol>
+  <li><strong>多 TF look-ahead leak 在 48 小时内出现 3 次</strong>: <code>data/raw/*_weekly.json</code> start-of-week stamp、<code>+7 days</code> shift 不严格、<code>pd.resample('W-FRI')</code> label vs 实际 Friday close 早了 4h。每次都被 codex 抓到，每次都改变了下游精度数字（US bottom CI 从 [+0.11, +9.67] 变到 [-0.72, +9.17]）。Engine 自己的 <code>enrich_with_higher_tf</code> 至今仍有同种泄漏。</li>
+
+  <li><strong>Walk-forward K=3 在 5 个 cell 上全部失败 R5 标准</strong>: in-sample 上看着 CI 显著正的 sweet spot 都是 2024-2026 tail 假象。同一个 feature 轴在 fold1 / fold2 偏好不同 tercile —— 每个 axis 都是 regime <em>predictor</em>，不是 filter。Filter tuning 已经撞天花板。</li>
+
+  <li><strong>脚本之间重复计算</strong>: <code>build_analysis_output</code>、<code>analyze_*_pool</code>、<code>walk_forward_*</code>、<code>backtest_cn_b_topology</code> 各自重新跑 MACD + units，5y SPY daily 每次都重算。</li>
+
+  <li><strong>当前 layer 边界模糊</strong>: <code>direction_gate</code>（instrument-class aware policy）嵌在 detector 里；<code>swing_labeler</code>（用未来信息的 retrospective label）跟 causal detector 同层；策略层不存在但已经在脑子里规划了 3 种异构策略。</li>
+</ol>
+
+<p>这些问题不是调参问题，而是<strong>架构层面的缺失</strong>。重构是为了让下一批 detector / strategy 不重复同样错误。</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="scope">
+<h2>3. In Scope / Out of Scope</h2>
+
+<h3>In Scope</h3>
+<ul>
+  <li>研究 / 回测 / 优化算法的全套流程</li>
+  <li>多 TF + 多 instrument class（us_equity / cn_futures）数据接入、缓存、provenance</li>
+  <li>多种 detector（divergence、exhaustion、未来的 candle-geometry / Brooks 框架）</li>
+  <li>多种策略（US 期权 5min PA、CN 飞天期权、US 选股扫描），每种自带研究 / 回测 / 验证 pipeline</li>
+  <li>本机可视化 audit panel</li>
+  <li>研究产物的可重现性（provenance manifests、artifact ids）</li>
+</ul>
+
+<h3>Out of Scope</h3>
+
+<div class="out-of-scope">
+  <h4>实盘执行系统 — 完全独立的未来项目</h4>
+  <p>下列内容<strong>不在本设计范围内</strong>，会作为一个独立项目单独优化：</p>
+  <ul>
+    <li>实盘下单 / 订单路由 / 成交回报</li>
+    <li>仓位管理 / 风控 / 资金管理</li>
+    <li>实时异常处理（断网、行情中断、状态恢复、reconnect）</li>
+    <li>实盘 streaming（websocket、tick-level 处理）</li>
+    <li>多策略并发执行 / strategy isolation framework</li>
+    <li>多用户 / 部署 / 云服务 / 推送</li>
+    <li>移动端 / API gateway</li>
+  </ul>
+  <p>明确划这条线的目的：避免 "为了实盘可能用得着" 而引入大量复杂度。实盘需要的特性，本架构通过<strong>明确边界 + envelope contract</strong> 而非内部支持来对接 —— 实盘系统作为 envelope 的另一个 consumer 存在。</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="overview">
+<h2>4. 架构总览</h2>
+
+<div class="ascii-diagram">┌────────────────────────────────────────────────────────────────┐
+│  Visualization                                                 │
+│  本机 streamlit；每个 strategy 一个 panel；零部署              │
+├────────────────────────────────────────────────────────────────┤
+│  Strategies                                                    │
+│  strategies/us_options_5min/    (期权 5min 价格行为)          │
+│  strategies/cn_xiao_options/    (飞天期权 / 肖淳心体系)        │
+│  strategies/us_equity_scanner/  (选股扫描)                     │
+│  每个完全独立目录；共享只有 envelope contract                  │
+├────────────────────────────────────────────────────────────────┤
+│  ←─── Audit Plane (横切；event 级 visibility blob) ────→       │
+│  每个 detector event 必带可见性轨迹：                          │
+│  cutoff_ts, foreign_tf_visible_ts, regime_tag, ...             │
+├────────────────────────────────────────────────────────────────┤
+│  Regime Context (新增)                                         │
+│  ex-ante regime tag: bull / bear / range / transition          │
+│  基于 weekly trend_side + volatility band 起步                 │
+├────────────────────────────────────────────────────────────────┤
+│  Detectors (causal)              Labels (retrospective)        │
+│  - MACD divergence               - ZigZag swings (允许看未来)  │
+│  - Exhaustion                    - 持续验证的 baseline truth   │
+│  - Brooks-style candle-geom      ⊥ 类型层禁止 detector 引用    │
+│                                                                │
+│  Policies (instrument-class-aware)                             │
+│  - direction_gate (从 detector 拆出)                           │
+│  - apply_policy / PolicyDecision                               │
+├────────────────────────────────────────────────────────────────┤
+│  Derivations                                                   │
+│  确定性 lens: features (MACD/EMA) / units (heap/cycle/segment)│
+│  / segments / labels —— 「这些是派生量，不是 alpha」          │
+├────────────────────────────────────────────────────────────────┤
+│  Data Layer                                                    │
+│  loaders/&lt;source&gt;.py (polygon / qveris / tqsdk)             │
+│  ForeignTFView API (state_at(cutoff_ts, require_completed))    │
+│  Parquet 缓存 + JSON provenance manifest                       │
+│  按需 refresh，零 streaming                                    │
+└────────────────────────────────────────────────────────────────┘
+
+[实盘执行系统]  ←──── envelope contract ────  独立未来项目
+</div>
+
+<p>关键设计选择:</p>
+<ul>
+  <li><strong>7 层 + 1 横切</strong>: 数据 → 派生 → (detectors ⊥ labels ⊥ policies) → regime → strategies → viz。Audit plane 横切所有层。</li>
+  <li><strong>Detectors / Labels / Policies 是严格分离的三块</strong>。Labels 可以用未来信息，Detectors 必须 causal，Policies 才是 instrument-class-aware 的。</li>
+  <li><strong>Regime context 是新增层</strong>。Walk-forward 失败的直接对策。strategy 可以 condition on regime tag。</li>
+  <li><strong>Audit plane 是横切而非纵向</strong>。它记录"在 t 时刻什么数据可见、什么 event fire、strategy 会做什么"，是 backtest 和未来实盘共用的 traceability。</li>
+  <li><strong>Strategy 之间零共享抽象</strong>。每个独立目录，只共享 envelope contract。</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="layers">
+<h2>5. 各层契约</h2>
+
+<div class="layer">
+  <h4>Data Layer <span class="layer-tag">L1</span></h4>
+  <p><strong>职责</strong>: 从外部数据源拉取 OHLCV bar 数据，统一 timestamp 语义，缓存，发布 provenance manifest。</p>
+  <p><strong>核心输出契约</strong>: <code>BarFrame</code>，约束为：</p>
+  <ul>
+    <li>必含列: <code>timestamp</code> (tz-aware UTC), <code>open</code>, <code>high</code>, <code>low</code>, <code>close</code></li>
+    <li>可选列: <code>volume</code>, <code>open_interest</code>（cn_futures 才有）</li>
+    <li>timestamp <strong>语义</strong>: period <strong>END</strong>（bar 收盘那一刻）。所有 loader 责任内部统一到这一点。</li>
+    <li>必带 metadata: <code>provider</code>, <code>symbol</code>, <code>level</code>, <code>session_id</code>（exchange calendar version）, <code>last_completed_ts</code></li>
+  </ul>
+  <p><strong>不做</strong>: streaming / websocket / 自动 reconnect / live tick handling。所有 refresh 都是显式 <code>load(symbol, level, as_of=...)</code> 调用。</p>
+</div>
+
+<div class="layer">
+  <h4>Derivations <span class="layer-tag">L2</span></h4>
+  <p><strong>职责</strong>: 从 BarFrame 派生确定性的 features 和 unit metadata，提供 cache。<strong>这一层不包含 alpha</strong>，输出是 lens 不是预测。</p>
+  <p><strong>输入</strong>: BarFrame + 计算参数</p>
+  <p><strong>输出</strong>:
+    <ul>
+      <li>features: <code>MACD(close)</code>, <code>EMA(close, n)</code>, <code>volatility</code>, ...</li>
+      <li>units: <code>HeapInfo</code>, <code>CycleInfo</code>, <code>SegmentInfo</code>（继承自现 <code>engine/units/</code>）</li>
+      <li>derived bars: synthesized higher-TF via no-leak resample</li>
+    </ul>
+  </p>
+  <p><strong>缓存</strong>: parquet 文件 + JSON manifest。Cache key 是 <code>(symbol, level, last_bar_ts, params_hash, code_version)</code>。</p>
+  <p><strong>重要</strong>: derivations 是<strong>对回测/live 都 deterministic</strong> 的。同样输入永远同样输出。无副作用、无随机性。</p>
+</div>
+
+<div class="layer">
+  <h4>Detectors <span class="layer-tag">L3a</span></h4>
+  <p><strong>职责</strong>: 把 derivations 转换成 <strong>causal</strong> 的离散事件。</p>
+  <p><strong>核心契约</strong> (codex M1 reconciled):</p>
+  <pre><code>detector(
+    bars: BarFrame,                                # primary TF
+    derivations: Derivations,                      # MACD/units already computed
+    *,
+    cutoff_ts: datetime,
+    foreign_views: dict[str, ForeignTFView] = {},  # {level_id: view}
+                                                   # e.g. {"1h": view_1h, "W": view_w}
+) -> list[Event]</code></pre>
+  <p><strong>强约束</strong>:
+    <ul>
+      <li>每次调用必须传 <code>cutoff_ts</code>（即使是回测全量跑也要传 = 最后一根 bar 的 ts）</li>
+      <li>所有 cross-TF 数据通过 <code>foreign_views</code> dict 显式注入，detector 内部不再自己 slice foreign bars</li>
+      <li>detector 不知道 <code>instrument_class</code>（那是 policy 的事）</li>
+      <li>detector 不 import labels（labels 用未来信息，detector 不能间接污染）</li>
+      <li>detector 不知道 regime tag（regime 是 policy + strategy 层 condition 用的，不应反过来污染 detector）</li>
+    </ul>
+  </p>
+  <p><strong>当前 module</strong>: <code>engine/divergence/detector.py</code>, <code>engine/divergence/exhaustion.py</code>。重构后 <code>direction_gate</code> 移出（到 L3c policy）。</p>
+</div>
+
+<div class="layer">
+  <h4>Labels <span class="layer-tag">L3b</span></h4>
+  <p><strong>职责</strong>: 给 derivations 加 retrospective 标注（ZigZag swings、forward return outcomes、regime classifications post-hoc...）。<strong>允许用未来信息</strong>。</p>
+  <p><strong>用途</strong>: ground truth for detector validation、target for ML labeling、recall / precision 分母。</p>
+  <p><strong>严格隔离</strong>:
+    <ul>
+      <li>Labels 模块永远不能被 detector / strategy import</li>
+      <li>Labels 永远不能在 live 时 emit（因为定义就是 retrospective）</li>
+      <li>类型上 <code>SwingLabel</code> 跟 <code>DetectorEvent</code> 是不同 dataclass，不能互相赋值</li>
+    </ul>
+  </p>
+  <p><strong>当前 module</strong>: <code>engine/labels/swing_labeler.py</code>。重构后保持位置，加更严格的类型边界。</p>
+</div>
+
+<div class="layer">
+  <h4>Policies <span class="layer-tag">L3c</span></h4>
+  <p><strong>职责</strong>: 给 detector event 加上 instrument-class-specific 的 PolicyDecision（weight、rule_id、monitor_required、strategy_hints）。</p>
+  <p><strong>核心契约</strong>: <code>apply_policy(event, instrument_class, regime?) → PolicyDecision</code></p>
+  <p><strong>当前 module</strong>: <code>engine/divergence/downstream_policies.py</code>。重构后接受 regime tag。<code>direction_gate</code> 从 detector 移到这里。</p>
+</div>
+
+<div class="layer">
+  <h4>Regime Context <span class="layer-tag">L4</span></h4>
+  <p><strong>职责</strong>: 在每个 cutoff_ts 上给出 <strong>ex-ante</strong> 的 regime tag。这是直接回应 walk-forward 失败的新层。</p>
+  <p><strong>v0 设计（最简）</strong>:
+    <pre><code>RegimeContext(
+  cutoff_ts: datetime,
+  trend_side_weekly: "bullish" | "bearish" | "transition",
+  volatility_band: "low" | "mid" | "high",       # 基于 trailing window
+  regime_tag: "trend_bull" | "trend_bear" | "range" | "transition",
+)</code></pre>
+  </p>
+  <p><strong>用途</strong>:
+    <ul>
+      <li>Policy 可以 condition on <code>regime_tag</code></li>
+      <li>Strategy 可以 condition on <code>regime_tag</code></li>
+      <li>Walk-forward harness 可以分 regime 重新验证</li>
+    </ul>
+  </p>
+  <p><strong>验证标准</strong>: 加入 regime 后，至少一个之前在 walk-forward 失败的 cell 应当在 favorable regime subset 上 2/2 fold 通过 R5。否则 regime layer 自身需要重设计。</p>
+</div>
+
+<div class="layer">
+  <h4>Strategies <span class="layer-tag">L5</span></h4>
+  <p><strong>职责</strong>: 把 detector events + policy decisions + regime tag 翻译成具体交易决策。</p>
+  <p><strong>关键设计</strong>: <strong>每个 strategy 完全独立目录，零共享父类</strong>。共享只是 envelope contract（消费 <code>AnalysisOutput</code>）。</p>
+  <pre><code>strategies/
+  us_options_5min/
+    detector_wiring.py     # 该策略用哪些 detector
+    rules.py               # 进场 / 出场 / 加仓 规则
+    backtest.py            # 该策略的 backtest entry
+    walk_forward.py        # 该策略的 walk-forward
+    panel.py               # streamlit panel for this strategy
+  cn_xiao_options/
+    (same structure, completely separate)
+  us_equity_scanner/
+    (same structure, completely separate)</code></pre>
+  <p><strong>共享只能来自 detectors / regime / derivations / data layer</strong>。如果两个 strategy 出现相同代码，先保留 duplication，<strong>等第三个出现时再抽象</strong>（rule of three）。</p>
+</div>
+
+<div class="layer">
+  <h4>Audit Plane <span class="layer-tag">cross-cutting</span></h4>
+  <p><strong>职责（v1.5 范围）</strong>: 横切所有层；记录在 t 时刻 <strong>detector 看到了什么数据 + 用了哪些 derivation artifact + 走到了哪条 policy</strong>。完整 schema 在 §6.4。</p>
+  <p><strong>v1.6 计划</strong>: strategy 的 trade-intent audit（具体进场/出场决定 + 用到哪些 events + sizing 计算 trace），在 Step 8a strategy 骨架落地后定 schema。本设计 scope 内 <strong>不</strong> 实现 strategy-intent audit（决策记录 §14.3）。</p>
+  <p><strong>实现</strong>: 每个 detector event 必带 <code>audit</code> 字段（full schema 在 §6.4）。</p>
+  <p>这是 codex review 提出的关键新概念，是<strong>修复 leak 类 bug 的结构性答案</strong>：发现可疑结果时回查 <code>audit</code> 一目了然，不用再人肉重建。</p>
+</div>
+
+<div class="layer">
+  <h4>Visualization <span class="layer-tag">L6</span></h4>
+  <p><strong>职责</strong>: 本机 streamlit，每个 strategy 一个 panel。</p>
+  <p><strong>最小可用集</strong> (codex 强烈建议从这里起步):
+    <ul>
+      <li>单 symbol 的 audit panel: bars + segments + 触发 events + forward return + artifact id 链接</li>
+      <li>跨 symbol monitoring: 今天哪些 symbol 在哪些 TF fire 了什么</li>
+      <li>策略 P&L 模拟: envelope → 简单 execution model → equity curve</li>
+    </ul>
+  </p>
+  <p><strong>不做</strong>: 实时蜡烛图（TradingView MCP 已经做得很好）；自定义指标 UI；移动端；推送；多用户。</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="abstractions">
+<h2>6. 关键抽象</h2>
+
+<h3>6.1 ForeignTFView — 解决 leak 类 bug 的核心抽象</h3>
+
+<p>当前所有 multi-TF 查询都直接做 <code>foreign_bars[foreign_bars['timestamp'] &lt;= ts]</code>。三次连续 leak 的根源都是这个模式没考虑 bar timestamp 语义。</p>
+
+<p><strong>新 API</strong>:</p>
+
+<pre><code>class ForeignTFView:
+    """A causal view of foreign-TF bars at a given cutoff_ts.
+
+    Promises:
+      - All accessor methods return only data whose period CLOSED at or
+        before cutoff_ts (per the exchange-calendar of the underlying
+        BarFrame — not just timestamp arithmetic).
+      - For period-end-stamped bars (our internal convention) this is
+        direct; provider adapters normalize BEFORE the view is built.
+      - require_completed=True (default) refuses to admit partial bars.
+        Determining "completed" uses the bar's exchange calendar +
+        session end time + provider latency hint, NOT just last_ts.
+    """
+
+    def __init__(self, bars: BarFrame, level: str, cutoff_ts: datetime,
+                 *, require_completed: bool = True): ...
+
+    # Named state_at to make "as-of cutoff" explicit at the call site,
+    # even though cutoff is bound at construction (codex M1 naming fix).
+    def state_at(self) -> LevelState:
+        """Return derived state (trend_side / cycle_state / ...) at cutoff_ts.
+
+        Implementation: backed by DerivedStore + prefix-safe precompute
+        (decision §14.1). MACD / EMA / heap / cycle / segment are causal —
+        each bar's output depends only on prior bars. So the derivation is
+        computed ONCE over the full BarFrame, persisted as parquet, and
+        state_at(t) becomes an O(1) lookup of the row at cutoff_ts.
+
+        Non-prefix-stable derivations (rare; explicitly tagged) fall back
+        to an LRU cache keyed by (artifact_id, cutoff_ts, params).
+        """
+
+    def last_n(self, n: int) -> BarFrame:
+        """Last n completed bars at or before cutoff_ts."""
+
+    def at(self, ts: datetime) -> BarRow | None:
+        """The bar whose period ENDED at exactly ts, if any."""</code></pre>
+
+<p><strong>强制性</strong>: detector / policy / regime context 任何 cross-TF 查询<strong>必须</strong>通过这个 view 拿。直接 <code>foreign_bars[...]</code> 在 linter 层面禁止（参考 7.2）。</p>
+
+<p><strong>Calendar awareness</strong> (codex M2): <code>require_completed</code> 判断不能只看 <code>last_completed_ts</code>。CN 夜盘、美股 early close、DST、CN 春节连休、provider 延迟（polygon 通常落后 close 15-30s）都影响 "is this bar truly closed at cutoff_ts" 的判定。BarFrame 的 <code>calendar_version</code> 字段是必需输入。Calendar 库使用 <code>exchange_calendars</code>（决策 §14.2），CN 期货夜盘按需 patch（patch 内容计入 <code>calendar_version</code> 字符串）。</p>
+
+<h3>6.2 BarFrame contract</h3>
+
+<pre><code>@dataclass(frozen=True)
+class BarFrame:
+    df: pd.DataFrame          # cols: timestamp(UTC), open, high, low, close, [volume]
+    provider: str             # "polygon" / "qveris" / "tqsdk"
+    symbol: str
+    level: str                # "D" / "1h" / "15m" / "5m" / "W"
+    exchange: str             # "XNYS" / "XSHG" / "XSGE" / ...
+    calendar_version: str     # "exchange_calendars==4.5.0+XNYS_2026"
+    stamp_convention: str     # always "period_end" after loader normalization
+    adjustment_mode: str      # "split_only" / "total" / "none" — affects all derivations
+    session_policy: str       # "regular" / "regular+extended" / "regular+night"
+    source_query: str         # provider-specific query string for replay
+    as_of: datetime           # when this snapshot was pulled
+    last_completed_ts: datetime
+    payload_hash: str         # sha256 of the parquet file
+
+    def __post_init__(self):
+        # validate contract: tz-aware UTC, required columns, monotone, etc
+
+    @property
+    def manifest(self) -> ProvenanceManifest:
+        """Return the JSON manifest describing this BarFrame (codex M1: bars
+        must publish manifests too, not just Layer 2+ artifacts)."""</code></pre>
+
+<h3>6.3 Provenance manifest schema</h3>
+
+<p><strong>每个</strong> cached artifact 旁必带一个 JSON manifest —— 包括 raw bars 本身（codex M1: 否则整条 lineage 树从无版本根开始）：</p>
+
+<pre><code>{
+  "artifact_id": "macd-spy-D-20210524T040000Z-20260522T040000Z",
+  "artifact_type": "derivations.macd",
+  "created_at": "2026-05-27T15:23:14Z",
+  "payload": {
+    "path": "data/cache/derivations/macd/spy-D-....parquet",
+    "hash": "sha256:def...",
+    "row_range": {"start": "2021-05-24T04:00:00Z", "end": "2026-05-22T04:00:00Z"},
+    "row_count": 1256
+  },
+  "inputs": [
+    {"artifact_id": "bars-spy-D-...", "hash": "sha256:abc..."}
+  ],
+  "params": {
+    "fast_len": 12, "slow_len": 26, "signal_len": 9, "hist_scale": 1.0
+  },
+  "code": {
+    "module": "derivations.macd",
+    "git_sha": "7b09d6a5",
+    "dirty_worktree": false,                       // codex M2: must record
+    "package_versions": {"pandas": "2.2.1", "numpy": "1.26.4", "pyarrow": "..."}
+  },
+  "data_metadata": {
+    "provider": "polygon",
+    "symbol": "SPY",
+    "level": "D",
+    "stamp_convention": "period_end",
+    "exchange": "XNYS",
+    "calendar_version": "exchange_calendars==4.5.0+XNYS_2026",
+    "adjustment_mode": "split_only",
+    "source_query": "GET /v2/aggs/.../2021-05-24/2026-05-22?adjusted=split",
+    "as_of": "2026-05-27T15:23:00Z",
+    "bar_count": 1256
+  }
+}</code></pre>
+
+<p>用途: <strong>可重现性</strong>（一年后回看 CSV 能知道精确生成条件）+ <strong>cache 失效</strong>（input hash + code version 一致就命中）+ <strong>leak 排查</strong>（出问题回查整条 input chain）。</p>
+
+<p><strong>codex M2 specifics applied</strong>: payload hash + row range, dirty-worktree flag, package versions, exchange + calendar_version, adjustment_mode, source_query, as_of。<code>dirty_worktree=true</code> 的 artifact 不许被 production strategy 消费（CI 直接 fail）。</p>
+
+<h3>6.4 Event audit blob</h3>
+
+<p>每个 detector event 的 <code>audit</code> 字段 (参考 5 节 Audit Plane)：</p>
+
+<pre><code>{
+  "event_id": "evt-spy-D-2026-04-21T20:00Z-top-exh-7b09",
+  "event_schema_version": "1.5",
+  "detector_id": "exhaustion",                       // codex M2
+  "detector_params_hash": "sha256:c4d2...",          // codex M2
+  "cutoff_ts": "2026-04-21T20:00:00Z",
+  "data_visible": {
+    "D":  {"artifact_id": "bars-spy-D-...",  "last_bar_ts": "2026-04-21T20:00:00Z"},
+    "1h": {"artifact_id": "bars-spy-1h-...", "last_bar_ts": "2026-04-21T19:00:00Z"},
+    "W":  {"artifact_id": "bars-spy-W-...",  "last_bar_ts": "2026-04-17T20:00:00Z"}
+  },
+  "derivation_artifacts": {                          // codex M2: explicit
+    "macd-D":  "macd-spy-D-...",
+    "units-D": "units-spy-D-..."
+  },
+  "regime": {                                        // codex M2: artifact id
+    "artifact_id": "regime-spy-D-2026-04-21",
+    "tag": "trend_bull"
+  },
+  "policy_trace": "pol-evt-spy-D-...-r5-bottom",     // codex M2: link to PolicyDecision
+  "strategy_trace": null,                            // v1.5 reserves field;
+                                                     //   actual strategy-intent audit
+                                                     //   ships in v1.6 (decision §14.3)
+  "code_version": "git-sha:7b09d6a5",
+  "retroactive": false                               // codex Major+Minor:
+                                                     //   true if rebuilt after the fact
+}</code></pre>
+
+<p><strong>v1.5 scope (codex M1 narrowing)</strong>: audit blob 是 <strong>event 级</strong> — 它记录"detector fire 时看到了什么 + 用了哪些 artifact + 走到了哪条 policy"。<strong>不包含 strategy 的具体动作</strong>（trade intent / position sizing），因为那需要 strategy-side 单独 schema。Strategy-intent audit 是 v1.6 的事（决策 §14.3）。</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="constraints">
+<h2>7. 类型层强制约束</h2>
+
+<h3>7.1 Import direction 规则</h3>
+
+<table>
+<thead><tr><th>层</th><th>可以 import</th><th>禁止 import</th></tr></thead>
+<tbody>
+<tr><td>data</td><td>（只 stdlib + pandas）</td><td>derivations, detectors, labels, policies, regime, strategies, viz, audit</td></tr>
+<tr><td>derivations</td><td>data</td><td>detectors, labels, policies, regime, strategies, viz</td></tr>
+<tr><td>detectors</td><td>data, derivations</td><td><span class="warn">labels</span>, policies, regime, strategies, viz</td></tr>
+<tr><td>labels</td><td>data, derivations</td><td>detectors, policies, regime, strategies, viz</td></tr>
+<tr><td>policies</td><td>data, derivations, detectors, regime</td><td>labels, strategies, viz</td></tr>
+<tr><td>regime</td><td>data, derivations</td><td>detectors, labels, policies, strategies, viz</td></tr>
+<tr><td>strategies/&lt;X&gt;</td><td>data, derivations, detectors, policies, regime</td><td>labels, strategies/&lt;Y&gt; (其他策略), viz</td></tr>
+<tr><td>audit</td><td>所有层（只读）</td><td>不能修改其他层的状态</td></tr>
+<tr><td>viz</td><td>strategies, audit</td><td>不直接调用其他层（必须通过 strategy 或 audit）</td></tr>
+</tbody>
+</table>
+
+<p><strong>关键</strong>: <code>detectors</code> 不能 import <code>labels</code> —— 这是 leak 类 bug 在 type 层的预防。</p>
+
+<h3>7.2 静态检查（lint rules）</h3>
+
+<p>用 <code>ruff</code> 或自写 AST 规则强制：</p>
+
+<ol>
+  <li><strong>禁止</strong> <code>bars[bars['timestamp'] &lt;= cutoff]</code> 模式（detector / policy 层）。必须用 <code>ForeignTFView</code>。</li>
+  <li><strong>禁止</strong> labels module 被 detectors / strategies import（除非显式 <code># type: ignore[label-leak]</code> 并有 PR comment 说明）。</li>
+  <li><strong>禁止</strong> <code>pd.resample()</code> 在 derivations 外被直接调用（必须通过 BarFrame 的 resample helper，保证 timestamp 语义）。</li>
+  <li><strong>禁止</strong> <code>datetime.now()</code> 在非顶层 entry script 中出现（避免隐式 cutoff_ts）。</li>
+</ol>
+
+<h3>7.3 Property-based tests</h3>
+
+<p>用 <code>hypothesis</code> 对 <code>ForeignTFView</code> 写性质测试:</p>
+
+<ol>
+  <li>For any <code>(bars, cutoff_ts)</code>: <code>view.last_n(k)['timestamp'].max() &lt;= cutoff_ts</code></li>
+  <li>For any partial last bar in <code>bars</code>: <code>require_completed=True</code> 一定排除它</li>
+  <li>For any synth resampled higher TF: 同样性质必须 hold</li>
+  <li>For any 时区组合（UTC / Asia/Shanghai / America/New_York）: cutoff 比较结果一致</li>
+</ol>
+</section>
+
+<!-- ============================================================ -->
+<section id="migration">
+<h2>8. 迁移路径（10 步）</h2>
+
+<p>每步在自身依赖满足后可独立 ship —— 不是无序并行（codex M1 reconciliation）。强制要求：</p>
+<ul>
+  <li>envelope v1.4 contract 不变（除非显式 minor bump）</li>
+  <li>当前 173 个 pytest 测试不破坏</li>
+  <li>每步前后回归对照（regression diff），不一致必须被显式标记为 "changed for known reason" 并 PR 说明</li>
+  <li>每步必须满足下方 <strong>exit criteria 模板</strong></li>
+</ul>
+
+<h3>8.0 每步 Exit Criteria 模板（codex Minor m4）</h3>
+
+<p>每个 step 在 PR description 里必须填齐：</p>
+<ol>
+  <li><strong>Dependencies</strong>: 列出依赖的 step 编号（必须全部 merged）</li>
+  <li><strong>Schema changes</strong>: 改了哪些 dataclass / DataFrame 列 / envelope 字段</li>
+  <li><strong>Expected regression diff</strong>: 列哪些 baseline 输出会变；为什么改变是 expected</li>
+  <li><strong>Allowed regression diff</strong>: 列允许 +/- ε 的输出（譬如 numerical CI 第 3 位小数）</li>
+  <li><strong>New tests required</strong>: 列必须新增的 test 文件 / 测试 case</li>
+  <li><strong>Rollback policy</strong>: 这步 ship 后如果发现问题，怎么撤回（revert / 配置开关 / data migration）</li>
+  <li><strong>Deprecation policy</strong>: 这步是否会让某个旧 module / API deprecate；deprecation 期限</li>
+</ol>
+
+<h3>8.1 Step list</h3>
+
+<div class="step">
+  <h4>Step 0 — Exchange calendar + BarFrame shim (early dep, codex M3 fix)</h4>
+  <div class="effort">预估 2-3 天 · 风险低-中 · Dependencies: 无</div>
+  <p>放在 Step 1 之前因为 ForeignTFView / Step 3 loaders / Step 6 regime 都依赖它。</p>
+  <p>引入 <code>exchange_calendars</code>（决策 §14.2），定义 <code>BarFrame</code> dataclass + 验证器（不含完整 loaders —— 只是 shim 让 Step 1 可以用）。把 1 个 loader（建议 polygon daily）改成产出 BarFrame，作为 reference 实现。</p>
+</div>
+
+<div class="step">
+  <h4>Step 1 — ForeignTFView + property tests</h4>
+  <div class="effort">预估 2-3 天 · 风险中 · Dependencies: Step 0</div>
+  <p>实现 <code>ForeignTFView</code> + <code>state_at()</code>（命名与 §6.1 统一）。把 <code>engine.divergence.multi_tf_context</code> 和 <code>engine.divergence.exhaustion._state_at</code> 都迁过去。Hypothesis property tests（参考 §7.3）。</p>
+</div>
+
+<div class="step">
+  <h4>Step 2 — 静态 lint + AST 检查（含 import-linter）</h4>
+  <div class="effort">预估 2 天 · 风险低 · Dependencies: Step 1</div>
+  <p>写 ruff custom rule + AST 检查脚本，禁止 <code>bars[timestamp &lt;= ...]</code> 模式以及 §7.2 列出的其它禁用模式。加 <strong>import-linter</strong> 强制 §7.1 import 方向（解决 codex M6 提出的 transitive import / re-export / importlib 等 gotchas）。</p>
+  <p><strong>Allowlist (codex M3)</strong>: lint day-1 不能全局生效 —— 大量旧 script 还没迁。先把 <code>src/engine/</code> 纳入强制范围；<code>src/scripts/</code> 整体 allowlist；逐脚本通过 explicit "removed from allowlist in PR #N" 收紧。Allowlist 是 review 过的 yaml 文件，<strong>不允许 inline <code>noqa</code> 逃逸</strong>。</p>
+</div>
+
+<div class="step">
+  <h4>Step 3 — 统一 data loaders</h4>
+  <div class="effort">预估 3-5 天 · 风险中 · Dependencies: Step 0</div>
+  <p>把 <code>scripts/fetch_qveris.py</code> 等抽到 <code>data/loaders/&lt;source&gt;.py</code>。所有 loader 返回 <code>BarFrame</code>（Step 0 已 shim 过定义）。timestamp 一律规范到 period_end UTC。loader 同时产出 manifest（依赖 Step 4 的 schema）。</p>
+</div>
+
+<div class="step">
+  <h4>Step 4 — Provenance manifest + Parquet 缓存 + DerivedStore</h4>
+  <div class="effort">预估 4-5 天 · 风险中 · Dependencies: Step 0 (BarFrame), 与 Step 3 协同（loader 用 manifest）</div>
+  <p>引入 <code>artifact_id</code> 概念。Derivations 层先享受：MACD / units 计算结果写 parquet + manifest。Cache key 是 manifest hash。</p>
+  <p><strong>DerivedStore</strong>（codex M2，决策 §14.1 = prefix-safe precompute）: <code>ForeignTFView.state_at()</code> 不能每次 cutoff 都重算 MACD。Step 4 落地两件事：</p>
+  <ol>
+    <li><strong>Prefix-safe primary path</strong>: 把 MACD / EMA / heaps / cycles / segments 等 causal derivations 在 BarFrame 全量上算完一次，存 parquet（带 manifest）。<code>state_at(t)</code> 查询退化为读 parquet 第 t 行。所有 causal derivations 默认走这条路径。</li>
+    <li><strong>LRU fallback path</strong>: 提供 <code>DerivedStore.get(artifact_id, cutoff_ts, params)</code> 接口给少数 non-prefix-stable derivations。每个 derivation 必须显式声明 <code>causal: bool</code>；只有 <code>causal=False</code> 才走 LRU。CI fail 任何 derivation 未声明 <code>causal</code>。</li>
+  </ol>
+</div>
+
+<div class="step">
+  <h4>Step 5 — 拆 detector / labels / policies</h4>
+  <div class="effort">预估 2-3 天 · 风险中 · Dependencies: Step 2 (lint), Step 1 (foreign views)</div>
+  <p>把 <code>direction_gate</code> 从 detector 移到 policy。<code>engine/labels/</code> 加严格 readonly 边界，import-linter 强制（Step 2 配置）。</p>
+</div>
+
+<div class="step">
+  <h4>Step 6 — Regime context v0</h4>
+  <div class="effort">预估 3-5 天 · 风险中-高（设计本身有研究成分）· Dependencies: Step 1 (views), Step 4 (manifests)</div>
+  <p>最简版本: <code>trend_side @ weekly</code> + <code>volatility_band</code>。</p>
+  <p><strong>架构 part vs 研究 part 分离 (codex M3)</strong>: Step 6 的 <strong>架构产物</strong> 只是 "regime context 这个模块存在 + 输出 RegimeContext dataclass + 加进 envelope"。<strong>研究产物</strong>（哪个 regime indicator 真正有 predictive power）是独立工作流。架构 step 完成的 acceptance: 模块存在、写入 manifest、通过 import-linter；<strong>不</strong> 卡在 "至少一个失败 cell 在 favorable subset 2/2 fold 通过"。</p>
+  <p><strong>研究 milestone 必须 pre-register</strong>（决策 §14.6，B 级严格度）：每次 regime 实验前在 <code>doc/regime-preregistration-YYYY-MM-DD.md</code> 冻结 (1) cell 列表 (2) regime 定义 + 阈值 (3) fold 边界 (4) Bonferroni 校正 (5) regime subset 后最小 n ≥ 15。Step 6 PR 必须引用 pre-reg doc 的 commit hash 作为 input。</p>
+</div>
+
+<div class="step">
+  <h4>Step 7 — Audit blob 加入 envelope</h4>
+  <div class="effort">预估 4-6 天 · 风险中 · Dependencies: Step 4 (artifact_id), Step 5 (policies), Step 6 (regime)</div>
+  <p>envelope v1.5: 每个 event 加 <code>audit</code> 字段（§6.4 schema）。</p>
+  <p><strong>Historical backfill (codex M3+M5)</strong>: 现有 detector 不能"auto produce" v1.5 audit —— 旧 artifact 没有 artifact_id、没有 regime tag、可能没有 dirty_worktree 信息。具体策略：</p>
+  <ul>
+    <li>新跑的 detector: 直接生成完整 audit blob</li>
+    <li>历史 artifact: 标记 <code>retroactive=true</code> + <code>confidence=inferred</code>；缺字段 = null；<strong>不允许</strong>在 production / strategy walk-forward 里被消费</li>
+  </ul>
+</div>
+
+<div class="step">
+  <h4>Step 8a — 第一个 strategy 的骨架 + wiring</h4>
+  <div class="effort">预估 5-7 天 · 风险中 · Dependencies: Step 5, Step 6, Step 7</div>
+  <p>建议从 <strong>US options 5min PA</strong> 开始（决策 §14.5）。<strong>仅包括骨架</strong>: 目录结构、入参契约、读 envelope、产出 trade_intent（dataclass，不下单）、reads-only audit panel input。<strong>无策略研究内容</strong> —— "进场规则到底是什么" 留给 Step 8b。</p>
+</div>
+
+<div class="step">
+  <h4>Step 8b — 实际 strategy 研究（不在本设计 doc 范围）</h4>
+  <div class="effort">不可估，多周到多月，按研究节奏</div>
+  <p>设计 + iterate strategy rules，pre-register validation pipeline，跑 walk-forward。<strong>本设计 doc 的 v0.2 scope 不包括 Step 8b</strong>。它属于策略研究工作流，由 Step 8a 的骨架支撑。</p>
+</div>
+
+<div class="step">
+  <h4>Step 9 — Streamlit audit panel</h4>
+  <div class="effort">预估 3-4 天 · 风险低 · Dependencies: Step 7 (audit blob), Step 8a (strategy 骨架)</div>
+  <p>本机单文件 streamlit。最小可用集（§5 末）。对 step 8a 那个 strategy 先做一个 panel。</p>
+</div>
+
+<div class="step">
+  <h4>Step 10 — 旧脚本 deprecate</h4>
+  <div class="effort">预估 2-3 天 · 风险低 · Dependencies: Step 4 普及到主 derivations</div>
+  <p>当 step 4 的 parquet/manifest 已经为所有 derivations 服务后，<code>scripts/analyze_*</code> 大量逻辑变成"读 manifest + summarize"。逐个简化或删除。allowlist (Step 2) 同步收紧。</p>
+</div>
+
+<h3>8.2 总预估</h3>
+<p><strong>32-44 天工作时间</strong>（含新增 Step 0、拆 Step 8）。Step 8b（真实 strategy 研究）不计算在内，独立工作流。实际可能因为研究分支（Step 6 acceptance milestone、Step 8b）拉长。Step 在依赖满足后可独立 ship，不强制串行。</p>
+
+<h3>8.3 Dependency DAG</h3>
+<pre class="ascii-diagram">
+Step 0 (calendar + BarFrame shim)
+  ├─→ Step 1 (ForeignTFView)
+  │     ├─→ Step 2 (lint + import-linter)
+  │     │     └─→ Step 5 (detector/label/policy split)
+  │     │            └─→ Step 7 (audit blob)
+  │     └─→ Step 6 (regime v0)  ←─┐
+  │            └─→ Step 7 ────────┘
+  └─→ Step 3 (loaders) ←─→ Step 4 (manifest + DerivedStore)
+                              └─→ Step 7
+                                    └─→ Step 8a (strategy skeleton)
+                                           ├─→ Step 8b [research,
+                                           │             out of scope]
+                                           └─→ Step 9 (streamlit panel)
+
+Step 10 (deprecate old scripts) — after Step 4 普及
+</pre>
+</section>
+
+<!-- ============================================================ -->
+<section id="test-migration">
+<h2>9. 测试迁移</h2>
+
+<p>当前 173 个 pytest（含 40 个 exhaustion）的迁移路径：</p>
+
+<table>
+<thead><tr><th>当前位置</th><th>迁移目标</th><th>迁移要点</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_features.py</code></td><td><code>tests/derivations/test_macd.py</code></td><td>纯 lift-and-shift</td></tr>
+<tr><td><code>tests/test_units.py</code></td><td><code>tests/derivations/test_units.py</code></td><td>纯 lift-and-shift</td></tr>
+<tr><td><code>tests/test_divergence.py</code></td><td><code>tests/detectors/test_divergence.py</code></td><td>direction_gate 相关测试拆到 <code>tests/policies/</code></td></tr>
+<tr><td><code>tests/test_exhaustion.py</code> (40 tests)</td><td><code>tests/detectors/test_exhaustion.py</code></td><td>multi-TF 部分改用 ForeignTFView，验证行为不变</td></tr>
+<tr><td><code>tests/test_downstream_policies.py</code></td><td><code>tests/policies/test_downstream_policies.py</code></td><td>加 regime tag 入参（向后兼容 default None）</td></tr>
+<tr><td><code>tests/test_output_envelope.py</code></td><td>原位</td><td>envelope v1.4 → v1.5 minor bump 时加 audit 字段测试</td></tr>
+<tr><td><code>tests/test_build_analysis_output.py</code></td><td>原位</td><td>e2e 测试不动；只验证 contract</td></tr>
+<tr><td><code>tests/test_swing_labeler.py</code></td><td><code>tests/labels/test_swing_labeler.py</code></td><td>验证 labels module 类型边界（不能被 detector import）</td></tr>
+<tr><td>(新)</td><td><code>tests/data/test_foreign_tf_view.py</code></td><td>Property-based tests; step 1 产物</td></tr>
+<tr><td>(新)</td><td><code>tests/regime/test_regime_v0.py</code></td><td>Step 6 产物</td></tr>
+<tr><td>(新)</td><td><code>tests/strategies/us_options_5min/...</code></td><td>Step 8 产物</td></tr>
+</tbody>
+</table>
+
+<p>测试覆盖率原则（codex M4 refined）：</p>
+<ul>
+  <li>旧 test 在替换 test 落地前 <strong>不能删除</strong>。两者并存直到 PR 显式标记 deprecate。</li>
+  <li>覆盖率衡量以 module-level coverage 为准，不仅 line count。</li>
+  <li><strong>例外</strong>: 某些 test 验证的是已知有 leak 的旧行为（譬如 <code>intraday_grace_minutes=30</code> 默认包含 partial bar）。这些 test 的输出会变 —— 必须创建 "changed for known reason" <strong>golden fixture</strong>（在 PR 里 review + commit）而不是机械地保持数字不变。</li>
+</ul>
+
+<h3>9.1 新架构 enforcement tests（codex M4）</h3>
+
+<p>新 layering 需要新 test 强制 —— 旧测试不能覆盖以下场景：</p>
+
+<table>
+<thead><tr><th>测试类型</th><th>位置</th><th>Step 触发</th></tr></thead>
+<tbody>
+<tr><td>Import graph / transitive import test (import-linter contract)</td><td><code>tests/architecture/test_import_layering.py</code></td><td>Step 2 / Step 5</td></tr>
+<tr><td>BarFrame validation + timestamp normalization fixtures</td><td><code>tests/data/test_bar_frame.py</code></td><td>Step 0</td></tr>
+<tr><td>Calendar edge cases: DST, US early close, CN 夜盘, CN 春节, weekend gap</td><td><code>tests/data/test_calendar_edges.py</code></td><td>Step 0</td></tr>
+<tr><td>Resample no-leak property tests (weekly / daily / intraday)</td><td><code>tests/data/test_resample_no_leak.py</code></td><td>Step 1</td></tr>
+<tr><td>Manifest hash invalidation + cache hit/miss</td><td><code>tests/data/test_provenance_manifest.py</code></td><td>Step 4</td></tr>
+<tr><td>Audit schema + lineage + retroactive flag tests</td><td><code>tests/audit/test_audit_blob.py</code></td><td>Step 7</td></tr>
+<tr><td><strong>Negative lint fixtures</strong>（故意违规的 sample code，验证 CI 抓得到）</td><td><code>tests/architecture/lint_fixtures/</code></td><td>Step 2</td></tr>
+<tr><td>ForeignTFView property tests (hypothesis-based)</td><td><code>tests/data/test_foreign_tf_view.py</code></td><td>Step 1</td></tr>
+<tr><td>DerivedStore cache correctness (codex M2)</td><td><code>tests/data/test_derived_store.py</code></td><td>Step 4</td></tr>
+<tr><td>Regime v0 contract test (artifact id, manifest)</td><td><code>tests/regime/test_regime_v0.py</code></td><td>Step 6</td></tr>
+<tr><td>Strategy isolation test: <code>strategies/A/</code> 不能 import <code>strategies/B/</code></td><td><code>tests/architecture/test_strategy_isolation.py</code></td><td>Step 8a</td></tr>
+</tbody>
+</table>
+
+<p><strong>Negative lint fixtures 说明</strong>: 这是 codex M4 强调的关键点 —— 不只验证 "正确 code 编译通过"，更要验证 "错误 code <strong>必须被 CI 抓住</strong>"。</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="example">
+<h2>10. 一个端到端示例</h2>
+
+<p>展示新架构下"在 2026-04-21 这一天，对 SPY 跑 exhaustion detector，看 1h regime context，给 US options 5min strategy 生成入场决策"的完整调用链:</p>
+
+<pre><code># Layer 1: 数据
+spy_d  = data.load("polygon", "SPY", "D",   as_of="2026-04-21T20:00:00Z")
+spy_1h = data.load("polygon", "SPY", "1h",  as_of="2026-04-21T20:00:00Z")
+spy_w  = data.load("polygon", "SPY", "W",   as_of="2026-04-21T20:00:00Z")
+# spy_d 是 BarFrame，自带 provenance manifest
+
+# Layer 2: 派生量（自动 cache）
+deriv_d = derivations.compute(spy_d)
+# deriv_d.macd, deriv_d.units —— deterministic, parquet-cached
+
+# Layer 3a: causal detector，必须传 cutoff_ts，foreign TF 通过 ForeignTFView
+cutoff = spy_d.last_completed_ts
+view_w = ForeignTFView(spy_w, "W", cutoff, require_completed=True)
+view_1h = ForeignTFView(spy_1h, "1h", cutoff, require_completed=True)
+
+events = detectors.exhaustion(
+    bars=spy_d, derivations=deriv_d,
+    cutoff_ts=cutoff,
+    foreign_views={"1h": view_1h, "W": view_w},
+)
+
+# Layer 4: regime context
+regime = regime_context.compute(
+    daily=spy_d, weekly_view=view_w, cutoff_ts=cutoff,
+)
+# regime.tag = "trend_bull"
+
+# Layer 3c: policies
+decisions = [policies.apply(ev, instrument_class="us_equity", regime=regime) for ev in events]
+
+# Audit plane: 每个 event 自动带 audit blob
+# event.audit = {cutoff_ts, data_visible: {D, 1h, W}, regime_tag, ...}
+
+# Layer 5: strategy（独立目录）
+from strategies.us_options_5min import rules
+trade_intents = rules.evaluate(events, decisions, regime, bars=spy_d)
+
+# Layer 6: viz
+# streamlit panel 读 trade_intents + event.audit + 历史前向收益
+</code></pre>
+
+<p>注意几点:</p>
+<ul>
+  <li><strong>cutoff_ts 在 detector 调用处必须显式传</strong></li>
+  <li><strong>ForeignTFView 是唯一的 cross-TF 查询通道</strong></li>
+  <li><strong>policies 接受 regime tag</strong>（向后兼容: regime=None 时走旧逻辑）</li>
+  <li><strong>strategy 不知道也不关心 detector 怎么计算的</strong>，只消费 events</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="antipatterns">
+<h2>11. 反模式清单</h2>
+
+<p>以下行为在 review / lint / 文档讨论中显式拒绝（codex 提的 + 我们补充的）：</p>
+
+<ol>
+  <li><strong>greenfield 重写</strong>。任何 "重新写一遍" 的提议都要先证明 strangler 路径不行。</li>
+  <li><strong>把 Layer 2 当 "圣杯"</strong>。Walk-forward 已经证明派生量不是 alpha 源。</li>
+  <li><strong>mtime-based 缓存失效</strong>。必须 hash-based + manifest。</li>
+  <li><strong>脚本独立 resample / localize / slice foreign TF</strong>。必须走 BarFrame / ForeignTFView。</li>
+  <li><strong>options / futures / equity scanner 共享父类</strong>。零共享抽象，每个策略一个独立目录。</li>
+  <li><strong>建 dashboard 在 audit / provenance 之前</strong>。先有 traceability，再有可视化。</li>
+  <li><strong>ship 没有 ex-ante regime gate 的 sweet spot</strong>。In-sample CI 显著正不够，必须 walk-forward 2/2 fold 通过。</li>
+  <li><strong>默认 grace window 包含部分未来 bar</strong>。<code>intraday_grace_minutes=30</code> 这种默认必须被 <code>require_completed=True</code> 取代。</li>
+  <li><strong>detectors import labels</strong>。type 层就要禁止。</li>
+  <li><strong>detector 嵌入 instrument_class</strong>。属于 policy。</li>
+  <li><strong>跨 strategy import</strong>。<code>strategies/A/</code> 永远不能 import <code>strategies/B/</code> 的任何东西。</li>
+  <li><strong>把实盘需求引入这套架构</strong>。实盘是独立项目，通过 envelope contract 对接。</li>
+  <li><strong>给 unused / hypothetical 抽象</strong>。出现第三个相似策略再抽象。前两个允许 duplication。</li>
+  <li><strong>看过 test fold 结果后再选 "favorable regime"</strong>（codex Minor m1）。所有 regime 假设必须 pre-register —— 哪个 cell、什么定义、什么阈值、最小 n —— 在跑 test fold 之前。</li>
+  <li><strong>看过结果后再改 R5 阈值 / fold 边界</strong>（codex Minor m1）。R5 标准是 n≥15 AND ≥+10pp uplift AND CI 排除 0；fold 边界是 train + test 切片定义。两者一旦定就不能因为结果不好而放松。</li>
+  <li><strong>接受 regime subset 后 n &lt; 15</strong>（codex Minor m1）。subset 后样本不够就是不够，不要凑数。</li>
+  <li><strong>历史 audit blob 不标 retroactive</strong>（codex Minor m1）。任何不是 detector 第一次 fire 时生成的 audit，必须带 <code>retroactive=true</code> + <code>confidence=inferred</code>，且不允许在 production / walk-forward 里被消费。</li>
+  <li><strong>放任 <code>utils/</code> 变成隐式跨 strategy 抽象</strong>（codex Minor m1）。Strategy 之间共享应该是 zero。<code>utils/</code> 如果出现就必须是 zero-domain logic（譬如纯数学）。任何包含交易概念的 helper 都是 strategy 抽象漏出。</li>
+  <li><strong>改 provider / calendar / adjustment_mode 而不 invalidate manifest</strong>（codex Minor m1）。这些是 manifest 的 input 字段，改了就要重生产 artifact。Code 里写 <code>provider="polygon"</code> 改成 <code>"polygon-v2"</code> 之类的字面修改必须触发 cache 失效。</li>
+</ol>
+</section>
+
+<!-- ============================================================ -->
+<section id="open">
+<h2>12. 未决问题</h2>
+
+<p>注: exchange calendar 库选择已收口为 <code>exchange_calendars</code>（决策 §14.2）。</p>
+
+<ol>
+  <li><strong>Regime indicator 具体计算</strong>: v0 用 weekly trend_side + volatility band 起步，但具体 volatility 怎么算（trailing N 日 std? ATR percentile?）属于 Step 6 研究 part，按 §14.6 B 级 pre-registration 流程定。</li>
+  <li><strong>Detector event schema 演进</strong>: envelope v1.5 加 audit 是 minor。如果 detector 输出本身要改（譬如加 <code>regime_at_fire</code> 直接在 event 里）是 minor 还是 major? 倾向 minor（新字段 + default null），但需要 case-by-case。</li>
+  <li><strong>缓存路径布局</strong>: <code>data/cache/&lt;provider&gt;/&lt;symbol&gt;/&lt;level&gt;.parquet</code> 还是 <code>data/cache/&lt;artifact_type&gt;/&lt;artifact_id&gt;.parquet</code>? 前者好 browse，后者好 manifest-driven。Step 4 落地时决定。</li>
+  <li><strong>Streamlit 还是 panel?</strong> streamlit 文件 reload 友好但单页面；panel 多页面但学习曲线陡。Step 9 落地时决定。</li>
+  <li><strong>Acceptance criteria for leak fixes</strong>（codex Minor m2）: 当 leak fix 改变了 baseline 输出（譬如 weekly look-ahead 修复让 bottom CI 从 [+0.11, +9.67] 变到 [-0.72, +9.17]），怎么 prove 这是 "intentional" 而不是 regression? 提案: PR description 必须包含 leak diagnosis、affected artifacts 列表、expected output change 表格（带 before/after 数字），review 通过即标记为 golden fixture。</li>
+  <li><strong>Envelope v1.4 → v1.5 兼容含义</strong>（codex Minor m2）: 加 audit 字段 default-empty 算 minor 对 v1.0-1.4 consumer 仍 silently OK，但 strategy 层会假设 audit 存在 —— 实质上是 hard dependency。明确: v1.5 consumers MUST handle audit-may-be-null（旧 backfilled artifact）；v1.5 producers MUST emit audit（除非显式标 retroactive）。</li>
+</ol>
+</section>
+
+<!-- ============================================================ -->
+<section id="glossary">
+<h2>13. 术语表</h2>
+
+<table>
+<thead><tr><th>术语</th><th>定义</th></tr></thead>
+<tbody>
+<tr><td><code>BarFrame</code></td><td>统一封装一组 OHLCV bars 的数据结构，自带 provenance（provider、level、stamp 语义、session_id）</td></tr>
+<tr><td><code>ForeignTFView</code></td><td>一个 BarFrame 在指定 cutoff_ts 下的 causal 视图，禁止暴露 cutoff 之后的数据</td></tr>
+<tr><td><code>cutoff_ts</code></td><td>一次 detector 或 policy 调用所能看到的最远时间戳。回测时 = 该次评估的时间点；live 时 = now</td></tr>
+<tr><td><code>require_completed</code></td><td>ForeignTFView 的 flag。True 表示只承认完整收盘的 bar（默认）；False 在 live 显式启用时才能传</td></tr>
+<tr><td><code>artifact_id</code></td><td>Layer 2+ cached 产物的全局唯一 id，对应一个 manifest 和一个 payload 文件</td></tr>
+<tr><td><code>Provenance manifest</code></td><td>每个 artifact 旁的 JSON 文件，记录生成条件（input hashes、params、code version、calendar version）</td></tr>
+<tr><td><code>Audit blob</code></td><td>每个 detector event 自带的可见性记录，回答"fire 时它看到了什么"</td></tr>
+<tr><td><code>Regime tag</code></td><td>ex-ante 的市场状态标签，由 regime context 层在每个 cutoff_ts 上独立计算</td></tr>
+<tr><td><code>R5 walk-forward 标准</code></td><td>K=3 时序切片，test cell 必须 n≥15 AND ≥10pp hit uplift AND bootstrap CI excludes 0，两个 test fold 都要通过</td></tr>
+<tr><td><code>Strangler refactor</code></td><td>渐进重构模式：新层与旧层并存，逐步把流量切到新层，旧层等所有 caller 迁完再删</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<section id="pending-decisions">
+<h2>14. 决策记录（codex M2/M3/M5 收口）</h2>
+
+<p>v0.2 给用户的 6 个待定项已经收口（2026-05-28）。本节作为决策的 audit trail —— 每条记录 (1) 选了哪个 (2) 理由 (3) 哪些 doc 章节因此被改写。</p>
+
+<h3>14.1 — DerivedStore cache 策略 <span class="good">[选 C: Prefix-safe precompute]</span></h3>
+
+<p><strong>决定</strong>: MACD / EMA / heaps / cycles / segments 等 causal derivations 一次性算完整 series 存 parquet；<code>state_at(t)</code> 退化为 O(1) array index。少数 non-prefix-stable derivations 显式标 <code>causal=False</code>，走 LRU fallback。</p>
+
+<p><strong>理由</strong>: 这些 derivations 在数学上就是 causal（每根 bar 输出只依赖前面 bars）。Cache 命中率 100% by construction，比 LRU 快一档。CI 强制每个 derivation 声明 <code>causal: bool</code>。</p>
+
+<p><strong>影响 sections</strong>: §6.1 (ForeignTFView.state_at docstring), §8.1 Step 4 (DerivedStore 实现细节)</p>
+
+<h3>14.2 — Exchange calendar 库 <span class="good">[选 A: exchange_calendars]</span></h3>
+
+<p><strong>决定</strong>: 使用 <code>exchange_calendars</code> Python lib。CN 期货夜盘按需 patch，patch 内容计入 <code>calendar_version</code> 字段（譬如 <code>"exchange_calendars==4.5.0+cn_night_session"</code>）。</p>
+
+<p><strong>理由</strong>: 事实标准，社区维护，版本化清晰。从零写 calendar 库的 5 年维护成本会超过整个架构重构。</p>
+
+<p><strong>影响 sections</strong>: §6.1 (Calendar awareness), §8.1 Step 0 (calendar 库引入), §12 (从 open question 移除)</p>
+
+<h3>14.3 — Strategy-intent audit timing <span class="good">[选 A: v1.6 minor]</span></h3>
+
+<p><strong>决定</strong>: 本设计 (v1.5 envelope) <strong>只</strong>实现 event-level audit。Strategy-intent audit (trade decisions / sizing / stop placement) 推迟到 v1.6，在 Step 8a strategy 骨架落地后基于实际需求设计 schema。</p>
+
+<p><strong>理由</strong>: 没有 strategy 实例之前设计 strategy schema 是过度抽象。Event audit 解决 leak prevention (urgent)，strategy audit 解决 post-mortem (important 但晚做不致命)。</p>
+
+<p><strong>影响 sections</strong>: §5 Audit Plane (文字 narrow 到 event), §6.4 (strategy_trace 字段保留但 v1.5 永远 null)</p>
+
+<h3>14.4 — Step 0 / Step 3 BarFrame 拆分 <span class="good">[选 A: shim + full loaders]</span></h3>
+
+<p><strong>决定</strong>: Step 0 = BarFrame shim + calendar + 1 reference loader（polygon daily，2-3 天）。Step 3 = 全部 loaders 迁到 BarFrame（3-5 天）。Step 1 / Step 3 / Step 4 在 Step 0 完成后可并行。</p>
+
+<p><strong>理由</strong>: 短依赖树 → review 周期短 → 错位 ship 风险低。Step 0 单独焦点收窄，PR 小好 review。</p>
+
+<p><strong>影响 sections</strong>: §8.1 Step 0/1/3 (已在 v0.2 应用), §8.3 Dependency DAG</p>
+
+<h3>14.5 — Step 8 strategy 拆分 <span class="good">[选 A: 8a 骨架 + 8b 研究]</span></h3>
+
+<p><strong>决定</strong>: Step 8a (5-7 天) 只做 strategy module 骨架 + wiring + 入参契约 + TradeIntent dataclass，<strong>无任何交易逻辑</strong>。Step 8b（实际策略研究）作为独立工作流，不在本设计 doc scope。</p>
+
+<p><strong>理由</strong>: 架构 vs 研究是不同 artifact。架构 freeze 后期望稳定，研究 iterate。混在一起 design doc 永远 freeze 不了。</p>
+
+<p><strong>影响 sections</strong>: §8.1 Step 8a / 8b (已在 v0.2 应用), §8.2 总预估</p>
+
+<p><strong>建议第一个 strategy</strong>: US options 5min PA。理由：对入场精度要求最高（option premium 损耗对错误信号最敏感），最能 stress-test detector + regime + audit 三层。</p>
+
+<h3>14.6 — Regime 研究 pre-registration <span class="good">[选 B: 中级严格度]</span></h3>
+
+<p><strong>决定</strong>: 每次 regime 实验前在 <code>doc/regime-preregistration-YYYY-MM-DD.md</code> 冻结 5 项：</p>
+
+<ol>
+  <li><strong>Cell 列表</strong>: 具体要测哪些（譬如 "bottom + conf=high, bottom + wick=low"）</li>
+  <li><strong>Regime 定义</strong>: formula + 阈值（譬如 <code>regime="trend_bull" iff weekly_dif &gt; 0 AND ATR_percentile &lt; 0.5</code>）</li>
+  <li><strong>Fold 边界</strong>: train/test 切片日期（已在 walk-forward harness 里 frozen）</li>
+  <li><strong>Bonferroni 校正</strong>: 如果同时测 K 个 cell，要求 p &lt; 0.05/K（譬如 K=5 → p &lt; 0.01）</li>
+  <li><strong>Regime subset 后最小 n ≥ 15</strong>: subset 后样本不够算无效，不能凑数</li>
+</ol>
+
+<p>Step 6 PR 必须引用 pre-reg doc 的 git commit hash 作为 input。Hash 引用 = 防止 pre-reg 被偷偷改。如果实验失败，<strong>不允许"调整 regime 定义重跑"</strong>，必须开新的 pre-reg 文件且显式说明跟前一份的区别。</p>
+
+<p><strong>理由</strong>: Codex 给的最重要反馈。Walk-forward 5 cell 全失败说明 detector 容易过拟合；regime layer 不防 cherry-pick 的话会重复同种错误。B 级抓住核心方法论 (fold + multiple-test + min-n) 同时无第三方 audit 流程负担。</p>
+
+<p><strong>影响 sections</strong>: §8.1 Step 6 (acceptance 不再是 milestone，独立 pre-reg 流程)</p>
+
+<h3>14.7 — Doc 状态变更</h3>
+
+<p>v0.3 = v0.2 + 14.1-14.6 决定全部固化。<strong>状态 DRAFT → FROZEN baseline</strong>。后续如需 substantive 改动需要新 minor version (v0.4+) 并 codex re-review。</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="changelog">
+<h2>15. 变更历史</h2>
+
+<h3>v0.3 — 2026-05-28 (FROZEN baseline)</h3>
+<ul>
+  <li>6 个待决项全部收口（见 §14）。所有"see §14 Q-..."的占位引用替换为具体决定的描述</li>
+  <li>§6.1 ForeignTFView <code>state_at()</code> docstring 写死 prefix-safe precompute 策略</li>
+  <li>§6.1 Calendar awareness 写死 <code>exchange_calendars</code></li>
+  <li>§8.1 Step 0 / Step 4 / Step 6 / Step 8a 引用 §14 决定编号代替 "pending"</li>
+  <li>§14 整段从 "待用户决策" 改为 "决策记录"，作为审计 trail</li>
+  <li>Status: DRAFT → <strong>FROZEN baseline</strong></li>
+</ul>
+
+<h3>v0.2 — 2026-05-27 (codex review applied)</h3>
+<ul>
+  <li><strong>M1 (Internal consistency)</strong>: bars manifest 提升到 first-class；ForeignTFView 命名统一 <code>state_at()</code>；detector 签名加 <code>foreign_views</code> dict 参数；audit plane 文字 narrow 到 event 级 (v1.5)；migration "每步独立" 软化为 "依赖满足后独立"</li>
+  <li><strong>M4 (Test migration)</strong>: 新增 §9.1 列 10 个新架构 enforcement tests；"coverage 不能下降" 加 "changed for known reason" 例外条款</li>
+  <li><strong>Minor m1</strong>: §11 antipatterns 加 6 条（cherry-pick regime / 改 R5 / subset n / 不标 retroactive / utils 漏出 / 不 invalidate manifest）</li>
+  <li><strong>Minor m2</strong>: §12 加 leak-fix acceptance 流程 + envelope v1.4→v1.5 兼容含义</li>
+  <li><strong>Minor m3</strong>: exchange calendar 从 open question 移除，promote 到 §14 Q-M2b（早期 dependency）</li>
+  <li><strong>Minor m4</strong>: §8.0 加 exit criteria 模板（7 条必填）</li>
+  <li><strong>API schema 扩充 (codex M2)</strong>: BarFrame 加 exchange/calendar_version/adjustment_mode/session_policy/source_query/as_of/payload_hash/manifest property；Manifest 加 payload hash/row range/dirty_worktree/package_versions/source_query/as_of；Audit blob 加 event_id/detector_id/params_hash/schema_version/derivation_artifacts/regime artifact/policy_trace/strategy_trace/retroactive 字段</li>
+  <li><strong>Migration 重构 (codex M3)</strong>: 新增 Step 0 (calendar + BarFrame shim)；Step 8 拆 8a (skeleton 5-7d) + 8b (research 不在 scope)；总预估 25-37d → 32-44d；加 §8.3 dependency DAG</li>
+  <li><strong>新增 §14 待决策</strong>: Q-M2a/b/c, Q-M3a/b, Q-M5a 六问</li>
+  <li><strong>新增 §15</strong>: 本变更历史</li>
+</ul>
+
+<h3>v0.1 — 2026-05-27 (initial draft)</h3>
+<ul>
+  <li>初稿，7 层 + 横切 audit plane 框架</li>
+  <li>10 步迁移路径，25-37 天总估</li>
+  <li>codex review 给 verdict "needs revision" → 触发 v0.2</li>
+</ul>
+</section>
+
+<div class="footer">
+  这份文档是 macd-momentum 2026-05-28 时点的目标架构。<br>
+  Version 0.3 · <span class="good">FROZEN baseline</span> · 所有 codex review 项收口<br>
+  后续 substantive 改动需要 v0.4+ minor bump + codex re-review。
+</div>
+
+</body>
+</html>

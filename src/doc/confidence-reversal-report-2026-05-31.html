@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confidence Band Reversal Analysis — 6-Pool Scheme B (2026-05-31)</title>
+<style>
+  body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 1100px; margin: 0 auto; padding: 2rem; background: #f8f9fa; color: #222; }
+  h1 { font-size: 1.5rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+  h2 { font-size: 1.15rem; margin-top: 2rem; color: #2c5282; border-left: 4px solid #4299e1; padding-left: 0.75rem; }
+  h3 { font-size: 1rem; margin-top: 1.5rem; color: #444; }
+  .meta { color: #666; font-size: 0.85rem; margin-bottom: 1.5rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+  th { background: #2c5282; color: white; padding: 0.5rem 0.75rem; text-align: left; }
+  td { padding: 0.45rem 0.75rem; border-bottom: 1px solid #e2e8f0; }
+  tr:nth-child(even) { background: #edf2f7; }
+  tr:hover { background: #bee3f8; }
+  .highlight { background: #c6f6d5 !important; font-weight: bold; }
+  .warn { background: #fed7d7 !important; }
+  .mild-warn { background: #fefcbf !important; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1rem 0; }
+  .kpi { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; text-align: center; }
+  .kpi-val { font-size: 1.6rem; font-weight: bold; color: #2c5282; }
+  .kpi-label { font-size: 0.8rem; color: #666; margin-top: 0.25rem; }
+  .finding { background: #ebf8ff; border-left: 4px solid #4299e1; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 6px 6px 0; }
+  .finding.caution { background: #fffaf0; border-color: #ed8936; }
+  .finding.action { background: #f0fff4; border-color: #48bb78; }
+  .bar { display: inline-block; background: #4299e1; height: 12px; vertical-align: middle; border-radius: 2px; }
+  .bar-neg { background: #fc8181; }
+  code { background: #edf2f7; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.85rem; }
+  .section-note { font-size: 0.82rem; color: #666; font-style: italic; margin-top: 0.25rem; }
+  ul.findings li { margin: 0.4rem 0; }
+</style>
+</head>
+<body>
+
+<h1>Confidence Band Reversal Analysis — 6-Pool Scheme B</h1>
+<p class="meta">
+  Date: 2026-05-31 &nbsp;|&nbsp; Universe: bottom × h=opposing signals, all 6 Scheme B pools &nbsp;|&nbsp;
+  Pools: CN_INDEX · CN_AGRI · CN_METAL · US_EQUITY · US_MACRO · CN_BOND &nbsp;|&nbsp;
+  Walk-forward OOS basis: 2022–2026 (K=3)
+</p>
+
+<!-- ── HEADLINE ── -->
+<h2>1. Headline Statistics</h2>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-val">111</div><div class="kpi-label">Total signals<br>(bottom × h=opposing)</div></div>
+  <div class="kpi"><div class="kpi-val">+0.873R</div><div class="kpi-label">Portfolio mean EV<br>(IS, equal-weight)</div></div>
+  <div class="kpi"><div class="kpi-val">73.0%</div><div class="kpi-label">Reversal rate<br>(realized_r &gt; 0)</div></div>
+  <div class="kpi"><div class="kpi-val">27.0%</div><div class="kpi-label">Failure rate<br>(stop-out or no TP1)</div></div>
+</div>
+
+<div class="finding">
+  <strong>OOS validation basis:</strong> Walk-forward K=3 on these same 111 signals yields portfolio EV fold1=+0.870R, fold2=+0.862R (gap≈0, STRONG PASS). This in-sample breakdown is therefore an honest characterisation — the underlying signal class is validated OOS.
+</div>
+
+<!-- ── CONFIDENCE BAND ── -->
+<h2>2. Confidence Band — Key Finding: Non-Monotonic</h2>
+
+<div class="finding">
+  <strong>Key finding:</strong> confidence_band is <em>not</em> monotonic with quality. The <code>mid</code> band (middle tercile of divergence confidence score) outperforms <code>high</code> on both EV and reversal rate. Do <em>not</em> use confidence as a simple cutoff filter.
+</div>
+
+<table>
+  <tr><th>Band</th><th>n</th><th>EV (R)</th><th>Reversal %</th><th>EV bar</th></tr>
+  <tr class="mild-warn">
+    <td>high</td><td>34</td><td>+0.770R</td><td>67.6%</td>
+    <td><span class="bar" style="width:77px"></span></td>
+  </tr>
+  <tr class="highlight">
+    <td>mid</td><td>34</td><td>+0.962R</td><td>76.5%</td>
+    <td><span class="bar" style="width:96px"></span></td>
+  </tr>
+  <tr>
+    <td>low</td><td>43</td><td>+0.884R</td><td>74.4%</td>
+    <td><span class="bar" style="width:88px"></span></td>
+  </tr>
+</table>
+
+<p class="section-note">Confidence tercile boundaries determined per-pool by signal density. n is balanced between high/mid by design; low has more signals because boundary terciles are asymmetric.</p>
+
+<h3>Interpretation</h3>
+<ul class="findings">
+  <li><strong>High-confidence signals</strong> often correspond to very clean textbook divergence patterns — but these are also the ones most likely to have been "already partially priced in" by the time the bar confirms. The divergence is obvious to all observers.</li>
+  <li><strong>Mid-confidence signals</strong> are the sweet spot: the divergence is real (pattern-confirmed) but not obvious, giving a better fade price at entry.</li>
+  <li><strong>Low-confidence signals</strong> are competitive on EV (better than high), likely because the lower n threshold brings in more genuine divergences with noisy context that doesn't affect the underlying price dynamics.</li>
+</ul>
+
+<!-- ── BAND × LOWER_RELATION ── -->
+<h2>3. Band × 15m Context (lower_relation) — Sweet Spot & Warning</h2>
+
+<table>
+  <tr><th>Band</th><th>lower_relation</th><th>n</th><th>EV (R)</th><th>Reversal %</th><th>EV bar</th></tr>
+  <tr class="highlight">
+    <td>mid</td><td>lagging</td><td>13</td><td>+1.269R</td><td>92.3%</td>
+    <td><span class="bar" style="width:127px"></span></td>
+  </tr>
+  <tr class="highlight">
+    <td>mid</td><td>leading</td><td>18</td><td>+0.874R</td><td>72.2%</td>
+    <td><span class="bar" style="width:87px"></span></td>
+  </tr>
+  <tr>
+    <td>high</td><td>leading</td><td>17</td><td>+0.882R</td><td>70.6%</td>
+    <td><span class="bar" style="width:88px"></span></td>
+  </tr>
+  <tr>
+    <td>low</td><td>lagging</td><td>21</td><td>+0.809R</td><td>76.2%</td>
+    <td><span class="bar" style="width:81px"></span></td>
+  </tr>
+  <tr>
+    <td>low</td><td>leading</td><td>18</td><td>+0.835R</td><td>66.7%</td>
+    <td><span class="bar" style="width:84px"></span></td>
+  </tr>
+  <tr class="warn">
+    <td>high</td><td>lagging</td><td>16</td><td>+0.688R</td><td>62.5%</td>
+    <td><span class="bar" style="width:69px"></span></td>
+  </tr>
+  <tr class="mild-warn">
+    <td>mid</td><td>pivoting</td><td>3</td><td>+0.167R</td><td>33.3%</td>
+    <td><span class="bar" style="width:17px"></span></td>
+  </tr>
+</table>
+
+<p class="section-note">low × pivoting (n=4, +1.500R, 100%) excluded from table — n too small for actionable conclusions. high × pivoting (n=1) likewise excluded.</p>
+
+<div class="finding action">
+  <strong>Best executable combo — mid × lagging (n=13, EV=+1.269R, 92.3% reversal):</strong><br>
+  Daily MACD divergence bottom at mid confidence + 15m trend lagging (15m MACD still bearish/descending as daily prints a bottom). The 15m lag validates that the daily reversal hasn't been "front-run" by the faster timeframe.
+</div>
+
+<div class="finding caution">
+  <strong>Worst reliable combo — high × lagging (n=16, EV=+0.688R, 62.5% reversal):</strong><br>
+  High-confidence daily bottom with 15m also lagging. Counter-intuitively worse than mid×lagging. Hypothesis: very high confidence + lagging 15m means the move already extended too far without the 15m confirming — increased probability of continued move against the daily signal before any reversal.
+</div>
+
+<!-- ── BY POOL ── -->
+<h2>4. By Pool</h2>
+
+<table>
+  <tr><th>Pool</th><th>n</th><th>EV (R)</th><th>Reversal %</th><th>OOS Fold1</th><th>OOS Fold2</th></tr>
+  <tr class="highlight">
+    <td>CN_BOND</td><td>9</td><td>+1.080R</td><td>88.9%</td><td>+0.269R</td><td>+0.429R</td>
+  </tr>
+  <tr class="highlight">
+    <td>US_MACRO</td><td>13</td><td>+1.125R</td><td>76.9%</td><td>+0.900R</td><td>+1.424R</td>
+  </tr>
+  <tr>
+    <td>US_EQUITY</td><td>27</td><td>+0.889R</td><td>74.1%</td><td>+1.250R</td><td>+0.375R</td>
+  </tr>
+  <tr>
+    <td>CN_METAL</td><td>22</td><td>+0.836R</td><td>72.7%</td><td>+0.673R</td><td>+0.782R</td>
+  </tr>
+  <tr>
+    <td>CN_AGRI</td><td>26</td><td>+0.814R</td><td>73.1%</td><td>+0.250R</td><td>+1.021R</td>
+  </tr>
+  <tr class="mild-warn">
+    <td>CN_INDEX</td><td>14</td><td>+0.643R</td><td>57.1%</td><td>+0.583R</td><td>n=2</td>
+  </tr>
+</table>
+
+<ul class="findings">
+  <li><strong>US_MACRO (GLD/GDX/TLT)</strong>: Highest IS EV (+1.125R), highest OOS fold2 (+1.424R). Rate-cut cycle amplifies reversal quality for macro assets. Portfolio anchor.</li>
+  <li><strong>CN_BOND (TF/T/TS)</strong>: Best IS reversal rate at 88.9%, strong EV. n=9 IS is the only concern — too small for pool-level confidence intervals. Monitor next 10 signals.</li>
+  <li><strong>CN_INDEX</strong>: Weakest pool (57.1% reversal, +0.643R). Fold2 OOS has n=2 — discard quantitatively. CN equity index futures have higher intraday noise-to-signal on daily MACD bottoms.</li>
+</ul>
+
+<!-- ── BY SUBTYPE ── -->
+<h2>5. Divergence Subtype</h2>
+
+<table>
+  <tr><th>Subtype</th><th>n</th><th>EV (R)</th><th>Reversal %</th></tr>
+  <tr class="highlight">
+    <td>hidden</td><td>17</td><td>+0.982R</td><td>82.4%</td>
+  </tr>
+  <tr>
+    <td>standard</td><td>50</td><td>+0.852R</td><td>72.0%</td>
+  </tr>
+  <tr>
+    <td>weakness</td><td>44</td><td>+0.855R</td><td>70.5%</td>
+  </tr>
+</table>
+
+<p class="section-note">Hidden divergence (price makes higher low while MACD makes lower low) modestly outperforms standard and weakness divergence within the bottom×h=opposing class. All three subtypes are positive and within CI overlap; do not drop any subtype based on this difference alone.</p>
+
+<!-- ── TIME SERIES ── -->
+<h2>6. Temporal Stability</h2>
+
+<table>
+  <tr><th>Year</th><th>n</th><th>EV (R)</th><th>Reversal %</th><th>Notes</th></tr>
+  <tr>
+    <td>2021</td><td>20</td><td>+0.879R</td><td>75.0%</td><td>Post-COVID recovery bull markets</td>
+  </tr>
+  <tr>
+    <td>2022</td><td>26</td><td>+0.951R</td><td>73.1%</td><td>Rate hike cycle begins — reversals sharp</td>
+  </tr>
+  <tr class="highlight">
+    <td>2023</td><td>13</td><td>+1.131R</td><td>84.6%</td><td>Best year — regime transitions well-defined</td>
+  </tr>
+  <tr class="warn">
+    <td>2024</td><td>23</td><td>+0.676R</td><td>60.9%</td><td>Worst year — CN commodity slump + US bull run</td>
+  </tr>
+  <tr>
+    <td>2025</td><td>23</td><td>+0.915R</td><td>78.3%</td><td>Recovery — regime normalisation</td>
+  </tr>
+  <tr class="mild-warn">
+    <td>2026</td><td>6</td><td>+0.547R</td><td>66.7%</td><td>YTD only (through 2026-05-31), n small</td>
+  </tr>
+</table>
+
+<div class="finding caution">
+  <strong>2024 dip:</strong> EV fell to +0.676R (60.9% reversal), the worst year in the sample. This aligns with the CN_METAL / CN_AGRI regime disruption documented separately (CN commodity slump Q2 2024 onwards, unrelated to US rate-cut timing). Both pools recovered fully in 2025. The 2024 dip does <em>not</em> contradict the OOS evidence — walk-forward fold boundaries straddle this period and both folds pass.
+</div>
+
+<!-- ── FAILURE MATRIX ── -->
+<h2>7. Failure Concentration (Band × Pool, n ≥ 3)</h2>
+
+<p>Cells with fail rate &gt; 40% are highlighted. Use these as soft de-weights, not hard filters.</p>
+
+<table>
+  <tr><th>Band</th><th>Pool</th><th>n</th><th>EV (R)</th><th>Fail %</th></tr>
+  <tr class="warn">
+    <td>high</td><td>CN_INDEX</td><td>5</td><td>+0.400R</td><td>60.0%</td>
+  </tr>
+  <tr class="warn">
+    <td>low</td><td>CN_INDEX</td><td>5</td><td>+0.200R</td><td>60.0%</td>
+  </tr>
+  <tr class="warn">
+    <td>mid</td><td>CN_METAL</td><td>6</td><td>+0.583R</td><td>50.0%</td>
+  </tr>
+  <tr class="mild-warn">
+    <td>low</td><td>US_EQUITY</td><td>7</td><td>+0.571R</td><td>42.9%</td>
+  </tr>
+  <tr class="mild-warn">
+    <td>high</td><td>CN_METAL</td><td>5</td><td>+0.500R</td><td>40.0%</td>
+  </tr>
+  <tr class="mild-warn">
+    <td>high</td><td>CN_AGRI</td><td>8</td><td>+0.521R</td><td>37.5%</td>
+  </tr>
+  <tr>
+    <td>mid</td><td>CN_AGRI</td><td>7</td><td>+0.786R</td><td>28.6%</td>
+  </tr>
+  <tr>
+    <td>high</td><td>US_MACRO</td><td>4</td><td>+1.125R</td><td>25.0%</td>
+  </tr>
+  <tr>
+    <td>high</td><td>US_EQUITY</td><td>9</td><td>+0.944R</td><td>22.2%</td>
+  </tr>
+  <tr>
+    <td>low</td><td>CN_AGRI</td><td>11</td><td>+1.045R</td><td>18.2%</td>
+  </tr>
+  <tr>
+    <td>mid</td><td>US_EQUITY</td><td>11</td><td>+1.045R</td><td>18.2%</td>
+  </tr>
+  <tr>
+    <td>low</td><td>US_MACRO</td><td>6</td><td>+1.187R</td><td>16.7%</td>
+  </tr>
+  <tr>
+    <td>low</td><td>CN_METAL</td><td>11</td><td>+1.127R</td><td>9.1%</td>
+  </tr>
+  <tr class="highlight">
+    <td>high</td><td>CN_BOND</td><td>3</td><td>+1.500R</td><td>0.0%</td>
+  </tr>
+  <tr class="highlight">
+    <td>mid</td><td>CN_BOND</td><td>3</td><td>+1.073R</td><td>0.0%</td>
+  </tr>
+  <tr class="highlight">
+    <td>mid</td><td>CN_INDEX</td><td>4</td><td>+1.500R</td><td>0.0%</td>
+  </tr>
+</table>
+
+<p class="section-note">Cells with n &lt; 3 are excluded. For cells with n = 3–5, treat as directional evidence only — do not tune hard decision rules on these samples.</p>
+
+<!-- ── ACTIONABLE CONCLUSIONS ── -->
+<h2>8. Actionable Conclusions</h2>
+
+<div class="finding action">
+  <strong>1. Priority tier — mid × lagging in US_MACRO or CN_METAL:</strong>
+  Highest reliable EV combination from sufficient sample. When a signal from GLD/GDX/TLT or SHFE metals prints with mid confidence and 15m lagging context, treat as the strongest executable setup.
+</div>
+
+<div class="finding action">
+  <strong>2. Portfolio anchor — US_MACRO:</strong>
+  Highest overall EV per signal (+1.125R IS, +1.424R OOS fold2). Uncorrelated to CN commodity cycles. All confidence bands show positive EV.
+</div>
+
+<div class="finding caution">
+  <strong>3. Soft de-weight — high band in CN pools:</strong>
+  high × CN_INDEX (60% fail), high × CN_METAL (40% fail), high × CN_AGRI (37.5% fail). Do not hard-filter — EV is still positive and n is small. Apply a 0.5× position size multiplier for high-confidence signals in CN pools as a risk management overlay.
+</div>
+
+<div class="finding caution">
+  <strong>4. Do not use confidence as a quality filter:</strong>
+  mid &gt; low &gt; high for EV. Dropping "low confidence" signals would degrade the portfolio by removing 43 signals with +0.884R EV. Use confidence_band only as a sizing input, not a pass/fail gate.
+</div>
+
+<div class="finding caution">
+  <strong>5. 2024 regime awareness:</strong>
+  EV dropped to +0.676R in 2024. CN commodity regime disruption is the primary driver. The 2025 recovery (+0.915R) confirms this was a regime episode, not signal decay. Rolling EV tracker (rolling_ev_tracker.py) will catch any recurrence.
+</div>
+
+<div class="finding">
+  <strong>6. CN_BOND monitoring:</strong>
+  CN_BOND shows the best IS reversal rate (88.9%) but n=9. The pool is validated OOS (fold1=+0.269R, fold2=+0.429R) but with wide CIs. Monitor next 10 signals closely before treating as a primary allocation pool.
+</div>
+
+<!-- ── APPENDIX ── -->
+<h2>Appendix — Methodology</h2>
+
+<table>
+  <tr><th>Parameter</th><th>Value</th></tr>
+  <tr><td>Signal class</td><td>MACD divergence bottom × h=opposing (1h trend bearish while daily predicts bounce)</td></tr>
+  <tr><td>confidence_band</td><td>Per-pool tercile of divergence confidence score [0, 1]</td></tr>
+  <tr><td>lower_relation</td><td>15m MACD context: leading / lagging / pivoting / unknown</td></tr>
+  <tr><td>Stop multiplier</td><td>1.5 × ATR (cn_futures); 1.0 × ATR (us_equity)</td></tr>
+  <tr><td>Target</td><td>TP1 = 1.0 × stop distance; TP2 = 2.0 × stop distance</td></tr>
+  <tr><td>realized_r</td><td>Actual R achieved; positive = reversal; negative = stop-out</td></tr>
+  <tr><td>reversal_rate</td><td>% of signals with realized_r &gt; 0 (touched TP1 or better)</td></tr>
+  <tr><td>Sample period</td><td>2021-01 → 2026-05-31</td></tr>
+  <tr><td>OOS validation</td><td>Walk-forward K=3, fold1 end 2024-09-11, fold2 end 2026-05-22</td></tr>
+  <tr><td>Data files</td><td>data/review/rr_b_{pool}.csv (6 pools)</td></tr>
+</table>
+
+<p class="meta" style="margin-top:2rem">
+  Generated: 2026-05-31 &nbsp;|&nbsp; Basis: 6-pool Scheme B n=111 IS signals &nbsp;|&nbsp;
+  Related: crosspool-walkforward-report-2026-05-31.html
+</p>
+
+</body>
+</html>

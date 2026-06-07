@@ -1,0 +1,946 @@
+"""Score today's live signals against OOS-validated sweet spots.
+
+Operational counterpart to analyze_sweet_spots_pool.py. Where the pool
+analyzer FINDS sweet spots from history, this script SCORES today's
+detector output against those known-good filters and produces a
+trader-facing ranked card.
+
+OOS-validated sweet spots (as of 2026-05-25, from
+doc/sweet-spots-2026-05-25.md + project_initial_sweet_spots_2026_05_25
+memory): only `bottom / swing_mid` for US pool survived strict 60/40
+OOS validation. All other discovered patterns collapsed or lacked
+sample. Production filters live in SWEET_SPOTS dict — refresh when
+new OOS verdicts arrive.
+
+Usage:
+  uv run python scripts/score_today.py --pool US
+  uv run python scripts/score_today.py --pool US --window-days 7
+  uv run python scripts/score_today.py --symbols SPY QQQ --instrument-class us_equity
+
+Output format:
+  Latest <window_days> of signals across the pool, tagged with which
+  sweet-spot region they fall in and a trade-readiness score (1-5).
+  Sorted by score descending.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from dataclasses import dataclass
+from datetime import date, timedelta
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import pandas as pd
+
+from data import bar_loader
+from engine.divergence.bpull_detector import BPullDetector
+from engine.divergence.context_a_detector import ContextADetector, ContextASignal
+from engine.divergence.detector import detect_all_divergences
+from engine.divergence.downstream_policies import apply_policy
+from engine.divergence.pa_detector import PABottomDetector, PASignal
+from engine.divergence.pa_structure import PAStructureDetector
+from engine.divergence.vflush_detector import VFlushDetector
+from engine.features.macd import macd
+from engine.features.streams import compute_feature_streams
+from engine.options.cn_ag_selector import enrich_with_iv, select_otm_calls
+from engine.options.cn_au_selector import enrich_with_iv_au, select_otm_calls_au
+from engine.units.snapshot import compute_unit_metadata
+
+DEFAULT_BARS_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
+_OPTIONS_DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "options" / "cn" / "ag"
+_AU_OPTIONS_DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "options" / "cn" / "au"
+
+_AG_SYMBOL_SUFFIX = "_ag"  # kq_m_shfe_ag — the only ag (silver) symbol in the metal pool
+_AU_SYMBOL_SUFFIX = "_au"  # kq_m_shfe_au — the only au (gold) symbol in the metal pool
+_OPTIONS_MIN_SCORE = 3     # Only annotate bottom signals with score >= this
+
+
+def _compute_mm_pct(sig, bars: "pd.DataFrame", entry_close: float) -> float | None:
+    """Measured-move target as % above entry: MM = B2 + (H1 - B1).
+
+    H1 is the max high strictly between B1 and B2 (ref_idx excluded).
+    Returns None for inter_segment signals (0% hit rate in both US and
+    CN_METAL backtests), when geometry is degenerate, or when mm_pct > 10%
+    (hit rate drops to 14-47% — unreliable, do not annotate).
+    """
+    if getattr(sig, "level", None) == "inter_segment":
+        return None
+    ref_idx = sig.reference_bar_idx
+    cand_idx = sig.candidate_bar_idx
+    # Need at least one bar between B1 and B2 to form H1
+    if cand_idx <= ref_idx + 1 or entry_close <= 0:
+        return None
+    b1 = float(sig.price_side.reference_value)
+    # Slice strictly after ref_idx so B1 bar's own high doesn't inflate H1
+    h1 = float(bars["high"].iloc[ref_idx + 1:cand_idx].max())
+    b2 = float(sig.price_side.candidate_value)
+    mm_height = h1 - b1
+    if mm_height <= 0:
+        return None
+    mm_pct = (b2 + mm_height) / entry_close * 100.0 - 100.0
+    if mm_pct > 10.0:
+        return None  # unreliable — reject rather than clamp to avoid false annotation
+    return round(mm_pct, 2)
+
+
+POOLS: dict[str, list[str]] = {
+    "US": ["SPY", "QQQ", "IWM", "DIA", "GLD", "GDX", "XLF", "XLK", "TLT", "NVDA", "XLB", "XLE", "XLRE", "XLU"],
+    "CN": ["kq_m_cffex_if", "kq_m_cffex_ih", "kq_m_cffex_ic", "kq_m_cffex_im"],
+    "CN_COMMODITY": [
+        "kq_m_shfe_rb", "kq_m_shfe_cu", "kq_m_shfe_au", "kq_m_shfe_ag",
+        "kq_m_dce_m", "kq_m_dce_i", "kq_m_dce_j", "kq_m_dce_jm",
+        "kq_m_dce_p", "kq_m_dce_y",
+        "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_cf", "kq_m_czce_sr",
+        "kq_m_ine_sc",
+    ],
+    # rb excluded — BPull OOS all-negative; MACD-divergence still included
+    "CN_METAL": ["kq_m_shfe_cu", "kq_m_shfe_au", "kq_m_shfe_ag", "kq_m_ine_sc"],
+    "CN_BOND": ["kq_m_cffex_tf", "kq_m_cffex_t", "kq_m_cffex_ts"],
+}
+
+POOL_INSTRUMENT_CLASS: dict[str, str] = {
+    "US": "us_equity",
+    "CN": "cn_index_futures",
+    "CN_COMMODITY": "cn_futures",
+    "CN_METAL": "cn_metal_futures",
+    "CN_BOND": "cn_futures",
+}
+
+# PA H2 climax+h=opp K=3 STRONG PASS (2026-06-04):
+#   F1=+0.640R  F2=+0.516R  F3=+0.571R  (require_climax=True, h=opposing)
+#   All 5 symbols individually positive; y/i/j excluded (negative h=opp lift)
+_CN_AGRI_POS_SYMBOLS: frozenset[str] = frozenset({
+    "kq_m_dce_m", "kq_m_dce_p",
+    "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr",
+})
+
+
+@dataclass(frozen=True)
+class SweetSpotRule:
+    """One OOS-validated sweet spot. score_today applies these to live signals.
+
+    Bucket constraints carry FROZEN OOS train-period tercile edges so live
+    scoring uses the same boundaries the validation used. Recomputing
+    edges from a different population (e.g., full current snapshot) would
+    let near-boundary live signals get a different label than the
+    validated rule (codex 2026-05-25 review). When the OOS validation is
+    refreshed, update the edges here AND bump validated_date / re-state
+    the train/test hit numbers.
+
+    `horizon` is the forward-return window the rule was validated on. A
+    bottom/h=5 rule means "the OOS test showed 5-day forward return > 0
+    in test_hit_pct of cases" — a consumer holding 20 days would get
+    different outcomes. Match score reports horizon so the consumer can
+    align hold period to validation window.
+
+    `validated_pool` documents the symbol universe that produced the rule.
+    Rule matching is by `pool_class` (instrument_class), so a rule
+    validated on CN_COMMODITY can also fire for a CN-index signal of the
+    same instrument_class — cross-pool extrapolation, real but accepted."""
+    rule_id: str
+    description: str
+    pool_class: str           # which instrument_class this rule applies to (us_equity / cn_futures)
+    direction: str            # "top" or "bottom"
+    horizon: int = 20         # forward-return window the rule was validated on
+    validated_pool: str = ""  # POOL name (US / CN / CN_COMMODITY) for documentation
+    subtype_constraint: str | None = None  # "standard" | "weakness" | "hidden" | None
+    # Each bucket constraint is either None (no constraint) or a tuple
+    # (bucket_name, (lo_edge, hi_edge)). At match time we test whether
+    # the live signal's feature value falls in the named tercile under
+    # those edges.
+    swing_constraint: tuple[str, tuple[float, float]] | None = None
+    wick_constraint: tuple[str, tuple[float, float]] | None = None
+    vol_constraint: tuple[str, tuple[float, float]] | None = None
+    train_hit_pct: float = 0.0
+    test_hit_pct: float = 0.0
+    validated_date: str = ""  # YYYY-MM-DD
+
+
+# OOS-validated sweet spots — only those that survived 60/40 train/test
+# split per doc/sweet-spots-2026-05-25.md.
+#
+# Edges below are TRAIN-PERIOD tercile bounds, extracted from
+# data/review/sweet_spots_pool_us_h20_oos.csv (split=='train' rows,
+# horizon-overlap purged). Refreshing OOS validation must re-extract.
+SWEET_SPOTS: list[SweetSpotRule] = [
+    SweetSpotRule(
+        rule_id="US-bot-swing-mid-h20",
+        description="bottom divergence with mid-range prior_swing_pct (US, 20-day hold)",
+        pool_class="us_equity",
+        direction="bottom",
+        horizon=20,
+        validated_pool="US",
+        # US h=20 train prior_swing_pct terciles: [-5.0181, +3.8242]
+        swing_constraint=("swing_mid", (-5.0181, 3.8242)),
+        train_hit_pct=85.3,
+        test_hit_pct=68.4,
+        validated_date="2026-05-25",
+    ),
+    SweetSpotRule(
+        rule_id="CN-bot-standard-h5",
+        description="bottom standard-subtype divergence on CN index futures (5-day hold)",
+        pool_class="cn_index_futures",
+        direction="bottom",
+        horizon=5,
+        validated_pool="CN",
+        subtype_constraint="standard",
+        train_hit_pct=66.7,
+        test_hit_pct=88.9,
+        validated_date="2026-05-25",
+    ),
+    SweetSpotRule(
+        rule_id="CN-COMMODITY-bot-wlow-vmid-h5",
+        description="bottom low-wick mid-volume divergence on CN commodity futures (5-day hold)",
+        pool_class="cn_futures",
+        direction="bottom",
+        horizon=5,
+        validated_pool="CN_COMMODITY",
+        # CN_COMMODITY h=5 train terciles:
+        #   wick_ratio: [+0.2331, +0.4610]; volume_ratio: [+0.9540, +1.2629]
+        wick_constraint=("wick_low", (0.2331, 0.4610)),
+        vol_constraint=("vol_mid", (0.9540, 1.2629)),
+        train_hit_pct=73.5,
+        test_hit_pct=81.8,
+        validated_date="2026-05-25",
+    ),
+    SweetSpotRule(
+        rule_id="CN-COMMODITY-bot-wmid-vhigh-h10",
+        description="bottom mid-wick high-volume divergence on CN commodity futures (10-day hold)",
+        pool_class="cn_futures",
+        direction="bottom",
+        horizon=10,
+        validated_pool="CN_COMMODITY",
+        # CN_COMMODITY h=10 train terciles:
+        #   wick_ratio: [+0.2328, +0.4613]; volume_ratio: [+0.9543, +1.2645]
+        wick_constraint=("wick_mid", (0.2328, 0.4613)),
+        vol_constraint=("vol_high", (0.9543, 1.2645)),
+        train_hit_pct=78.3,
+        test_hit_pct=63.0,
+        validated_date="2026-05-25",
+    ),
+]
+
+
+def in_tercile_mid(value: float | None, edges: tuple[float, float]) -> bool:
+    """True iff value falls in the mid tercile (lo ≤ v < hi)."""
+    if value is None:
+        return False
+    lo, hi = edges
+    return lo <= value < hi
+
+
+def in_tercile_low(value: float | None, edges: tuple[float, float]) -> bool:
+    if value is None:
+        return False
+    return value < edges[0]
+
+
+def in_tercile_high(value: float | None, edges: tuple[float, float]) -> bool:
+    if value is None:
+        return False
+    return value >= edges[1]
+
+
+_BUCKET_TESTS = {
+    "swing_low": in_tercile_low, "swing_mid": in_tercile_mid, "swing_high": in_tercile_high,
+    "wick_low": in_tercile_low, "wick_mid": in_tercile_mid, "wick_high": in_tercile_high,
+    "vol_low": in_tercile_low, "vol_mid": in_tercile_mid, "vol_high": in_tercile_high,
+}
+
+
+def _load_bars_daily(sym: str, args) -> pd.DataFrame | None:
+    """Load daily bars for sym from BarStore or JSON fallback."""
+    if getattr(args, "quant_data_root", None) is not None:
+        resolved = bar_loader.infer_symbol_and_mic(sym)
+        if resolved is not None:
+            quant_sym, mic = resolved
+            try:
+                return bar_loader.load_bars_quant(quant_sym, mic, "D", args.quant_data_root)
+            except Exception as e:
+                print(f"quant load {sym}/daily: {e} — falling back to JSON", file=sys.stderr)
+    path = args.bars_dir / f"{sym.lower()}_daily.json"
+    if not path.exists():
+        return None
+    return bar_loader.load_bars_json(path)
+
+
+def _load_bars_60(sym: str, args) -> pd.DataFrame | None:
+    """Load 60min bars for sym, mirroring _load_bars_daily quant-first strategy."""
+    if getattr(args, "quant_data_root", None) is not None:
+        resolved = bar_loader.infer_symbol_and_mic(sym)
+        if resolved is not None:
+            quant_sym, mic = resolved
+            try:
+                return bar_loader.load_bars_quant(quant_sym, mic, "60min", args.quant_data_root)
+            except Exception:
+                pass  # fall through to JSON
+    path = args.bars_dir / f"{sym.lower()}_60.json"
+    if not path.exists():
+        return None
+    return bar_loader.load_bars_json(path)
+
+
+def _load_bars_15(sym: str, args) -> pd.DataFrame | None:
+    """Load 15min bars for sym, mirroring _load_bars_60 quant-first strategy."""
+    if getattr(args, "quant_data_root", None) is not None:
+        resolved = bar_loader.infer_symbol_and_mic(sym)
+        if resolved is not None:
+            quant_sym, mic = resolved
+            try:
+                return bar_loader.load_bars_quant(quant_sym, mic, "15min", args.quant_data_root)
+            except Exception:
+                pass
+    path = args.bars_dir / f"{sym.lower()}_15.json"
+    if not path.exists():
+        return None
+    return bar_loader.load_bars_json(path)
+
+
+def _position_size(r: dict) -> str:
+    """Derive position-size recommendation for a scored signal.
+
+    Levels: full / half / light / watch
+
+    Rules (applied in order):
+    1. Base from score: 4=full, 3=half, 2=light, 1=watch
+    2. Phase cap (PA signals): TR/TR_FORMING → cap at half; BEAR/UNCLEAR → watch
+    3. 15m confirmation: explicitly False → downgrade one level
+    """
+    _levels = ["full", "half", "light", "watch"]
+
+    score = r.get("score", 1)
+    if score >= 4:
+        base = "full"
+    elif score == 3:
+        base = "half"
+    elif score == 2:
+        base = "light"
+    else:
+        base = "watch"
+
+    # Phase cap for PA signals (pa_phase present)
+    pa_phase = r.get("pa_phase")
+    if pa_phase in ("TR", "TR_FORMING"):
+        if base == "full":
+            base = "half"
+    elif pa_phase in ("BEAR", "UNCLEAR"):
+        base = "watch"
+
+    # 15min confirmation downgrade (CN_METAL PA H2 only; None = not applicable)
+    pa_15m = r.get("pa_15m_confirmed")
+    if pa_15m is False:
+        idx = _levels.index(base)
+        base = _levels[min(idx + 1, len(_levels) - 1)]
+
+    return base
+
+
+def match_rule(rule: SweetSpotRule, sig_dir: str, sig_subtype: str,
+               ctx: dict[str, float]) -> bool:
+    """Apply this rule's FROZEN OOS edges + categorical constraints to a live signal."""
+    if sig_dir != rule.direction:
+        return False
+    if rule.subtype_constraint is not None and sig_subtype != rule.subtype_constraint:
+        return False
+    for constraint, ctx_key in [
+        (rule.swing_constraint, "prior_swing_distance_pct"),
+        (rule.wick_constraint, "candidate_rejection_wick_ratio"),
+        (rule.vol_constraint, "candidate_volume_ratio"),
+    ]:
+        if constraint is None:
+            continue
+        bucket_name, edges = constraint
+        test = _BUCKET_TESTS.get(bucket_name)
+        if test is None:
+            return False
+        if not test(ctx.get(ctx_key), edges):
+            return False
+    return True
+
+
+def readiness_score(matched_rules: list[SweetSpotRule], sig_confidence: float) -> int:
+    """Quick 1-5 score combining matched sweet spots + raw detector confidence."""
+    base = 1
+    if matched_rules:
+        # +1 per OOS-validated match
+        base += min(len(matched_rules), 2)
+        best_test = max(r.test_hit_pct for r in matched_rules)
+        if best_test >= 70:
+            base += 1
+    if sig_confidence >= 0.8:
+        base += 1
+    return min(5, base)
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description="Score today's signals vs OOS-validated sweet spots")
+    grp = p.add_mutually_exclusive_group(required=True)
+    grp.add_argument("--pool", choices=sorted(POOLS), help="preset symbol pool")
+    grp.add_argument("--symbols", nargs="+", help="explicit symbol list")
+    p.add_argument("--instrument-class", choices=["us_equity", "cn_futures", "cn_index_futures", "czce", "cn_metal_futures"],
+                   default=None, dest="instrument_class")
+    p.add_argument("--bars-dir", type=Path, default=DEFAULT_BARS_DIR)
+    p.add_argument("--quant-data-root", type=Path, default=bar_loader.DEFAULT_QUANT_ROOT, dest="quant_data_root",
+                   help="quant-data Parquet root (default: data/quant/)")
+    p.add_argument("--window-days", type=int, default=7,
+                   help="how many trailing calendar days of signals to surface (default 7)")
+    p.add_argument("-o", "--output", type=Path, help="write JSON scorecard to this file")
+    args = p.parse_args()
+
+    symbols = POOLS[args.pool] if args.pool else args.symbols
+    if args.instrument_class is not None:
+        instrument_class = args.instrument_class
+    elif args.pool:
+        instrument_class = POOL_INSTRUMENT_CLASS[args.pool]
+    else:
+        instrument_class = "us_equity"
+
+    pool_name = args.pool if args.pool else "custom"
+    # Rule selection: instrument_class match is mandatory. Additionally, when
+    # --pool is set, rules must have validated_pool matching the pool name
+    # — a CN-COMMODITY-validated rule won't fire on CN index signals (codex
+    # 2026-05-25). For --symbols (custom pool, validated_pool unknown) we
+    # accept all matching-class rules with a warning so consumer can opt in.
+    if args.pool:
+        pool_rules = [r for r in SWEET_SPOTS
+                       if r.pool_class == instrument_class and r.validated_pool == args.pool]
+    else:
+        pool_rules = [r for r in SWEET_SPOTS if r.pool_class == instrument_class]
+        if pool_rules:
+            print(f"NOTE: --symbols mode loads ALL {instrument_class} rules "
+                  f"regardless of original validated_pool. Cross-pool extrapolation; "
+                  f"verify symbol universe matches.", file=sys.stderr)
+
+    cutoff_date = date.today() - timedelta(days=args.window_days)
+    print(f"Pool: {pool_name} ({len(symbols)} symbols, class={instrument_class})")
+    print(f"Window: last {args.window_days} days (signals on/after {cutoff_date})")
+    print(f"Active sweet-spot rules for this class: {len(pool_rules)}")
+    for r in pool_rules:
+        print(f"  - {r.rule_id} (validated {r.validated_date} on {r.validated_pool}, h={r.horizon}): "
+              f"{r.description}")
+        print(f"      train hit {r.train_hit_pct:.1f}%, test hit {r.test_hit_pct:.1f}%")
+        if r.subtype_constraint is not None:
+            print(f"      subtype: {r.subtype_constraint}")
+        for label, c in [("swing", r.swing_constraint), ("wick", r.wick_constraint),
+                          ("vol", r.vol_constraint)]:
+            if c is not None:
+                bname, (lo, hi) = c
+                # Show the actual predicate so traders see the live threshold,
+                # not just the train tercile range (codex 2026-05-25):
+                #   _low → value < lo;  _mid → lo ≤ value < hi;  _high → value ≥ hi
+                if bname.endswith("_low"):
+                    print(f"      {label}: {bname} (value < {lo:+.4f})")
+                elif bname.endswith("_high"):
+                    print(f"      {label}: {bname} (value ≥ {hi:+.4f})")
+                else:
+                    print(f"      {label}: {bname} ({lo:+.4f} ≤ value < {hi:+.4f})")
+    print()
+
+    scored: list[dict] = []
+    loaded_symbols = 0
+    for sym in symbols:
+        bars = _load_bars_daily(sym, args)
+        if bars is None:
+            print(f"  {sym}: missing data, skipped", file=sys.stderr)
+            continue
+        loaded_symbols += 1
+        h_bars = None  # loaded on demand by detector blocks below
+        macd_df = macd(bars["close"], hist_scale=1.0)
+        streams = compute_feature_streams(bars["close"], macd_df["dif"], macd_df["dea"], macd_df["hist"])
+        units = compute_unit_metadata(macd_df["dif"], macd_df["dea"], macd_df["hist"], streams["dif_proximity_zero"])
+        signals = detect_all_divergences(
+            units_df=units, ohlc=bars, dif=macd_df["dif"], hist=macd_df["hist"],
+            level_id="D", instrument_class=instrument_class,
+        )
+        for sig in signals:
+            if sig.timestamp.date() < cutoff_date:
+                continue
+            ctx = sig.context_features or {}
+            policy = apply_policy(sig, instrument_class=instrument_class)
+            if policy.weight == 0.0:
+                continue
+            matched = [r for r in pool_rules if match_rule(r, sig.direction, sig.subtype, ctx)]
+            score = readiness_score(matched, sig.confidence)
+            sig_date = sig.timestamp.date()
+            entry_close = float(bars["close"].iloc[sig.candidate_bar_idx])
+            rec: dict = {
+                "symbol": sym,
+                "date": sig_date.isoformat(),
+                "direction": sig.direction,
+                "level": sig.level,
+                "subtype": sig.subtype,
+                "confidence": round(sig.confidence, 3),
+                "wick_ratio": round(ctx.get("candidate_rejection_wick_ratio"), 3) if ctx.get("candidate_rejection_wick_ratio") is not None else None,
+                "swing_pct": round(ctx.get("prior_swing_distance_pct"), 2) if ctx.get("prior_swing_distance_pct") is not None else None,
+                "vol_ratio": round(ctx.get("candidate_volume_ratio"), 2) if ctx.get("candidate_volume_ratio") is not None else None,
+                "invalidation_level": ctx.get("invalidation_level"),
+                "matched_sweet_spots": [r.rule_id for r in matched],
+                "policy_rule": policy.rule_id,
+                "policy_weight": policy.weight,
+                "pa_isolated": None,
+                "score": score,
+                "underlying_price": entry_close,
+                "options_calls": None,
+            }
+            if (
+                instrument_class == "cn_metal_futures"
+                and sym.endswith(_AG_SYMBOL_SUFFIX)
+                and sig.direction == "bottom"
+                and score >= _OPTIONS_MIN_SCORE
+            ):
+                mm_pct = _compute_mm_pct(sig, bars, entry_close)
+                calls = select_otm_calls(entry_close, sig_date, mm_target_pct=mm_pct)
+                enrich_with_iv(calls, sig_date, entry_close, _OPTIONS_DATA_DIR)
+                rec["options_calls"] = calls
+            elif (
+                instrument_class == "cn_metal_futures"
+                and sym.endswith(_AU_SYMBOL_SUFFIX)
+                and sig.direction == "bottom"
+                and score >= _OPTIONS_MIN_SCORE
+            ):
+                mm_pct = _compute_mm_pct(sig, bars, entry_close)
+                calls = select_otm_calls_au(entry_close, sig_date, mm_target_pct=mm_pct)
+                enrich_with_iv_au(calls, sig_date, entry_close, _AU_OPTIONS_DATA_DIR)
+                rec["options_calls"] = calls
+            rec["position_size"] = _position_size(rec)
+            scored.append(rec)
+
+        # BPull scan — cn_metal_futures only (K=3 STRONG PASS: F1=+1.000R F3=+1.008R)
+        if instrument_class == "cn_metal_futures":
+            h_bars = _load_bars_60(sym, args)
+            bpull_det = BPullDetector()
+            for bsig in bpull_det.scan(bars, h_bars):
+                if bsig.timestamp.date() < cutoff_date:
+                    continue
+                weight = BPullDetector.policy_weight(bsig, instrument_class, symbol=sym)
+                if weight == 0.0:
+                    continue
+                # Score: h=opposing K=3 STRONG PASS → 4; shouldn't reach here otherwise
+                bscore = 4 if bsig.higher_tf_relation == "opposing" else 2
+                bsig_date = bsig.timestamp.date()
+                bentry_close = float(bars["close"].iloc[bsig.bar_idx])
+                brec: dict = {
+                    "symbol": sym,
+                    "date": bsig_date.isoformat(),
+                    "direction": "bottom",
+                    "level": "bpull",
+                    "subtype": "bpull",
+                    "confidence": weight,  # policy_weight (0.75) — comparable to MACD confidence
+                    "wick_ratio": None,
+                    "swing_pct": None,
+                    "vol_ratio": None,
+                    "invalidation_level": None,
+                    "matched_sweet_spots": [],
+                    "policy_rule": "bpull-k3-cn-metal",
+                    "policy_weight": weight,
+                    "pa_isolated": None,
+                    "score": bscore,
+                    "underlying_price": bentry_close,
+                    "options_calls": None,
+                }
+                if sym.endswith(_AG_SYMBOL_SUFFIX) and bscore >= _OPTIONS_MIN_SCORE:
+                    bcalls = select_otm_calls(bentry_close, bsig_date)
+                    enrich_with_iv(bcalls, bsig_date, bentry_close, _OPTIONS_DATA_DIR)
+                    brec["options_calls"] = bcalls
+                elif sym.endswith(_AU_SYMBOL_SUFFIX) and bscore >= _OPTIONS_MIN_SCORE:
+                    bcalls = select_otm_calls_au(bentry_close, bsig_date)
+                    enrich_with_iv_au(bcalls, bsig_date, bentry_close, _AU_OPTIONS_DATA_DIR)
+                    brec["options_calls"] = bcalls
+                brec["position_size"] = _position_size(brec)
+                scored.append(brec)
+
+        # PA H2 scan — cn_metal_futures only, with isolation annotation + PA structure filter.
+        # Isolation: no quality≥0.1 PA signal in the past 10 bars for the same symbol.
+        # EV validated: isolated +0.657R vs non-isolated +0.179R (backtest_pa_standalone.py).
+        # Phase filter: BULL phase excluded (K=3 OOS all-negative: F1=-1.0R F2=-1.0R F3=-0.29R).
+        # TR/TR_FORMING: ATR stop kept (outperforms structural stop for CN: +0.628R vs +0.516R).
+        # invalidation_level: structural stop for reference; execution uses ATR-based sizing.
+        if instrument_class == "cn_metal_futures":
+            if h_bars is None:
+                h_bars = _load_bars_60(sym, args)
+
+            _cn_struct_det = PAStructureDetector()
+
+            # 15min bars for intraday confirmation (informational field pa_15m_confirmed).
+            # Backtest: confirmed subset F3=+0.682R vs unconfirmed F3=+0.081R (CN_METAL TR phase).
+            # Confirmation window: 5 trading days (~7 calendar days) from daily signal.
+            _m15_bars = _load_bars_15(sym, args)
+            _m15_sigs_opp: list[PASignal] = []
+            if _m15_bars is not None and len(_m15_bars) >= 50:
+                _m15_det = PABottomDetector(
+                    min_h_legs=2, min_quality=0.2, ema_threshold=0.0, min_gap=3,
+                )
+                _m15_sigs_opp = [
+                    s for s in _m15_det.scan(_m15_bars, h_bars)
+                    if s.higher_tf_relation == "opposing"
+                ]
+
+            # Base scan (min_quality=0.1, min_gap=1) — reference set for isolation check
+            base_pa_det = PABottomDetector(
+                min_h_legs=2, min_quality=0.1, ema_threshold=0.0, min_gap=1,
+            )
+            all_pa_sigs: list[PASignal] = base_pa_det.scan(bars, h_bars)
+            base_bar_idxs = [s.bar_idx for s in all_pa_sigs]
+
+            # Quality≥0.3 signals — what we actually output
+            pa_det = PABottomDetector(
+                min_h_legs=2, min_quality=0.3, ema_threshold=0.0,
+            )
+            pa_sigs: list[PASignal] = pa_det.scan(bars, h_bars)
+
+            for pa_sig in pa_sigs:
+                if pa_sig.timestamp.date() < cutoff_date:
+                    continue
+                pa_weight = PABottomDetector.policy_weight(pa_sig, instrument_class)
+                if pa_weight == 0.0:
+                    continue
+
+                # PA structure filter: skip BULL phase (consistently negative EV in CN_METAL)
+                _cn_struct = _cn_struct_det.detect(bars, up_to_idx=pa_sig.bar_idx)
+                if _cn_struct.phase == "BULL":
+                    continue
+
+                # Isolation: no quality≥0.1 signal within past 10 bars
+                recent_base = [b for b in base_bar_idxs
+                               if 0 < pa_sig.bar_idx - b <= 10]
+                is_isolated = len(recent_base) == 0
+
+                # Score: isolated h=opposing → 4; non-isolated h=opposing → 3; other → 2
+                if pa_sig.higher_tf_relation == "opposing":
+                    pa_score = 4 if is_isolated else 3
+                else:
+                    pa_score = 2
+
+                pa_date = pa_sig.timestamp.date()
+                pa_close = float(bars["close"].iloc[pa_sig.bar_idx])
+
+                # 15min intraday confirmation: first 15min h=opp signal within 5 trading days
+                _confirm_deadline = pa_sig.timestamp + pd.Timedelta(days=7)
+                _m15_confirm = next(
+                    (s for s in _m15_sigs_opp
+                     if pa_sig.timestamp < s.timestamp <= _confirm_deadline),
+                    None,
+                )
+                pa_15m_confirmed = _m15_confirm is not None
+                pa_15m_entry = (
+                    round(float(_m15_bars["close"].iloc[_m15_confirm.bar_idx]), 4)
+                    if _m15_confirm is not None else None
+                )
+
+                pa_rec: dict = {
+                    "symbol": sym,
+                    "date": pa_date.isoformat(),
+                    "direction": "bottom",
+                    "level": "pa_h2",
+                    "subtype": "pa_h2",
+                    "confidence": pa_weight,
+                    "wick_ratio": None,
+                    "swing_pct": None,
+                    "vol_ratio": None,
+                    "invalidation_level": (
+                        round(_cn_struct.structural_stop, 4)
+                        if _cn_struct.structural_stop else None
+                    ),
+                    "matched_sweet_spots": [],
+                    "policy_rule": "pa-h2-cn-metal-tr-phase",
+                    "policy_weight": pa_weight,
+                    "pa_isolated": is_isolated,
+                    "score": pa_score,
+                    "underlying_price": pa_close,
+                    "options_calls": None,
+                    "pa_phase": _cn_struct.phase,
+                    "pa_15m_confirmed": pa_15m_confirmed,
+                    "pa_15m_entry": pa_15m_entry,
+                }
+                if sym.endswith(_AG_SYMBOL_SUFFIX) and pa_score >= _OPTIONS_MIN_SCORE:
+                    pa_calls = select_otm_calls(pa_close, pa_date)
+                    enrich_with_iv(pa_calls, pa_date, pa_close, _OPTIONS_DATA_DIR)
+                    pa_rec["options_calls"] = pa_calls
+                elif sym.endswith(_AU_SYMBOL_SUFFIX) and pa_score >= _OPTIONS_MIN_SCORE:
+                    pa_calls = select_otm_calls_au(pa_close, pa_date)
+                    enrich_with_iv_au(pa_calls, pa_date, pa_close, _AU_OPTIONS_DATA_DIR)
+                    pa_rec["options_calls"] = pa_calls
+                pa_rec["position_size"] = _position_size(pa_rec)
+                scored.append(pa_rec)
+
+        # VFlush scan — cn_metal_futures only (K=3 STRONG PASS, cu+sc only).
+        # V-shape vertical flush bottoms: deep below EMA + current-bar selling climax,
+        # NO h_leg requirement. ag+au excluded (OOS negative); policy_weight=0.65 for cu+sc.
+        if instrument_class == "cn_metal_futures":
+            if h_bars is None:
+                h_bars = _load_bars_60(sym, args)
+            vflush_det = VFlushDetector()
+            for vsig in vflush_det.scan(bars, h_bars):
+                if vsig.timestamp.date() < cutoff_date:
+                    continue
+                vweight = VFlushDetector.policy_weight(vsig, instrument_class, symbol=sym)
+                if vweight == 0.0:
+                    continue
+                vscore = 3 if vsig.higher_tf_relation == "opposing" else 2
+                vsig_date = vsig.timestamp.date()
+                vclose = float(bars["close"].iloc[vsig.bar_idx])
+                vrec: dict = {
+                    "symbol": sym,
+                    "date": vsig_date.isoformat(),
+                    "direction": "bottom",
+                    "level": "vflush",
+                    "subtype": "vflush",
+                    "confidence": vweight,
+                    "wick_ratio": None,
+                    "swing_pct": None,
+                    "vol_ratio": None,
+                    "invalidation_level": None,
+                    "matched_sweet_spots": [],
+                    "policy_rule": "vflush-k3-cn-metal",
+                    "policy_weight": vweight,
+                    "pa_isolated": None,
+                    "score": vscore,
+                    "underlying_price": vclose,
+                    "options_calls": None,
+                }
+                # ag+au excluded by policy_weight gate above; only cu/sc reach here
+                vrec["position_size"] = _position_size(vrec)
+                scored.append(vrec)
+
+        # Context A scan — US (us_equity) + CN_METAL (cn_metal_futures).
+        # CONDITIONAL PASS K=3: h=opposing only; policy_weight=0.60.
+        # US: OOS F1=+0.106R / F2=+0.179R / F3=+0.574R (3/3 positive).
+        # CN_METAL: F1=+0.342R / F2=−0.192R / F3=+0.619R (F2 2024 regime known).
+        if instrument_class in ("us_equity", "cn_metal_futures"):
+            if h_bars is None:
+                h_bars = _load_bars_60(sym, args)
+            ctx_a_det = ContextADetector()
+            for asig in ctx_a_det.scan(bars, h_bars):
+                if asig.timestamp.date() < cutoff_date:
+                    continue
+                aweight = ContextADetector.policy_weight(asig, instrument_class, symbol=sym)
+                if aweight == 0.0:
+                    continue
+                ascore = 3  # Conditional PASS
+                asig_date = asig.timestamp.date()
+                aclose = float(bars["close"].iloc[asig.bar_idx])
+                arec: dict = {
+                    "symbol": sym,
+                    "date": asig_date.isoformat(),
+                    "direction": "bottom",
+                    "level": "context_a",
+                    "subtype": "context_a",
+                    "confidence": aweight,
+                    "wick_ratio": None,
+                    "swing_pct": None,
+                    "vol_ratio": None,
+                    "invalidation_level": None,
+                    "matched_sweet_spots": [],
+                    "policy_rule": "context-a-k3-conditional",
+                    "policy_weight": aweight,
+                    "pa_isolated": None,
+                    "score": ascore,
+                    "underlying_price": aclose,
+                    "options_calls": None,
+                }
+                if (
+                    instrument_class == "cn_metal_futures"
+                    and sym.endswith(_AG_SYMBOL_SUFFIX)
+                    and ascore >= _OPTIONS_MIN_SCORE
+                ):
+                    acalls = select_otm_calls(aclose, asig_date)
+                    enrich_with_iv(acalls, asig_date, aclose, _OPTIONS_DATA_DIR)
+                    arec["options_calls"] = acalls
+                elif (
+                    instrument_class == "cn_metal_futures"
+                    and sym.endswith(_AU_SYMBOL_SUFFIX)
+                    and ascore >= _OPTIONS_MIN_SCORE
+                ):
+                    acalls = select_otm_calls_au(aclose, asig_date)
+                    enrich_with_iv_au(acalls, asig_date, aclose, _AU_OPTIONS_DATA_DIR)
+                    arec["options_calls"] = acalls
+                arec["position_size"] = _position_size(arec)
+                scored.append(arec)
+
+        # US PA — DIF>0 h=opposing + structural stop.
+        # Framework: PA structure first → stop from TR floor / recent HL; DIF<0 disabled.
+        # K=3 validated: DIF>0 h=opp struct F3=+0.507R; TR phase struct F3=+0.141R.
+        # Phase allocation: BULL=full weight, TR/TR_FORMING=half weight, BEAR/UNCLEAR=skip.
+        if instrument_class == "us_equity":
+            if h_bars is None:
+                h_bars = _load_bars_60(sym, args)
+            _pa_struct_det = PAStructureDetector()
+            _pa_us_det = PABottomDetector(
+                min_h_legs=2, min_quality=0.3, ema_threshold=0.0, min_gap=10,
+            )
+            _pa_us_sigs: list[PASignal] = _pa_us_det.scan(bars, h_bars)
+            for _us_sig in _pa_us_sigs:
+                if _us_sig.timestamp.date() < cutoff_date:
+                    continue
+                # DIF>0 required — DIF<0 disabled in all phases per PA framework
+                _us_dif = float(macd_df["dif"].iloc[_us_sig.bar_idx])
+                if _us_dif <= 0:
+                    continue
+                # h=opposing required (60m DIF<0 confirms daily bottom)
+                if _us_sig.higher_tf_relation != "opposing":
+                    continue
+                # PA structure at signal bar
+                _us_struct = _pa_struct_det.detect(bars, up_to_idx=_us_sig.bar_idx)
+                if _us_struct.phase in ("BEAR", "UNCLEAR"):
+                    continue
+                if _us_struct.structural_stop is None:
+                    continue
+                _us_close = float(bars["close"].iloc[_us_sig.bar_idx])
+                if _us_struct.structural_stop >= _us_close:
+                    continue
+                # Phase-based weight: BULL=0.65, TR/TR_FORMING=0.40
+                _us_phase_w = 0.65 if _us_struct.phase == "BULL" else 0.40
+                # TR phase: entry must be in bottom zone of range
+                if _us_struct.phase in ("TR", "TR_FORMING"):
+                    if not _us_struct.at_tr_bottom:
+                        continue
+                _us_score = 3 if _us_struct.phase == "BULL" else 2
+                _us_date  = _us_sig.timestamp.date()
+                _us_stop  = round(_us_struct.structural_stop, 4)
+                _us_stop_pct = round(
+                    (_us_close - _us_struct.structural_stop) / _us_close * 100, 1
+                )
+                _us_rec: dict = {
+                    "symbol": sym,
+                    "date": _us_date.isoformat(),
+                    "direction": "bottom",
+                    "level": "pa_us_dif_pos",
+                    "subtype": f"pa_us_{_us_struct.phase.lower()}",
+                    "confidence": _us_phase_w,
+                    "wick_ratio": None,
+                    "swing_pct": None,
+                    "vol_ratio": None,
+                    "invalidation_level": _us_stop,
+                    "matched_sweet_spots": [],
+                    "policy_rule": "pa-us-dif-pos-structural-stop",
+                    "policy_weight": _us_phase_w,
+                    "pa_isolated": None,
+                    "score": _us_score,
+                    "underlying_price": _us_close,
+                    "options_calls": None,
+                    # Extra PA context for downstream inspection
+                    "pa_phase": _us_struct.phase,
+                    "pa_tr_top": round(_us_struct.tr_top, 2) if _us_struct.tr_top else None,
+                    "pa_tr_bot": round(_us_struct.tr_bot, 2) if _us_struct.tr_bot else None,
+                    "pa_stop_pct": _us_stop_pct,
+                }
+                _us_rec["position_size"] = _position_size(_us_rec)
+                scored.append(_us_rec)
+
+        # CN_AGRI_POS PA H2 climax scan — m/p/ta/ma/sr only.
+        # Validated: PABottomDetector(require_climax=True)+h=opp K=3 STRONG PASS.
+        # F1=+0.640R(n=8)  F2=+0.516R(n=7)  F3=+0.571R(n=7)  (2026-06-04)
+        # y/i/j excluded — negative h=opp lift in full-history analysis.
+        if instrument_class == "cn_futures" and sym in _CN_AGRI_POS_SYMBOLS:
+            if h_bars is None:
+                h_bars = _load_bars_60(sym, args)
+            _agri_det = PABottomDetector(
+                min_h_legs=2, min_quality=0.3, ema_threshold=0.0,
+                min_gap=10,
+                require_climax=True, climax_threshold=0.4,
+            )
+            for _agri_sig in _agri_det.scan(bars, h_bars):
+                if _agri_sig.timestamp.date() < cutoff_date:
+                    continue
+                if _agri_sig.higher_tf_relation != "opposing":
+                    continue
+                _agri_date  = _agri_sig.timestamp.date()
+                _agri_close = float(bars["close"].iloc[_agri_sig.bar_idx])
+                _agri_rec: dict = {
+                    "symbol": sym,
+                    "date": _agri_date.isoformat(),
+                    "direction": "bottom",
+                    "level": "pa_h2_climax",
+                    "subtype": "pa_agri_climax",
+                    "confidence": 0.65,
+                    "wick_ratio": None,
+                    "swing_pct": None,
+                    "vol_ratio": None,
+                    "invalidation_level": None,
+                    "matched_sweet_spots": [],
+                    "policy_rule": "pa-h2-agri-climax-hopp",
+                    "policy_weight": 0.65,
+                    "pa_isolated": None,
+                    "score": 3,
+                    "underlying_price": _agri_close,
+                    "options_calls": None,
+                }
+                _agri_rec["position_size"] = _position_size(_agri_rec)
+                scored.append(_agri_rec)
+
+    if loaded_symbols == 0:
+        src = args.quant_data_root or args.bars_dir
+        hint = "fetch_quant.py" if args.quant_data_root else "fetch_polygon / fetch_akshare / fetch_tqsdk"
+        print(f"ERROR: 0/{len(symbols)} symbols loadable from {src}. Run {hint}.",
+              file=sys.stderr)
+        return 2
+    if not scored:
+        print(f"No signals in last {args.window_days} days "
+              f"({loaded_symbols}/{len(symbols)} symbols loaded).")
+        return 0
+    scored.sort(key=lambda r: (-r["score"], -r["confidence"]))
+
+    print(f"{'sym':<8} {'date':<11} {'dir':<7} {'lvl':<14} {'conf':<5} "
+          f"{'wick':<5} {'swng':<6} {'vol':<5} {'invd':<10} {'sweet':<22} {'policy':<28} {'iso':<4} {'15m':<4} {'sc':<2} {'pos':<5}")
+    print("-" * 149)
+    for r in scored:
+        sweet = ",".join(r["matched_sweet_spots"]) or "—"
+        wick = f"{r['wick_ratio']:.2f}" if r['wick_ratio'] is not None else "—"
+        swng = f"{r['swing_pct']:+.1f}" if r['swing_pct'] is not None else "—"
+        vol = f"{r['vol_ratio']:.2f}" if r['vol_ratio'] is not None else "—"
+        invd = f"{r['invalidation_level']:.2f}" if r['invalidation_level'] is not None else "—"
+        pa_iso = r.get("pa_isolated")
+        iso_str = "iso" if pa_iso is True else ("—" if pa_iso is False else "")
+        m15c = r.get("pa_15m_confirmed")
+        m15_str = "✓" if m15c is True else ("…" if m15c is False else "")
+        pos_str = r.get("position_size", "")
+        print(f"{r['symbol']:<8} {r['date']:<11} {r['direction']:<7} {r['level']:<14} "
+              f"{r['confidence']:.2f}  {wick:<5} {swng:<6} {vol:<5} {invd:<10} "
+              f"{sweet:<22} {r['policy_rule'] or '(baseline)':<28} {iso_str:<4} {m15_str:<4} {r['score']} {pos_str:<5}")
+
+    # Options suggestions for ag/au bottom signals (score >= OPTIONS_MIN_SCORE)
+    option_signals = [
+        r for r in scored
+        if r.get("options_calls")
+        and r["direction"] == "bottom"
+        and r["score"] >= _OPTIONS_MIN_SCORE
+    ]
+    if option_signals:
+        print()
+        print(f"Options suggestions (ag/au bottom signals, score>={_OPTIONS_MIN_SCORE}):")
+        for r in option_signals:
+            calls = r["options_calls"]
+            underlying = r.get("underlying_price", float("nan"))
+            metal = "au" if r["symbol"].endswith(_AU_SYMBOL_SUFFIX) else "ag"
+            # MM target annotation (same for all strikes in this signal)
+            mm_pct = calls[0].get("mm_target_pct") if calls else None
+            mm_tag = f"  MM_target=+{mm_pct:.1f}%" if mm_pct is not None else ""
+            print(f"  {metal} [{r['date']}] underlying={underlying:.2f}{mm_tag}:")
+            for c in calls:
+                price_str = f"{c['option_price']:.0f}" if c.get("option_price") is not None else "n/a"
+                iv_str = f"{c['iv']:.1f}%" if c.get("iv") is not None else "n/a"
+                src = c.get("price_source")
+                src_tag = f" [{src}]" if src is not None else ""
+                mm_marker = "  ← MM" if c.get("is_mm_strike") else ""
+                print(f"    {c['contract_sym']}  OTM={c['otm_pct']:.1f}%  DTE={c['days_to_expiry']}"
+                      f"  price={price_str}  IV={iv_str}{src_tag}{mm_marker}")
+
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps({
+            "pool": pool_name,
+            "instrument_class": instrument_class,
+            "window_days": args.window_days,
+            "active_rules": [r.rule_id for r in pool_rules],
+            "scored": scored,
+        }, indent=2))
+        print(f"\nJSON scorecard → {args.output}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

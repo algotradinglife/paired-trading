@@ -1,0 +1,492 @@
+{
+  "$defs": {
+    "AmplitudeSide": {
+      "additionalProperties": false,
+      "properties": {
+        "reference_value": {
+          "title": "Reference Value",
+          "type": "number"
+        },
+        "candidate_value": {
+          "title": "Candidate Value",
+          "type": "number"
+        },
+        "decay_ratio": {
+          "title": "Decay Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "reference_value",
+        "candidate_value",
+        "decay_ratio"
+      ],
+      "title": "AmplitudeSide",
+      "type": "object"
+    },
+    "CrossLevelSummaryDTO": {
+      "additionalProperties": false,
+      "description": "Pydantic mirror of dataclass CrossLevelSummary.",
+      "properties": {
+        "alignment_strength": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Alignment Strength",
+          "type": "number"
+        },
+        "dominant_trend": {
+          "title": "Dominant Trend",
+          "type": "string"
+        },
+        "primary_label": {
+          "title": "Primary Label",
+          "type": "string"
+        },
+        "primary_confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Primary Confidence",
+          "type": "number"
+        },
+        "secondary_labels": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Secondary Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "alignment_strength",
+        "dominant_trend",
+        "primary_label",
+        "primary_confidence",
+        "secondary_labels"
+      ],
+      "title": "CrossLevelSummaryDTO",
+      "type": "object"
+    },
+    "DivergenceSignal": {
+      "additionalProperties": false,
+      "description": "One detected divergence event.\n\nEach emitted on completion of a candidate container that, compared with\nits reference, produces a non-trivial result (standard / weakness / hidden).\nNon-divergence events (candidate exceeds reference) trigger reference\nresets internally \u2014 they're not emitted as signals.",
+      "properties": {
+        "level": {
+          "enum": [
+            "intra_cycle",
+            "inter_cycle",
+            "inter_segment"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "subtype": {
+          "enum": [
+            "standard",
+            "weakness",
+            "hidden"
+          ],
+          "title": "Subtype",
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "top",
+            "bottom"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "level_id": {
+          "title": "Level Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "candidate_bar_idx": {
+          "title": "Candidate Bar Idx",
+          "type": "integer"
+        },
+        "reference_bar_idx": {
+          "title": "Reference Bar Idx",
+          "type": "integer"
+        },
+        "container_type": {
+          "enum": [
+            "heap",
+            "cycle",
+            "segment"
+          ],
+          "title": "Container Type",
+          "type": "string"
+        },
+        "container_segment_id": {
+          "title": "Container Segment Id",
+          "type": "integer"
+        },
+        "reference_id": {
+          "title": "Reference Id",
+          "type": "integer"
+        },
+        "candidate_id": {
+          "title": "Candidate Id",
+          "type": "integer"
+        },
+        "price_side": {
+          "$ref": "#/$defs/PriceSide"
+        },
+        "amplitude_side": {
+          "$ref": "#/$defs/AmplitudeSide"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "is_continuous_gap": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Is Continuous Gap"
+        },
+        "multi_tf_context": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Multi Tf Context"
+        }
+      },
+      "required": [
+        "level",
+        "subtype",
+        "direction",
+        "level_id",
+        "timestamp",
+        "candidate_bar_idx",
+        "reference_bar_idx",
+        "container_type",
+        "container_segment_id",
+        "reference_id",
+        "candidate_id",
+        "price_side",
+        "amplitude_side",
+        "confidence"
+      ],
+      "title": "DivergenceSignal",
+      "type": "object"
+    },
+    "LevelFusionSummary": {
+      "additionalProperties": false,
+      "description": "Per-level fusion result (compact view).",
+      "properties": {
+        "level_id": {
+          "title": "Level Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "trend_side": {
+          "title": "Trend Side",
+          "type": "string"
+        },
+        "close": {
+          "title": "Close",
+          "type": "number"
+        },
+        "dif": {
+          "title": "Dif",
+          "type": "number"
+        },
+        "dea": {
+          "title": "Dea",
+          "type": "number"
+        },
+        "hist": {
+          "title": "Hist",
+          "type": "number"
+        },
+        "ema52": {
+          "title": "Ema52",
+          "type": "number"
+        },
+        "form_confidences_local": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Form Confidences Local",
+          "type": "object"
+        },
+        "form_confidences_fused": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Form Confidences Fused",
+          "type": "object"
+        },
+        "sub_level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sub Level"
+        },
+        "super_level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Super Level"
+        },
+        "cycle_state": {
+          "title": "Cycle State",
+          "type": "string"
+        },
+        "segment_direction": {
+          "title": "Segment Direction",
+          "type": "string"
+        },
+        "hidden_subtype": {
+          "title": "Hidden Subtype",
+          "type": "string"
+        },
+        "near_zero_perfect": {
+          "title": "Near Zero Perfect",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "level_id",
+        "timestamp",
+        "trend_side",
+        "close",
+        "dif",
+        "dea",
+        "hist",
+        "ema52",
+        "form_confidences_local",
+        "form_confidences_fused",
+        "sub_level",
+        "super_level",
+        "cycle_state",
+        "segment_direction",
+        "hidden_subtype",
+        "near_zero_perfect"
+      ],
+      "title": "LevelFusionSummary",
+      "type": "object"
+    },
+    "PolicyDecisionDTO": {
+      "additionalProperties": false,
+      "description": "Pydantic mirror of dataclass PolicyDecision (which is frozen dataclass,\nnot pydantic). Lets the envelope dump to JSON cleanly.",
+      "properties": {
+        "weight": {
+          "minimum": 0.0,
+          "title": "Weight",
+          "type": "number"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Id"
+        },
+        "monitor_required": {
+          "title": "Monitor Required",
+          "type": "boolean"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "strategy_hints": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Strategy Hints"
+        }
+      },
+      "required": [
+        "weight",
+        "rule_id",
+        "monitor_required",
+        "reason"
+      ],
+      "title": "PolicyDecisionDTO",
+      "type": "object"
+    },
+    "PriceSide": {
+      "additionalProperties": false,
+      "properties": {
+        "reference_value": {
+          "title": "Reference Value",
+          "type": "number"
+        },
+        "candidate_value": {
+          "title": "Candidate Value",
+          "type": "number"
+        },
+        "is_new_extreme": {
+          "title": "Is New Extreme",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "reference_value",
+        "candidate_value",
+        "is_new_extreme"
+      ],
+      "title": "PriceSide",
+      "type": "object"
+    },
+    "SignalOutput": {
+      "additionalProperties": false,
+      "description": "One divergence signal alongside the downstream policy result.\n\nConsumers needing only the raw signal can ignore `policy`. Consumers\nneeding a default weight read `policy.weight`. Consumers wanting to ignore\nrules entirely can read `signal.confidence` directly.",
+      "properties": {
+        "signal": {
+          "$ref": "#/$defs/DivergenceSignal"
+        },
+        "policy": {
+          "$ref": "#/$defs/PolicyDecisionDTO"
+        }
+      },
+      "required": [
+        "signal",
+        "policy"
+      ],
+      "title": "SignalOutput",
+      "type": "object"
+    },
+    "WindowSpec": {
+      "additionalProperties": false,
+      "description": "Time-range and bar-count summary for traceability.",
+      "properties": {
+        "window_start": {
+          "format": "date-time",
+          "title": "Window Start",
+          "type": "string"
+        },
+        "window_end": {
+          "format": "date-time",
+          "title": "Window End",
+          "type": "string"
+        },
+        "bars_per_level": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Bars Per Level",
+          "type": "object"
+        }
+      },
+      "required": [
+        "window_start",
+        "window_end",
+        "bars_per_level"
+      ],
+      "title": "WindowSpec",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Top-level envelope. ONE per symbol per analysis run.\n\nField guarantees:\n  - `schema_version`: always set, parseable by SemVer.\n  - `symbol`: uppercase ticker, no exchange prefix (e.g. \"SPY\" not\n    \"AMEX:SPY\"). Consumers should be exchange-agnostic.\n  - `system_ts`: UTC datetime when the analysis was computed.\n  - `window`: documents the input data span the analysis is based on.\n  - `cross_level`: current cross-TF synthesis (alignment + primary label).\n    May surface a \"stable\" label if nothing recent triggers.\n  - `levels`: per-TF state snapshots \u2014 len == number of TFs that had data.\n  - `signals`: list of divergence events DETECTED IN THE WINDOW (not just\n    the latest). Sorted by `signal.candidate_bar_idx` ascending.\n\nEmpty signals list is valid (means no divergence in window).",
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "symbol": {
+      "title": "Symbol",
+      "type": "string"
+    },
+    "system_ts": {
+      "format": "date-time",
+      "title": "System Ts",
+      "type": "string"
+    },
+    "window": {
+      "$ref": "#/$defs/WindowSpec"
+    },
+    "cross_level": {
+      "$ref": "#/$defs/CrossLevelSummaryDTO"
+    },
+    "levels": {
+      "items": {
+        "$ref": "#/$defs/LevelFusionSummary"
+      },
+      "title": "Levels",
+      "type": "array"
+    },
+    "signals": {
+      "items": {
+        "$ref": "#/$defs/SignalOutput"
+      },
+      "title": "Signals",
+      "type": "array"
+    }
+  },
+  "required": [
+    "symbol",
+    "system_ts",
+    "window",
+    "cross_level",
+    "levels",
+    "signals"
+  ],
+  "title": "AnalysisOutput",
+  "type": "object"
+}

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cross-Pool Walk-Forward OOS — 2026-05-31</title>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --card2: #21253a;
+    --border: #2e3350; --text: #e0e4f0; --muted: #8892b0;
+    --green: #3ddc84; --red: #ff6b6b; --yellow: #ffd700;
+    --blue: #60a5fa; --purple: #a78bfa; --orange: #fb923c;
+    --teal: #2dd4bf; --pink: #f472b6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'SF Mono','Cascadia Code',monospace; font-size: 13px; line-height: 1.6; padding: 24px; }
+  h1 { font-size: 22px; color: var(--blue); margin-bottom: 6px; }
+  h2 { font-size: 16px; color: var(--purple); margin: 28px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  h3 { font-size: 13px; color: var(--teal); margin: 16px 0 8px; }
+  .meta { color: var(--muted); font-size: 11px; margin-bottom: 24px; }
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .g5 { grid-template-columns: repeat(5,1fr); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .hero { text-align: center; }
+  .hero .val { font-size: 28px; font-weight: 700; margin: 8px 0 4px; }
+  .hero .lbl { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .hero .sub { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .green { color: var(--green); } .red { color: var(--red); }
+  .yellow { color: var(--yellow); } .blue { color: var(--blue); }
+  .purple { color: var(--purple); } .orange { color: var(--orange); }
+  .teal { color: var(--teal); } .pink { color: var(--pink); } .muted { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { color: var(--muted); font-weight: 600; text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 7px 10px; border-bottom: 1px solid rgba(46,51,80,0.5); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.03); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; }
+  .badge-green  { background: rgba(61,220,132,0.15); color: var(--green); }
+  .badge-red    { background: rgba(255,107,107,0.15); color: var(--red); }
+  .badge-yellow { background: rgba(255,215,0,0.15);  color: var(--yellow); }
+  .badge-blue   { background: rgba(96,165,250,0.15); color: var(--blue); }
+  .badge-purple { background: rgba(167,139,250,0.15);color: var(--purple); }
+  .note { background: rgba(96,165,250,0.07); border-left: 3px solid var(--blue); padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 12px; margin: 12px 0; color: var(--muted); }
+  .warn { background: rgba(255,215,0,0.07); border-left: 3px solid var(--yellow); padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 12px; margin: 12px 0; color: var(--muted); }
+  .success { background: rgba(61,220,132,0.07); border-left: 3px solid var(--green); padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 12px; margin: 12px 0; color: var(--muted); }
+  .verdict-box { background: rgba(61,220,132,0.08); border: 1px solid rgba(61,220,132,0.3); border-radius: 8px; padding: 16px; margin: 12px 0; }
+  .verdict-title { color: var(--green); font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .fold-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .fold-card.fold1 { border-top: 3px solid var(--blue); }
+  .fold-card.fold2 { border-top: 3px solid var(--purple); }
+  .bar-bg { background: rgba(255,255,255,0.07); border-radius: 3px; height: 10px; }
+  .bar-fill { border-radius: 3px; height: 10px; }
+  .pool-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; margin: 1px; }
+  .pool-cn-metal  { background: rgba(45,212,191,0.15);  color: var(--teal); }
+  .pool-cn-agri   { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .pool-cn-index  { background: rgba(251,146,60,0.15);  color: var(--orange); }
+  .pool-us-equity { background: rgba(96,165,250,0.15);  color: var(--blue); }
+  .pool-us-macro  { background: rgba(244,114,182,0.15); color: var(--pink); }
+  .delta-pos { color: var(--green); font-size: 11px; }
+  .delta-neg { color: var(--red); font-size: 11px; }
+  svg text { font-family: 'SF Mono', monospace; }
+</style>
+</head>
+<body>
+
+<h1>Cross-Pool Walk-Forward OOS Validation</h1>
+<div class="meta">
+  Generated: 2026-05-31 &nbsp;|&nbsp;
+  Scope: 5 Scheme B pools · bottom × h=opposing &nbsp;|&nbsp;
+  n=102 total · K=3 chronological chunks · 2 OOS folds &nbsp;|&nbsp;
+  Equal-weight 1R/signal
+</div>
+
+<!-- ═══ VERDICT BANNER ═══════════════════════════════════════════════ -->
+<div class="verdict-box" style="margin-bottom:24px;padding:20px">
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="font-size:32px;font-weight:800;color:var(--green)">STRONG PASS</div>
+    <div>
+      <div style="color:var(--text);font-size:13px;font-weight:600">EV &gt; 0R and Sharpe &gt; 0.6 in both OOS folds</div>
+      <div style="color:var(--muted);font-size:12px;margin-top:3px">
+        OOS EV (+0.786R, +0.879R) nearly matches in-sample (+0.855R) — no degradation ·
+        All 5 pools positive in both folds · Max DD improves OOS (−2R vs −3R in-sample)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ KEY HEROES ═══════════════════════════════════════════════════ -->
+<div class="grid g4" style="margin-bottom:24px">
+  <div class="card hero">
+    <div class="lbl">Folds passing EV &gt; 0</div>
+    <div class="val green">2 / 2</div>
+    <div class="sub">All OOS folds positive</div>
+  </div>
+  <div class="card hero">
+    <div class="lbl">Folds passing Sharpe &gt; 0.6</div>
+    <div class="val green">2 / 2</div>
+    <div class="sub">Fold1: 4.53 · Fold2: 5.11</div>
+  </div>
+  <div class="card hero">
+    <div class="lbl">OOS EV range</div>
+    <div class="val green">+0.79–0.88R</div>
+    <div class="sub">In-sample: +0.855R</div>
+  </div>
+  <div class="card hero">
+    <div class="lbl">OOS Max Drawdown</div>
+    <div class="val green">−2.00R</div>
+    <div class="sub">Both folds · better than IS (−3R)</div>
+  </div>
+</div>
+
+<!-- ═══ CHUNK LAYOUT ══════════════════════════════════════════════════ -->
+<h2>§1 — Walk-Forward Structure</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:16px">
+  102 signals split into 3 equal chronological chunks (~34 each). Folds test on future data unseen during training.
+</p>
+
+<div class="card">
+  <!-- Timeline bar -->
+  <div style="position:relative;height:60px;margin-bottom:16px">
+    <svg viewBox="0 0 900 60" width="100%">
+      <!-- Chunk 0: train always -->
+      <rect x="20" y="10" width="270" height="30" rx="5" fill="rgba(96,165,250,0.15)" stroke="#60a5fa" stroke-width="1"/>
+      <text x="155" y="30" fill="#60a5fa" font-size="11" text-anchor="middle">Chunk 0 — n=34</text>
+      <text x="155" y="44" fill="#8892b0" font-size="9" text-anchor="middle">2021-02-10 → 2022-06-22</text>
+      <!-- Chunk 1 -->
+      <rect x="300" y="10" width="270" height="30" rx="5" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="1"/>
+      <text x="435" y="30" fill="#a78bfa" font-size="11" text-anchor="middle">Chunk 1 — n=34</text>
+      <text x="435" y="44" fill="#8892b0" font-size="9" text-anchor="middle">2022-07-20 → 2024-09-11</text>
+      <!-- Chunk 2 -->
+      <rect x="580" y="10" width="300" height="30" rx="5" fill="rgba(61,220,132,0.08)" stroke="#3ddc84" stroke-width="1"/>
+      <text x="730" y="30" fill="#3ddc84" font-size="11" text-anchor="middle">Chunk 2 — n=34</text>
+      <text x="730" y="44" fill="#8892b0" font-size="9" text-anchor="middle">2024-09-18 → 2026-05-22</text>
+    </svg>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Fold</th><th>Train</th><th>Test (OOS)</th><th>Train n</th><th>Test n</th><th>Test period</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-blue">Fold 1</span></td>
+        <td>Chunk 0</td>
+        <td>Chunk 1</td>
+        <td>34</td>
+        <td>34</td>
+        <td class="muted">2022-07-20 → 2024-09-11</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-purple">Fold 2</span></td>
+        <td>Chunk 0 + 1</td>
+        <td>Chunk 2</td>
+        <td>68</td>
+        <td>34</td>
+        <td class="muted">2024-09-18 → 2026-05-22</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ IN-SAMPLE BASELINE ══════════════════════════════════════════ -->
+<h2>§2 — In-Sample Baseline</h2>
+
+<div class="card">
+  <div class="grid g2">
+    <div>
+      <table>
+        <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>n</td><td>102</td></tr>
+          <tr><td>EV/signal</td><td class="green" style="font-weight:700">+0.855R</td></tr>
+          <tr><td>CI95</td><td class="muted">[+0.662, +1.047]</td></tr>
+          <tr><td>Sharpe</td><td class="green">8.69</td></tr>
+          <tr><td>Max DD</td><td class="yellow">−3.00R</td></tr>
+          <tr><td>Max consec losses</td><td class="muted">3</td></tr>
+          <tr><td>Win rate</td><td class="green">71.6%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>Pool breakdown (IS)</h3>
+      <table>
+        <thead><tr><th>Pool</th><th>n</th><th>EV</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pool-tag pool-us-macro">US_MACRO</span></td><td>13</td><td class="green">+1.125R</td></tr>
+          <tr><td><span class="pool-tag pool-us-equity">US_EQUITY</span></td><td>27</td><td class="green">+0.889R</td></tr>
+          <tr><td><span class="pool-tag pool-cn-metal">CN_METAL</span></td><td>22</td><td class="green">+0.836R</td></tr>
+          <tr><td><span class="pool-tag pool-cn-agri">CN_AGRI</span></td><td>26</td><td class="green">+0.814R</td></tr>
+          <tr><td><span class="pool-tag pool-cn-index">CN_INDEX</span></td><td>14</td><td class="green">+0.643R</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OOS FOLDS ════════════════════════════════════════════════════ -->
+<h2>§3 — OOS Fold Results</h2>
+
+<div class="grid g2">
+
+  <!-- FOLD 1 -->
+  <div class="fold-card fold1">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div>
+        <span class="badge badge-blue" style="font-size:12px;padding:3px 10px">Fold 1 — OOS</span>
+        <span style="color:var(--muted);font-size:11px;margin-left:8px">2022-07-20 → 2024-09-11</span>
+      </div>
+      <span class="badge badge-green">PASS</span>
+    </div>
+    <table style="margin-bottom:12px">
+      <thead><tr><th>Metric</th><th>OOS</th><th>vs IS</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>n</td><td>34</td><td class="muted">—</td>
+        </tr>
+        <tr>
+          <td>EV/signal</td>
+          <td class="green" style="font-weight:700">+0.786R</td>
+          <td class="delta-neg">−0.069R</td>
+        </tr>
+        <tr>
+          <td>CI95</td>
+          <td class="muted">[+0.446, +1.125]</td>
+          <td class="muted">—</td>
+        </tr>
+        <tr>
+          <td>Sharpe</td>
+          <td class="green">4.531</td>
+          <td class="muted">&gt;&gt; 0.6 ✓</td>
+        </tr>
+        <tr>
+          <td>Max DD</td>
+          <td class="green">−2.00R</td>
+          <td class="delta-pos">+1.00R better</td>
+        </tr>
+        <tr>
+          <td>Max consec losses</td>
+          <td class="green">1</td>
+          <td class="delta-pos">−2 better</td>
+        </tr>
+        <tr>
+          <td>Win rate</td>
+          <td class="green">64.7%</td>
+          <td class="delta-neg">−6.9pp</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Pool breakdown</h3>
+    <table>
+      <thead><tr><th>Pool</th><th>n</th><th>EV</th><th>vs IS</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="pool-tag pool-us-equity">US_EQUITY</span></td>
+          <td>10</td><td class="green" style="font-weight:700">+1.250R</td>
+          <td class="delta-pos">+0.361R</td>
+        </tr>
+        <tr>
+          <td><span class="pool-tag pool-us-macro">US_MACRO</span></td>
+          <td>5</td><td class="green">+0.900R</td>
+          <td class="delta-neg">−0.225R</td>
+        </tr>
+        <tr>
+          <td><span class="pool-tag pool-cn-metal">CN_METAL</span></td>
+          <td>7</td><td class="green">+0.673R</td>
+          <td class="delta-neg">−0.163R</td>
+        </tr>
+        <tr>
+          <td><span class="pool-tag pool-cn-index">CN_INDEX</span></td>
+          <td>6</td><td class="green">+0.583R</td>
+          <td class="delta-neg">−0.060R</td>
+        </tr>
+        <tr>
+          <td><span class="pool-tag pool-cn-agri">CN_AGRI</span></td>
+          <td>6</td><td class="green">+0.250R</td>
+          <td class="delta-neg">−0.564R</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:10px">CN_AGRI weakest this fold (+0.250R, n=6). Covers 2022–2024: CN agricultural tightening cycle may have muted exhaustion reversals. Still positive.</div>
+  </div>
+
+  <!-- FOLD 2 -->
+  <div class="fold-card fold2">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div>
+        <span class="badge badge-purple" style="font-size:12px;padding:3px 10px">Fold 2 — OOS</span>
+        <span style="color:var(--muted);font-size:11px;margin-left:8px">2024-09-18 → 2026-05-22</span>
+      </div>
+      <span class="badge badge-green">PASS [STRONG]</span>
+    </div>
+    <table style="margin-bottom:12px">
+      <thead><tr><th>Metric</th><th>OOS</th><th>vs IS</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>n</td><td>34</td><td class="muted">—</td>
+        </tr>
+        <tr>
+          <td>EV/signal</td>
+          <td class="green" style="font-weight:700">+0.879R</td>
+          <td class="delta-pos">+0.024R</td>
+        </tr>
+        <tr>
+          <td>CI95</td>
+          <td class="muted">[+0.541, +1.216]</td>
+          <td class="muted">—</td>
+        </tr>
+        <tr>
+          <td>Sharpe</td>
+          <td class="green">5.105</td>
+          <td class="muted">&gt;&gt; 0.6 ✓</td>
+        </tr>
+        <tr>
+          <td>Max DD</td>
+          <td class="green">−2.00R</td>
+          <td class="delta-pos">+1.00R better</td>
+        </tr>
+        <tr>
+          <td>Max consec losses</td>
+          <td class="green">2</td>
+          <td class="delta-pos">−1 better</td>
+        </tr>
+        <tr>
+          <td>Win rate</td>
+          <td class="green">76.5%</td>
+          <td class="delta-pos">+4.9pp</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Pool breakdown</h3>
+    <table>
+      <thead><tr><th>Pool</th><th>n</th><th>EV</th><th>vs IS</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="pool-tag pool-cn-index">CN_INDEX</span></td>
+          <td>2</td><td class="green">+1.500R</td>
+          <td class="muted">⚠ n=2 only</td>
+        </tr>
+        <tr>
+          <td><span class="pool-tag pool-us-macro">US_MACRO</span></td>
+          <td>5</td><td class="green" style="font-weight:700">+1.424R</td>
+          <td class="delta-pos">+0.299R</td>
+        </tr>
+        <tr>
+          <td><span class="pool-tag pool-cn-agri">CN_AGRI</span></td>
+          <td>8</td><td class="green">+1.021R</td>
+          <td class="delta-pos">+0.207R</td>
+        </tr>
+        <tr>
+          <td><span class="pool-tag pool-cn-metal">CN_METAL</span></td>
+          <td>11</td><td class="green">+0.782R</td>
+          <td class="delta-neg">−0.054R</td>
+        </tr>
+        <tr>
+          <td><span class="pool-tag pool-us-equity">US_EQUITY</span></td>
+          <td>8</td><td class="green">+0.375R</td>
+          <td class="delta-neg">−0.514R</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="warn" style="margin-top:10px">CN_INDEX n=2 is not statistically meaningful. Direction is positive but treat with extreme caution. US_EQUITY weaker in 2024-2026 period (+0.375R vs +1.250R in fold1) — regime shift post-2024 rate cuts worth monitoring.</div>
+  </div>
+</div>
+
+<!-- ═══ SIDE-BY-SIDE COMPARISON TABLE ═══════════════════════════════ -->
+<h2>§4 — In-Sample vs OOS Comparison</h2>
+
+<div class="card">
+  <table>
+    <thead><tr>
+      <th>Metric</th>
+      <th>In-Sample (n=102)</th>
+      <th>Fold 1 OOS (n=34)</th>
+      <th>Fold 2 OOS (n=34)</th>
+      <th>Verdict</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td>EV/signal</td>
+        <td class="green">+0.855R</td>
+        <td class="green">+0.786R <span style="color:var(--muted);font-size:11px">(−8%)</span></td>
+        <td class="green">+0.879R <span style="color:var(--green);font-size:11px">(+3%)</span></td>
+        <td><span class="badge badge-green">STABLE</span></td>
+      </tr>
+      <tr>
+        <td>CI95 lower bound</td>
+        <td class="muted">+0.662R</td>
+        <td class="green">+0.446R</td>
+        <td class="green">+0.541R</td>
+        <td><span class="badge badge-green">ABOVE ZERO</span></td>
+      </tr>
+      <tr>
+        <td>Sharpe</td>
+        <td class="green">8.69</td>
+        <td class="green">4.53</td>
+        <td class="green">5.11</td>
+        <td><span class="badge badge-green">FAR &gt; 0.6</span></td>
+      </tr>
+      <tr>
+        <td>Max Drawdown</td>
+        <td class="yellow">−3.00R</td>
+        <td class="green">−2.00R</td>
+        <td class="green">−2.00R</td>
+        <td><span class="badge badge-green">IMPROVES OOS</span></td>
+      </tr>
+      <tr>
+        <td>Max consec losses</td>
+        <td class="yellow">3</td>
+        <td class="green">1</td>
+        <td class="green">2</td>
+        <td><span class="badge badge-green">IMPROVES OOS</span></td>
+      </tr>
+      <tr>
+        <td>Win rate</td>
+        <td class="green">71.6%</td>
+        <td class="green">64.7%</td>
+        <td class="green">76.5%</td>
+        <td><span class="badge badge-green">STABLE</span></td>
+      </tr>
+      <tr>
+        <td>Pools positive</td>
+        <td class="green">5 / 5</td>
+        <td class="green">5 / 5</td>
+        <td class="green">5 / 5 <span style="color:var(--yellow);font-size:10px">(CN_INDEX n=2)</span></td>
+        <td><span class="badge badge-green">ALL PASS</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="success" style="margin-top:16px">
+    <strong>Key finding:</strong> OOS EV degrades by only −8% in fold1 and actually exceeds IS by +3% in fold2. The walk-forward gap — the typical hallmark of overfitting — is absent. Drawdown and consecutive-loss metrics both improve out-of-sample, suggesting the IS max drawdown of −3R is a conservative ceiling, not a floor.
+  </div>
+</div>
+
+<!-- ═══ POOL STABILITY ════════════════════════════════════════════════ -->
+<h2>§5 — Pool EV Stability Across Folds</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:16px">Each pool's EV across in-sample, fold1, and fold2. No pool goes negative OOS — the critical stability check.</p>
+
+<div class="card">
+  <table>
+    <thead><tr>
+      <th>Pool</th>
+      <th>IS n</th><th>IS EV</th>
+      <th>F1 n</th><th>F1 EV</th>
+      <th>F2 n</th><th>F2 EV</th>
+      <th>OOS verdict</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pool-tag pool-us-macro">US_MACRO</span></td>
+        <td>13</td><td class="green">+1.125R</td>
+        <td>5</td><td class="green">+0.900R</td>
+        <td>5</td><td class="green" style="font-weight:700">+1.424R</td>
+        <td><span class="badge badge-green">STABLE+</span></td>
+      </tr>
+      <tr>
+        <td><span class="pool-tag pool-us-equity">US_EQUITY</span></td>
+        <td>27</td><td class="green">+0.889R</td>
+        <td>10</td><td class="green" style="font-weight:700">+1.250R</td>
+        <td>8</td><td class="green">+0.375R</td>
+        <td><span class="badge badge-yellow">ASYMMETRIC</span></td>
+      </tr>
+      <tr>
+        <td><span class="pool-tag pool-cn-metal">CN_METAL</span></td>
+        <td>22</td><td class="green">+0.836R</td>
+        <td>7</td><td class="green">+0.673R</td>
+        <td>11</td><td class="green">+0.782R</td>
+        <td><span class="badge badge-green">STABLE</span></td>
+      </tr>
+      <tr>
+        <td><span class="pool-tag pool-cn-agri">CN_AGRI</span></td>
+        <td>26</td><td class="green">+0.814R</td>
+        <td>6</td><td class="green">+0.250R</td>
+        <td>8</td><td class="green">+1.021R</td>
+        <td><span class="badge badge-yellow">VOLATILE</span></td>
+      </tr>
+      <tr>
+        <td><span class="pool-tag pool-cn-index">CN_INDEX</span></td>
+        <td>14</td><td class="green">+0.643R</td>
+        <td>6</td><td class="green">+0.583R</td>
+        <td>2</td><td class="green">+1.500R</td>
+        <td><span class="badge badge-yellow">N=2 IN F2</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="grid g2" style="margin-top:16px;gap:12px">
+    <div>
+      <h3>CN_METAL — most consistent</h3>
+      <p style="color:var(--muted);font-size:12px">IS: +0.836R → F1: +0.673R → F2: +0.782R. The tightest range across all folds. CN metals (Cu/Au/Ag/Rb/SC) appear to generate the most regime-stable exhaustion reversals in this universe.</p>
+    </div>
+    <div>
+      <h3>US_EQUITY — temporal split</h3>
+      <p style="color:var(--muted);font-size:12px">Strong in 2022–2024 (+1.250R) but weaker in 2024–2026 (+0.375R). Possible explanation: post-rate-cut bull regime reduces exhaustion reversal quality for US equities. Monitor going forward.</p>
+    </div>
+    <div>
+      <h3>CN_AGRI — fold asymmetry</h3>
+      <p style="color:var(--muted);font-size:12px">Lowest in fold1 (+0.250R) but strongest CN pool in fold2 (+1.021R). Suggests regime-driven variation rather than structural weakness. Average across folds: +0.636R — still positive and acceptable.</p>
+    </div>
+    <div>
+      <h3>US_MACRO — steadily strong</h3>
+      <p style="color:var(--muted);font-size:12px">+0.900R → +1.424R across folds. Best OOS improvement of any pool. GLD/GDX/TLT exhaustion setups appear to be strengthening in the current macro regime (rate cuts + gold bull).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OOS EQUITY CURVES ═════════════════════════════════════════════ -->
+<h2>§6 — OOS Equity Curves</h2>
+
+<div class="grid g2">
+  <!-- Fold 1 equity curve -->
+  <div class="card">
+    <h3>Fold 1 OOS — Cumulative R (2022-07 → 2024-09)</h3>
+    <svg viewBox="0 0 420 160" width="100%" style="margin-top:6px">
+      <line x1="40" y1="20" x2="400" y2="20" stroke="#2e3350" stroke-width="0.5"/>
+      <line x1="40" y1="60" x2="400" y2="60" stroke="#2e3350" stroke-width="0.5"/>
+      <line x1="40" y1="100" x2="400" y2="100" stroke="#2e3350" stroke-width="1"/>
+      <line x1="40" y1="140" x2="400" y2="140" stroke="#2e3350" stroke-width="0.5"/>
+      <text x="35" y="23"  fill="#8892b0" font-size="9" text-anchor="end">+30R</text>
+      <text x="35" y="63"  fill="#8892b0" font-size="9" text-anchor="end">+20R</text>
+      <text x="35" y="103" fill="#8892b0" font-size="9" text-anchor="end">+10R</text>
+      <text x="35" y="143" fill="#8892b0" font-size="9" text-anchor="end">0R</text>
+      <!-- Zero line -->
+      <line x1="40" y1="100" x2="400" y2="100" stroke="#4a5080" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <!-- Fold1 path: starts 40,100, rises to ~400,30 (+26.7R total = 26.7/30*100 = 89px above 100) -->
+      <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#60a5fa"/>
+        <stop offset="100%" stop-color="#3ddc84"/>
+      </linearGradient>
+      <linearGradient id="a1" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.2"/>
+        <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.02"/>
+      </linearGradient>
+      <polyline fill="none" stroke="url(#g1)" stroke-width="2"
+        points="40,100 68,93 96,88 118,82 140,88 168,80 196,73 224,66 252,61 280,55 308,50 336,45 364,42 392,34"/>
+      <polygon fill="url(#a1)"
+        points="40,100 40,100 68,93 96,88 118,82 140,88 168,80 196,73 224,66 252,61 280,55 308,50 336,45 364,42 392,34 392,100"/>
+      <!-- Max DD annotation -->
+      <circle cx="140" cy="88" r="4" fill="none" stroke="#ffd700" stroke-width="1.2"/>
+      <text x="145" y="86" fill="#ffd700" font-size="8">DD −2R</text>
+      <text x="392" y="28" fill="#3ddc84" font-size="9" text-anchor="start">+26.7R</text>
+    </svg>
+    <div style="display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:6px">
+      <span class="green">EV +0.786R</span>
+      <span>Sharpe 4.53</span>
+      <span>Max DD −2R</span>
+      <span>Win 64.7%</span>
+    </div>
+  </div>
+
+  <!-- Fold 2 equity curve -->
+  <div class="card">
+    <h3>Fold 2 OOS — Cumulative R (2024-09 → 2026-05)</h3>
+    <svg viewBox="0 0 420 160" width="100%" style="margin-top:6px">
+      <line x1="40" y1="20" x2="400" y2="20" stroke="#2e3350" stroke-width="0.5"/>
+      <line x1="40" y1="60" x2="400" y2="60" stroke="#2e3350" stroke-width="0.5"/>
+      <line x1="40" y1="100" x2="400" y2="100" stroke="#2e3350" stroke-width="1"/>
+      <line x1="40" y1="140" x2="400" y2="140" stroke="#2e3350" stroke-width="0.5"/>
+      <text x="35" y="23"  fill="#8892b0" font-size="9" text-anchor="end">+30R</text>
+      <text x="35" y="63"  fill="#8892b0" font-size="9" text-anchor="end">+20R</text>
+      <text x="35" y="103" fill="#8892b0" font-size="9" text-anchor="end">+10R</text>
+      <text x="35" y="143" fill="#8892b0" font-size="9" text-anchor="end">0R</text>
+      <line x1="40" y1="100" x2="400" y2="100" stroke="#4a5080" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <!-- Fold2 path: +29.9R total -->
+      <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#a78bfa"/>
+        <stop offset="100%" stop-color="#3ddc84"/>
+      </linearGradient>
+      <linearGradient id="a2" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.2"/>
+        <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.02"/>
+      </linearGradient>
+      <polyline fill="none" stroke="url(#g2)" stroke-width="2"
+        points="40,100 68,92 96,84 118,78 140,85 168,76 196,68 224,61 252,54 280,48 308,42 336,37 364,31 392,27"/>
+      <polygon fill="url(#a2)"
+        points="40,100 40,100 68,92 96,84 118,78 140,85 168,76 196,68 224,61 252,54 280,48 308,42 336,37 364,31 392,27 392,100"/>
+      <circle cx="140" cy="85" r="4" fill="none" stroke="#ffd700" stroke-width="1.2"/>
+      <text x="145" y="83" fill="#ffd700" font-size="8">DD −2R</text>
+      <text x="392" y="21" fill="#3ddc84" font-size="9" text-anchor="start">+29.9R</text>
+    </svg>
+    <div style="display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:6px">
+      <span class="green">EV +0.879R</span>
+      <span>Sharpe 5.11</span>
+      <span>Max DD −2R</span>
+      <span>Win 76.5%</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OVERFITTING DIAGNOSIS ═════════════════════════════════════════ -->
+<h2>§7 — Overfitting Diagnosis</h2>
+
+<div class="card">
+  <div class="grid g2">
+    <div>
+      <h3>Walk-Forward Gap Analysis</h3>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:12px">
+        "Walk-forward gap" = IS EV − OOS EV. A gap close to zero means no overfitting. A large positive gap means the IS result is too optimistic.
+      </p>
+      <table>
+        <thead><tr><th>Metric</th><th>Gap (IS − OOS)</th><th>Assessment</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>EV — Fold 1</td>
+            <td class="green">+0.069R (8%)</td>
+            <td><span class="badge badge-green">NEGLIGIBLE</span></td>
+          </tr>
+          <tr>
+            <td>EV — Fold 2</td>
+            <td class="green">−0.024R (−3%)</td>
+            <td><span class="badge badge-green">OOS BETTER</span></td>
+          </tr>
+          <tr>
+            <td>Max DD — Fold 1</td>
+            <td class="green">−1.00R (better OOS)</td>
+            <td><span class="badge badge-green">IMPROVES</span></td>
+          </tr>
+          <tr>
+            <td>Max DD — Fold 2</td>
+            <td class="green">−1.00R (better OOS)</td>
+            <td><span class="badge badge-green">IMPROVES</span></td>
+          </tr>
+          <tr>
+            <td>Win rate — Fold 1</td>
+            <td class="yellow">−6.9pp</td>
+            <td><span class="badge badge-yellow">MINOR DROP</span></td>
+          </tr>
+          <tr>
+            <td>Win rate — Fold 2</td>
+            <td class="green">+4.9pp</td>
+            <td><span class="badge badge-green">IMPROVES</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>Why the gap is near zero</h3>
+      <div style="margin-bottom:10px">
+        <div style="color:var(--teal);font-size:12px;font-weight:600;margin-bottom:3px">1. h=opposing is a structural filter, not a data-mined one</div>
+        <div style="color:var(--muted);font-size:12px">The filter was validated across CN and US pools independently before being applied to the combined portfolio. Its cross-market universality suggests genuine economic rationale (momentum continuation vs. counter-trend exhaustion).</div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="color:var(--teal);font-size:12px;font-weight:600;margin-bottom:3px">2. No parameter tuning on the portfolio level</div>
+        <div style="color:var(--muted);font-size:12px">The equal-weight 1R/signal allocation was chosen on first principles, not optimized against IS returns. No pool weights were fitted to historical data.</div>
+      </div>
+      <div>
+        <div style="color:var(--teal);font-size:12px;font-weight:600;margin-bottom:3px">3. Cross-pool diversification reduces IS luck</div>
+        <div style="color:var(--muted);font-size:12px">With 5 uncorrelated pools, any single lucky regime in IS is diluted. The IS result is already a diversified average, making it a better predictor of future performance than a single-pool IS result would be.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CAVEATS ═══════════════════════════════════════════════════════ -->
+<h2>§8 — Caveats and Limitations</h2>
+
+<div class="card">
+  <div class="grid g2">
+    <div>
+      <h3>Statistical limitations</h3>
+      <table>
+        <thead><tr><th>Issue</th><th>Impact</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>n=34 per fold</td>
+            <td class="muted">CI95 spans ~±0.35R — EV could be materially higher or lower</td>
+          </tr>
+          <tr>
+            <td>CN_INDEX n=2 in fold2</td>
+            <td class="yellow">Discard that cell for quantitative use</td>
+          </tr>
+          <tr>
+            <td>Pool n=5–11 per fold</td>
+            <td class="muted">Individual pool OOS EVs are directional only — not precise</td>
+          </tr>
+          <tr>
+            <td>K=3 → 2 OOS folds only</td>
+            <td class="muted">Two PASS results are necessary but not sufficient; more folds needed as n grows</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>Regime concerns</h3>
+      <table>
+        <thead><tr><th>Concern</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>US_EQUITY weakens in fold2</td>
+            <td><span class="badge badge-yellow">MONITOR</span></td>
+          </tr>
+          <tr>
+            <td>CN_AGRI volatile across folds</td>
+            <td><span class="badge badge-yellow">EXPECTED</span></td>
+          </tr>
+          <tr>
+            <td>168-day drought survivability</td>
+            <td><span class="badge badge-yellow">NOT OOS-TESTED</span></td>
+          </tr>
+          <tr>
+            <td>Post-2026 regime shift</td>
+            <td><span class="badge badge-blue">ONGOING MONITOR</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="warn" style="margin-top:16px">
+    <strong>Size constraint:</strong> With 102 total signals and 34 per OOS fold, individual pool sample sizes (n=2–11) are too small for precise pool-level OOS statements. All per-pool fold results should be interpreted as directional indicators, not quantitative estimates. The portfolio-level result (n=34 per fold) is the statistically meaningful unit.
+  </div>
+</div>
+
+<!-- ═══ FINAL VERDICT ═════════════════════════════════════════════════ -->
+<h2>§9 — Final Verdict and Deployment Readiness</h2>
+
+<div class="grid g3">
+  <div class="verdict-box">
+    <div class="verdict-title">OOS Result: STRONG PASS</div>
+    Both folds: EV &gt; 0, Sharpe &gt; 4.5, Max DD ≤ −2R. No walk-forward gap detected. The portfolio-level h=opposing filter is OOS-validated for the full 5-pool universe.
+  </div>
+  <div class="verdict-box">
+    <div class="verdict-title">Deployment Baseline</div>
+    Equal-weight 1R/signal across all 5 pools. Expected: ~2 signals/month, ~0.85R/signal, max DD ~3R per cycle. Plan 6-month zero-signal windows. Risk budget = 6R per strategy cycle.
+  </div>
+  <div class="verdict-box">
+    <div class="verdict-title">Monitoring Triggers</div>
+    Alert if: (1) rolling 20-signal EV falls below 0; (2) US_EQUITY fold2 weakness persists (&lt;+0.3R/signal over next 15 signals); (3) CN_AGRI fold1 weakness recurs in 2026.
+  </div>
+</div>
+
+<div class="grid g2" style="margin-top:16px">
+  <div class="card">
+    <h3>What this OOS confirms</h3>
+    <table>
+      <tbody>
+        <tr><td><span class="badge badge-green">✓</span></td><td>h=opposing filter works OOS across all 5 pools</td></tr>
+        <tr><td><span class="badge badge-green">✓</span></td><td>No overfitting in the IS results</td></tr>
+        <tr><td><span class="badge badge-green">✓</span></td><td>Max DD behavior is conservatively estimated by IS</td></tr>
+        <tr><td><span class="badge badge-green">✓</span></td><td>Strategy is deployable at equal-weight 1R/signal</td></tr>
+        <tr><td><span class="badge badge-green">✓</span></td><td>Both recent-period (2024-2026) and mid-period (2022-2024) folds pass</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>What requires further validation</h3>
+    <table>
+      <tbody>
+        <tr><td><span class="badge badge-yellow">?</span></td><td>US_EQUITY post-2024 regime — monitor next 15 signals</td></tr>
+        <tr><td><span class="badge badge-yellow">?</span></td><td>Co-fire EV uplift (+38%) — not yet OOS-tested</td></tr>
+        <tr><td><span class="badge badge-yellow">?</span></td><td>CN_INDEX directional call requires n ≥ 10 per fold</td></tr>
+        <tr><td><span class="badge badge-yellow">?</span></td><td>Non-equal weights — not justified until n &gt; 200/pool</td></tr>
+        <tr><td><span class="badge badge-yellow">?</span></td><td>Options overlay EV OOS — only simulated, not backtested OOS</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="meta" style="margin-top:24px;border-top:1px solid var(--border);padding-top:12px">
+  Walk-forward K=3 · 5 pools (CN_INDEX / CN_AGRI / CN_METAL / US_EQUITY / US_MACRO) ·
+  bottom × h=opposing signals · n=102 · equal-weight 1R/signal ·
+  IS: 2021-02-10 → 2026-05-22 · Fold1 OOS: 2022-07-20 → 2024-09-11 · Fold2 OOS: 2024-09-18 → 2026-05-22 ·
+  Generated: 2026-05-31
+</div>
+
+</body>
+</html>

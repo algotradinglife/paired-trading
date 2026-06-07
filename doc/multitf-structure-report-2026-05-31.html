@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多周期结构可读性报告 — 日线视角下的1h与15min估算</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+    --teal: #2dd4bf;
+    --orange: #fb923c;
+    --accent: #6366f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Pro Text', -apple-system, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 32px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  h2 { font-size: 16px; font-weight: 600; color: var(--blue); margin: 36px 0 14px;
+       border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  h3 { font-size: 13px; font-weight: 600; color: var(--purple); margin: 22px 0 10px; }
+  .meta { color: var(--muted); font-size: 12px; margin-bottom: 28px; }
+
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px;
+         font-weight: 600; letter-spacing: 0.4px; }
+  .tag-high   { background: #042f2e; color: var(--teal);   border: 1px solid #0f766e; }
+  .tag-mid    { background: #2d2200; color: var(--yellow); border: 1px solid #92400e; }
+  .tag-low    { background: #2d0d0d; color: var(--red);    border: 1px solid #7f1d1d; }
+  .tag-info   { background: #1e1b4b; color: var(--purple); border: 1px solid #4c1d95; }
+  .tag-note   { background: #12141e; color: var(--muted);  border: 1px solid var(--border); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0 20px; }
+  th { background: #12141e; color: var(--muted); font-weight: 500;
+       text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--border);
+       font-size: 11px; letter-spacing: 0.3px; white-space: nowrap; }
+  th:first-child, th.left { text-align: left; }
+  td { padding: 7px 10px; border-bottom: 1px solid #1e2130; text-align: right;
+       vertical-align: middle; }
+  td:first-child { text-align: left; }
+  tr:hover td { background: #1e2130; }
+
+  .pos { color: var(--green); font-weight: 500; }
+  .neg { color: var(--red); font-weight: 500; }
+  .neu { color: var(--yellow); font-weight: 500; }
+
+  .box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 14px 0;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .box.teal   { border-left-color: var(--teal); }
+  .box.green  { border-left-color: var(--green); }
+  .box.yellow { border-left-color: var(--yellow); }
+  .box.red    { border-left-color: var(--red); }
+  .box.purple { border-left-color: var(--purple); }
+  .box-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+  .box.teal   .box-title { color: var(--teal); }
+  .box.green  .box-title { color: var(--green); }
+  .box.yellow .box-title { color: var(--yellow); }
+  .box.red    .box-title { color: var(--red); }
+  .box.purple .box-title { color: var(--purple); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 14px 0; }
+
+  .factor-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .factor-card .fc-title { font-weight: 600; font-size: 13px; color: var(--blue); margin-bottom: 8px; }
+  .factor-card .fc-body  { font-size: 12px; color: var(--muted); line-height: 1.7; }
+  .factor-card .fc-body strong { color: var(--text); }
+
+  /* Timeline visual */
+  .tf-vis {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .tf-row { display: flex; align-items: center; margin-bottom: 14px; gap: 10px; }
+  .tf-row:last-child { margin-bottom: 0; }
+  .tf-label { width: 80px; font-size: 12px; font-weight: 600; color: var(--muted);
+              flex-shrink: 0; text-align: right; }
+  .tf-bar-wrap { flex: 1; position: relative; height: 28px; min-width: 400px; }
+  .tf-bar {
+    position: absolute; top: 4px; height: 20px; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; white-space: nowrap; padding: 0 6px;
+  }
+  .bar-day   { background: #1e3a5f; border: 1px solid var(--blue);   color: var(--blue); }
+  .bar-1h    { background: #1a3d2b; border: 1px solid var(--green);  color: var(--green); }
+  .bar-15m   { background: #3d2a00; border: 1px solid var(--yellow); color: var(--yellow); }
+  .tf-scale  { display: flex; margin-left: 90px; gap: 0; }
+  .tf-scale-mark { font-size: 10px; color: var(--muted); flex: 1; }
+
+  .readability-bar {
+    display: inline-block; height: 8px; border-radius: 4px; vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .inst-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .inst-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .inst-card .ic-name  { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  .inst-card .ic-pool  { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .ic-stat { display: flex; justify-content: space-between; font-size: 12px;
+             color: var(--muted); margin-top: 3px; }
+  .ic-stat .sv { color: var(--text); font-weight: 500; }
+
+  code { background: #12141e; border: 1px solid var(--border); border-radius: 3px;
+         padding: 1px 5px; font-family: 'JetBrains Mono', monospace;
+         font-size: 12px; color: var(--teal); }
+
+  .footnote { color: var(--muted); font-size: 12px; margin-top: 32px;
+              border-top: 1px solid var(--border); padding-top: 14px; }
+
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; font-size: 13px; }
+  p  { font-size: 13px; color: var(--muted); margin: 8px 0; }
+</style>
+</head>
+<body>
+
+<h1>多周期结构可读性 — 日线视角下的1h与15min估算</h1>
+<div class="meta">
+  2026-05-31 &nbsp;·&nbsp; MACD(12,26,9) 标准参数 &nbsp;·&nbsp;
+  五池实证数据支撑 &nbsp;·&nbsp; <span class="tag tag-info">研究版本 R5</span>
+</div>
+
+<!-- ====== SECTION 1 ====== -->
+<h2>一、核心命题</h2>
+
+<div class="box teal">
+  <div class="box-title">时间换算是固定的，可读性是品种特定的</div>
+  从日线视角估算1h和15min的波段结构，存在两个完全不同的问题：
+  <ol style="margin:8px 0 0 16px;">
+    <li><strong>时间换算</strong>（数学问题）：1根日线 = 多少根1h/15min？——答案由交易时长固定，品种间差异不大。</li>
+    <li><strong>结构可读性</strong>（经验问题）：低周期的方向和状态能否从日线形态可靠推断？——答案因品种大相径庭，取决于波动性、趋势性和跳空行为。</li>
+  </ol>
+</div>
+
+<!-- ====== SECTION 2 ====== -->
+<h2>二、时间换算基础</h2>
+
+<h3>各市场日交易时长</h3>
+
+<table>
+  <tr>
+    <th class="left">市场</th><th class="left">交易时段</th>
+    <th>日有效时长</th><th>1日 ≈ 1h bars</th><th>1日 ≈ 15min bars</th>
+  </tr>
+  <tr>
+    <td>美股 ETF/股票</td><td>09:30 – 16:00</td>
+    <td>6.5h</td><td>~6–7根</td><td>~26根</td>
+  </tr>
+  <tr>
+    <td>CN股指期货（CFFEX）</td><td>09:30–11:30, 13:00–15:00</td>
+    <td>4.0h</td><td>~4根</td><td>~16根</td>
+  </tr>
+  <tr>
+    <td>CN商品期货（日盘）</td><td>09:00–11:30, 13:30–15:00</td>
+    <td>4.0h</td><td>~4根</td><td>~16根</td>
+  </tr>
+  <tr>
+    <td>CN商品期货（含夜盘）</td><td>日盘 + 21:00–次日02:30</td>
+    <td>9–11h（品种不同）</td><td>~9–11根</td><td>~36–44根</td>
+  </tr>
+</table>
+
+<div class="box yellow">
+  <div class="box-title">夜盘的影响</div>
+  铜(CU)、黄金(AU)、白银(AG)、原油(SC)等品种有夜盘，夜盘时间内的1h结构变化无法从次日日线收盘状态反推。
+  这是CN金属品种1h可读性偏低的结构性原因之一。
+</div>
+
+<h3>MACD(12,26,9) 各级别一个完整波段折算日线数</h3>
+
+<div class="tf-vis">
+  <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">
+    以下为典型范围（慢EMA=26周期为基准），每格代表1根日线
+  </div>
+
+  <!-- Scale -->
+  <div style="display:flex; margin-left:90px; margin-bottom:6px;">
+    <div style="font-size:10px;color:var(--muted);width:100%">
+      <span style="float:left">0</span>
+      <span style="position:absolute;margin-left:8%">1日</span>
+      <span style="position:absolute;margin-left:20%">3日</span>
+      <span style="position:absolute;margin-left:40%">7日</span>
+      <span style="position:absolute;margin-left:65%">14日</span>
+      <span style="float:right">20日+</span>
+    </div>
+  </div>
+
+  <!-- 日线 -->
+  <div class="tf-row">
+    <div class="tf-label">日线波段</div>
+    <div class="tf-bar-wrap">
+      <div class="tf-bar bar-day" style="left:25%;width:60%">20–60 根日线（1–3个月）</div>
+    </div>
+  </div>
+  <!-- 1h US -->
+  <div class="tf-row">
+    <div class="tf-label">1h 波段<br><span style="font-size:10px">(美股)</span></div>
+    <div class="tf-bar-wrap">
+      <div class="tf-bar bar-1h" style="left:6%;width:55%">3–12 根日线</div>
+    </div>
+  </div>
+  <!-- 1h CN -->
+  <div class="tf-row">
+    <div class="tf-label">1h 波段<br><span style="font-size:10px">(CN日盘)</span></div>
+    <div class="tf-bar-wrap">
+      <div class="tf-bar bar-1h" style="left:6%;width:50%">3–10 根日线</div>
+    </div>
+  </div>
+  <!-- 1h retracement -->
+  <div class="tf-row">
+    <div class="tf-label">1h 回调<br><span style="font-size:10px">(子浪)</span></div>
+    <div class="tf-bar-wrap">
+      <div class="tf-bar bar-1h" style="left:2%;width:20%;background:#0a2e1a">1–3 根日线</div>
+    </div>
+  </div>
+  <!-- 15min US -->
+  <div class="tf-row">
+    <div class="tf-label">15min 波段<br><span style="font-size:10px">(美股)</span></div>
+    <div class="tf-bar-wrap">
+      <div class="tf-bar bar-15m" style="left:0%;width:12%">0.3–2.5根</div>
+    </div>
+  </div>
+  <!-- 15min CN -->
+  <div class="tf-row">
+    <div class="tf-label">15min 波段<br><span style="font-size:10px">(CN日盘)</span></div>
+    <div class="tf-bar-wrap">
+      <div class="tf-bar bar-15m" style="left:0%;width:10%">0.3–2根</div>
+    </div>
+  </div>
+</div>
+
+<h3>实操解读规则</h3>
+<table>
+  <tr>
+    <th class="left">日线形态</th><th class="left">对应低周期含义</th><th class="left">实战建议</th>
+  </tr>
+  <tr>
+    <td>连续 <strong>1–3根</strong> 小幅整理/回踩</td>
+    <td>1h 子波回调，主结构未变</td>
+    <td>可视为顺势加仓机会</td>
+  </tr>
+  <tr>
+    <td>连续 <strong>4–8根</strong> 反向修正</td>
+    <td>1h 已完成一个完整反向波段，MACD 大概率过零轴</td>
+    <td>原有1h方向判断需重新评估</td>
+  </tr>
+  <tr>
+    <td>连续 <strong>≥10根</strong> 反向运动</td>
+    <td>1h 已产生 1–2 个反转波段，日线趋势在重构</td>
+    <td>等待新日线信号，不逆势持仓</td>
+  </tr>
+  <tr>
+    <td>单根日线内的高低点振幅</td>
+    <td>通常包含 15min 的完整一涨一跌</td>
+    <td>15min 状态只能盘中实时观察</td>
+  </tr>
+</table>
+
+<div class="box purple">
+  <div class="box-title">15min 的不可见性</div>
+  15min 级别的完整波段（含上涨+回调）时长约 2–8 小时，基本在单根日线内完成。
+  从日线无法推断15min当前所处位置，<strong>15min方向只能在盘中实时读取</strong>，
+  不能从日线形态事后推算。这也是为什么回测中等待15min零轴确认需要平均18根15min bars（4.5h），
+  信号往往在次日才出现——日线信号是起点，15min是盘中执行层。
+</div>
+
+<!-- ====== SECTION 3 ====== -->
+<h2>三、影响可读性的三个核心变量</h2>
+
+<div class="grid3">
+  <div class="factor-card">
+    <div class="fc-title">① 波动率区制</div>
+    <div class="fc-body">
+      <strong>高波动品种</strong>（AG白银、NVDA、SC原油）：
+      1h波段周期短且噪声大，同样3根日线内可能塞进2–3个完整1h波段甚至更多；
+      1h方向逆转快，日线视角估算误差极大。<br><br>
+      <strong>低波动趋势型</strong>（GLD、TLT、MA甲醇）：
+      1h结构平稳连续，日线上可以可靠估读1h所处阶段。
+    </div>
+  </div>
+  <div class="factor-card">
+    <div class="fc-title">② 趋势性 vs 均值回归</div>
+    <div class="fc-body">
+      <strong>强趋势品种</strong>（TA、SR、IF/IC、SPY）：
+      1h方向持续性好，一旦确认方向通常延续3–8根日线，日线层面估读"1h大概还在延续"可靠。<br><br>
+      <strong>均值回归/政策扰动品种</strong>（M豆粕、Y豆油）：
+      受USDA报告、产地天气频繁打断，1h结构在日线上近乎不可读。
+    </div>
+  </div>
+  <div class="factor-card">
+    <div class="fc-title">③ 隔夜跳空</div>
+    <div class="fc-body">
+      <strong>有夜盘的品种</strong>（CN金属/能源期货）：
+      日盘收盘时的1h状态到次日开盘可能已完全改变，
+      夜盘走势让日线视角的1h估算失去参考价值。<br><br>
+      <strong>无夜盘品种</strong>（股指期货、美股ETF）：
+      日线收盘状态与次日开盘1h延续性较强，估算更可靠。
+    </div>
+  </div>
+</div>
+
+<!-- ====== SECTION 4 ====== -->
+<h2>四、实证依据：h=opposing EV 作为1h可读性代理指标</h2>
+
+<div class="box green">
+  <div class="box-title">为什么 h=opposing EV 能反映1h结构可读性</div>
+  h=opposing filter 的逻辑前提是：日线信号出现时，1h方向与信号相反（仍在延续原趋势）。
+  这个过滤器有效的必要条件是 <strong>"1h方向"本身是可靠的信息</strong>。
+  如果某品种的1h方向噪声极大、经常快速反转，那么"h=opposing"这个标签本身就不可信，
+  过滤器自然失效（EV接近零甚至为负）。
+  因此，<strong>h=opposing EV 高 ↔ 该品种1h结构稳定可读；EV低/负 ↔ 1h结构混乱不可信</strong>。
+</div>
+
+<h3>品种可读性分级（基于768笔交易实证）</h3>
+
+<table>
+  <tr>
+    <th class="left">品种</th>
+    <th class="left">所属池</th>
+    <th>h=opp EV</th>
+    <th>h=opp n</th>
+    <th class="left">可读性</th>
+    <th class="left">主要原因</th>
+  </tr>
+
+  <!-- HIGH -->
+  <tr><td colspan="6" style="background:#12141e;color:var(--teal);font-size:11px;font-weight:600;letter-spacing:0.5px;padding:6px 10px;">
+    高可读性 — 1h结构在日线上可靠估读
+  </td></tr>
+  <tr>
+    <td>SR（白糖）</td><td style="color:var(--muted)">CN_AGRI</td>
+    <td class="pos">+0.966R</td><td>10</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">农化工强趋势，季节性明确，1h方向持续</td>
+  </tr>
+  <tr>
+    <td>MA（甲醇）</td><td style="color:var(--muted)">CN_AGRI</td>
+    <td class="pos">+0.929R</td><td>7</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">化工品能源相关，趋势延续性强</td>
+  </tr>
+  <tr>
+    <td>TA（PTA）</td><td style="color:var(--muted)">CN_AGRI</td>
+    <td class="pos">+0.929R</td><td>7</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">与MA同属化工品，结构类似</td>
+  </tr>
+  <tr>
+    <td>RB（螺纹钢）</td><td style="color:var(--muted)">CN_METAL</td>
+    <td class="pos">+0.929R</td><td>7</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">建材需求季节性强，机构主导，夜盘影响小</td>
+  </tr>
+  <tr>
+    <td>IC（中证500）</td><td style="color:var(--muted)">CN_INDEX</td>
+    <td class="pos">+1.071R</td><td>7</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">股指无夜盘，机构主导，1h结构连续</td>
+  </tr>
+  <tr>
+    <td>IF（沪深300）</td><td style="color:var(--muted)">CN_INDEX</td>
+    <td class="pos">+0.857R</td><td>7</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">同上，流动性最佳</td>
+  </tr>
+  <tr>
+    <td>GLD（黄金ETF）</td><td style="color:var(--muted)">US_MACRO</td>
+    <td class="pos">+1.286R</td><td>7</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">宏观驱动，低噪声，美股时段连续无跳空</td>
+  </tr>
+  <tr>
+    <td>TLT（长债ETF）</td><td style="color:var(--muted)">US_MACRO</td>
+    <td class="pos">+1.231R</td><td>7</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">利率驱动，趋势连贯，1h方向持续性极强</td>
+  </tr>
+  <tr>
+    <td>DIA（道琼斯）</td><td style="color:var(--muted)">US_EQUITY</td>
+    <td class="pos">+1.500R</td><td>9</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">蓝筹权重大，波动平滑，1h结构稳定</td>
+  </tr>
+  <tr>
+    <td>SPY（S&P500）</td><td style="color:var(--muted)">US_EQUITY</td>
+    <td class="pos">+0.725R</td><td>20</td>
+    <td><span class="tag tag-high">高</span></td>
+    <td style="color:var(--muted);font-size:12px">样本最大（n=20），稳健性最强</td>
+  </tr>
+
+  <!-- MID -->
+  <tr><td colspan="6" style="background:#12141e;color:var(--yellow);font-size:11px;font-weight:600;letter-spacing:0.5px;padding:6px 10px;">
+    中等可读性 — 部分时段可用，需结合其他信息
+  </td></tr>
+  <tr>
+    <td>SC（原油）</td><td style="color:var(--muted)">CN_METAL</td>
+    <td class="pos">+0.488R</td><td>12</td>
+    <td><span class="tag tag-mid">中</span></td>
+    <td style="color:var(--muted);font-size:12px">地缘政治扰动，夜盘活跃，1h偶有跳变</td>
+  </tr>
+  <tr>
+    <td>AU（黄金期货）</td><td style="color:var(--muted)">CN_METAL</td>
+    <td class="pos">+0.673R</td><td>6</td>
+    <td><span class="tag tag-mid">中</span></td>
+    <td style="color:var(--muted);font-size:12px">夜盘随海外黄金价格，日盘1h与GLD有差异</td>
+  </tr>
+  <tr>
+    <td>IWM（小盘股）</td><td style="color:var(--muted)">US_EQUITY</td>
+    <td class="pos">+1.000R</td><td>5</td>
+    <td><span class="tag tag-mid">中</span></td>
+    <td style="color:var(--muted);font-size:12px">EV高但n=5，小盘波动率偏高，样本待积累</td>
+  </tr>
+  <tr>
+    <td>GDX（金矿股）</td><td style="color:var(--muted)">US_MACRO</td>
+    <td class="pos">+0.750R</td><td>4</td>
+    <td><span class="tag tag-mid">中</span></td>
+    <td style="color:var(--muted);font-size:12px">兼具商品和股票属性，n=4 样本偏小</td>
+  </tr>
+  <tr>
+    <td>I（铁矿石）</td><td style="color:var(--muted)">CN_AGRI</td>
+    <td class="pos">+0.350R</td><td>10</td>
+    <td><span class="tag tag-mid">中</span></td>
+    <td style="color:var(--muted);font-size:12px">需求端受政策调控，夜盘存在但影响可控</td>
+  </tr>
+  <tr>
+    <td>M（豆粕）</td><td style="color:var(--muted)">CN_AGRI</td>
+    <td class="pos">+0.200R</td><td>5</td>
+    <td><span class="tag tag-mid">中</span></td>
+    <td style="color:var(--muted);font-size:12px">USDA报告扰动大，但h=opp仍正</td>
+  </tr>
+  <tr>
+    <td>NVDA（英伟达）</td><td style="color:var(--muted)">US_EQUITY</td>
+    <td class="pos">+0.200R</td><td>5</td>
+    <td><span class="tag tag-mid">中</span></td>
+    <td style="color:var(--muted);font-size:12px">财报驱动大幅跳空，1h在盈利周期内结构稳定，其余时段噪声</td>
+  </tr>
+
+  <!-- LOW -->
+  <tr><td colspan="6" style="background:#12141e;color:var(--red);font-size:11px;font-weight:600;letter-spacing:0.5px;padding:6px 10px;">
+    低可读性 — 日线无法可靠估读1h结构，h=opposing 过滤失效
+  </td></tr>
+  <tr>
+    <td>AG（白银）</td><td style="color:var(--muted)">CN_METAL</td>
+    <td class="neg">−0.333R</td><td>9</td>
+    <td><span class="tag tag-low">低</span></td>
+    <td style="color:var(--muted);font-size:12px">高波动 + 夜盘活跃，1h方向在日线收盘后可能已彻底反转</td>
+  </tr>
+  <tr>
+    <td>CU（铜）</td><td style="color:var(--muted)">CN_METAL</td>
+    <td class="neg">−1.000R</td><td>3</td>
+    <td><span class="tag tag-low">低</span></td>
+    <td style="color:var(--muted);font-size:12px">n=3 极小，但方向性与全球宏观强相关，1h受LME夜盘主导</td>
+  </tr>
+  <tr>
+    <td>XLF（金融ETF）</td><td style="color:var(--muted)">US_EQUITY</td>
+    <td class="neg">−0.050R</td><td>10</td>
+    <td><span class="tag tag-low">低</span></td>
+    <td style="color:var(--muted);font-size:12px">行业ETF受板块轮动、利率快速变动影响，1h方向跳变</td>
+  </tr>
+  <tr>
+    <td>Y（豆油）</td><td style="color:var(--muted)">CN_AGRI</td>
+    <td>—（n=0）</td><td>0</td>
+    <td><span class="tag tag-low">低</span></td>
+    <td style="color:var(--muted);font-size:12px">整体 EV −0.125R，h=opp 信号从未出现，策略在该品种完全不适用</td>
+  </tr>
+</table>
+
+<!-- ====== SECTION 5 ====== -->
+<h2>五、与信号系统的对接</h2>
+
+<h3>5.1 入场时机的多周期逻辑</h3>
+
+<div class="box" style="border-left-color:var(--accent)">
+  <div class="box-title" style="color:var(--accent)">三层结构的分工</div>
+  <table style="margin:8px 0 0">
+    <tr>
+      <th class="left">周期</th><th class="left">角色</th><th class="left">从日线是否可读</th><th class="left">操作含义</th>
+    </tr>
+    <tr>
+      <td><strong>日线</strong></td>
+      <td>信号触发层</td>
+      <td><span class="tag tag-high">完全可读</span></td>
+      <td>MACD耗竭信号出现时确认日线级别方向</td>
+    </tr>
+    <tr>
+      <td><strong>1小时</strong></td>
+      <td>背景滤网层</td>
+      <td><span class="tag tag-mid">部分可读</span>（品种相关）</td>
+      <td>h=opposing 标签有效时作为过滤器；高可读性品种可从日线粗估1h状态</td>
+    </tr>
+    <tr>
+      <td><strong>15分钟</strong></td>
+      <td>执行入场层</td>
+      <td><span class="tag tag-low">基本不可读</span></td>
+      <td>必须盘中实时观察；日线信号是入场预警，15min信号是扣扳机时机</td>
+    </tr>
+  </table>
+</div>
+
+<h3>5.2 回测实证：15min入场时机的代价</h3>
+
+<div class="box red">
+  <div class="box-title">等待15min确认是得不偿失的</div>
+  实测数据：日线MACD耗竭信号后等待15min MACD零轴穿越，平均需要 <strong>18根15min bars（约4.5小时）</strong>。
+  入场价格较日线收盘价平均偏移 <strong>0.5–0.6×ATR</strong>，直接侵蚀近一半的止损空间。
+  根本原因：MACD耗竭信号本身发生在价格极端，任何确认行为都是在等待价格已经反转之后再入场。
+  <strong>结论：对于1h可读性高的品种，日线收盘即是最优入场时机；15min用于盘中微调止损位，而非作为入场触发器。</strong>
+</div>
+
+<h3>5.3 不同品种的多周期操作建议</h3>
+
+<div class="grid2">
+  <div class="factor-card" style="border-color:var(--teal)">
+    <div class="fc-title" style="color:var(--teal)">高可读性品种 — 日线收盘入场</div>
+    <div class="fc-body">
+      <strong>适用：</strong>GLD, TLT, DIA, SPY, IF, IC, MA, SR, TA, RB<br><br>
+      日线信号出现 + h=opposing 确认 → <strong>日线收盘价入场</strong><br>
+      止损：ATR × 0.75（股指/美股）或 ATR × 1.5（金属）<br>
+      1h方向从日线形态可粗估，不需要盘中二次确认<br><br>
+      <strong>注意：</strong>即便1h可读，仍不可用15min零轴作为触发，
+      会导致入场滑点过大
+    </div>
+  </div>
+  <div class="factor-card" style="border-color:var(--yellow)">
+    <div class="fc-title" style="color:var(--yellow)">中可读性品种 — 日线收盘入场 + 收紧止损</div>
+    <div class="fc-body">
+      <strong>适用：</strong>SC, AU, IWM, GDX, I, NVDA, M<br><br>
+      日线信号 + h=opposing → 日线收盘入场，但止损略收紧<br>
+      1h状态存在不确定性，通过更紧的止损控制风险<br><br>
+      <strong>特别说明：</strong><br>
+      NVDA — 财报期间前后3周信号质量大幅降低，其余时段可正常操作<br>
+      SC/AU — 建议配合夜盘方向辅助判断，不单独依赖日盘1h估读
+    </div>
+  </div>
+  <div class="factor-card" style="border-color:var(--red)">
+    <div class="fc-title" style="color:var(--red)">低可读性品种 — 回避或降权</div>
+    <div class="fc-body">
+      <strong>适用：</strong>AG, CU, XLF, Y<br><br>
+      h=opposing 过滤器在这些品种上失效（EV为负或接近零），
+      说明日线视角下的1h方向信息完全不可靠。<br><br>
+      AG：夜盘随海外白银剧烈波动，日盘收盘1h状态到次日开盘时可能已经反转3次<br>
+      XLF：利率敏感行业ETF，1h方向由Fed声明等事件主导而非技术结构<br><br>
+      <strong>操作：</strong>这些品种的日线信号可执行，但<strong>忽略h=opposing标签</strong>，
+      不以多周期结构作为增强条件
+    </div>
+  </div>
+  <div class="factor-card" style="border-color:var(--purple)">
+    <div class="fc-title" style="color:var(--purple)">CN_METAL 顶部信号 — 特殊处理</div>
+    <div class="fc-body">
+      顶部信号 + h=opposing（1h仍多头时做空）：<br>
+      n=15，EV=−0.533R，满止损率73%<br><br>
+      机制解释：硬商品强趋势属性，1h多头背书下的日线顶背离
+      往往是"假顶"——1h动能尚未衰竭，对应在日线上就是
+      1h还未完成一个完整波段，过早做空必败。<br><br>
+      <strong>等待信号：</strong>1h方向转为空头（h=supporting for top），
+      即1h已完成上涨波段后，日线顶背离才具有执行价值
+    </div>
+  </div>
+</div>
+
+<!-- ====== SECTION 6 ====== -->
+<h2>六、总结：日线视角的认知边界</h2>
+
+<table>
+  <tr>
+    <th class="left">问题</th><th class="left">结论</th>
+  </tr>
+  <tr>
+    <td>1根日线对应多少根1h/15min？</td>
+    <td>
+      美股：~6根1h / ~26根15min<br>
+      CN日盘：~4根1h / ~16根15min<br>
+      CN含夜盘：~9–11根1h / ~36–44根15min
+    </td>
+  </tr>
+  <tr>
+    <td>1h波段在日线上通常有多长？</td>
+    <td>3–12根日线（典型），回调子浪1–3根</td>
+  </tr>
+  <tr>
+    <td>15min波段能从日线读出吗？</td>
+    <td><span class="tag tag-low">基本不能</span> — 通常在单根日线内完成，只能盘中实时观察</td>
+  </tr>
+  <tr>
+    <td>1h结构可以从日线估算吗？</td>
+    <td>品种高度相关：GLD/TLT/DIA/SPY/IF/IC/MA/SR/TA/RB 可靠；AG/CU/XLF 不可靠</td>
+  </tr>
+  <tr>
+    <td>应该等待15min入场确认吗？</td>
+    <td><span class="tag tag-low">不应该</span> — 平均4.5h等待，入场偏移0.5–0.6×ATR，净损益为负</td>
+  </tr>
+  <tr>
+    <td>h=opposing EV能反映1h可读性吗？</td>
+    <td><span class="tag tag-high">是</span> — EV高表示1h方向稳定可信；EV负表示1h结构混乱</td>
+  </tr>
+</table>
+
+<div class="footnote">
+  数据来源：MACD动能策略768笔模拟交易（2021–2026）&nbsp;·&nbsp; MACD参数：(12,26,9) &nbsp;·&nbsp;
+  多周期结构基于 B-拓扑（日线+1h+15min）信号体系 &nbsp;·&nbsp;
+  本报告为技术研究，不构成投资建议
+</div>
+
+</body>
+</html>

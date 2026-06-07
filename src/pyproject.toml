@@ -1,0 +1,33 @@
+[project]
+name = "macd-momentum-engine"
+version = "0.1.0"
+description = "MACD momentum analysis engine — Python reference implementation of K-line momentum theory (Song Jianyi)"
+requires-python = ">=3.13"
+dependencies = [
+    "akshare>=1.18.63",
+    "exchange-calendars>=4.13.2",
+    "numpy>=2.4.6",
+    "pandas>=3.0.3",
+    "pydantic>=2.13.4",
+    "requests>=2.34.2",
+    "scipy>=1.17.1",
+    "tqsdk>=3.9.9",
+    "yfinance>=1.3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "ruff>=0.15.13",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.hatch.build.targets.wheel]
+packages = ["engine", "data"]

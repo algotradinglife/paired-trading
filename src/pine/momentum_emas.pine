@@ -1,0 +1,19 @@
+//@version=5
+// macd-momentum baseline indicator
+//
+// Plots EMA12 / EMA24 / EMA52 as overlay lines + a small data window block
+// that exposes current values for MCP / engine cross-validation.
+//
+// EMA24 ≈ price location at sub-level归零轴  (Song Jianyi K-line momentum theory)
+// EMA52 ≈ price location at current-level归零轴
+//
+// Reference: doc/04-feature-extraction.md §1.2 + doc/02-architecture.md
+indicator("MM · EMAs (12/24/52)", overlay=true, shorttitle="MM EMAs")
+
+ema12 = ta.ema(close, 12)
+ema24 = ta.ema(close, 24)
+ema52 = ta.ema(close, 52)
+
+plot(ema12, title="EMA12", color=color.new(color.yellow, 0), linewidth=1)
+plot(ema24, title="EMA24", color=color.new(color.orange, 0), linewidth=2)
+plot(ema52, title="EMA52", color=color.new(color.purple, 0), linewidth=2)
