@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pandas as pd
 
+from data import bar_loader
 from engine.divergence.detector import detect_all_divergences
 from engine.divergence.downstream_policies import apply_policy
 from engine.divergence.multi_tf_context import (
@@ -74,6 +75,18 @@ def load_bars(path: Path) -> pd.DataFrame:
     return df.sort_values("timestamp").reset_index(drop=True)
 
 
+def load_bars_via_quant(stem: str, level: str, quant_root: Path) -> pd.DataFrame:
+    """Load a kq_m_<exch>_<sym> bar series from the Parquet quant store.
+
+    level is the BarStore level: 'D', '60min', or '15min'.
+    """
+    mapping = bar_loader._kq_m_to_quant(stem)
+    if mapping is None:
+        raise ValueError(f"Cannot map {stem!r} to a quant-data symbol")
+    sym, mic = mapping
+    return bar_loader.load_bars_quant(sym, mic, level, quant_root)
+
+
 def detect_signals(bars: pd.DataFrame, level_id: str, instrument_class: str):
     macd_df = macd(bars["close"], hist_scale=1.0)
     streams = compute_feature_streams(bars["close"], macd_df["dif"], macd_df["dea"], macd_df["hist"])
@@ -101,17 +114,24 @@ def evaluate_forward(symbol, sig, bars):
                fwd_returns=fwd, signed_returns=signed, hits=hits)
 
 
-def run_for_symbol(stem: str) -> tuple[list[Row], str]:
-    daily_p = DATA_DIR / f"{stem}_daily.json"
-    sixty_p = DATA_DIR / f"{stem}_60.json"
-    fifteen_p = DATA_DIR / f"{stem}_15.json"
-    missing = [p.name for p in (daily_p, sixty_p, fifteen_p) if not p.exists()]
-    if missing:
-        return [], f"missing files: {missing}"
-
-    daily = load_bars(daily_p)
-    sixty = load_bars(sixty_p)
-    fifteen = load_bars(fifteen_p)
+def run_for_symbol(stem: str, source: str = "json", quant_root: Path | None = None) -> tuple[list[Row], str]:
+    if source == "quant":
+        try:
+            daily = load_bars_via_quant(stem, "D", quant_root)
+            sixty = load_bars_via_quant(stem, "60min", quant_root)
+            fifteen = load_bars_via_quant(stem, "15min", quant_root)
+        except Exception as e:
+            return [], f"quant load error: {e}"
+    else:
+        daily_p = DATA_DIR / f"{stem}_daily.json"
+        sixty_p = DATA_DIR / f"{stem}_60.json"
+        fifteen_p = DATA_DIR / f"{stem}_15.json"
+        missing = [p.name for p in (daily_p, sixty_p, fifteen_p) if not p.exists()]
+        if missing:
+            return [], f"missing files: {missing}"
+        daily = load_bars(daily_p)
+        sixty = load_bars(sixty_p)
+        fifteen = load_bars(fifteen_p)
     if daily.empty or sixty.empty or fifteen.empty:
         return [], "empty bars"
 
@@ -185,12 +205,16 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--quant-data-root", type=Path, default=bar_loader.DEFAULT_QUANT_ROOT, dest="quant_data_root",
-                        help="quant-data Parquet root (no-op for CN futures — always uses JSON)")
-    parser.parse_args()  # accept the flag without error; CN kq_m_ symbols use JSON only
+                        help="quant-data Parquet root (used when --source=quant)")
+    parser.add_argument("--source", choices=["json", "quant"], default="json",
+                        help="bar source: legacy JSON (data/raw/) or quant Parquet store (default: json)")
+    parser.add_argument("--out", type=Path, default=None,
+                        help="output CSV path (default: data/review/cn_b_topology_signals_all.csv)")
+    args = parser.parse_args()
 
     all_rows = []
     for stem in CN_FUTURES:
-        rows, status = run_for_symbol(stem)
+        rows, status = run_for_symbol(stem, source=args.source, quant_root=args.quant_data_root)
         n_top = sum(1 for r in rows if r.signal.direction == "top")
         n_bot = sum(1 for r in rows if r.signal.direction == "bottom")
         n_ctx = sum(1 for r in rows if r.signal.multi_tf_context)
@@ -202,7 +226,7 @@ def main():
         return 1
 
     df = rows_to_df(all_rows)
-    out_path = OUT_DIR / "cn_b_topology_signals_all.csv"
+    out_path = args.out if args.out is not None else OUT_DIR / "cn_b_topology_signals_all.csv"
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
     print(f"\nTotal: {len(all_rows)} signals × {len(FORWARD_WINDOWS)} horizons = {len(df)} rows → {out_path}")
