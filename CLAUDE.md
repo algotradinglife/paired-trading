@@ -1,4 +1,4 @@
-# macd-momentum — K线动能理论 Wiki 生成任务
+# paired-trading — K线动能理论 Wiki 生成任务（历史任务，已完成）
 
 ## 你的职责
 你是专门用于处理《K线动能理论》（宋建毅著）PDF 解析后内容的 Claude Code session。

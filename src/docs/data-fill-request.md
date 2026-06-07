@@ -1,7 +1,7 @@
-# 数据补齐需求 — macd-momentum → quant-data
+# 数据补齐需求 — paired-trading → quant-data
 
 **日期**: 2026-06-02  
-**提出方**: macd-momentum 项目  
+**提出方**: paired-trading 项目（旧称 macd-momentum）  
 **接收方**: quant-data 项目  
 **背景**: 期权 payoff 分析管道已打通（3,111 条 CN 期权记录），但存在三类数据缺口导致关键分析单元格样本量不足，无法进行统计检验。
 
@@ -33,7 +33,7 @@ analyze_options_payoff.py --source parquet --market CN
 
 ### 问题
 
-`_contracts/SHFE.parquet`、`DCE.parquet`、`CZCE.parquet` 已有 `option_strike` 和 `option_underlying` 字段，但 macd-momentum 的 payoff 分析脚本无法自动计算 OTM rank（需要信号日期当天的标的收盘价）。
+`_contracts/SHFE.parquet`、`DCE.parquet`、`CZCE.parquet` 已有 `option_strike` 和 `option_underlying` 字段，但 paired-trading 的 payoff 分析脚本无法自动计算 OTM rank（需要信号日期当天的标的收盘价）。
 
 现有 `_contracts` schema：
 
@@ -59,7 +59,7 @@ atm_strike    float64   # 每个到期月在上市首日的 ATM 行权价（静�
 strike_step   float64   # 行权价间距（e.g. AG=100, RB=50, AU=4）
 ```
 
-macd-momentum 端根据这两列 + 信号日期的标的价格自行计算当日 OTM rank，无需逐日数据。
+paired-trading 端根据这两列 + 信号日期的标的价格自行计算当日 OTM rank，无需逐日数据。
 
 方案 B：提供 `_otm_rank/{exchange}.parquet`，schema：
 
@@ -249,7 +249,7 @@ option_index      str       # "C3500"
 
 ## 验收标准
 
-完成后 macd-momentum 端执行以下命令验收：
+完成后 paired-trading 端执行以下命令验收：
 
 ```bash
 # CN 全量

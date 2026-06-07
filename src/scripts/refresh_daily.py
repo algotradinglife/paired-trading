@@ -1,4 +1,4 @@
-"""Daily data refresh for macd-momentum quant store.
+"""Daily data refresh for paired-trading quant store.
 
 Fetches the latest bars for all symbols used by the trading system:
   - US equities (weekly + daily + 1h + 15m): yfinance (no API key needed)
@@ -198,7 +198,7 @@ def _refresh_cn_options(lookback_days: int = 30, expiry_window_days: int = 90) -
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Daily data refresh for macd-momentum.")
+    parser = argparse.ArgumentParser(description="Daily data refresh for paired-trading.")
     parser.add_argument(
         "--start", type=str, default=None,
         help="YYYY-MM-DD start date (default: 7 days ago)",

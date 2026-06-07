@@ -1,7 +1,7 @@
 [project]
-name = "macd-momentum-engine"
+name = "paired-trading"
 version = "0.1.0"
-description = "MACD momentum analysis engine — Python reference implementation of K-line momentum theory (Song Jianyi)"
+description = "Paired-trading engine — underlying + options joint analysis grounded in Song Jianyi's K-line momentum theory, Al Brooks' price action, and Xiao Chunxin's options timing"
 requires-python = ">=3.13"
 dependencies = [
     "akshare>=1.18.63",

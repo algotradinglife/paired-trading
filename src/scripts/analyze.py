@@ -64,7 +64,7 @@ def _load_bars(symbol: str, suffix: str, args) -> pd.DataFrame | None:
 def main() -> int:
     p = argparse.ArgumentParser(
         prog="analyze",
-        description="Run the macd-momentum engine and emit AnalysisOutput JSON",
+        description="Run the paired-trading engine and emit AnalysisOutput JSON",
     )
     p.add_argument("symbol",
                    help="symbol stem matching <bars_dir>/<symbol_lower>_<resolution>.json "

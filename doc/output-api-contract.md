@@ -52,7 +52,7 @@
   reflect that B-topology multi-TF context is now wired up for CN
   signals via TqSdk 60min/15min data.
 
-This document is the contract between the **macd-momentum analysis engine** and any downstream consumer (trading systems, dashboards, alerts, backtests). It tells you exactly what fields to depend on, what may change, and how versioning works.
+This document is the contract between the **paired-trading analysis engine** and any downstream consumer (trading systems, dashboards, alerts, backtests). It tells you exactly what fields to depend on, what may change, and how versioning works.
 
 ---
 
