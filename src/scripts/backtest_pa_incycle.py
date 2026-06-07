@@ -30,6 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
 import pandas as pd
 
+from data import bar_loader
 from engine.features.macd import macd as compute_macd
 from engine.features.pa_features import compute_pa_features
 from engine.features.streams import compute_feature_streams
@@ -88,13 +89,7 @@ FILTERS: dict[str, object] = {
 
 
 def load_bars(sym: str, bars_dir: Path, suffix: str = "_daily") -> pd.DataFrame | None:
-    candidates = list(bars_dir.glob(f"**/{sym}{suffix}.json"))
-    if not candidates:
-        return None
-    payload = json.loads(candidates[0].read_text())
-    df = pd.DataFrame(payload["bars"])
-    df["timestamp"] = pd.to_datetime(df["time"], unit="s", utc=True)
-    return df.sort_values("timestamp").reset_index(drop=True)
+    return bar_loader.load_bars_quant_or_json(sym, suffix, bars_dir)
 
 
 def compute_atr(bars: pd.DataFrame, period: int = ATR_PERIOD) -> pd.Series:

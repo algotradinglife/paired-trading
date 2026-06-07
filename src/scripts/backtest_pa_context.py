@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
 import pandas as pd
 
+from data import bar_loader
 from engine.divergence.pa_context_classifier import classify_context
 from engine.features.macd import macd, ema
 from engine.labels.swing_labeler import label_swings
@@ -44,14 +45,7 @@ RECALL_WINDOW_AFTER  = 5
 
 
 def load_bars(sym: str, bars_dir: Path) -> pd.DataFrame | None:
-    candidates = list(bars_dir.glob(f"**/{sym}_daily.json"))
-    if not candidates:
-        return None
-    payload = json.loads(candidates[0].read_text())
-    raw = payload.get("bars", payload) if isinstance(payload, dict) else payload
-    df = pd.DataFrame(raw)
-    df["timestamp"] = pd.to_datetime(df["time"], unit="s", utc=True)
-    return df.sort_values("timestamp").reset_index(drop=True)
+    return bar_loader.load_bars_quant_or_json(sym, "_daily", bars_dir)
 
 
 def scan_contexts(

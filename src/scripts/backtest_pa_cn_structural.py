@@ -30,28 +30,8 @@ CUTOFF_IS   = pd.Timestamp("2022-12-31", tz="UTC")
 CUTOFF_OOS1 = pd.Timestamp("2023-12-31", tz="UTC")
 CUTOFF_OOS2 = pd.Timestamp("2024-12-31", tz="UTC")
 
-_SUFFIX_TO_BARSTORE_LEVEL = {"_daily": "D", "_60": "60min", "_15": "15min"}
-
-
 def load_bars(sym, suffix="_daily"):
-    """Prefer the quant Parquet store (full 5-year intraday for shfe/ine);
-    fall back to legacy JSON in data/raw/ for symbols not yet imported."""
-    resolved = bar_loader.infer_symbol_and_mic(sym)
-    level = _SUFFIX_TO_BARSTORE_LEVEL.get(suffix)
-    if resolved is not None and level is not None:
-        quant_sym, mic = resolved
-        try:
-            return bar_loader.load_bars_quant(quant_sym, mic, level,
-                                              bar_loader.DEFAULT_QUANT_ROOT)
-        except Exception:
-            pass
-    c = list(BARS_DIR.glob(f"**/{sym}{suffix}.json"))
-    if not c: return None
-    p = json.loads(c[0].read_text())
-    raw = p.get("bars", p) if isinstance(p, dict) else p
-    df = pd.DataFrame(raw)
-    df["timestamp"] = pd.to_datetime(df["time"], unit="s", utc=True)
-    return df.sort_values("timestamp").reset_index(drop=True)
+    return bar_loader.load_bars_quant_or_json(sym, suffix, BARS_DIR)
 
 def compute_atr(bars, period=14):
     hi,lo,pc = bars["high"],bars["low"],bars["close"].shift(1)

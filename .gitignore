@@ -1,5 +1,18 @@
 # === 数据：必须出仓到外置盘 ===
 data/
+# But the engine's "data" Python package belongs in source control:
+# un-ignore the package root, then re-ignore the actual data subdirs
+!src/data/
+src/data/quant/
+src/data/quant
+src/data/raw/
+src/data/raw
+src/data/options/
+src/data/options
+src/data/review/
+src/data/review
+src/data/quant_minishare_main/
+src/data/quant_minishare_main
 datasets/
 derived/
 knowledge-base/

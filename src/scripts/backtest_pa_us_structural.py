@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import numpy as np
 import pandas as pd
+from data import bar_loader
 from engine.divergence.pa_detector import PABottomDetector, PASignal
 from engine.features.macd import macd as compute_macd
 
@@ -43,13 +44,7 @@ CUTOFF_OOS2 = pd.Timestamp("2024-12-31", tz="UTC")
 # ── data ─────────────────────────────────────────────────────────────────
 
 def load_bars(sym, suffix="_daily"):
-    c = list(BARS_DIR.glob(f"**/{sym}{suffix}.json"))
-    if not c: return None
-    p = json.loads(c[0].read_text())
-    raw = p.get("bars", p) if isinstance(p, dict) else p
-    df = pd.DataFrame(raw)
-    df["timestamp"] = pd.to_datetime(df["time"], unit="s", utc=True)
-    return df.sort_values("timestamp").reset_index(drop=True)
+    return bar_loader.load_bars_quant_or_json(sym, suffix, BARS_DIR)
 
 def compute_atr(bars, period=14):
     hi, lo, pc = bars["high"], bars["low"], bars["close"].shift(1)
