@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import numpy as np
 import pandas as pd
+from data import bar_loader
 from engine.divergence.pa_detector import PABottomDetector, PASignal
 from engine.divergence.pa_structure import PAStructureDetector
 from engine.features.macd import macd as compute_macd
@@ -29,7 +30,21 @@ CUTOFF_IS   = pd.Timestamp("2022-12-31", tz="UTC")
 CUTOFF_OOS1 = pd.Timestamp("2023-12-31", tz="UTC")
 CUTOFF_OOS2 = pd.Timestamp("2024-12-31", tz="UTC")
 
+_SUFFIX_TO_BARSTORE_LEVEL = {"_daily": "D", "_60": "60min", "_15": "15min"}
+
+
 def load_bars(sym, suffix="_daily"):
+    """Prefer the quant Parquet store (full 5-year intraday for shfe/ine);
+    fall back to legacy JSON in data/raw/ for symbols not yet imported."""
+    resolved = bar_loader.infer_symbol_and_mic(sym)
+    level = _SUFFIX_TO_BARSTORE_LEVEL.get(suffix)
+    if resolved is not None and level is not None:
+        quant_sym, mic = resolved
+        try:
+            return bar_loader.load_bars_quant(quant_sym, mic, level,
+                                              bar_loader.DEFAULT_QUANT_ROOT)
+        except Exception:
+            pass
     c = list(BARS_DIR.glob(f"**/{sym}{suffix}.json"))
     if not c: return None
     p = json.loads(c[0].read_text())
