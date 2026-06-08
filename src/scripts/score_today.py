@@ -381,7 +381,7 @@ def main() -> int:
     grp = p.add_mutually_exclusive_group(required=True)
     grp.add_argument("--pool", choices=sorted(POOLS), help="preset symbol pool")
     grp.add_argument("--symbols", nargs="+", help="explicit symbol list")
-    p.add_argument("--instrument-class", choices=["us_equity", "cn_futures", "cn_index_futures", "czce", "cn_metal_futures"],
+    p.add_argument("--instrument-class", choices=["us_equity", "cn_futures", "cn_index_futures", "czce", "cn_metal_futures", "cn_bond"],
                    default=None, dest="instrument_class")
     p.add_argument("--bars-dir", type=Path, default=DEFAULT_BARS_DIR)
     p.add_argument("--quant-data-root", type=Path, default=bar_loader.DEFAULT_QUANT_ROOT, dest="quant_data_root",
@@ -666,6 +666,63 @@ def main() -> int:
                     pa_rec["options_calls"] = pa_calls
                 pa_rec["position_size"] = _position_size(pa_rec)
                 scored.append(pa_rec)
+
+        # PA H2 scan — cn_bond only (CFFEX treasury futures tf/t/ts).
+        # Validated 2026-06-08 (backtest_pa_cn_phasefilter --pool CN_BOND):
+        #   All h=opp:   n=31 EV=+0.548R  F1=+0.219(n=16) F2=+1.500(n=6) F3=+0.500(n=9)
+        #   TR phase 28/31 (90% of fires) — phase filter is essentially free here.
+        #   3/3 OOS folds positive → policy_weight 0.70 (h=opp), 0.40 (neutral).
+        # Differences vs cn_metal PA H2:
+        #   - NO 15min confirmation gate (validated for CN_METAL only).
+        #   - Skip BULL phase (mirrors cn_metal; BULL n=3, too small to fight).
+        #   - Use PAStructureDetector.structural_stop (TR-dominated → tight stop).
+        if instrument_class == "cn_bond":
+            if h_bars is None:
+                h_bars = _load_bars_60(sym, args)
+            _cn_bond_struct_det = PAStructureDetector()
+            _cn_bond_pa_det = PABottomDetector(
+                min_h_legs=2, min_quality=0.3, ema_threshold=0.0,
+            )
+            for _b_sig in _cn_bond_pa_det.scan(bars, h_bars):
+                if _b_sig.timestamp.date() < cutoff_date:
+                    continue
+                _b_weight = PABottomDetector.policy_weight(
+                    _b_sig, instrument_class, symbol=sym,
+                )
+                if _b_weight == 0.0:
+                    continue
+                # PA structure filter: skip BULL phase (mirror cn_metal; only
+                # 3/31 CN_BOND fires landed in BULL — not worth fighting over).
+                _b_struct = _cn_bond_struct_det.detect(bars, up_to_idx=_b_sig.bar_idx)
+                if _b_struct.phase == "BULL":
+                    continue
+                _b_date = _b_sig.timestamp.date()
+                _b_close = float(bars["close"].iloc[_b_sig.bar_idx])
+                _b_rec: dict = {
+                    "symbol": sym,
+                    "date": _b_date.isoformat(),
+                    "direction": "bottom",
+                    "level": "pa_cn_bond",
+                    "subtype": "pa_h2",
+                    "confidence": _b_weight,
+                    "wick_ratio": None,
+                    "swing_pct": None,
+                    "vol_ratio": None,
+                    "invalidation_level": (
+                        round(_b_struct.structural_stop, 4)
+                        if _b_struct.structural_stop else None
+                    ),
+                    "matched_sweet_spots": [],
+                    "policy_rule": "pa-cn-bond-h-opp",
+                    "policy_weight": _b_weight,
+                    "pa_isolated": None,
+                    "score": 3,  # TR phase dominant per validation; matches cn_metal TR pattern
+                    "underlying_price": _b_close,
+                    "options_calls": None,
+                    "pa_phase": _b_struct.phase,
+                }
+                _b_rec["position_size"] = _position_size(_b_rec)
+                scored.append(_b_rec)
 
         # VFlush scan — cn_metal_futures only (K=3 STRONG PASS, cu+sc only).
         # V-shape vertical flush bottoms: deep below EMA + current-bar selling climax,
