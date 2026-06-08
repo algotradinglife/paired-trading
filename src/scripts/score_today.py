@@ -125,6 +125,17 @@ _CN_AGRI_POS_SYMBOLS: frozenset[str] = frozenset({
     "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr",
 })
 
+# P0 lane × market eval 2026-06-09: pa_us_60min symbol-level suppression.
+# Empirical full_stack 5.5y per-symbol shows these are net negative or
+# very small samples with extreme negative EV. See
+# doc/repro/lane_market_evaluation_2026-06-09.md kill list.
+_PA_US_60MIN_SUPPRESS: frozenset[str] = frozenset({
+    "DIA",   # n=10 EV-0.40R win=20% — broad-market reversal not the pattern
+    "XLK",   # n=14 EV-0.14R win=29% — large-cap tech, low 60min vol
+    "QQQ",   # n=11 EV-0.14R win=27% — same family as XLK
+    "XLRE",  # n= 4 EV-0.75R win= 0% — small sample but 0 winners
+})
+
 # All DIF-divergence-based detector levels.  paired-trading retired the
 # DIF signal lane 2026-06-08 (decision: "DIF 全退役") — PA detectors own
 # live signal generation.  By default score_today filters every record
@@ -1334,6 +1345,11 @@ def main() -> int:
                         continue
                     _trend = str(_s60.features.get("trend_structure", ""))
                     if _trend != "uptrend":
+                        continue
+                    # P0 symbol-level suppression (2026-06-09 lane × market eval):
+                    # DIA n=10 EV-0.40, XLK n=14 EV-0.14, QQQ n=11 EV-0.14,
+                    # XLRE n=4 EV-0.75. See doc/repro/lane_market_evaluation_2026-06-09.md.
+                    if sym.upper() in _PA_US_60MIN_SUPPRESS:
                         continue
                     _w60 = PABottomDetector.policy_weight(_s60, instrument_class, symbol=sym)
                     if _w60 == 0.0:

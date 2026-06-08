@@ -23,6 +23,19 @@ from engine.divergence.pa_context_classifier import classify_context
 from engine.features.macd import macd as compute_macd
 
 
+# Symbol-level suppression — P0 lane × market evaluation 2026-06-09.
+# Empirical full_stack 5.5y EV < 0 with n >= 5; full_stack_backtest.csv basis.
+# See doc/repro/lane_market_evaluation_2026-06-09.md.
+_CONTEXT_A_EXCLUDED_CN_METAL: frozenset[str] = frozenset({
+    "kq_m_ine_sc",  # n=10, EV=-0.886R, win=0% (zero winners)
+})
+_CONTEXT_A_EXCLUDED_US: frozenset[str] = frozenset({
+    "DIA",  # n=13, EV=-0.090R — broad-market reversal not the pattern
+    "SPY",  # n= 9, EV=-0.199R — same
+    "XLU",  # n=11, EV=-0.258R — defensive utility, sells climax but no rebound
+})
+
+
 # ---------------------------------------------------------------------------
 # Signal dataclass
 # ---------------------------------------------------------------------------
@@ -132,9 +145,20 @@ class ContextADetector:
           - US OOS F1=+0.106R / F2=+0.179R / F3=+0.574R (3/3 positive)
           - CN_METAL OOS F1=+0.342R / F2=−0.192R / F3=+0.619R (F2 fail = 2024 regime)
         All other h_rel return 0.0 — not validated.
+
+        Symbol-level suppression (P0, 2026-06-09):
+          - CN_METAL: kq_m_ine_sc (0% win, n=10, EV-0.886R)
+          - US: DIA, SPY, XLU (broad-market / defensive, all negative EV)
+        BASELINE_REF: baselines/context_a_{us_equity,cn_metal_futures}.json
         """
         if sig.higher_tf_relation != "opposing":
             return 0.0
-        if instrument_class in ("us_equity", "cn_metal_futures"):
+        if instrument_class == "cn_metal_futures":
+            if symbol is not None and symbol.lower() in _CONTEXT_A_EXCLUDED_CN_METAL:
+                return 0.0
+            return 0.60
+        if instrument_class == "us_equity":
+            if symbol is not None and symbol.upper() in _CONTEXT_A_EXCLUDED_US:
+                return 0.0
             return 0.60
         return 0.0
