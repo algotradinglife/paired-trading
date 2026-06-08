@@ -28,6 +28,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -36,7 +37,16 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "review"
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+DATA_DIR = _default_review_dir()
 
 BULL_LEVELS = ["intra_cycle_bull_dea", "intra_cycle_bull_hist", "intra_cycle_bull_slope"]
 BULL_LABEL = {"intra_cycle_bull_dea": "DEAD+", "intra_cycle_bull_hist": "HICD+",

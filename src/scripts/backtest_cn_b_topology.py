@@ -17,6 +17,7 @@ Output:
 from __future__ import annotations
 
 import json
+import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -38,7 +39,17 @@ from engine.features.streams import compute_feature_streams
 from engine.units.snapshot import compute_unit_metadata
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
-OUT_DIR = Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+OUT_DIR = _default_review_dir()
 FORWARD_WINDOWS = [5, 10, 20]
 
 # 19 CN futures — filename stems match fetch_tqsdk.py sanitization of
@@ -209,7 +220,9 @@ def main():
     parser.add_argument("--source", choices=["json", "quant"], default="json",
                         help="bar source: legacy JSON (data/raw/) or quant Parquet store (default: json)")
     parser.add_argument("--out", type=Path, default=None,
-                        help="output CSV path (default: data/review/cn_b_topology_signals_all.csv)")
+                        help="output CSV path (default: <review_dir>/cn_b_topology_signals_all.csv; "
+                             "review_dir honors $DERIVED_ROOT/paired-trading/src-data-review "
+                             "or falls back to src/data/review/)")
     args = parser.parse_args()
 
     all_rows = []

@@ -25,6 +25,7 @@ Outputs:
 
 from __future__ import annotations
 
+import os
 import sys
 from itertools import combinations
 from pathlib import Path
@@ -46,8 +47,16 @@ DIMENSIONS = [
 MIN_N = 10
 HORIZON = 20
 BOOTSTRAP_B = 1000
-CSV_IN = Path(__file__).resolve().parents[1] / "data" / "review" / "signals_2026-05-23.csv"
-OUT_DIR = Path(__file__).resolve().parents[1] / "data" / "review"
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+OUT_DIR = _default_review_dir()
+CSV_IN = OUT_DIR / "signals_2026-05-23.csv"
 
 
 def hhi(symbols: pd.Series) -> float:

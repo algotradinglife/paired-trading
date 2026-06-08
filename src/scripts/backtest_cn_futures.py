@@ -23,6 +23,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -40,7 +41,17 @@ from engine.units.snapshot import compute_unit_metadata
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data" / "raw"
-REVIEW_DIR = ROOT / "data" / "review"
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return ROOT / "data" / "review"
+
+
+REVIEW_DIR = _default_review_dir()
 REVIEW_DIR.mkdir(parents=True, exist_ok=True)
 
 SYMBOLS = [

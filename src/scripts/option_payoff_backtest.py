@@ -49,7 +49,17 @@ from engine.divergence.multi_tf_context import (
 from engine.units.snapshot import compute_unit_metadata
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
-OUT_DIR = Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+OUT_DIR = _default_review_dir()
 
 PROXY = os.environ.get("POLYGON_PROXY_URL", "http://35.77.84.125:8080")
 SLEEP = 0.3

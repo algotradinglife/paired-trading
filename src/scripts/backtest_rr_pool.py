@@ -32,6 +32,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -50,7 +51,17 @@ from engine.features.streams import compute_feature_streams
 from engine.units.snapshot import compute_unit_metadata
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
-OUT_DIR = Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+OUT_DIR = _default_review_dir()
 
 ATR_PERIOD = 14
 MAX_HOLD = 20          # bars; open positions marked at close on bar MAX_HOLD
