@@ -159,7 +159,7 @@ class TestStructureSource:
         assert "phase=UNCLEAR" in src.rationale
 
     def test_phase_vote_invariant_across_ambush_patterns(self):
-        """daily_structure is direction-agnostic — BULL stays BULL for both."""
+        """For BULL/BEAR phases, daily_structure stays direction-agnostic."""
         bars = _strong_uptrend_daily(180)
         bot = _vote_from_daily_structure(
             bars, len(bars) - 1, ambush_pattern="h2_bottom",
@@ -168,6 +168,106 @@ class TestStructureSource:
             bars, len(bars) - 1, ambush_pattern="h2_top",
         )
         assert bot.vote == top.vote == "bull"
+
+    # ------------------------------------------------------------------
+    # TR position-aware voting (locked 2026-06-08).
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _fake_struct(phase: str, *, tr_top=None, tr_bot=None, pos_in_tr=None,
+                     at_tr_bottom=False):
+        """Construct a PAStructure-like object with the fields
+        _vote_from_daily_structure reads."""
+        from engine.divergence.pa_structure import PAStructure
+        return PAStructure(
+            phase=phase,
+            tr_top=tr_top,
+            tr_bot=tr_bot,
+            structural_stop=None,
+            tr_range_pct=None,
+            pos_in_tr=pos_in_tr,
+            at_tr_bottom=at_tr_bottom,
+        )
+
+    def test_tr_bottom_with_h2_bottom_votes_bull(self, monkeypatch):
+        bars = _strong_uptrend_daily(60)  # any bars; detector is mocked
+        fake = self._fake_struct("TR", tr_top=110.0, tr_bot=100.0, pos_in_tr=0.15)
+        monkeypatch.setattr(
+            "engine.divergence.pa_direction_assessment.PAStructureDetector.detect",
+            lambda self, *a, **kw: fake,
+        )
+        src = _vote_from_daily_structure(
+            bars, len(bars) - 1, ambush_pattern="h2_bottom",
+        )
+        assert src.vote == "bull"
+        assert "pos_in_tr=0.15" in src.rationale
+
+    def test_tr_top_with_h2_top_votes_bear(self, monkeypatch):
+        bars = _strong_uptrend_daily(60)
+        fake = self._fake_struct("TR", tr_top=110.0, tr_bot=100.0, pos_in_tr=0.85)
+        monkeypatch.setattr(
+            "engine.divergence.pa_direction_assessment.PAStructureDetector.detect",
+            lambda self, *a, **kw: fake,
+        )
+        src = _vote_from_daily_structure(
+            bars, len(bars) - 1, ambush_pattern="h2_top",
+        )
+        assert src.vote == "bear"
+        assert "pos_in_tr=0.85" in src.rationale
+
+    def test_tr_middle_votes_neutral_for_both_patterns(self, monkeypatch):
+        bars = _strong_uptrend_daily(60)
+        fake = self._fake_struct("TR", tr_top=110.0, tr_bot=100.0, pos_in_tr=0.50)
+        monkeypatch.setattr(
+            "engine.divergence.pa_direction_assessment.PAStructureDetector.detect",
+            lambda self, *a, **kw: fake,
+        )
+        for pattern in ("h2_bottom", "h2_top"):
+            src = _vote_from_daily_structure(
+                bars, len(bars) - 1, ambush_pattern=pattern,
+            )
+            assert src.vote == "neutral", f"{pattern}: {src.rationale}"
+
+    def test_tr_position_mismatch_votes_neutral_conservative(self, monkeypatch):
+        """h2_bottom at tr_top OR h2_top at tr_bot → neutral (conservative).
+        Multi-TF resolves the ambiguity through other sources; daily_structure
+        stays out per the user-locked policy 2026-06-08."""
+        bars = _strong_uptrend_daily(60)
+
+        fake_top = self._fake_struct("TR", tr_top=110.0, tr_bot=100.0, pos_in_tr=0.85)
+        monkeypatch.setattr(
+            "engine.divergence.pa_direction_assessment.PAStructureDetector.detect",
+            lambda self, *a, **kw: fake_top,
+        )
+        src1 = _vote_from_daily_structure(
+            bars, len(bars) - 1, ambush_pattern="h2_bottom",
+        )
+        assert src1.vote == "neutral"
+
+        fake_bot = self._fake_struct("TR", tr_top=110.0, tr_bot=100.0, pos_in_tr=0.10)
+        monkeypatch.setattr(
+            "engine.divergence.pa_direction_assessment.PAStructureDetector.detect",
+            lambda self, *a, **kw: fake_bot,
+        )
+        src2 = _vote_from_daily_structure(
+            bars, len(bars) - 1, ambush_pattern="h2_top",
+        )
+        assert src2.vote == "neutral"
+
+    def test_tr_forming_incomplete_range_votes_neutral(self, monkeypatch):
+        """TR_FORMING with tr_bot=None (only resistance confirmed) →
+        neutral; can't compute pos_in_tr without both edges."""
+        bars = _strong_uptrend_daily(60)
+        fake = self._fake_struct("TR_FORMING", tr_top=110.0, tr_bot=None, pos_in_tr=None)
+        monkeypatch.setattr(
+            "engine.divergence.pa_direction_assessment.PAStructureDetector.detect",
+            lambda self, *a, **kw: fake,
+        )
+        src = _vote_from_daily_structure(
+            bars, len(bars) - 1, ambush_pattern="h2_bottom",
+        )
+        assert src.vote == "neutral"
+        assert "incomplete_range" in src.rationale
 
 
 # ---------------------------------------------------------------------------

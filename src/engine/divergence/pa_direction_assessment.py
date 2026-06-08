@@ -112,37 +112,78 @@ class DirectionVerdict:
 # ---------------------------------------------------------------------------
 
 
+# TR position thresholds — user lock 2026-06-08 ("TR 区间底部做多，
+# 顶部做空，其他位置不做"):
+#   close in bottom 30% of TR + h2_bottom    → bull (entry zone)
+#   close in top 30% of TR + h2_top          → bear (entry zone)
+#   middle 30-70% of TR (any pattern)        → neutral (don't trade)
+#   bottom 30% + h2_top  or top 30% + h2_bottom (position mismatch)
+#                                            → neutral (conservative —
+#     multi-TF resolution via other sources, daily_structure stays out)
+_TR_BULL_ZONE_MAX: float = 0.30
+_TR_BEAR_ZONE_MIN: float = 0.70
+
+
 def _vote_from_daily_structure(
     daily_bars: pd.DataFrame,
     bar_idx: int,
     ambush_pattern: AmbushPattern = "h2_bottom",
 ) -> DirectionSource:
-    """Source A — PA structural phase on daily bars.
+    """Source A — PA structural phase + TR position on daily bars.
 
-    Direction-agnostic with respect to ambush_pattern: a BULL phase is
-    bullish for both bottom-hunting and top-hunting setups, because the
-    phase describes the durable trend, not the trade direction.
-    Caller-facing semantics (the direction-vote synthesis) handle the
-    interplay with the trade side.
+    Direction interpretation depends on phase AND, for TR phases, the
+    close's position within the range:
 
-    Mapping:
-        BULL                 → bull
-        BEAR                 → bear
-        TR / TR_FORMING      → neutral
-        UNCLEAR              → neutral
+        BULL                              → bull  (trend backdrop)
+        BEAR                              → bear  (trend backdrop)
+        TR / TR_FORMING:
+            pos_in_tr ≤ 0.30 + h2_bottom  → bull  ("buy support")
+            pos_in_tr ≥ 0.70 + h2_top     → bear  ("sell resistance")
+            otherwise (middle, or mismatch) → neutral  ("don't trade")
+            tr_top or tr_bot is None        → neutral  (incomplete range)
+        UNCLEAR                           → neutral  (no structure)
 
-    Rationale carries phase + tr_top/tr_bot when available.
+    Rationale carries phase + pos_in_tr (when applicable) + tr_top/tr_bot.
+
+    Rationale for the TR/TR_FORMING logic (user-locked 2026-06-08):
+    PA's H2 setups live inside TR phases — buying support at tr_bot,
+    selling resistance at tr_top.  Treating every TR/TR_FORMING signal
+    as "neutral" makes daily_structure miss the directional content the
+    range structure provides.  Position-mismatched signals (h2_bottom
+    near tr_top, or h2_top near tr_bot) stay neutral here; multi-TF
+    sources (weekly_trend / hourly_state / etc.) resolve the
+    ambiguity.
     """
     det = PAStructureDetector()
     struct = det.detect(daily_bars, up_to_idx=bar_idx)
     phase = struct.phase
+    rationale_bits = [f"phase={phase}"]
+
     if phase == "BULL":
         vote: Vote = "bull"
     elif phase == "BEAR":
         vote = "bear"
-    else:
+    elif phase in ("TR", "TR_FORMING"):
+        # Need both edges + pos_in_tr to make a position call.
+        if (struct.tr_top is None or struct.tr_bot is None
+                or struct.pos_in_tr is None):
+            vote = "neutral"
+            rationale_bits.append("incomplete_range")
+        else:
+            pos = float(struct.pos_in_tr)
+            pos_clip = max(0.0, min(1.0, pos))
+            rationale_bits.append(f"pos_in_tr={pos_clip:.2f}")
+            if ambush_pattern == "h2_bottom" and pos_clip <= _TR_BULL_ZONE_MAX:
+                vote = "bull"
+            elif ambush_pattern == "h2_top" and pos_clip >= _TR_BEAR_ZONE_MIN:
+                vote = "bear"
+            else:
+                # Middle of range OR position-mismatched signal —
+                # conservative neutral; multi-TF sources resolve.
+                vote = "neutral"
+    else:  # UNCLEAR
         vote = "neutral"
-    rationale_bits = [f"phase={phase}"]
+
     if struct.tr_top is not None and struct.tr_bot is not None:
         rationale_bits.append(f"tr=[{struct.tr_bot:.2f},{struct.tr_top:.2f}]")
     return DirectionSource(
