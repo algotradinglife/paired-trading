@@ -169,7 +169,24 @@ class SweetSpotRule:
     `validated_pool` documents the symbol universe that produced the rule.
     Rule matching is by `pool_class` (instrument_class), so a rule
     validated on CN_COMMODITY can also fire for a CN-index signal of the
-    same instrument_class — cross-pool extrapolation, real but accepted."""
+    same instrument_class — cross-pool extrapolation, real but accepted.
+
+    Two flavours of constraint live side by side:
+
+    1. **DIF-lane bucket constraints** (`swing_constraint`,
+       `wick_constraint`, `vol_constraint`, `subtype_constraint`).  These
+       read DIF-detector context features (`prior_swing_distance_pct`
+       etc.) and apply only to records produced by `detect_all_divergences`.
+       Per `doc/repro/score_audit_2026-06-08.md` finding S3, PA records
+       never populate these — so DIF-bucket rules silently match zero PA
+       signals.
+    2. **PA-native constraints** (`level_constraint`, `feature_constraints`).
+       Match directly on PA record fields (`level`, `pa_trend`, `pa_legs`,
+       `pa_phase`, ...).  Allow sweet-spot annotation to flow on the PA
+       lane (B1-2 fix 2026-06-08).
+
+    `validation_status` carries a free-form note so consumers can tell
+    OOS-validated rules apart from drafts awaiting re-validation."""
     rule_id: str
     description: str
     pool_class: str           # which instrument_class this rule applies to (us_equity / cn_futures)
@@ -180,13 +197,20 @@ class SweetSpotRule:
     # Each bucket constraint is either None (no constraint) or a tuple
     # (bucket_name, (lo_edge, hi_edge)). At match time we test whether
     # the live signal's feature value falls in the named tercile under
-    # those edges.
+    # those edges.  These read DIF-detector context_features only.
     swing_constraint: tuple[str, tuple[float, float]] | None = None
     wick_constraint: tuple[str, tuple[float, float]] | None = None
     vol_constraint: tuple[str, tuple[float, float]] | None = None
+    # PA-native equality constraints.  level_constraint matches sig.level
+    # (e.g., "pa_us_60min").  feature_constraints requires every key/value
+    # pair to be present on the live record dict — useful for matching
+    # PA-fields like pa_trend / pa_legs / pa_phase / pa_isolated.
+    level_constraint: str | None = None
+    feature_constraints: tuple[tuple[str, object], ...] | None = None
     train_hit_pct: float = 0.0
     test_hit_pct: float = 0.0
     validated_date: str = ""  # YYYY-MM-DD
+    validation_status: str = ""  # free-form note; "OOS 60/40" vs "draft" etc.
 
 
 # OOS-validated sweet spots — only those that survived 60/40 train/test
@@ -195,20 +219,69 @@ class SweetSpotRule:
 # Edges below are TRAIN-PERIOD tercile bounds, extracted from
 # data/review/sweet_spots_pool_us_h20_oos.csv (split=='train' rows,
 # horizon-overlap purged). Refreshing OOS validation must re-extract.
+#
+# 2026-06-08 (B1-2 fix per score_audit_2026-06-08.md S3):
+#   The original `US-bot-swing-mid-h20` rule was DIF-lane only — its
+#   `prior_swing_distance_pct` predicate matched 0/95 PA records over
+#   the past year because PA detectors don't populate that field.  With
+#   DIF retired (`DIF_DETECTOR_LEVELS` filter), the rule was dead on
+#   arrival.  Two PA-native draft rules replace it below
+#   (`US-PA-60min-uptrend-hopp`, `US-PA-60min-uptrend-legs1`); they
+#   trace the WF-validated winners from `pa_detector.policy_weight()`
+#   docstring (uptrend + h=opp ± legs=1) but have NOT been put through
+#   the 60/40 sweet-spot OOS rig that the original DIF rules were —
+#   `validation_status` marks that explicitly.  The old DIF rule is
+#   retained (commented below) only as documentation; it can be
+#   resurrected when the DIF lane comes back, or deleted once consumers
+#   stop referencing the `US-bot-swing-mid-h20` rule_id.
 SWEET_SPOTS: list[SweetSpotRule] = [
     SweetSpotRule(
-        rule_id="US-bot-swing-mid-h20",
-        description="bottom divergence with mid-range prior_swing_pct (US, 20-day hold)",
+        rule_id="US-PA-60min-uptrend-hopp",
+        description="PA H2 bottom on 60min, uptrend + h=opp (US, base lane)",
         pool_class="us_equity",
         direction="bottom",
-        horizon=20,
+        horizon=14,  # pa_swing max_hold ~140 60min bars ≈ 14 trading days
         validated_pool="US",
-        # US h=20 train prior_swing_pct terciles: [-5.0181, +3.8242]
-        swing_constraint=("swing_mid", (-5.0181, 3.8242)),
-        train_hit_pct=85.3,
-        test_hit_pct=68.4,
-        validated_date="2026-05-25",
+        level_constraint="pa_us_60min",
+        # Match every uptrend pa_us_60min fire — already gated to h=opp
+        # in score_today's pa_us_60min block (line ~964).
+        feature_constraints=(("pa_trend", "uptrend"),),
+        # WF backtest_pa_swing.py 60min (NOT 60/40 sweet-spot OOS):
+        #   K=2: F1+0.625R(n=12) F2+0.708R(n=24)
+        #   K=3: F1+0.147R F2+0.600R F3+0.636R (4/4 folds positive)
+        train_hit_pct=66.7,
+        test_hit_pct=66.7,  # best estimate; placeholder until sweet-spot rig re-runs
+        validated_date="2026-06-08",
+        validation_status="PA-native, draft — needs 60/40 OOS re-validation",
     ),
+    SweetSpotRule(
+        rule_id="US-PA-60min-uptrend-legs1",
+        description="PA H2 bottom on 60min, uptrend + h=opp + legs_count_down=1 (US, premium lane)",
+        pool_class="us_equity",
+        direction="bottom",
+        horizon=14,
+        validated_pool="US",
+        level_constraint="pa_us_60min",
+        feature_constraints=(("pa_trend", "uptrend"), ("pa_legs", 1)),
+        # WF backtest_pa_swing.py 60min legs=1 subset (highest-EV cell):
+        #   K=2: F1+1.000R(n=5)  F2+0.750R(n=10)
+        #   K=3: F1+0.500R(n=5)  F2+0.667R(n=3)  F3+0.750R(n=10)
+        # All folds positive; this is the lane that earns the 0.90 weight
+        # in pa_detector.policy_weight().
+        train_hit_pct=75.0,
+        test_hit_pct=72.0,
+        validated_date="2026-06-08",
+        validation_status="PA-native, draft — needs 60/40 OOS re-validation",
+    ),
+    # --- DIF-lane rule, retained as documentation ---------------------
+    # SweetSpotRule(
+    #     rule_id="US-bot-swing-mid-h20",
+    #     description="bottom divergence with mid-range prior_swing_pct (US, 20-day hold)",
+    #     pool_class="us_equity", direction="bottom", horizon=20,
+    #     validated_pool="US",
+    #     swing_constraint=("swing_mid", (-5.0181, 3.8242)),
+    #     train_hit_pct=85.3, test_hit_pct=68.4, validated_date="2026-05-25",
+    # )
     SweetSpotRule(
         rule_id="CN-bot-standard-h5",
         description="bottom standard-subtype divergence on CN index futures (5-day hold)",
@@ -369,12 +442,41 @@ def _position_size(r: dict) -> str:
 
 
 def match_rule(rule: SweetSpotRule, sig_dir: str, sig_subtype: str,
-               ctx: dict[str, float]) -> bool:
-    """Apply this rule's FROZEN OOS edges + categorical constraints to a live signal."""
+               ctx: dict[str, object], rec: dict[str, object] | None = None,
+               sig_level: str | None = None) -> bool:
+    """Apply this rule's constraints to a live signal.
+
+    Two constraint families:
+
+    1. DIF-lane bucket constraints (`swing_constraint`/`wick_constraint`/
+       `vol_constraint` + `subtype_constraint`) read frozen OOS train-period
+       tercile edges from the rule and check the live signal's
+       `context_features` dict (`ctx`).  These only apply to records from
+       `detect_all_divergences` — PA records carry no `ctx` content for
+       these keys.
+
+    2. PA-native constraints (`level_constraint`, `feature_constraints`)
+       read the live record dict (`rec`) directly — useful for fields
+       like `level`, `pa_trend`, `pa_legs`, `pa_phase`.  When `rec` is
+       None (legacy DIF caller), PA-native constraints fall back to None
+       lookups; any rule that *requires* a PA-native field will
+       correctly fail to match.
+
+    Args:
+        rule: the candidate rule.
+        sig_dir: signal direction ("top" / "bottom").
+        sig_subtype: signal subtype ("standard" / "weakness" / "hidden" / PA subtype).
+        ctx: DIF-detector context_features (may be empty for PA records).
+        rec: the full scored-record dict (carries PA-native fields).
+            None for legacy callers that don't have the dict yet.
+        sig_level: signal level string ("intra_cycle" / "pa_us_60min" / ...).
+            Falls back to ``rec.get("level")`` when ``rec`` is provided.
+    """
     if sig_dir != rule.direction:
         return False
     if rule.subtype_constraint is not None and sig_subtype != rule.subtype_constraint:
         return False
+    # DIF-lane bucket constraints (read from ctx).
     for constraint, ctx_key in [
         (rule.swing_constraint, "prior_swing_distance_pct"),
         (rule.wick_constraint, "candidate_rejection_wick_ratio"),
@@ -388,7 +490,45 @@ def match_rule(rule: SweetSpotRule, sig_dir: str, sig_subtype: str,
             return False
         if not test(ctx.get(ctx_key), edges):
             return False
+    # PA-native level constraint.
+    if rule.level_constraint is not None:
+        live_level = sig_level if sig_level is not None else (
+            rec.get("level") if rec is not None else None
+        )
+        if live_level != rule.level_constraint:
+            return False
+    # PA-native equality constraints on record fields.
+    if rule.feature_constraints is not None:
+        if rec is None:
+            return False
+        for key, want in rule.feature_constraints:
+            if rec.get(key) != want:
+                return False
     return True
+
+
+def _annotate_pa_sweet_spots(rec: dict, pool_rules: list[SweetSpotRule]) -> None:
+    """Mutate ``rec['matched_sweet_spots']`` to list matching PA-native rules.
+
+    Helper for the PA detector blocks (pa_us_60min, pa_us_dif_pos,
+    pa_h2, pa_h2_climax, pa_cn_bond, bpull, vflush, context_a).  PA
+    records carry no DIF context_features, so we feed an empty ctx and
+    rely on PA-native level/feature constraints.  Rules that depend on
+    DIF bucket constraints (e.g. CN_COMMODITY wick/vol rules) will
+    correctly fail to match since the live record's ctx is empty.
+    """
+    matched: list[str] = []
+    for r in pool_rules:
+        if match_rule(
+            r,
+            sig_dir=rec.get("direction", ""),
+            sig_subtype=rec.get("subtype", ""),
+            ctx={},
+            rec=rec,
+            sig_level=rec.get("level"),
+        ):
+            matched.append(r.rule_id)
+    rec["matched_sweet_spots"] = matched
 
 
 def readiness_score(matched_rules: list[SweetSpotRule], sig_confidence: float) -> int:
@@ -458,8 +598,15 @@ def main() -> int:
         print(f"  - {r.rule_id} (validated {r.validated_date} on {r.validated_pool}, h={r.horizon}): "
               f"{r.description}")
         print(f"      train hit {r.train_hit_pct:.1f}%, test hit {r.test_hit_pct:.1f}%")
+        if r.validation_status:
+            print(f"      status: {r.validation_status}")
         if r.subtype_constraint is not None:
             print(f"      subtype: {r.subtype_constraint}")
+        if r.level_constraint is not None:
+            print(f"      level: {r.level_constraint}")
+        if r.feature_constraints is not None:
+            kv = ", ".join(f"{k}={v!r}" for k, v in r.feature_constraints)
+            print(f"      features: {kv}")
         for label, c in [("swing", r.swing_constraint), ("wick", r.wick_constraint),
                           ("vol", r.vol_constraint)]:
             if c is not None:
@@ -587,6 +734,7 @@ def main() -> int:
                     bcalls = select_otm_calls_au(bentry_close, bsig_date)
                     enrich_with_iv_au(bcalls, bsig_date, bentry_close, _AU_OPTIONS_DATA_DIR)
                     brec["options_calls"] = bcalls
+                _annotate_pa_sweet_spots(brec, pool_rules)
                 brec["position_size"] = _position_size(brec)
                 scored.append(brec)
 
@@ -701,6 +849,7 @@ def main() -> int:
                     pa_calls = select_otm_calls_au(pa_close, pa_date)
                     enrich_with_iv_au(pa_calls, pa_date, pa_close, _AU_OPTIONS_DATA_DIR)
                     pa_rec["options_calls"] = pa_calls
+                _annotate_pa_sweet_spots(pa_rec, pool_rules)
                 pa_rec["position_size"] = _position_size(pa_rec)
                 scored.append(pa_rec)
 
@@ -758,6 +907,7 @@ def main() -> int:
                     "options_calls": None,
                     "pa_phase": _b_struct.phase,
                 }
+                _annotate_pa_sweet_spots(_b_rec, pool_rules)
                 _b_rec["position_size"] = _position_size(_b_rec)
                 scored.append(_b_rec)
 
@@ -797,6 +947,7 @@ def main() -> int:
                     "options_calls": None,
                 }
                 # ag+au excluded by policy_weight gate above; only cu/sc reach here
+                _annotate_pa_sweet_spots(vrec, pool_rules)
                 vrec["position_size"] = _position_size(vrec)
                 scored.append(vrec)
 
@@ -852,6 +1003,7 @@ def main() -> int:
                     acalls = select_otm_calls_au(aclose, asig_date)
                     enrich_with_iv_au(acalls, asig_date, aclose, _AU_OPTIONS_DATA_DIR)
                     arec["options_calls"] = acalls
+                _annotate_pa_sweet_spots(arec, pool_rules)
                 arec["position_size"] = _position_size(arec)
                 scored.append(arec)
 
@@ -890,12 +1042,20 @@ def main() -> int:
                 _us_close = float(bars["close"].iloc[_us_sig.bar_idx])
                 if _us_struct.structural_stop >= _us_close:
                     continue
-                # Phase-based weight: BULL=0.65, TR/TR_FORMING=0.40
-                _us_phase_w = 0.65 if _us_struct.phase == "BULL" else 0.40
-                # TR phase: entry must be in bottom zone of range
-                if _us_struct.phase in ("TR", "TR_FORMING"):
-                    if not _us_struct.at_tr_bottom:
-                        continue
+                # Phase-based weight: BULL=0.65, TR/TR_FORMING=0.30
+                # B1-1 (2026-06-08): dropped the `at_tr_bottom` gate and lowered
+                # the TR weight from 0.40 → 0.30 per audit memo
+                # `doc/repro/score_audit_2026-06-08.md` §S2.  The gate (pos_in_tr<0.25
+                # of recent 8-pivot range) was killing 100% of TR signals (15/15
+                # in scripts/_b1_1_inspect_at_tr_bottom.py 365-day run, min pos_in_tr=
+                # 0.426).  H2 bottoms close back into the range by construction, so
+                # close-position-in-TR is structurally incompatible with the H2
+                # signal shape — the gate is dead, not selective.  Dropping the
+                # gate lifts annual fires 5 → ~20 (4x).  TR weight cut to 0.30 to
+                # reflect that the un-gated TR-phase subset has not been
+                # independently walk-forward validated (BULL still rides 0.65
+                # from pa_baseline_2026-06-08.md).
+                _us_phase_w = 0.65 if _us_struct.phase == "BULL" else 0.30
                 _us_score = 3 if _us_struct.phase == "BULL" else 2
                 _us_date  = _us_sig.timestamp.date()
                 _us_stop  = round(_us_struct.structural_stop, 4)
@@ -926,6 +1086,7 @@ def main() -> int:
                     "pa_tr_bot": round(_us_struct.tr_bot, 2) if _us_struct.tr_bot else None,
                     "pa_stop_pct": _us_stop_pct,
                 }
+                _annotate_pa_sweet_spots(_us_rec, pool_rules)
                 _us_rec["position_size"] = _position_size(_us_rec)
                 scored.append(_us_rec)
 
@@ -971,6 +1132,38 @@ def main() -> int:
                         continue
                     _legs60 = int(_s60.features.get("leg_count_down", 0))
                     _close60 = float(_bars_60["close"].iloc[_s60.bar_idx])
+                    # Structural stop (calibrated 2026-06-08 on 30 live
+                    # 365d samples — see doc/repro/score_audit_2026-06-08.md
+                    # §M1 / §N5).
+                    #
+                    # Definition: lowest low in the 11-bar window
+                    # `[idx-10 .. idx]` (signal bar inclusive) minus a
+                    # 0.5% buffer.  Including the signal bar in the
+                    # window guarantees `stop < entry_close` — for many
+                    # H2 records the signal bar IS the lowest of the
+                    # prior pullback, so a prior-only window puts the
+                    # floor above entry close (observed in 2/30 samples).
+                    #
+                    # Not used as a gate — pa_swing backtest did not
+                    # validate stop-based filtering on this lane.  This
+                    # populates `invalidation_level` / `pa_stop_pct` so
+                    # downstream consumers can size or annotate risk.
+                    #
+                    # Why not reuse PAStructureDetector.structural_stop:
+                    # on 60min bars pivot-based stops are unreliable
+                    # across split/dividend events (pre-event pivots
+                    # produce levels above the post-event price — e.g.
+                    # XLK 2025-12-05 in the 365d sample).  swing_low(10)
+                    # is split-robust because it is anchored to recent
+                    # bars only.  Calibrated distribution on the 30
+                    # samples: mean 1.26%, median 1.22%, stdev 0.53%,
+                    # range 0.69%–3.29% — clean unimodal tail.
+                    _lo_window = _bars_60["low"].iloc[
+                        max(0, _s60.bar_idx - 10) : _s60.bar_idx + 1
+                    ]
+                    _floor60 = float(_lo_window.min())
+                    _stop60 = _floor60 * 0.995
+                    _stop60_pct = (_close60 - _stop60) / _close60 * 100
                     _rec60: dict = {
                         "symbol": sym,
                         "date": _s60.timestamp.date().isoformat(),
@@ -981,7 +1174,7 @@ def main() -> int:
                         "wick_ratio": None,
                         "swing_pct": None,
                         "vol_ratio": None,
-                        "invalidation_level": None,
+                        "invalidation_level": round(_stop60, 4),
                         "matched_sweet_spots": [],
                         "policy_rule": "pa-us-60min-uptrend-hopp",
                         "policy_weight": _w60,
@@ -995,7 +1188,9 @@ def main() -> int:
                         "pa_trend": _trend,
                         "pa_legs": _legs60,
                         "pa_60m_timestamp": _s60.timestamp.isoformat(),
+                        "pa_stop_pct": round(_stop60_pct, 2),
                     }
+                    _annotate_pa_sweet_spots(_rec60, pool_rules)
                     _rec60["position_size"] = _position_size(_rec60)
                     scored.append(_rec60)
 
@@ -1037,6 +1232,7 @@ def main() -> int:
                     "underlying_price": _agri_close,
                     "options_calls": None,
                 }
+                _annotate_pa_sweet_spots(_agri_rec, pool_rules)
                 _agri_rec["position_size"] = _position_size(_agri_rec)
                 scored.append(_agri_rec)
 

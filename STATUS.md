@@ -3,6 +3,13 @@
 Snapshot at 2026-06-08.  Read this first to know where the project
 stands; consult linked docs / commits for the details.
 
+> **Audit pass 2026-06-08** — policy table + active-levels enumeration
+> below reconciled against `scripts/score_today.py` per
+> `doc/repro/score_audit_2026-06-08.md` (P1 finding S5).  Previous
+> revision advertised level `pa_us_daily` / weight `0.80*` for the US
+> daily lane and omitted `bpull` / `vflush` / `context_a` /
+> `pa_h2_climax` / `pa_cn_bond` from the active set.
+
 ## What this is
 
 A multi-period analysis + paired-trading engine for the joint analysis
@@ -23,25 +30,49 @@ report HTMLs (`doc/legacy/`).
 
 PA (Price Action) detectors own live signal generation as of
 2026-06-08.  Policy weights live in `src/engine/divergence/pa_detector.py::policy_weight()`
-and are validated K=3 walk-forward (see `doc/repro/pa_baseline_2026-06-08.md`
-and `pa_policy_validation_2026-06-08.md`):
+(and per-detector siblings: `bpull_detector.py`, `vflush_detector.py`,
+`context_a_detector.py`), validated K=3 walk-forward (see
+`doc/repro/pa_baseline_2026-06-08.md` and
+`pa_policy_validation_2026-06-08.md`):
 
-| instrument_class       | path                       | weight | validation                             |
-|------------------------|----------------------------|--------|----------------------------------------|
-| `us_equity`            | uptrend + h=opp (60min)    | 0.80   | EV +0.384R, n=56, F1+0.625 F2+0.708   |
-| `us_equity`            | uptrend + h=opp + legs=1   | 0.90   | EV +0.595R, n=21, hit 62%             |
-| `us_equity`            | uptrend + h=opp (daily)    | 0.80*  | EV +0.173R, n=68 — weaker; both lanes emit |
-| `us_equity` (long-bond)| tlt/tlh/iei/ief/shy        | 0.00   | suppressed (4/4 folds negative)        |
-| `cn_metal_futures`     | h=opp                      | 0.75   | EV +0.524R, n=46, 3 OOS folds all +   |
-| `cn_metal_futures`     | TR phase × h=opp           | (sub)  | EV +0.666R, n=38                       |
-| `cn_bond`              | h=opp                      | 0.70   | EV +0.548R, n=31, 3 OOS folds all +   |
-| `cn_futures`           | h=opp                      | 0.55   | monitoring only (EV ≈ 0)              |
-| `czce` / `cn_agri`     | (any)                      | 0.00   | OOS EV ≈ 0 with fold degradation      |
+| instrument_class       | path                                | weight                         | validation                                  |
+|------------------------|-------------------------------------|--------------------------------|---------------------------------------------|
+| `us_equity`            | uptrend + h=opp (60min)             | 0.80                           | EV +0.384R, n=56, F1+0.625 F2+0.708         |
+| `us_equity`            | uptrend + h=opp + legs=1 (60min)    | 0.90                           | EV +0.595R, n=21, hit 62%                   |
+| `us_equity`            | DIF>0 + h=opp + BULL phase (daily)  | 0.65                           | dominant emit path; score=3                 |
+| `us_equity`            | DIF>0 + h=opp + at_tr_bottom (daily)| 0.40                           | TR/TR_FORMING sub-cell; score=2 (half size) |
+| `us_equity` (long-bond)| tlt/tlh/iei/ief/shy                 | 0.00                           | suppressed (4/4 folds negative)             |
+| `cn_metal_futures`     | h=opp                               | 0.75                           | EV +0.524R, n=46, 3 OOS folds all +         |
+| `cn_metal_futures`     | TR phase × h=opp                    | (sub)                          | EV +0.666R, n=38                            |
+| `cn_bond`              | h=opp                               | 0.70                           | EV +0.548R, n=31, 3 OOS folds all +         |
+| `cn_futures`           | h=opp                               | 0.55                           | monitoring only (EV ≈ 0)                    |
+| `czce` / `cn_agri`     | (any)                               | 0.00                           | OOS EV ≈ 0 with fold degradation            |
 
-`score_today.py` is the live scorecard runner; PA detectors emit at
-both daily and 60min (`pa_us_daily` + `pa_us_60min` levels for US,
-`pa_h2` for cn_metal_futures, `pa_cn_bond` for cn_bond,
-`pa_h2_climax` for the validated CN agri sub-set).
+Daily-lane caveat: the audit found `pa_us_dif_pos` emits 5 records vs
+the 60min lane's 30 over 365 days — the `at_tr_bottom` gate (close in
+bottom 25% of the recent 8-pivot range) kills almost every TR setup.
+The 0.80 EV+0.173R/n=68 figure quoted in earlier STATUS revisions came
+from a pre-gate backtest and is **not** what the current code emits.
+See `doc/repro/score_audit_2026-06-08.md` finding S2 for the triage
+options.
+
+`score_today.py` is the live scorecard runner.  It currently emits
+**10 distinct level identifiers** across the pools (PA + a few small
+ancillary detectors; the 9 DIF-divergence levels are gated off by
+default):
+
+| Level            | Pool / instrument_class               | Emit-path policy_weight                                                | Score range            |
+|------------------|---------------------------------------|------------------------------------------------------------------------|------------------------|
+| `pa_us_60min`    | US 60min (us_equity, non-long-bond)   | 0.80 (uptrend + h=opp, legs=0) / 0.90 (legs=1)                         | 3 / 4                  |
+| `pa_us_dif_pos`  | US daily (us_equity, non-long-bond)   | 0.65 (BULL phase) / 0.40 (TR or TR_FORMING + at_tr_bottom)             | 3 (BULL) / 2 (TR)      |
+| `context_a`      | US + CN_METAL (us_equity, cn_metal)   | 0.60 (h=opp only; other h_rel = 0.0)                                   | 3 (Conditional PASS)   |
+| `pa_h2`          | CN_METAL (cn_metal_futures)           | 0.75 (h=opp) / 0.45 (supporting) / 0.60 (neutral)                      | 2-4 (iso + phase)      |
+| `bpull`          | CN_METAL ex-rb (cn_metal_futures)     | 0.75 (h=opp only; non-opp gated to 0.0 so only score=4 emits)          | 4                      |
+| `vflush`         | CN_METAL cu/sc only (cn_metal_futures)| 0.65 (h=opp; ag+au suppressed at 0.0)                                  | 3 (h=opp) / 2 (other)  |
+| `pa_cn_bond`     | CN_BOND (cn_bond)                     | 0.70 (h=opp) / 0.40 (neutral)                                          | 3 (fixed)              |
+| `pa_h2_climax`   | CN_COMMODITY agri subset              | 0.65 hardcoded in script (m/p/ta/ma/sr + require_climax + h=opp)       | 3 (fixed)              |
+| `intra_cycle`, `inter_cycle`, `inter_segment` | all classes (via `detect_all_divergences`) | apply_policy() per signal; **filtered out by default** under DIF retirement | n/a |
+| `intra_cycle_{hist,slope,dea,bull_hist,bull_slope,bull_dea}` | all classes | apply_policy() per signal; **filtered out by default** under DIF retirement | n/a |
 
 ### Retired (DIF lane)
 
@@ -163,7 +194,7 @@ Common runs:
 .venv/bin/python tools/repro_confidence_reversal.py
 
 # Full test suite
-.venv/bin/python -m pytest tests/ -q     # 217 passed currently
+.venv/bin/python -m pytest tests/ -q     # 315 passed currently
 ```
 
 ## Known followups
@@ -172,23 +203,47 @@ In rough priority order, mostly read-only / low-risk:
 
 1. **60min lane structural stop** — `pa_us_60min` records currently
    carry `invalidation_level=None` so position sizing falls through
-   to the default branch.  Wait for live samples before calibrating.
-2. **CN_BOND live data check** — confirm 60min Parquet bars exist
-   for `kq_m_cffex_tf/t/ts` in the production data root; otherwise
-   the scan silently no-ops.
-3. **detector.py source-level deprecation banner** — the classical 3
+   to the default branch.  Audit confirmed 9 score=4 + 21 score=3
+   live samples over the past year — enough to extract empirical
+   stops from peak adverse excursion.  See audit memo §N5.
+2. **`pa_us_dif_pos` daily-lane `at_tr_bottom` triage** — audit
+   memo §S2/N2: code emits 0.65/0.40, not the 0.80 the prior STATUS
+   advertised.  Either widen the gate (`pos_in_tr < 0.40`) and
+   re-run K=3 WF, or formally downgrade the daily lane to a
+   "BULL-phase-only" path and update the table.  Interim wording in
+   the policy table above reflects what code does, **not** a
+   re-validated weight — re-cite EV/hit before claiming OOS support
+   for the 0.65/0.40 numbers.
+3. **Sweet-spot rules dead-on-arrival for PA records** — audit memo
+   §S3 / §N3: the `SWEET_SPOTS` table is keyed on context features
+   (`prior_swing_distance_pct`, `wick_ratio`, `vol_ratio`) that PA
+   detectors don't populate.  0/95 1y US records match
+   `US-bot-swing-mid-h20`.  Either back-populate the context or
+   replace the rules with PA-native predicates.  Validated date on
+   surviving rules should be marked "pre-DIF-retirement, requires
+   re-validation".
+4. **detector.py source-level deprecation banner** — the classical 3
    DIF detectors emit from `engine/divergence/detector.py` which has
    no DEPRECATED banner.  Production behaviour is correct via
    score_today filter; source-level housekeeping is optional.
-4. **Physical removal of 9 DIF detector files** — defer; once we
+5. **Physical removal of 9 DIF detector files** — defer; once we
    confirm zero live consumers, remove the dead code.
-5. **DERIVED_ROOT env-var rollout audit** — 14 scripts route through
+6. **DERIVED_ROOT env-var rollout audit** — 14 scripts route through
    `_default_review_dir()` now; spot-check any new scripts added
    afterwards.
-6. **Black-model option pricer** — `options_simulation` /
+7. **Black-model option pricer** — `options_simulation` /
    `options_crossmarket` repro is gated on a pricer that didn't
    survive the migration.  Rebuild only if option-EV simulation is
    needed live.
+8. **`bpull` score gradient** — audit memo §S4: 31/31 bpull records
+   land at score=4 because non-opposing branches are policy-gated
+   to 0.  No quality signal reaches the consumer beyond "fire / not
+   fire".  Decide whether to surface bpull-internal features or
+   accept the binary lane.
+9. **PA `pa_isolated` / `pa_15m_confirmed` field consistency** —
+   audit memo §M3 / §M4: only `pa_h2` populates these fields; other
+   PA-derived levels emit them as hardcoded `None`.  Either drop the
+   fields on non-applicable lanes or compute them uniformly.
 
 ## Memory & instructions
 
