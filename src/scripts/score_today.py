@@ -119,15 +119,26 @@ _CN_AGRI_POS_SYMBOLS: frozenset[str] = frozenset({
     "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr",
 })
 
-# The 6 DIF intra_cycle_* variants (HICD / DIFSR / DEAD ± bull) were
-# marked deprecated 2026-06-08; paired-trading is moving signal
-# generation to PA.  By default score_today filters them out of the live
-# scorecard so the deprecated lane stops cluttering production output.
-# Pass --include-deprecated-dif to keep the legacy behaviour (used by
-# historical CSV regeneration or comparison runs).  Note the classical
-# 3 (intra_cycle, inter_cycle, inter_segment) are NOT deprecated and
-# always emit.
-DEPRECATED_DIF_LEVELS: frozenset[str] = frozenset({
+# All DIF-divergence-based detector levels.  paired-trading retired the
+# DIF signal lane 2026-06-08 (decision: "DIF 全退役") — PA detectors own
+# live signal generation.  By default score_today filters every record
+# from these levels out of the scorecard; pass --include-dif-detectors
+# to opt in (historical CSV regeneration or A/B comparison runs).
+#
+# Two groups:
+#   Classical 3:        intra_cycle / inter_cycle / inter_segment
+#                       — original MACD divergence detectors, baseline
+#                       through 2026-05-31 reports.
+#   intra_cycle_* (6):  HICD / DIFSR / DEAD ± bull variants
+#                       — engine files carry DEPRECATED banner since
+#                       2026-06-08; sample-explosion side-effects broke
+#                       the 2026-05-31 baselines.
+DIF_DETECTOR_LEVELS: frozenset[str] = frozenset({
+    # Classical 3
+    "intra_cycle",
+    "inter_cycle",
+    "inter_segment",
+    # intra_cycle_* (6 deprecated variants)
     "intra_cycle_hist",
     "intra_cycle_slope",
     "intra_cycle_dea",
@@ -407,10 +418,12 @@ def main() -> int:
     p.add_argument("--window-days", type=int, default=7,
                    help="how many trailing calendar days of signals to surface (default 7)")
     p.add_argument("-o", "--output", type=Path, help="write JSON scorecard to this file")
-    p.add_argument("--include-deprecated-dif", action="store_true",
-                   help="emit the 6 deprecated intra_cycle_* DIF detector levels "
-                        "(HICD/DIFSR/DEAD ± bull); default skips them — PA system "
-                        "is the active lane.  See DEPRECATED_DIF_LEVELS.")
+    p.add_argument("--include-dif-detectors", action="store_true",
+                   help="emit DIF-divergence-based detector records (classical 3 "
+                        "intra_cycle/inter_cycle/inter_segment + 6 deprecated "
+                        "intra_cycle_* variants); default skips them — paired-"
+                        "trading retired the DIF lane 2026-06-08.  See "
+                        "DIF_DETECTOR_LEVELS for the full list.")
     args = p.parse_args()
 
     symbols = POOLS[args.pool] if args.pool else args.symbols
@@ -481,7 +494,7 @@ def main() -> int:
         for sig in signals:
             if sig.timestamp.date() < cutoff_date:
                 continue
-            if sig.level in DEPRECATED_DIF_LEVELS and not args.include_deprecated_dif:
+            if sig.level in DIF_DETECTOR_LEVELS and not args.include_dif_detectors:
                 continue
             ctx = sig.context_features or {}
             policy = apply_policy(sig, instrument_class=instrument_class)
