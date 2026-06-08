@@ -1089,10 +1089,11 @@ def main() -> int:
                 scored.append(_b_rec)
 
         # VFlush scan — cn_metal_futures only. BASELINE_REF: baselines/vflush_cn_metal_cu_sc.json
-        # 2026-06-09 DRIFT: cu+sc baseline n=4 vs original n=50 claim; production weight
-        # reduced 0.65→0.30 pending root-cause. ag+au excluded (OOS negative).
+        # 2026-06-09 DRIFT verdict reverted: was a false alarm caused by
+        # backtest_vflush.py's truncated JSON loader; full_stack confirms cu+sc n=42
+        # over 5.5y, consistent with docstring n=50. Weight back to 0.65.
         # V-shape vertical flush bottoms: deep below EMA + current-bar selling climax,
-        # NO h_leg requirement.
+        # NO h_leg requirement. ag+au excluded (OOS negative).
         if instrument_class == "cn_metal_futures":
             if h_bars is None:
                 h_bars = _load_bars_60(sym, args)

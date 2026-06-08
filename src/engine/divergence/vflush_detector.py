@@ -243,10 +243,11 @@ class VFlushDetector:
 
           Other instrument classes: not validated → 0.0
 
-        2026-06-09 DRIFT: cu+sc sub-pool reproduced n=4 (cu n=1, sc n=3) vs
-        original docstring n=50. Production signals are ag-dominated path
-        which was never baseline-validated. Weight reduced 0.65 → 0.30
-        pending root-cause investigation (data backfill vs param drift).
+        2026-06-09 DRIFT was a FALSE ALARM. Standalone backtest_vflush.py
+        uses simple JSON loader which is truncated for cu/sc to 2026 only;
+        full_stack uses Parquet (full history) and gets cu+sc n=42 over
+        5.5y, consistent with docstring n=50 claim. Weight restored 0.65.
+        Real fix needed: backtest_vflush.py must use load_bars_quant_or_json.
         BASELINE_REF: baselines/vflush_cn_metal_cu_sc.json
 
         Args:
@@ -261,7 +262,7 @@ class VFlushDetector:
             if symbol is not None and symbol.lower() in _VFLUSH_EXCLUDED_CN_METAL:
                 return 0.0
             if rel == "opposing":
-                return 0.30  # DRIFT-recommended; was 0.65; see BASELINE_REF
+                return 0.65  # K=3 STRONG PASS; see BASELINE_REF
             return 0.0  # non-opposing not validated in K=3 walk-forward
 
         # Not validated on other pools
