@@ -4,6 +4,15 @@ Detects swing bottom setups from daily OHLCV bars without requiring MACD
 divergence state. Designed as a recall expansion mechanism complementary
 to the existing MACD divergence detector.
 
+Recall validation (vs ZigZag 5%+ up swings, 2026-06-08):
+  - US (10 ETFs, 2015 swings):   MACD 52.9% / PA 53.7% / +24.1pp PA-only
+                                  combined 77.0%, overlap 29.6% (PA is additive)
+  - CN_METAL (cu/au/ag/sc, 264): MACD 44.7% / PA 46.6% / +22.0pp PA-only
+                                  combined 66.7%
+  → PA catches +22-24pp of bottoms MACD misses; not a shadow of MACD.
+    B1 context 40-day max return: US +11.6%, CN +13.2%.
+    Residual blind spot (no detector hits): US 23%, CN 33%.
+
 Core pattern — H2 Bottom:
   1. Price in downswing (below EMA20, ema_distance_norm < threshold)
   2. At least 2 prior recovery attempts (h_leg_count >= min_h_legs)
@@ -15,9 +24,11 @@ Integration with MACD engine:
   - PASignal annotated with higher_tf_relation for policy routing
   - Policy weights calibrated by instrument_class (see policy_weight()):
       us_equity uptrend+h=opp:      0.80 (legs=1 bonus → 0.90)
+      us_equity us long-bond ETFs:  0.0  (tlt/tlh/iei/ief/shy — see policy_weight)
       cn_metal_futures h=opp:       0.75
+      cn_bond h=opp:                0.70 (cffex_tf/t/ts, 3-fold all positive)
       cn_futures h=opp:             0.55 (marginal, monitoring only)
-      czce/cn_agri:                 0.0  (negative OOS — suppressed)
+      czce/cn_agri:                 0.0  (OOS EV ≈ 0 with fold degradation — suppressed)
   - Ensemble boost: PA + MACD divergence within 3 bars → weight +0.15
   - legs=1 bonus validated K=3: 4/4 folds positive, n too small for production
 
@@ -205,11 +216,21 @@ class PABottomDetector:
     # Policy weights (calibrated from WF backtest 2026-06-02)
     # ------------------------------------------------------------------
 
+    # US long-duration treasury ETFs structurally break the PA H2 setup
+    # (see policy_weight() docstring).  Module-level so test setups can
+    # extend it without touching the function body.
+    US_LONG_BOND_SUPPRESS: frozenset[str] = frozenset({"tlt", "tlh", "iei", "ief", "shy"})
+
     @staticmethod
-    def policy_weight(sig: PASignal, instrument_class: str = "cn_metal_futures") -> float:
+    def policy_weight(
+        sig: PASignal,
+        instrument_class: str = "cn_metal_futures",
+        *,
+        symbol: str | None = None,
+    ) -> float:
         """Policy weight for a PA H2 bottom signal.
 
-        Calibrated from WF backtests (2026-06-02):
+        Calibrated from WF backtests (latest: 2026-06-08):
 
           us_equity (backtest_pa_swing.py, 60min):
             K=2 (IS≤2022, OOS1=2023-2024H1, OOS2>2024H2):
@@ -221,19 +242,50 @@ class PABottomDetector:
               uptrend + h=opp + legs=1: F1=+0.500R(n=5)  F2=+0.667R(n=3)  F3=+0.750R(n=10)
                 4/4 folds positive (incl IS), monotone increasing — monitoring-grade
 
-          cn_metal_futures (backtest_pa_standalone.py, gap-fix 2026-06-03):
-            K=2 corrected: IS=-0.095R(n=39) F1=+0.348R(n=23) F2=+0.373R(n=34) → 0.75
+          us_equity long-bond ETFs (tlt/tlh/iei/ief/shy):
+            backtest_pa_us_k3 (2026-06-08, tlt only): n=27 EV=-0.519R, hit=15%
+              4/4 folds negative: IS=-0.56 F1=-0.86 F2=-0.17 F3=-0.33
+              All years 2021-2026 negative (covers hike/yield-peak/cut regimes)
+              → suppress lane to 0.0; PA H2 doesn't survive duration shock dynamics
+
+          cn_metal_futures (backtest_pa_standalone.py, gap-fix 2026-06-03;
+            confirmed by backtest_pa_cn_structural.py via Parquet 2026-06-08):
             K=3 corrected: IS=-0.095R(n=39) F1=+0.348R(n=23) F2=+0.682R(n=16) F3=+0.097R(n=19)
-              All 3 OOS folds positive; IS negative; F3 marginal — monitoring grade
-              Drivers: cu=+0.722R(n=18), au=+0.269R(n=18); sc/ag drag
+            cn_structural 2026-06-08 (Parquet): all h=opp n=46 EV=+0.524R,
+              F1+0.591 F2+1.045 F3+0.255 — all 3 OOS folds positive
+            TR phase × h=opp: n=38 EV=+0.666R, F1+1.143 F2+1.250 F3+0.229
+              (TR phase is the strongest sub-cell; phase filter is a real signal)
+
+          cn_bond (cffex_tf/t/ts treasury futures; previously routed to cn_futures):
+            backtest_pa_cn_phasefilter --pool CN_BOND (2026-06-08):
+              All h=opp: n=31 EV=+0.548R, F1=+0.219(n=16) F2=+1.500(n=6) F3=+0.500(n=9)
+              TR phase 28/31 (90%); 3/3 OOS folds positive — STRONG PASS → 0.70
 
           cn_futures (mixed):         F1=+0.183R        F2=+0.124R       marginal → 0.55
           cn_agri_pos (m/p/ta/ma/sr, require_climax=True, h=opp, 2026-06-04):
             K=3: F1=+0.640R(n=8)  F2=+0.516R(n=7)  F3=+0.571R(n=7)  STRONG PASS → 0.65
             (handled inline in score_today; y/i/j excluded — negative h=opp lift)
-          czce / cn_agri (no climax): F1=-0.069R        F2=-0.068R       REJECTED → 0.0
+          czce / cn_agri (no climax):
+            backtest_pa_cn_phasefilter 2026-06-08 sub-pool slice:
+              CZCE only (ta/ma/cf/sr): n=46 OOS EV=+0.032R, F1+0.294 F2-0.068 F3-0.100
+              DCE_AGRI (m/i/j/jm/p/y): n=105 OOS EV=+0.017R, F1+0.239 F2-0.086 F3-0.014
+              IS→OOS degradation (CZCE +0.278R→+0.032R) is overfit signature.
+              OOS EV ≈ 0 with fold degradation, hit 35-37% → suppressed at 0.0
+
+        Args:
+            sig: the PA signal
+            instrument_class: routing class
+            symbol: optional lowercased symbol stem, used to short-circuit
+                lanes that are structurally broken at the symbol level
+                (e.g. US long-bond ETFs under us_equity).
         """
+        sym = (symbol or "").lower()
         rel = sig.higher_tf_relation
+
+        # Symbol-level suppression: PA H2 fails on US long-duration
+        # treasury ETFs across every macro regime (see docstring).
+        if sym in PABottomDetector.US_LONG_BOND_SUPPRESS:
+            return 0.0
 
         if instrument_class == "cn_metal_futures":
             # K=3 corrected (gap-fix): OOS folds all positive; IS=-0.095R; F3=+0.097R (marginal)
@@ -242,6 +294,13 @@ class PABottomDetector:
             if rel == "supporting":
                 return 0.45
             return 0.60  # neutral/unknown
+
+        if instrument_class == "cn_bond":
+            # CFFEX treasury futures (tf/t/ts).  K=3 all OOS folds positive;
+            # 90% of signals fire in TR phase.
+            if rel == "opposing":
+                return 0.70
+            return 0.40  # neutral fallback; bond futures rarely trade BULL phase
 
         if instrument_class == "cn_futures":
             # Mixed commodity: marginal positive OOS, metal sub-pool drives
@@ -271,12 +330,13 @@ class PABottomDetector:
             # ranging or unknown trend — not validated
             return 0.0
 
-        # czce, cn_agri: consistently negative OOS — suppress
+        # czce, cn_agri: OOS EV ≈ 0 with fold degradation — suppress
         return 0.0
 
     @staticmethod
     def ensemble_weight(pa_sig: PASignal, instrument_class: str,
-                        macd_within_bars: int | None) -> float:
+                        macd_within_bars: int | None,
+                        *, symbol: str | None = None) -> float:
         """Weight when PA and MACD both fire near the same bar.
 
         Args:
@@ -284,11 +344,13 @@ class PABottomDetector:
             instrument_class: routing class
             macd_within_bars: bars between PA and nearest MACD signal,
                 None if no nearby MACD signal
+            symbol: forwarded to ``policy_weight`` for symbol-level
+                suppression (US long-bond ETFs)
 
         Returns:
             Combined weight for the ensemble signal.
         """
-        base = PABottomDetector.policy_weight(pa_sig, instrument_class)
+        base = PABottomDetector.policy_weight(pa_sig, instrument_class, symbol=symbol)
         if base == 0.0:
             return 0.0
         if macd_within_bars is not None and macd_within_bars <= 3:

@@ -40,6 +40,13 @@ POOLS: dict[str, list[str]] = {
         "kq_m_ine_sc",
     ],
     "CN_BOND": ["kq_m_cffex_tf", "kq_m_cffex_t", "kq_m_cffex_ts"],
+    "CZCE_ONLY": [
+        "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_cf", "kq_m_czce_sr",
+    ],
+    "DCE_AGRI": [
+        "kq_m_dce_m", "kq_m_dce_i", "kq_m_dce_j", "kq_m_dce_jm",
+        "kq_m_dce_p", "kq_m_dce_y",
+    ],
 }
 
 

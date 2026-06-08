@@ -1,5 +1,11 @@
 """DIF Slope Reversal (DIFSR) detector.
 
+DEPRECATED (2026-06-08): paired-trading is moving signal generation off the
+DIF-based intra_cycle_* path.  See engine.divergence.pa_* for the active
+lane and doc/repro/pa_baseline_2026-06-08.md for the policy rationale.
+This module is retained for historical CSV regeneration; do not extend.
+
+
 Fires within a single bearish MACD cycle (DIF < 0) when the DIF's
 short-term slope turns from negative to positive while price continues
 to make a lower low vs the DIF-trough bar.

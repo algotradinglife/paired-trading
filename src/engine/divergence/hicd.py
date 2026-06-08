@@ -1,5 +1,13 @@
 """Histogram Intra-Cycle Divergence (HICD) detector.
 
+DEPRECATED (2026-06-08): paired-trading is moving signal generation off the
+DIF-based intra_cycle_* path (HICD/DIFSR/DEAD ± bull variants).  Sample-
+expansion side-effects diluted the 2026-05-31 baselines (see
+doc/repro/cn_b_topology_repro_2026-06-07.md).  PA detectors in
+engine.divergence.pa_* are the active lane.  This module is retained for
+historical CSV regeneration; do not extend.
+
+
 Fires within a single bearish MACD cycle (DIF < 0) when the histogram
 recovers from its local trough while price continues to make lower lows.
 Unlike the standard heap-vs-heap detector, this does NOT require two

@@ -1,5 +1,11 @@
 """DEA Bullish-Cycle Divergence (DEAD+) detector.
 
+DEPRECATED (2026-06-08): paired-trading is moving signal generation off the
+DIF-based intra_cycle_* path.  See engine.divergence.pa_* for the active
+lane and doc/repro/pa_baseline_2026-06-08.md for the policy rationale.
+This module is retained for historical CSV regeneration; do not extend.
+
+
 Fires within a bullish MACD cycle (DIF > 0) when the DEA (MACD signal line,
 slow EMA of DIF) stops declining — its slope crosses from negative to ≥ 0 —
 while price continues to make a lower low vs the DEA-trough bar.

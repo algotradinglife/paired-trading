@@ -107,7 +107,7 @@ POOL_INSTRUMENT_CLASS: dict[str, str] = {
     "CN": "cn_index_futures",
     "CN_COMMODITY": "cn_futures",
     "CN_METAL": "cn_metal_futures",
-    "CN_BOND": "cn_futures",
+    "CN_BOND": "cn_bond",  # promoted from cn_futures 2026-06-08; see pa_detector docstring
 }
 
 # PA H2 climax+h=opp K=3 STRONG PASS (2026-06-04):

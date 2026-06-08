@@ -1,5 +1,11 @@
 """Histogram Intra-Cycle Divergence — Bullish Cycle (HICD+) detector.
 
+DEPRECATED (2026-06-08): paired-trading is moving signal generation off the
+DIF-based intra_cycle_* path.  See engine.divergence.pa_* for the active
+lane and doc/repro/pa_baseline_2026-06-08.md for the policy rationale.
+This module is retained for historical CSV regeneration; do not extend.
+
+
 Fires within a bullish MACD cycle (DIF > 0) when the histogram (DIF − DEA gap)
 has pulled back from a peak and then recovers ≥ MIN_HIST_RECOVERY of its
 pullback magnitude, while price extends to a new low vs the histogram-trough bar.

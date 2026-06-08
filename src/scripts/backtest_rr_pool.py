@@ -115,7 +115,7 @@ POOL_INSTRUMENT_CLASS: dict[str, str] = {
     "CN_AGRI": "czce",      # CZCE1 rule applied; covers both DCE and CZCE symbols
     "US_EQUITY": "us_equity",
     "US_MACRO": "us_equity",
-    "CN_BOND": "cn_futures",
+    "CN_BOND": "cn_bond",  # promoted from cn_futures 2026-06-08; n=31 EV+0.548R, 3 OOS folds positive
 }
 
 
