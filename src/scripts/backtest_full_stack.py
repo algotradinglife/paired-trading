@@ -533,6 +533,12 @@ def main() -> int:
                    help="ISO date — only emit signals on/after this")
     p.add_argument("--out-csv", type=Path,
                    default=_default_review_dir() / "full_stack_backtest.csv")
+    p.add_argument("--max-hold-daily", type=int, default=30,
+                   help="Daily bar hold-cap for non-60min lanes (default 30; "
+                        "raised from 20 per max_hold_experiment_2026-06-09.md: "
+                        "+25%% EV / +38.72R across stack on 5.5y replay)")
+    p.add_argument("--max-hold-60min", type=int, default=140,
+                   help="60min bar hold-cap for pa_us_60min lane (default 140)")
     args = p.parse_args()
 
     since_ts = pd.Timestamp(args.since, tz="UTC")
@@ -540,7 +546,9 @@ def main() -> int:
     all_rows: list[dict] = []
     for pool in pools:
         print(f"\n=== {pool} ({POOL_TO_CLASS[pool]}) ===")
-        rows = replay_pool(pool, since_ts)
+        rows = replay_pool(pool, since_ts,
+                           max_hold_daily=args.max_hold_daily,
+                           max_hold_60min=args.max_hold_60min)
         all_rows.extend(rows)
         print(f"{pool}: {len(rows)} trades")
 
