@@ -46,6 +46,7 @@ from engine.divergence.pa_structure import PAStructureDetector
 from engine.divergence.vflush_detector import VFlushDetector
 from engine.features.macd import macd
 from engine.features.streams import compute_feature_streams
+from engine.features.swing_context import compute_swing_context
 from engine.options.cn_ag_selector import enrich_with_iv, select_otm_calls
 from engine.options.cn_au_selector import enrich_with_iv_au, select_otm_calls_au
 from engine.units.snapshot import compute_unit_metadata
@@ -891,6 +892,76 @@ def main() -> int:
                 }
                 _us_rec["position_size"] = _position_size(_us_rec)
                 scored.append(_us_rec)
+
+        # PA H2 scan — us_equity 60min "fast lane".  Sibling of the daily
+        # us_equity block above; emits independent records (different
+        # timestamps, hold period, stop sizing).
+        #
+        # Backtest validation (pa_swing --dataset us_60min, 5y 2021-2026):
+        #   uptrend + h=opp:              n=56  EV=+0.384R  F1+0.625 F2+0.708
+        #   uptrend + h=opp + legs=1:     n=21  EV=+0.595R  hit 62%
+        # Per-symbol standouts: nvda +1.200R(n=5), gdx +1.000R(n=5),
+        # spy +0.929R(n=7) — nvda flips from -0.20R daily → +1.20R 60min.
+        #
+        # Operational profile: 60min entry, daily HTF for h=opp gate,
+        # max_hold ~140 60min bars (~3.5 trading days), atr_period=50.
+        # Distinct from the daily lane: don't run BULL phase filter or
+        # structural stop here — pa_swing didn't validate those.
+        if instrument_class == "us_equity" and sym.lower() not in PABottomDetector.US_LONG_BOND_SUPPRESS:
+            _bars_60 = _load_bars_60(sym, args)
+            if _bars_60 is not None and len(_bars_60) >= 100:
+                _h_daily = bars  # daily bars already loaded above as `bars`
+                _swing_ctx = compute_swing_context(_bars_60, swing_n=3)
+                _pa60_det = PABottomDetector(
+                    min_h_legs=2,
+                    min_quality=0.3,    # production threshold (pa_swing used 0.1 in backtest)
+                    ema_threshold=0.0,
+                    min_gap=35,         # ~1.5 trading day spacing on 60min
+                    h_lookback=20,
+                )
+                _pa60_sigs: list[PASignal] = _pa60_det.scan(
+                    _bars_60, h_bars=_h_daily, swing_context=_swing_ctx,
+                )
+                for _s60 in _pa60_sigs:
+                    if _s60.timestamp.date() < cutoff_date:
+                        continue
+                    if _s60.higher_tf_relation != "opposing":
+                        continue
+                    _trend = str(_s60.features.get("trend_structure", ""))
+                    if _trend != "uptrend":
+                        continue
+                    _w60 = PABottomDetector.policy_weight(_s60, instrument_class, symbol=sym)
+                    if _w60 == 0.0:
+                        continue
+                    _legs60 = int(_s60.features.get("leg_count_down", 0))
+                    _close60 = float(_bars_60["close"].iloc[_s60.bar_idx])
+                    _rec60: dict = {
+                        "symbol": sym,
+                        "date": _s60.timestamp.date().isoformat(),
+                        "direction": "bottom",
+                        "level": "pa_us_60min",
+                        "subtype": f"pa_us_60min_uptrend{'_legs1' if _legs60 == 1 else ''}",
+                        "confidence": _w60,
+                        "wick_ratio": None,
+                        "swing_pct": None,
+                        "vol_ratio": None,
+                        "invalidation_level": None,
+                        "matched_sweet_spots": [],
+                        "policy_rule": "pa-us-60min-uptrend-hopp",
+                        "policy_weight": _w60,
+                        "pa_isolated": None,
+                        # score=4 when legs=1 bonus fires (weight=0.90), else 3
+                        "score": 4 if _legs60 == 1 else 3,
+                        "underlying_price": _close60,
+                        "options_calls": None,
+                        # Extra context so downstream can sort/group on TF
+                        "pa_timeframe": "60min",
+                        "pa_trend": _trend,
+                        "pa_legs": _legs60,
+                        "pa_60m_timestamp": _s60.timestamp.isoformat(),
+                    }
+                    _rec60["position_size"] = _position_size(_rec60)
+                    scored.append(_rec60)
 
         # CN_AGRI_POS PA H2 climax scan — m/p/ta/ma/sr only.
         # Validated: PABottomDetector(require_climax=True)+h=opp K=3 STRONG PASS.
