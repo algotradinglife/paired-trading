@@ -16,17 +16,21 @@
     "cutoff3": "2025-06-30",
     "stop_framework": "ATR x 1.5"
   },
-  "samples_2026-06-09_reproduction": {
-    "scope": "ALL h=opp (no symbol filter — script lacks --symbols flag)",
+  "samples_2026-06-09_v3_after_loader_fix": {
+    "scope": "cu+sc h=opp with selling_climax_score>=0.3 (production VFlushDetector default)",
+    "is":  {"n": 49, "ev_r":  0.321, "win_pct": 55},
+    "f1":  {"n": 17, "ev_r":  0.119, "win_pct": 41},
+    "f2":  {"n":  4, "ev_r":  1.348, "win_pct": 100},
+    "f3":  {"n": 10, "ev_r":  0.775, "win_pct": 80},
+    "note": "After fixing JSON loader bug (commit pending). Numbers consistent with docstring n=50 claim. F2 n=4 is an outlier; F3 strong."
+  },
+  "samples_2026-06-09_BEFORE_loader_fix_KEPT_FOR_HISTORY": {
+    "scope": "ALL h=opp (truncated 60min JSON; documentation of false alarm)",
     "is": {"n": 22, "ev_r": -0.073},
     "f1": {"n":  7, "ev_r":  0.068},
     "f2": {"n":  4, "ev_r":  1.229},
-    "f3": {"n": 10, "ev_r":  0.415}
-  },
-  "samples_2026-06-09_cu_sc_only": {
-    "scope": "Manually filtered from /tmp/vflush_cn_metal.csv to cu+sc only",
-    "n": 4,
-    "note": "Per-symbol breakdown shows cu n=1 (-1.000R), sc n=3 (+0.666R). FAR below docstring's claimed n=50 across folds."
+    "f3": {"n": 10, "ev_r":  0.415},
+    "note": "These false numbers triggered the 2026-06-09 DRIFT verdict. Kept for history; do NOT use."
   },
   "samples_prior_2026-06-03": {
     "note": "Original docstring baseline; cu+sc only claim",

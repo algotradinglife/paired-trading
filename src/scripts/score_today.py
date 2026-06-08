@@ -129,11 +129,22 @@ _CN_AGRI_POS_SYMBOLS: frozenset[str] = frozenset({
 # Empirical full_stack 5.5y per-symbol shows these are net negative or
 # very small samples with extreme negative EV. See
 # doc/repro/lane_market_evaluation_2026-06-09.md kill list.
+# 2026-06-09 P1c extension: added SPY (n=25 EV-0.04R, largest negative
+# sample, structural broad-market pattern).
 _PA_US_60MIN_SUPPRESS: frozenset[str] = frozenset({
     "DIA",   # n=10 EV-0.40R win=20% — broad-market reversal not the pattern
     "XLK",   # n=14 EV-0.14R win=29% — large-cap tech, low 60min vol
     "QQQ",   # n=11 EV-0.14R win=27% — same family as XLK
     "XLRE",  # n= 4 EV-0.75R win= 0% — small sample but 0 winners
+    "SPY",   # n=25 EV-0.04R win=32% — broad-market (P1c 2026-06-09)
+})
+
+# P1c lane × market eval 2026-06-09: pa_us_dif_pos broad-market suppression.
+# DIA and SPY consistently negative across context_a + pa_us_60min + pa_us_dif_pos
+# = structural pattern (broad-market H2 reversals don't sustain to TP1).
+_PA_US_DIF_POS_SUPPRESS: frozenset[str] = frozenset({
+    "DIA",   # n=8  EV-0.026R win=50%
+    "SPY",   # n=9  EV-0.088R win=56%
 })
 
 # All DIF-divergence-based detector levels.  paired-trading retired the
@@ -1224,6 +1235,12 @@ def main() -> int:
         # doc/repro/pa_tlt_diagnostic_2026-06-08.md).  Match the
         # PABottomDetector.policy_weight() suppression set.
         if instrument_class == "us_equity" and sym.lower() not in PABottomDetector.US_LONG_BOND_SUPPRESS:
+            # P1c lane × market eval 2026-06-09: pa_us_dif_pos broad-market suppression.
+            # DIA n=8 EV-0.026, SPY n=9 EV-0.088 — same broad-market pattern as
+            # context_a US and pa_us_60min. Sample is borderline but principle is
+            # structural: broad-market reversals are slow-moving, don't fit H2 timing.
+            if sym.upper() in _PA_US_DIF_POS_SUPPRESS:
+                continue
             if h_bars is None:
                 h_bars = _load_bars_60(sym, args)
             _pa_struct_det = PAStructureDetector()

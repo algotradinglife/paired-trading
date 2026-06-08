@@ -28,6 +28,7 @@ import numpy as np
 import pandas as pd
 
 from engine.divergence.bpull_detector import BPullDetector, BPullSignal
+from data import bar_loader
 
 DEFAULT_BARS_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
 ATR_PERIOD = 14
@@ -72,13 +73,14 @@ CONFIGS: list[tuple[str, float, float, bool]] = [
 # ---------------------------------------------------------------------------
 
 def load_bars(sym: str, bars_dir: Path, suffix: str = "_daily") -> pd.DataFrame | None:
-    candidates = list(bars_dir.glob(f"**/{sym}{suffix}.json"))
-    if not candidates:
-        return None
-    payload = json.loads(candidates[0].read_text())
-    df = pd.DataFrame(payload["bars"])
-    df["timestamp"] = pd.to_datetime(df["time"], unit="s", utc=True)
-    return df.sort_values("timestamp").reset_index(drop=True)
+    """Load bars via load_bars_quant_or_json (Parquet → fallback JSON).
+
+    The simple JSON loader previously here was wrong: snapshots for
+    shfe ag/au/cu / ine sc were truncated to 2026 H1 during migration,
+    so h_rel annotation silently failed for ~98% of historical signals
+    (see vflush 2026-06-09 incident — same bug pattern).
+    """
+    return bar_loader.load_bars_quant_or_json(sym, suffix, bars_dir)
 
 
 def compute_atr(bars: pd.DataFrame, period: int = ATR_PERIOD) -> pd.Series:
