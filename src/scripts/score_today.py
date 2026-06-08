@@ -833,6 +833,11 @@ def main() -> int:
         if instrument_class == "cn_metal_futures":
             h_bars = _load_bars_60(sym, args)
             bpull_det = BPullDetector()
+            # Structural stop on daily — bpull is a "buy the pullback in
+            # uptrend / TR" signal; PA structural_stop returns the most
+            # recent HL (BULL) or TR floor (TR/TR_FORMING).  Same shape
+            # as pa_h2 / context_a / pa_h2_climax.
+            _bpull_struct_det = PAStructureDetector()
             for bsig in bpull_det.scan(bars, h_bars):
                 if bsig.timestamp.date() < cutoff_date:
                     continue
@@ -843,6 +848,13 @@ def main() -> int:
                 bscore = 4 if bsig.higher_tf_relation == "opposing" else 2
                 bsig_date = bsig.timestamp.date()
                 bentry_close = float(bars["close"].iloc[bsig.bar_idx])
+                _bpull_struct = _bpull_struct_det.detect(bars, up_to_idx=bsig.bar_idx)
+                _b_inval = (
+                    round(_bpull_struct.structural_stop, 4)
+                    if _bpull_struct.structural_stop is not None
+                    and _bpull_struct.structural_stop < bentry_close
+                    else None
+                )
                 brec: dict = {
                     "symbol": sym,
                     "date": bsig_date.isoformat(),
@@ -853,7 +865,7 @@ def main() -> int:
                     "wick_ratio": None,
                     "swing_pct": None,
                     "vol_ratio": None,
-                    "invalidation_level": None,
+                    "invalidation_level": _b_inval,
                     "matched_sweet_spots": [],
                     "policy_rule": "bpull-k3-cn-metal",
                     "policy_weight": weight,
