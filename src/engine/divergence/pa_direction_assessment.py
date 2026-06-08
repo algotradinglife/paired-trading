@@ -124,38 +124,22 @@ _TR_BULL_ZONE_MAX: float = 0.30
 _TR_BEAR_ZONE_MIN: float = 0.70
 
 
-def _vote_from_daily_structure(
-    daily_bars: pd.DataFrame,
+def _structure_vote_logic(
+    bars: pd.DataFrame,
     bar_idx: int,
-    ambush_pattern: AmbushPattern = "h2_bottom",
-) -> DirectionSource:
-    """Source A — PA structural phase + TR position on daily bars.
+    ambush_pattern: AmbushPattern,
+) -> tuple[Vote, str]:
+    """Generic PA-structure-based vote logic — TF-agnostic.
 
-    Direction interpretation depends on phase AND, for TR phases, the
-    close's position within the range:
+    Used by both daily_structure (always on daily bars) and the new
+    signal_tf_structure source (on the signal's primary TF, which for
+    pa_us_60min is 60min bars).  The logic encodes the locked-2026-06-08
+    "TR 区间底部做多，顶部做空，其他位置不做" policy.
 
-        BULL                              → bull  (trend backdrop)
-        BEAR                              → bear  (trend backdrop)
-        TR / TR_FORMING:
-            pos_in_tr ≤ 0.30 + h2_bottom  → bull  ("buy support")
-            pos_in_tr ≥ 0.70 + h2_top     → bear  ("sell resistance")
-            otherwise (middle, or mismatch) → neutral  ("don't trade")
-            tr_top or tr_bot is None        → neutral  (incomplete range)
-        UNCLEAR                           → neutral  (no structure)
-
-    Rationale carries phase + pos_in_tr (when applicable) + tr_top/tr_bot.
-
-    Rationale for the TR/TR_FORMING logic (user-locked 2026-06-08):
-    PA's H2 setups live inside TR phases — buying support at tr_bot,
-    selling resistance at tr_top.  Treating every TR/TR_FORMING signal
-    as "neutral" makes daily_structure miss the directional content the
-    range structure provides.  Position-mismatched signals (h2_bottom
-    near tr_top, or h2_top near tr_bot) stay neutral here; multi-TF
-    sources (weekly_trend / hourly_state / etc.) resolve the
-    ambiguity.
+    Returns (vote, rationale_bits_string) — caller wraps in DirectionSource.
     """
     det = PAStructureDetector()
-    struct = det.detect(daily_bars, up_to_idx=bar_idx)
+    struct = det.detect(bars, up_to_idx=bar_idx)
     phase = struct.phase
     rationale_bits = [f"phase={phase}"]
 
@@ -164,7 +148,6 @@ def _vote_from_daily_structure(
     elif phase == "BEAR":
         vote = "bear"
     elif phase in ("TR", "TR_FORMING"):
-        # Need both edges + pos_in_tr to make a position call.
         if (struct.tr_top is None or struct.tr_bot is None
                 or struct.pos_in_tr is None):
             vote = "neutral"
@@ -178,19 +161,33 @@ def _vote_from_daily_structure(
             elif ambush_pattern == "h2_top" and pos_clip >= _TR_BEAR_ZONE_MIN:
                 vote = "bear"
             else:
-                # Middle of range OR position-mismatched signal —
-                # conservative neutral; multi-TF sources resolve.
                 vote = "neutral"
     else:  # UNCLEAR
         vote = "neutral"
 
     if struct.tr_top is not None and struct.tr_bot is not None:
         rationale_bits.append(f"tr=[{struct.tr_bot:.2f},{struct.tr_top:.2f}]")
+
+    return vote, ", ".join(rationale_bits)
+
+
+def _vote_from_daily_structure(
+    daily_bars: pd.DataFrame,
+    bar_idx: int,
+    ambush_pattern: AmbushPattern = "h2_bottom",
+) -> DirectionSource:
+    """Source A — PA structural phase + TR position on daily bars.
+
+    Thin wrapper over ``_structure_vote_logic`` that always evaluates
+    on the daily bars.  See ``_structure_vote_logic`` for the policy
+    encoded (TR position-aware vote, locked 2026-06-08).
+    """
+    vote, rationale = _structure_vote_logic(daily_bars, bar_idx, ambush_pattern)
     return DirectionSource(
         name="daily_structure",
         vote=vote,
         weight=_SOURCE_WEIGHT,
-        rationale=", ".join(rationale_bits),
+        rationale=rationale,
     )
 
 
@@ -573,58 +570,83 @@ def assess_direction(
     ambush_pattern: AmbushPattern = "h2_bottom",
     weekly_bars: pd.DataFrame | None = None,
     bars_15: pd.DataFrame | None = None,
+    signal_tf_bars: pd.DataFrame | None = None,
+    signal_tf_label: str | None = None,
+    signal_tf_bar_idx: int | None = None,
 ) -> DirectionVerdict:
-    """Aggregate the eight direction sources into a verdict.
+    """Aggregate the direction sources into a verdict.
 
-    Source pool (each contributes weight 0.125; threshold 0.50 = 4-of-8):
+    Source pools (each source weight 0.125; threshold = 0.50 × total_weight):
 
-      1. daily_structure   — PAStructureDetector phase
-      2. hourly_state      — 1h DIF vs ATR margin
-      3. context           — Context A/B1 classifier (bottom-only)
-      4. divergence        — PA-native pivot+hist check
-      5. weekly_trend      — W phase + W DIF (multi-TF backdrop)
-      6. minute15_state    — 15m DIF vs ATR (fine-grain confirmation)
-      7. force_balance     — bull/bear strength over recent window
-      8. exhaustion        — exhausting-side detection
+      8-source path (default, daily-anchored lanes):
+        1. daily_structure   — PAStructureDetector phase + TR position
+        2. hourly_state      — 1h DIF vs ATR margin
+        3. context           — Context A/B1 (bottom) or A_top/B1_top (top)
+        4. divergence        — PA-native pivot+hist check
+        5. weekly_trend      — W phase + W DIF (multi-TF backdrop)
+        6. minute15_state    — 15m DIF vs ATR (fine-grain confirmation)
+        7. force_balance     — bull/bear strength over recent window
+        8. exhaustion        — exhausting-side detection
+
+      10-source path (signal_tf_bars provided — POC for pa_us_60min):
+        Adds signal_tf_structure (PA structure on signal's own TF) +
+        resonance (alignment check between signal-TF and daily structures).
+        threshold = 0.625 = 5-of-10 majority required.
 
     Parameters
     ----------
     daily_bars : pd.DataFrame
-        Daily OHLCV (must have at least open/high/low/close + timestamp).
+        Daily OHLCV.  Always used for the daily_structure source.
     hourly_bars : pd.DataFrame or None
         Optional 1h OHLCV.  None → hourly source votes neutral.
     bar_idx : int
-        Positional index into ``daily_bars`` at which to evaluate.
+        Positional index into ``daily_bars`` at the signal day.
     macd_df : pd.DataFrame or None
         Optional daily MACD frame.  None → context + divergence neutral.
     ambush_pattern : "h2_bottom" | "h2_top"
         Polarity hint — propagated to every polarity-aware source.
-    weekly_bars : pd.DataFrame or None
-        Optional weekly OHLCV.  None → weekly source neutral.
-    bars_15 : pd.DataFrame or None
-        Optional 15-minute OHLCV.  None → 15m source neutral.
+    weekly_bars, bars_15 : optional OHLCV for weekly_trend / minute15_state.
+    signal_tf_bars : pd.DataFrame or None
+        OPT-IN POC param (D-full architecture revision 2026-06-08).  When
+        provided, activates the 10-source path: signal_tf_structure runs
+        on these bars with the same TR position-aware logic, and a
+        resonance source compares the signal-TF vote against daily.
+        Intended for pa_us_60min where signal's TF (60min) differs from
+        the daily backdrop.  None → standard 8-source path (daily-anchored).
+    signal_tf_label : str or None
+        Label for the signal_tf (e.g. "60min").  Required when
+        signal_tf_bars is provided.
+    signal_tf_bar_idx : int or None
+        Index into ``signal_tf_bars`` at the signal bar.  Required when
+        signal_tf_bars is provided.
 
     Returns
     -------
     DirectionVerdict
-        Direction ∈ {long_call, long_put, skip} with per-source rationale.
+        Direction ∈ {long_call, long_put, skip}.  When the 10-source
+        path is taken, the rationale string carries the resonance state
+        ("resonance=YES" / "resonance=NO" / "resonance=n/a").
     """
     # Lazy imports to avoid circular dep at module load time
     from engine.divergence.dir_sources_multitf import (
-        minute15_state_source, weekly_trend_source,
+        minute15_state_source, resonance_check_source,
+        signal_tf_structure_source, weekly_trend_source,
     )
     from engine.divergence.dir_sources_context import (
         exhaustion_source, force_balance_source,
     )
 
-    _ALL_NAMES = (
+    use_signal_tf = signal_tf_bars is not None
+    _BASE_NAMES = (
         "daily_structure", "hourly_state", "context", "divergence",
         "weekly_trend", "minute15_state", "force_balance", "exhaustion",
     )
+    _ALL_NAMES = _BASE_NAMES + (
+        (f"signal_tf_structure_{signal_tf_label or 'signal_tf'}", "resonance")
+        if use_signal_tf else ()
+    )
 
     if not (0 <= bar_idx < len(daily_bars)):
-        # Degenerate — return a skip with eight neutral sources so callers
-        # can serialise the record without special-casing.
         sources = [
             DirectionSource(name=name, vote="neutral",
                             weight=_SOURCE_WEIGHT, rationale="bar_idx_oob")
@@ -637,8 +659,6 @@ def assess_direction(
             rationale="bar_idx out of bounds",
         )
 
-    # Source order is fixed — downstream consumers can index by position
-    # if they choose to.
     src_structure = _vote_from_daily_structure(
         daily_bars, bar_idx, ambush_pattern=ambush_pattern,
     )
@@ -658,7 +678,6 @@ def assess_direction(
         daily_bars, bar_idx, macd_df, ambush_pattern=ambush_pattern,
     )
 
-    # New (D-full) sources
     src_weekly = weekly_trend_source(
         weekly_bars, sig_ts, ambush_pattern=ambush_pattern,
         weight=_SOURCE_WEIGHT,
@@ -681,13 +700,29 @@ def assess_direction(
         src_weekly, src_15m, src_force, src_exhaust,
     ]
 
+    if use_signal_tf:
+        src_signal_tf = signal_tf_structure_source(
+            signal_tf_bars, signal_tf_bar_idx,
+            ambush_pattern=ambush_pattern,
+            tf_label=signal_tf_label or "signal_tf",
+            weight=_SOURCE_WEIGHT,
+        )
+        src_resonance = resonance_check_source(
+            src_signal_tf.vote, src_structure.vote,
+            weight=_SOURCE_WEIGHT,
+            signal_tf_label=signal_tf_label or "signal_tf",
+        )
+        sources.extend([src_signal_tf, src_resonance])
+
+    total_weight = sum(s.weight for s in sources)
+    threshold = total_weight * 0.50
     bull_votes = sum(s.weight for s in sources if s.vote == "bull")
     bear_votes = sum(s.weight for s in sources if s.vote == "bear")
 
-    if bull_votes >= 0.50:
+    if bull_votes >= threshold:
         direction: Direction = "long_call"
         confidence = bull_votes
-    elif bear_votes >= 0.50:
+    elif bear_votes >= threshold:
         direction = "long_put"
         confidence = bear_votes
     else:

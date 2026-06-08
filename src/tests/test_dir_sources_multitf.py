@@ -29,6 +29,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from engine.divergence.dir_sources_multitf import (
     minute15_state_source,
+    resonance_check_source,
+    signal_tf_structure_source,
     weekly_trend_source,
 )
 from engine.divergence.pa_direction_assessment import DirectionSource
@@ -315,3 +317,114 @@ class TestMinute15StateSource:
         src = minute15_state_source(bars, sig_ts, ambush_pattern="h2_bottom")
         assert "15m DIF=" in src.rationale
         assert "ATR=" in src.rationale
+
+
+# ---------------------------------------------------------------------------
+# signal_tf_structure_source (POC for pa_us_60min lane)
+# ---------------------------------------------------------------------------
+
+
+class TestSignalTfStructureSource:
+    def test_unavailable_bars_votes_neutral(self):
+        src = signal_tf_structure_source(
+            None, None, ambush_pattern="h2_bottom", tf_label="60min",
+        )
+        assert src.vote == "neutral"
+        assert src.name == "signal_tf_structure_60min"
+        assert "unavailable" in src.rationale
+
+    def test_short_history_votes_neutral(self):
+        # 20 bars only — below the 30-bar floor
+        n = 20
+        ts = pd.date_range("2024-01-01", periods=n, freq="1h", tz="UTC")
+        bars = pd.DataFrame({
+            "timestamp": ts,
+            "open": 100.0, "high": 101.0, "low": 99.0, "close": 100.0,
+            "volume": 100,
+        })
+        src = signal_tf_structure_source(
+            bars, len(bars) - 1, ambush_pattern="h2_bottom", tf_label="60min",
+        )
+        assert src.vote == "neutral"
+
+    def test_bull_structure_votes_bull(self, monkeypatch):
+        """Mock PAStructureDetector to isolate the source's plumbing
+        (the structure classification has its own pivot-confirmation
+        tests under PA — we just need a BULL phase pass-through here)."""
+        from engine.divergence.pa_structure import PAStructure
+        n = 200
+        ts = pd.date_range("2024-01-01", periods=n, freq="1h", tz="UTC")
+        bars = pd.DataFrame({
+            "timestamp": ts,
+            "open": 100.0, "high": 101.0, "low": 99.0, "close": 100.0,
+            "volume": 100,
+        })
+        fake = PAStructure(
+            phase="BULL", tr_top=None, tr_bot=None,
+            structural_stop=None, tr_range_pct=None,
+            pos_in_tr=None, at_tr_bottom=False,
+        )
+        monkeypatch.setattr(
+            "engine.divergence.pa_direction_assessment.PAStructureDetector.detect",
+            lambda self, *a, **kw: fake,
+        )
+        src = signal_tf_structure_source(
+            bars, len(bars) - 1, ambush_pattern="h2_bottom", tf_label="60min",
+        )
+        assert src.vote == "bull"
+        assert "tf=60min" in src.rationale
+
+    def test_oob_bar_idx_votes_neutral(self):
+        n = 100
+        ts = pd.date_range("2024-01-01", periods=n, freq="1h", tz="UTC")
+        bars = pd.DataFrame({
+            "timestamp": ts,
+            "open": 100.0, "high": 101.0, "low": 99.0, "close": 100.0,
+            "volume": 100,
+        })
+        src = signal_tf_structure_source(
+            bars, 9999, ambush_pattern="h2_bottom", tf_label="60min",
+        )
+        assert src.vote == "neutral"
+        assert "bar_idx_oob" in src.rationale
+
+
+# ---------------------------------------------------------------------------
+# resonance_check_source — bull/bear when signal-TF and daily agree
+# ---------------------------------------------------------------------------
+
+
+class TestResonanceCheckSource:
+    def test_both_bull_votes_bull(self):
+        src = resonance_check_source("bull", "bull", signal_tf_label="60min")
+        assert src.vote == "bull"
+        assert "resonance=YES" in src.rationale
+        assert src.name == "resonance"
+
+    def test_both_bear_votes_bear(self):
+        src = resonance_check_source("bear", "bear", signal_tf_label="60min")
+        assert src.vote == "bear"
+        assert "resonance=YES" in src.rationale
+
+    def test_conflicting_votes_neutral_with_no_flag(self):
+        src = resonance_check_source("bull", "bear", signal_tf_label="60min")
+        assert src.vote == "neutral"
+        assert "resonance=NO" in src.rationale
+
+        src = resonance_check_source("bear", "bull", signal_tf_label="60min")
+        assert src.vote == "neutral"
+        assert "resonance=NO" in src.rationale
+
+    def test_one_neutral_returns_neutral_with_n_a(self):
+        src = resonance_check_source("bull", "neutral", signal_tf_label="60min")
+        assert src.vote == "neutral"
+        assert "resonance=n/a" in src.rationale
+
+        src = resonance_check_source("neutral", "bull", signal_tf_label="60min")
+        assert src.vote == "neutral"
+        assert "resonance=n/a" in src.rationale
+
+    def test_both_neutral_returns_neutral(self):
+        src = resonance_check_source("neutral", "neutral", signal_tf_label="60min")
+        assert src.vote == "neutral"
+        assert "resonance=n/a" in src.rationale

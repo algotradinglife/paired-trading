@@ -335,3 +335,136 @@ def minute15_state_source(
             f"15m DIF={dif_val:+.4f} vs ATR={atr_repr} pattern={ambush_pattern}"
         ),
     )
+
+
+# ===========================================================================
+# Signal-TF structure + resonance (D-full POC 2026-06-08)
+# ---------------------------------------------------------------------------
+# Per the user-locked architecture: each PA emit lane has its OWN primary
+# structure on its own TF.  For pa_us_60min that's 60min PA phase; for
+# pa_h2 / pa_us_dif_pos / pa_cn_bond that's daily PA phase.  The legacy
+# 4-source DIR ran daily_structure for ALL lanes, which makes pa_us_60min
+# signals always read the daily-level TR position instead of the 60min
+# one they actually fired at.
+#
+# This module adds two helpers:
+#
+#   signal_tf_structure_source — PA structure vote on the signal's TF.
+#       Reuses _structure_vote_logic from pa_direction_assessment (same
+#       TR position policy locked 2026-06-08), but lets the caller pass
+#       any TF's bars.
+#
+#   resonance_check_source — comparison source that votes the shared
+#       direction when signal-TF structure and daily structure agree,
+#       neutral otherwise.  The "common direction" is the user's
+#       "共振" — alignment between the trade's own TF and the daily
+#       backdrop.  Disagreement → each TF follows its own structure
+#       independently (handled at sizing/exit time, not here).
+# ===========================================================================
+
+
+def signal_tf_structure_source(
+    signal_bars: pd.DataFrame | None,
+    bar_idx: int | None,
+    ambush_pattern: AmbushPattern = "h2_bottom",
+    tf_label: str = "signal_tf",
+    *,
+    weight: float = _DEFAULT_SOURCE_WEIGHT,
+) -> DirectionSource:
+    """PA structure vote evaluated on the signal's primary TF.
+
+    For a pa_us_60min record the signal's TF is 60min; for daily PA
+    lanes it's daily.  The vote logic mirrors ``_vote_from_daily_structure``
+    (TR position-aware per the locked 2026-06-08 policy).
+
+    Parameters
+    ----------
+    signal_bars : pd.DataFrame | None
+        Bars on the signal's TF.  None / too short → vote=neutral.
+    bar_idx : int | None
+        Index into ``signal_bars`` at the signal bar.  None / out of
+        range → vote=neutral.
+    ambush_pattern : "h2_bottom" | "h2_top"
+        Propagated to the position-aware vote.
+    tf_label : str
+        Human-readable TF tag baked into the source name (e.g. "60min").
+    weight : float
+        Source weight in the synthesiser.
+    """
+    name = f"signal_tf_structure_{tf_label}"
+    if signal_bars is None or len(signal_bars) < 30:
+        return DirectionSource(
+            name=name,
+            vote="neutral",
+            weight=weight,
+            rationale=f"signal_tf_bars_unavailable tf={tf_label}",
+        )
+    if bar_idx is None or not (0 <= bar_idx < len(signal_bars)):
+        return DirectionSource(
+            name=name,
+            vote="neutral",
+            weight=weight,
+            rationale=f"bar_idx_oob tf={tf_label}",
+        )
+
+    # Lazy import to avoid a circular dep with pa_direction_assessment.
+    from engine.divergence.pa_direction_assessment import _structure_vote_logic
+
+    vote, rationale = _structure_vote_logic(signal_bars, bar_idx, ambush_pattern)
+    return DirectionSource(
+        name=name,
+        vote=vote,
+        weight=weight,
+        rationale=f"{rationale} tf={tf_label}",
+    )
+
+
+def resonance_check_source(
+    signal_tf_vote: Vote,
+    daily_vote: Vote,
+    *,
+    weight: float = _DEFAULT_SOURCE_WEIGHT,
+    signal_tf_label: str = "signal_tf",
+) -> DirectionSource:
+    """Vote based on alignment between the signal-TF and daily structures.
+
+    Encodes the user's "共振" (resonance) concept:
+        signal_tf == daily, both in {bull, bear} → resonance vote=same
+        signal_tf == daily, both neutral          → neutral (vacuous)
+        signal_tf != daily                        → neutral (conflict —
+            each TF follows its own structure for entry/stop downstream)
+
+    The DirectionVerdict's overall .rationale carries the resonance
+    state textually so the live scorecard can show
+    "60min:bull|daily:bull|resonance=YES" or
+    "60min:bull|daily:bear|resonance=NO".
+
+    Always returned even when both votes are neutral so downstream
+    consumers see the explicit "no signal-TF view" or "no daily view"
+    case.
+    """
+    if signal_tf_vote == daily_vote and signal_tf_vote in ("bull", "bear"):
+        vote: Vote = signal_tf_vote
+        rationale = (
+            f"resonance=YES {signal_tf_label}={signal_tf_vote} daily={daily_vote}"
+        )
+    elif signal_tf_vote != daily_vote and "neutral" not in (signal_tf_vote, daily_vote):
+        # Explicit conflict — signal_tf says one thing, daily says the
+        # opposite.  Resonance source stays out (neutral).  Sizing /
+        # exit modules handle the split-trade case.
+        vote = "neutral"
+        rationale = (
+            f"resonance=NO {signal_tf_label}={signal_tf_vote} daily={daily_vote}"
+        )
+    else:
+        # One or both neutral — no resonance signal either way.
+        vote = "neutral"
+        rationale = (
+            f"resonance=n/a {signal_tf_label}={signal_tf_vote} daily={daily_vote}"
+        )
+    return DirectionSource(
+        name="resonance",
+        vote=vote,
+        weight=weight,
+        rationale=rationale,
+    )

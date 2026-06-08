@@ -478,6 +478,9 @@ def _attach_direction_verdict(
     ambush_pattern: str = "h2_bottom",
     weekly_bars: "pd.DataFrame | None" = None,
     bars_15: "pd.DataFrame | None" = None,
+    signal_tf_bars: "pd.DataFrame | None" = None,
+    signal_tf_label: str | None = None,
+    signal_tf_bar_idx: int | None = None,
 ) -> None:
     """Annotate ``rec`` with a DirectionVerdict from the DIR module.
 
@@ -512,6 +515,9 @@ def _attach_direction_verdict(
             daily_bars, hourly_bars, bar_idx,
             macd_df=macd_df, ambush_pattern=ambush_pattern,
             weekly_bars=weekly_bars, bars_15=bars_15,
+            signal_tf_bars=signal_tf_bars,
+            signal_tf_label=signal_tf_label,
+            signal_tf_bar_idx=signal_tf_bar_idx,
         )
     except Exception as exc:  # pragma: no cover — defensive
         rec["direction_verdict"] = "skip"
@@ -1372,12 +1378,23 @@ def main() -> int:
                         _w_bars = _load_bars_weekly(sym, args)
                         _bars_15_cache = _load_bars_15(sym, args)
                         _dir_feeds_loaded = True
+                    # POC: pa_us_60min is the first lane to use the 10-source
+                    # DIR path (signal_tf_structure on 60min bars +
+                    # resonance vs daily structure).  Per the user-locked
+                    # 2026-06-08 architecture: each PA lane judges
+                    # structure on its OWN TF; daily is a parallel
+                    # backdrop providing the resonance flag.  Other PA
+                    # emit blocks keep the 8-source path until this POC
+                    # is validated.
                     _attach_direction_verdict(
                         _rec60, bars, _bars_60, _daily_idx,
                         macd_df=macd_df,
                         ambush_pattern="h2_bottom",
                         weekly_bars=_w_bars,
                         bars_15=_bars_15_cache,
+                        signal_tf_bars=_bars_60,
+                        signal_tf_label="60min",
+                        signal_tf_bar_idx=int(_s60.bar_idx),
                     )
                     _rec60["position_size"] = _position_size(_rec60)
                     scored.append(_rec60)
