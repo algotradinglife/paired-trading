@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "lane": "pa_h2_climax",
+  "pool": "cn_agri_pos",
+  "instrument_class": "cn_futures",
+  "symbols_included": ["kq_m_dce_m", "kq_m_dce_p", "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr"],
+  "symbols_excluded": ["kq_m_dce_y", "kq_m_dce_i", "kq_m_dce_j"],
+  "detector_params": {
+    "min_h_legs": 2,
+    "min_quality": 0.3,
+    "ema_threshold": 0.0,
+    "min_gap": 10,
+    "require_climax": true,
+    "climax_threshold": 0.4,
+    "h_filter": "opposing"
+  },
+  "walk_forward": {
+    "method": "K=3 OOS folds",
+    "cutoff1": null,
+    "cutoff2": null,
+    "cutoff3": "2024-12-31",
+    "stop_framework": "ATR x 1.5",
+    "note": "Reproduced via backtest_pa_standalone; cutoff1/2 not pinned in original claim — ambiguity contributed to non-reproducibility."
+  },
+  "samples": {
+    "is": {"n": 28, "ev_r": 0.082, "win_pct": null},
+    "f1": {"n": 18, "ev_r": 0.622, "win_pct": null},
+    "f2": {"n":  9, "ev_r": -0.444, "win_pct": null},
+    "f3": {"n": 17, "ev_r": -0.316, "win_pct": null}
+  },
+  "samples_full_stack_5y": {
+    "framework": "PA structural stop (live production form)",
+    "n": 64, "ev_r": -0.040, "win_pct": 46.9,
+    "year_breakdown": {
+      "2021": {"n": 9, "ev_r": -0.102},
+      "2022": {"n": 17, "ev_r": 0.011},
+      "2023": {"n": 12, "ev_r": 0.315},
+      "2024": {"n": 11, "ev_r": -0.005},
+      "2025": {"n": 9, "ev_r": -0.904},
+      "2026YTD": {"n": 6, "ev_r": 0.424}
+    },
+    "symbol_breakdown": {
+      "kq_m_dce_p": {"n": 11, "ev_r": -0.361, "win_pct": 36},
+      "kq_m_czce_ma": {"n": 15, "ev_r": -0.132, "win_pct": 47},
+      "kq_m_dce_m": {"n": 14, "ev_r": 0.039, "win_pct": 43},
+      "kq_m_czce_sr": {"n": 11, "ev_r": 0.109, "win_pct": 55},
+      "kq_m_czce_ta": {"n": 13, "ev_r": 0.126, "win_pct": 54}
+    }
+  },
+  "claimed_baseline_unreproducible": {
+    "claimed_in": "src/engine/divergence/pa_detector.py:275 (pre-2fab5c1f)",
+    "claimed_date": "2026-06-04",
+    "claimed_f1": 0.640,
+    "claimed_f2": 0.516,
+    "claimed_f3": 0.571,
+    "claimed_n": [8, 7, 7],
+    "actual_f1": 0.622,
+    "actual_f2": -0.444,
+    "actual_f3": -0.316,
+    "actual_n": [18, 9, 17]
+  },
+  "verdict": "STALE",
+  "verdict_reason": "Prior K=3 STRONG PASS NOT REPRODUCIBLE. F1 close (+0.622R vs +0.640R) but F2/F3 are negative under multiple cutoffs. Full-stack 5.5y replay also negative due to 2025 cluster.",
+  "policy_weight_assigned": 0.0,
+  "policy_weight_prior": 0.65,
+  "valid_until": "2026-09-08",
+  "commit_hash": "2fab5c1f",
+  "data_snapshot": "2026-06-08",
+  "last_verified": "2026-06-08",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_pa_standalone.py --pool CN_AGRI_POS --stop-mult 1.5 --cutoff3 2024-12-31",
+  "related_docs": [
+    "doc/repro/pa_h2_climax_anomaly_2026-06-08.md",
+    "doc/repro/full_stack_backtest_2026-06-08.md",
+    "codex-review.md"
+  ],
+  "notes": "Lane retained in score_today.py for annotation/data collection. Re-validate after 2026 H2 data. Quarantine: do not promote weight without (a) reproducible K=3 with pinned cutoffs, (b) handling of 2025 collapse mechanism."
+}

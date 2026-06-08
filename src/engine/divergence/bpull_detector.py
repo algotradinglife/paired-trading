@@ -31,6 +31,11 @@ Full-pool WF validation (backtest_bpull.py, 2026-06-02, gap-fixed):
   CN_COMMODITY h=opposing: DCE agri drag makes it non-actionable; not routed
 
 Routing: cn_metal_futures only (policy_weight 0.65 h=opp).
+
+BASELINE_REF: baselines/bpull_cn_metal_futures.json
+  Single source of truth for policy_weight evidence. The F1/F2/F3 numbers
+  above are HISTORICAL — see the JSON for current verdict, valid_until, and
+  re-validation status. Run `scripts/validate_baselines.py` to audit.
 """
 from __future__ import annotations
 

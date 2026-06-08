@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "lane": "pa_h2",
+  "pool": "cn_bond",
+  "instrument_class": "cn_bond",
+  "symbols_included": ["kq_m_cffex_tf", "kq_m_cffex_t", "kq_m_cffex_ts"],
+  "symbols_excluded": [],
+  "detector_params": {
+    "h_filter": "opposing",
+    "phase_filter": "TR phase preferred",
+    "note": "Default PABottomDetector() — routed via pa_detector.py:307-312"
+  },
+  "walk_forward": {
+    "method": "K=3 OOS folds (cutoffs hardcoded in backtest_pa_cn_phasefilter.py)",
+    "cutoff1": "see-script",
+    "cutoff2": "see-script",
+    "cutoff3": "see-script",
+    "stop_framework": "ATR x 1.5"
+  },
+  "samples": {
+    "is": {"n": null, "ev_r": null, "win_pct": null},
+    "f1": {"n": 16, "ev_r":  0.219, "win_pct": null},
+    "f2": {"n":  6, "ev_r":  1.500, "win_pct": null},
+    "f3": {"n":  9, "ev_r":  0.500, "win_pct": null}
+  },
+  "samples_aggregate": {
+    "n": 31, "ev_r": 0.548, "tr_phase_pct": 90.3
+  },
+  "samples_full_stack_5y": {
+    "framework": "PA structural stop (live production form)",
+    "n": 73, "ev_r": 0.123, "win_pct": 65.8,
+    "note": "Direction-consistent positive; magnitude 0.123R vs 0.548R aggregate suggests baseline was sample-period-favorable. F2=+1.500R(n=6) is a tiny-n outlier that won't repeat."
+  },
+  "verdict": "STRONG PASS",
+  "verdict_reason": "Reproduced EXACTLY 2026-06-09: n=31 EV+0.548R F1+0.219(n=16) F2+1.500(n=6) F3+0.500(n=9). Full-stack confirms direction (+0.123R EV / win 66%). Caveat: F2+1.500R(n=6) is small-sample outlier and aggregate EV is overstated.",
+  "policy_weight_assigned": 0.70,
+  "valid_until": "2026-09-08",
+  "commit_hash": "2fab5c1f",
+  "data_snapshot": "2026-06-08",
+  "last_verified": "2026-06-09",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_pa_cn_phasefilter.py --pool CN_BOND",
+  "related_docs": [
+    "src/engine/divergence/pa_detector.py:268-271",
+    "doc/repro/full_stack_backtest_2026-06-08.md"
+  ],
+  "notes": "F2=+1.500R(n=6) is a small-sample outlier; should NOT be used as headline number. Re-validate with explicit cutoffs and report median/IQR alongside mean R."
+}

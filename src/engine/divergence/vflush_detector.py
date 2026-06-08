@@ -32,6 +32,10 @@ Walk-forward status (2026-06-03, backtest_vflush.py, CN_METAL):
     IS=+0.255R(n=32)  F1=+0.684R(n=18)  F2=+0.101R(n=14)  F3=+0.341R(n=13)
     ag=-0.015R(n=19), au=-0.357R(n=8) drag F2 to marginal
   policy_weight: cn_metal_futures cu+sc + h=opposing → 0.65; ag+au → 0.0
+
+BASELINE_REF: baselines/vflush_cn_metal_cu_sc.json
+  Single source of truth for policy_weight evidence. Per-fold n is small
+  (7-12); drift-prone. Run `scripts/validate_baselines.py` for audit.
 """
 from __future__ import annotations
 

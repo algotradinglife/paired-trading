@@ -269,11 +269,21 @@ class PABottomDetector:
             backtest_pa_cn_phasefilter --pool CN_BOND (2026-06-08):
               All h=opp: n=31 EV=+0.548R, F1=+0.219(n=16) F2=+1.500(n=6) F3=+0.500(n=9)
               TR phase 28/31 (90%); 3/3 OOS folds positive — STRONG PASS → 0.70
+              CAVEAT: F2=+1.500R(n=6) is a small-sample outlier; aggregate
+              EV is overstated. Full-stack 5.5y confirms direction (+0.123R EV
+              n=73 win 66%) but at lower magnitude.
+              BASELINE_REF: baselines/pa_h2_cn_bond.json
 
           cn_futures (mixed):         F1=+0.183R        F2=+0.124R       marginal → 0.55
-          cn_agri_pos (m/p/ta/ma/sr, require_climax=True, h=opp, 2026-06-04):
-            K=3: F1=+0.640R(n=8)  F2=+0.516R(n=7)  F3=+0.571R(n=7)  STRONG PASS → 0.65
-            (handled inline in score_today; y/i/j excluded — negative h=opp lift)
+          cn_agri_pos (m/p/ta/ma/sr, require_climax=True, h=opp):
+            STALE 2026-06-08: original K=3 STRONG PASS claim NOT REPRODUCIBLE.
+              Documented: F1=+0.640R(n=8) F2=+0.516R(n=7) F3=+0.571R(n=7), 2026-06-04
+              Reproduced (--cutoff3 2024-12-31): F1=+0.622R(n=18) F2=-0.444R(n=9) F3=-0.316R(n=17)
+              Reproduced (--cutoff3 2025-06-30): F1=+0.622R(n=18) F2=-0.458R(n=15) F3=-0.227R(n=11)
+              Full-stack 5.5y replay: EV -0.040R / n=64 / win 47%.
+              Lane suspended (policy_weight=0). See:
+                doc/repro/pa_h2_climax_anomaly_2026-06-08.md
+                baselines/pa_h2_climax_cn_agri_pos.json
           czce / cn_agri (no climax):
             backtest_pa_cn_phasefilter 2026-06-08 sub-pool slice:
               CZCE only (ta/ma/cf/sr): n=46 OOS EV=+0.032R, F1+0.294 F2-0.068 F3-0.100

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "lane": "vflush",
+  "pool": "cn_metal_futures",
+  "scope": "cu_sc",
+  "instrument_class": "cn_metal_futures",
+  "symbols_included": ["kq_m_shfe_cu", "kq_m_ine_sc"],
+  "symbols_excluded": ["kq_m_shfe_ag", "kq_m_shfe_au"],
+  "detector_params": {
+    "note": "Default VFlushDetector() — see src/engine/divergence/vflush_detector.py"
+  },
+  "walk_forward": {
+    "method": "K=3 OOS folds",
+    "cutoff1": "2023-12-31",
+    "cutoff2": "2024-12-31",
+    "cutoff3": "2025-06-30",
+    "stop_framework": "ATR x 1.5"
+  },
+  "samples_2026-06-09_reproduction": {
+    "scope": "ALL h=opp (no symbol filter — script lacks --symbols flag)",
+    "is": {"n": 22, "ev_r": -0.073},
+    "f1": {"n":  7, "ev_r":  0.068},
+    "f2": {"n":  4, "ev_r":  1.229},
+    "f3": {"n": 10, "ev_r":  0.415}
+  },
+  "samples_2026-06-09_cu_sc_only": {
+    "scope": "Manually filtered from /tmp/vflush_cn_metal.csv to cu+sc only",
+    "n": 4,
+    "note": "Per-symbol breakdown shows cu n=1 (-1.000R), sc n=3 (+0.666R). FAR below docstring's claimed n=50 across folds."
+  },
+  "samples_prior_2026-06-03": {
+    "note": "Original docstring baseline; cu+sc only claim",
+    "is": {"n": 22, "ev_r":  0.598},
+    "f1": {"n": 12, "ev_r":  0.722},
+    "f2": {"n":  9, "ev_r":  0.436},
+    "f3": {"n":  7, "ev_r":  0.533}
+  },
+  "samples_full_stack_5y": {
+    "framework": "PA structural stop (live production form)",
+    "n": 42, "ev_r": 0.404, "win_pct": 54.8,
+    "median_r": 1.500,
+    "note": "Median +1.500R indicates extreme R/R asymmetry. Sample size still small; needs more data."
+  },
+  "rejected_subpools": {
+    "ag": "IS=-0.375R",
+    "au": "IS=-1.000R"
+  },
+  "verdict": "DRIFT",
+  "verdict_reason": "2026-06-09 reproduction shows cu+sc sub-pool has only n=4 signals (cu n=1, sc n=3) across all folds, vs docstring's n=50 claim. Either (a) data has been backfilled/changed since 2026-06-03, (b) detector parameters drifted, or (c) original sub-pool definition was different. The full-pool (ag-dominated, n=43) shows EV+0.185R/win 49% — modest, not STRONG PASS magnitude. Production policy_weight=0.65 cannot be defended on current evidence.",
+  "policy_weight_assigned": 0.65,
+  "policy_weight_recommended": 0.30,
+  "valid_until": "2026-07-09",
+  "commit_hash": "2fab5c1f",
+  "data_snapshot": "2026-06-08",
+  "last_verified": "2026-06-09",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_vflush.py --cutoff1 2023-12-31 --cutoff2 2024-12-31 --cutoff3 2025-06-30 --h-opp-only",
+  "repro_post_filter": "Filter /tmp/vflush_cn_metal.csv to cu+sc only (script lacks --symbols flag).",
+  "related_docs": [
+    "src/engine/divergence/vflush_detector.py:29-32",
+    "doc/repro/full_stack_backtest_2026-06-08.md"
+  ],
+  "notes": "Tiny per-fold sample (n=7-12) makes this drift-prone. Full pool n=32 marginal; sub-pool cu+sc is real but not robust."
+}

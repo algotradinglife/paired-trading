@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "lane": "bpull",
+  "pool": "cn_metal_futures",
+  "instrument_class": "cn_metal_futures",
+  "symbols_included": ["kq_m_shfe_cu", "kq_m_shfe_au", "kq_m_shfe_ag", "kq_m_ine_sc"],
+  "symbols_excluded": ["kq_m_shfe_rb"],
+  "detector_params": {
+    "min_h_legs": 2,
+    "h_filter": "opposing",
+    "note": "Default BPullDetector() — see src/engine/divergence/bpull_detector.py"
+  },
+  "walk_forward": {
+    "method": "K=3 OOS folds (gap-fixed)",
+    "cutoff1": "2023-12-31",
+    "cutoff2": "2024-12-31",
+    "cutoff3": "2025-06-30",
+    "stop_framework": "ATR x 1.5"
+  },
+  "samples": {
+    "is": {"n": 73, "ev_r":  0.165, "win_pct": 44},
+    "f1": {"n": 12, "ev_r":  0.148, "win_pct": 50},
+    "f2": {"n": 16, "ev_r":  0.706, "win_pct": 69},
+    "f3": {"n": 38, "ev_r":  0.361, "win_pct": 61}
+  },
+  "samples_prior_2026-06-02": {
+    "note": "Original docstring baseline; cutoffs were NOT pinned at the time.",
+    "is": {"n": 92, "ev_r":  0.171},
+    "f1": {"n": 71, "ev_r":  0.121},
+    "f2": {"n": 48, "ev_r":  0.348},
+    "f3": {"n": 45, "ev_r":  0.495}
+  },
+  "samples_full_stack_5y": {
+    "framework": "PA structural stop (live production form)",
+    "n": 172, "ev_r": 0.179, "win_pct": 57.6,
+    "note": "Direction-consistent with K=3 claim. Production replay confirms STRONG PASS verdict."
+  },
+  "symbol_drivers": {
+    "kq_m_shfe_au": 0.542,
+    "kq_m_shfe_cu": 0.242,
+    "kq_m_shfe_ag": 0.240,
+    "kq_m_ine_sc": 0.149,
+    "kq_m_shfe_rb_excluded": "IS=+0.218R but OOS1=-0.448R OOS2=-0.252R OOS3=-0.240R; 56% stop rate"
+  },
+  "verdict": "STRONG PASS",
+  "verdict_reason": "K=3 all OOS folds positive (F1+0.148, F2+0.706, F3+0.361). Full-stack 5.5y replay direction-consistent (+0.179R EV / win 58%). Reproduced 2026-06-08 with pinned cutoffs; rb exclusion is critical (rb stand-alone -0.207R/n=51 would flip F1 to -0.332R if included).",
+  "policy_weight_assigned": 0.75,
+  "valid_until": "2026-09-08",
+  "commit_hash": "2fab5c1f",
+  "data_snapshot": "2026-06-08",
+  "last_verified": "2026-06-09",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_bpull.py --pool CN_METAL --cutoff1 2023-12-31 --cutoff2 2024-12-31 --cutoff3 2025-06-30",
+  "repro_post_filter": "Exclude kq_m_shfe_rb from the raw output (script lacks --exclude flag; production routing excludes rb).",
+  "related_docs": [
+    "src/engine/divergence/bpull_detector.py:24-30",
+    "doc/repro/full_stack_backtest_2026-06-08.md"
+  ],
+  "notes": "Score_today.py:834 comment cites 'F1=+1.000R F3=+1.008R' which does NOT match canonical baseline above. Likely refers to bpull_detector.py:21-22 +EMA20-touch sub-experiment (missed-swing-dataset). Clean up score_today comment when re-verifying."
+}

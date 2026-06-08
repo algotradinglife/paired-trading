@@ -115,9 +115,11 @@ POOL_INSTRUMENT_CLASS: dict[str, str] = {
     "CN_BOND": "cn_bond",  # promoted from cn_futures 2026-06-08; see pa_detector docstring
 }
 
-# PA H2 climax+h=opp K=3 STRONG PASS (2026-06-04):
-#   F1=+0.640R  F2=+0.516R  F3=+0.571R  (require_climax=True, h=opposing)
-#   All 5 symbols individually positive; y/i/j excluded (negative h=opp lift)
+# PA H2 climax — STALE 2026-06-08: original K=3 STRONG PASS NOT REPRODUCIBLE.
+# Full-stack 5.5y: EV -0.040R / n=64 / win 47%. 2025 alone -0.904R EV / n=9.
+# kq_m_dce_p alone -0.361R / n=11. Lane suspended (policy_weight=0 below).
+# See doc/repro/pa_h2_climax_anomaly_2026-06-08.md
+# BASELINE_REF: baselines/pa_h2_climax_cn_agri_pos.json
 _CN_AGRI_POS_SYMBOLS: frozenset[str] = frozenset({
     "kq_m_dce_m", "kq_m_dce_p",
     "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr",
@@ -1429,9 +1431,12 @@ def main() -> int:
                     scored.append(_rec60)
 
         # CN_AGRI_POS PA H2 climax scan — m/p/ta/ma/sr only.
-        # Validated: PABottomDetector(require_climax=True)+h=opp K=3 STRONG PASS.
-        # F1=+0.640R(n=8)  F2=+0.516R(n=7)  F3=+0.571R(n=7)  (2026-06-04)
-        # y/i/j excluded — negative h=opp lift in full-history analysis.
+        # STALE 2026-06-08: prior K=3 STRONG PASS (F1+0.640/F2+0.516/F3+0.571, n=22)
+        # NOT REPRODUCIBLE; full-stack 5.5y replay shows EV -0.040R / n=64, win 47%
+        # with 2025 collapse (-0.904R EV / n=9 dominates). Weight dropped 0.65→0.0;
+        # lane retained for annotation/data collection only (gated below).
+        # See doc/repro/pa_h2_climax_anomaly_2026-06-08.md
+        # BASELINE_REF: baselines/pa_h2_climax_cn_agri_pos.json
         if instrument_class == "cn_futures" and sym in _CN_AGRI_POS_SYMBOLS:
             if h_bars is None:
                 h_bars = _load_bars_60(sym, args)
@@ -1463,14 +1468,14 @@ def main() -> int:
                     "direction": "bottom",
                     "level": "pa_h2_climax",
                     "subtype": "pa_agri_climax",
-                    "confidence": 0.65,
+                    "confidence": 0.0,
                     "wick_ratio": None,
                     "swing_pct": None,
                     "vol_ratio": None,
                     "invalidation_level": _agri_inval,
                     "matched_sweet_spots": [],
-                    "policy_rule": "pa-h2-agri-climax-hopp",
-                    "policy_weight": 0.65,
+                    "policy_rule": "pa-h2-agri-climax-hopp-WATCH",
+                    "policy_weight": 0.0,
                     "pa_isolated": None,
                     "score": 3,
                     "underlying_price": _agri_close,
