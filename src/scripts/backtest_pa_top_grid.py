@@ -65,9 +65,25 @@ REVIEW_DIR_DEFAULT = Path(__file__).resolve().parents[2] / "data" / "review"
 # Simulation parameters mirror BOTTOM simulate_trade in backtest_pa_swing.py
 # but flip direction (short).
 ATR_PERIOD = 14
-MAX_HOLD   = 40
 MIN_GAP    = 10
-STOP_MULT  = 1.5
+
+# Frame defaults (counter_trend = C4 baseline).
+FRAME_DEFAULTS: dict[str, dict] = {
+    "counter_trend": dict(
+        stop_mult=1.5,
+        max_hold=40,
+        phase_allow=None,        # No phase gate; report all rows.
+    ),
+    "trend_follow": dict(
+        stop_mult=2.5,
+        max_hold=80,
+        # Reject BULL phase entries — trend-following puts should not
+        # fade an uptrend. Allow BEAR / TR / TR_FORMING (and UNCLEAR
+        # for completeness, since the structure detector occasionally
+        # leaves bars unclassified mid-window).
+        phase_allow={"BEAR", "TR", "TR_FORMING", "UNCLEAR"},
+    ),
+}
 
 CUTOFF_IS   = pd.Timestamp("2022-12-31", tz="UTC")
 CUTOFF_OOS1 = pd.Timestamp("2023-12-31", tz="UTC")
@@ -132,8 +148,8 @@ def simulate_short(
     bars: pd.DataFrame,
     entry_idx: int,
     atr_series: pd.Series,
-    stop_mult: float = STOP_MULT,
-    max_hold: int = MAX_HOLD,
+    stop_mult: float = 1.5,
+    max_hold: int = 40,
 ) -> float | None:
     """Short-side mirror of simulate_trade in backtest_pa_swing.py.
 
@@ -210,7 +226,15 @@ def fold_label(ts: pd.Timestamp) -> str:
 # Per-pool scan
 # ---------------------------------------------------------------------------
 
-def scan_pool(pool: str, cfg: dict, bars_dir: Path) -> pd.DataFrame:
+def scan_pool(
+    pool: str,
+    cfg: dict,
+    bars_dir: Path,
+    *,
+    stop_mult: float,
+    max_hold: int,
+    phase_allow: set[str] | None,
+) -> pd.DataFrame:
     records: list[dict] = []
     struct_det = PAStructureDetector()
 
@@ -249,12 +273,19 @@ def scan_pool(pool: str, cfg: dict, bars_dir: Path) -> pd.DataFrame:
         print(f"  [{pool}] {sym}: signals={n_total}  h=opp={n_opp}")
 
         for sig in sigs:
-            r = simulate_short(bars, sig.bar_idx, atr)
-            if r is None:
-                continue
-
             struct = struct_det.detect(bars, up_to_idx=sig.bar_idx)
             phase = struct.phase
+
+            # Frame-level phase gate: trend_follow drops BULL entries.
+            if phase_allow is not None and phase not in phase_allow:
+                continue
+
+            r = simulate_short(
+                bars, sig.bar_idx, atr,
+                stop_mult=stop_mult, max_hold=max_hold,
+            )
+            if r is None:
+                continue
 
             if cfg.get("run_context"):
                 ctx = classify_context(bars, sig.bar_idx, macd_df, ema20, ema60)
@@ -358,24 +389,47 @@ def main() -> None:
     parser.add_argument("--min-cell-n",  type=int, default=20,
                         help="Minimum OOS n for a cell to be promoted "
                              "in the summary table.")
-    parser.add_argument("--out-csv",     type=Path,
-                        default=REVIEW_DIR_DEFAULT / "pa_top_wf_grid.csv")
+    parser.add_argument("--frame",       default="counter_trend",
+                        choices=list(FRAME_DEFAULTS.keys()),
+                        help="Simulation frame. counter_trend = C4 baseline "
+                             "(1.5xATR / 40-bar / no phase gate). trend_follow "
+                             "= 2.5xATR / 80-bar / phase∈{BEAR,TR,TR_FORMING}.")
+    parser.add_argument("--out-csv",     type=Path, default=None,
+                        help="Output grid CSV. Default depends on --frame.")
     args = parser.parse_args()
+
+    frame_cfg = FRAME_DEFAULTS[args.frame]
+    stop_mult: float = frame_cfg["stop_mult"]
+    max_hold: int = frame_cfg["max_hold"]
+    phase_allow: set[str] | None = frame_cfg["phase_allow"]
+
+    if args.out_csv is None:
+        if args.frame == "counter_trend":
+            args.out_csv = REVIEW_DIR_DEFAULT / "pa_top_wf_grid.csv"
+        else:
+            args.out_csv = (
+                REVIEW_DIR_DEFAULT / f"pa_top_wf_grid_{args.frame}.csv"
+            )
 
     selected = list(POOLS) if args.pool == "all" else [args.pool]
 
-    print(f"PA TOP grid backtest — pools: {selected}")
+    print(f"PA TOP grid backtest — frame={args.frame}  pools: {selected}")
     print(f"K=3 folds: IS<={CUTOFF_IS.date()}  OOS1<={CUTOFF_OOS1.date()}  "
           f"OOS2<={CUTOFF_OOS2.date()}  OOS3>")
-    print(f"stop={STOP_MULT}xATR  max_hold={MAX_HOLD}  min_gap={MIN_GAP}  "
-          f"min_quality=0.3  div_lookback={DIV_LOOKBACK}")
+    print(f"stop={stop_mult}xATR  max_hold={max_hold}  min_gap={MIN_GAP}  "
+          f"min_quality=0.3  div_lookback={DIV_LOOKBACK}  "
+          f"phase_allow={'<all>' if phase_allow is None else sorted(phase_allow)}")
     print("=" * 80)
 
     all_signals: list[pd.DataFrame] = []
     for pool in selected:
         cfg = POOLS[pool]
         print(f"\n-- {pool} ({len(cfg['symbols'])} symbols) --")
-        df = scan_pool(pool, cfg, args.bars_dir)
+        df = scan_pool(
+            pool, cfg, args.bars_dir,
+            stop_mult=stop_mult, max_hold=max_hold,
+            phase_allow=phase_allow,
+        )
         if df.empty:
             print(f"  [{pool}] no signals")
             continue

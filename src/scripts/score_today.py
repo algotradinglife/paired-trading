@@ -42,6 +42,10 @@ from engine.divergence.context_a_detector import ContextADetector, ContextASigna
 from engine.divergence.detector import detect_all_divergences
 from engine.divergence.downstream_policies import apply_policy
 from engine.divergence.pa_detector import PABottomDetector, PASignal
+from engine.divergence.pa_direction_assessment import (
+    DirectionVerdict,
+    assess_direction,
+)
 from engine.divergence.pa_structure import PAStructureDetector
 from engine.divergence.vflush_detector import VFlushDetector
 from engine.features.macd import macd
@@ -400,6 +404,44 @@ def _load_bars_15(sym: str, args) -> pd.DataFrame | None:
     if not path.exists():
         return None
     return bar_loader.load_bars_json(path)
+
+
+def _attach_direction_verdict(
+    rec: dict,
+    daily_bars: "pd.DataFrame",
+    hourly_bars: "pd.DataFrame | None",
+    bar_idx: int,
+    macd_df: "pd.DataFrame | None" = None,
+) -> None:
+    """Annotate ``rec`` with a DirectionVerdict from the DIR module.
+
+    Adds three fields on the record:
+        direction_verdict     : "long_call" | "long_put" | "skip"
+        direction_confidence  : float in [0, 1]
+        direction_sources     : {source_name: vote, ...}
+
+    ANNOTATION ONLY (Step 1, 2026-06-08):
+    These fields are attached for human review.  ``score_today`` does
+    NOT use the verdict to gate emission, change scoring, or alter
+    weights — those continue to come from the existing per-detector
+    policy_weight paths.  The verdict is recorded so reviewers can
+    sanity-check alignment between the synthesiser and the existing
+    PA gates before any consumer starts reading the verdict.
+    """
+    try:
+        verdict: DirectionVerdict = assess_direction(
+            daily_bars, hourly_bars, bar_idx, macd_df=macd_df,
+        )
+    except Exception as exc:  # pragma: no cover — defensive
+        rec["direction_verdict"] = "skip"
+        rec["direction_confidence"] = 0.0
+        rec["direction_sources"] = {}
+        rec["direction_rationale"] = f"assess_err={exc!s}"
+        return
+    rec["direction_verdict"] = verdict.direction
+    rec["direction_confidence"] = round(float(verdict.confidence), 4)
+    rec["direction_sources"] = {s.name: s.vote for s in verdict.sources}
+    rec["direction_rationale"] = verdict.rationale
 
 
 def _position_size(r: dict) -> str:
@@ -850,6 +892,9 @@ def main() -> int:
                     enrich_with_iv_au(pa_calls, pa_date, pa_close, _AU_OPTIONS_DATA_DIR)
                     pa_rec["options_calls"] = pa_calls
                 _annotate_pa_sweet_spots(pa_rec, pool_rules)
+                _attach_direction_verdict(
+                    pa_rec, bars, h_bars, pa_sig.bar_idx, macd_df=macd_df,
+                )
                 pa_rec["position_size"] = _position_size(pa_rec)
                 scored.append(pa_rec)
 
@@ -908,6 +953,9 @@ def main() -> int:
                     "pa_phase": _b_struct.phase,
                 }
                 _annotate_pa_sweet_spots(_b_rec, pool_rules)
+                _attach_direction_verdict(
+                    _b_rec, bars, h_bars, _b_sig.bar_idx, macd_df=macd_df,
+                )
                 _b_rec["position_size"] = _position_size(_b_rec)
                 scored.append(_b_rec)
 
@@ -1087,6 +1135,9 @@ def main() -> int:
                     "pa_stop_pct": _us_stop_pct,
                 }
                 _annotate_pa_sweet_spots(_us_rec, pool_rules)
+                _attach_direction_verdict(
+                    _us_rec, bars, h_bars, _us_sig.bar_idx, macd_df=macd_df,
+                )
                 _us_rec["position_size"] = _position_size(_us_rec)
                 scored.append(_us_rec)
 
@@ -1191,6 +1242,20 @@ def main() -> int:
                         "pa_stop_pct": round(_stop60_pct, 2),
                     }
                     _annotate_pa_sweet_spots(_rec60, pool_rules)
+                    # Map the 60min signal bar to the corresponding daily
+                    # bar index so the DIR module can read structure /
+                    # context / divergence on the daily lens, then pass
+                    # the 60min series as the hourly_bars argument.
+                    _daily_ts = pd.to_datetime(bars["timestamp"]).values
+                    _sig_np = pd.Timestamp(_s60.timestamp).to_datetime64()
+                    _mask = _daily_ts <= _sig_np
+                    if _mask.any():
+                        _daily_idx = int(_mask.sum()) - 1
+                    else:
+                        _daily_idx = 0
+                    _attach_direction_verdict(
+                        _rec60, bars, _bars_60, _daily_idx, macd_df=macd_df,
+                    )
                     _rec60["position_size"] = _position_size(_rec60)
                     scored.append(_rec60)
 
