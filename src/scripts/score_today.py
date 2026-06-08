@@ -119,6 +119,23 @@ _CN_AGRI_POS_SYMBOLS: frozenset[str] = frozenset({
     "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr",
 })
 
+# The 6 DIF intra_cycle_* variants (HICD / DIFSR / DEAD ± bull) were
+# marked deprecated 2026-06-08; paired-trading is moving signal
+# generation to PA.  By default score_today filters them out of the live
+# scorecard so the deprecated lane stops cluttering production output.
+# Pass --include-deprecated-dif to keep the legacy behaviour (used by
+# historical CSV regeneration or comparison runs).  Note the classical
+# 3 (intra_cycle, inter_cycle, inter_segment) are NOT deprecated and
+# always emit.
+DEPRECATED_DIF_LEVELS: frozenset[str] = frozenset({
+    "intra_cycle_hist",
+    "intra_cycle_slope",
+    "intra_cycle_dea",
+    "intra_cycle_bull_hist",
+    "intra_cycle_bull_slope",
+    "intra_cycle_bull_dea",
+})
+
 
 @dataclass(frozen=True)
 class SweetSpotRule:
@@ -390,6 +407,10 @@ def main() -> int:
     p.add_argument("--window-days", type=int, default=7,
                    help="how many trailing calendar days of signals to surface (default 7)")
     p.add_argument("-o", "--output", type=Path, help="write JSON scorecard to this file")
+    p.add_argument("--include-deprecated-dif", action="store_true",
+                   help="emit the 6 deprecated intra_cycle_* DIF detector levels "
+                        "(HICD/DIFSR/DEAD ± bull); default skips them — PA system "
+                        "is the active lane.  See DEPRECATED_DIF_LEVELS.")
     args = p.parse_args()
 
     symbols = POOLS[args.pool] if args.pool else args.symbols
@@ -459,6 +480,8 @@ def main() -> int:
         )
         for sig in signals:
             if sig.timestamp.date() < cutoff_date:
+                continue
+            if sig.level in DEPRECATED_DIF_LEVELS and not args.include_deprecated_dif:
                 continue
             ctx = sig.context_features or {}
             policy = apply_policy(sig, instrument_class=instrument_class)
