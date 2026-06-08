@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "lane": "us_regime_gate",
+  "pool": "us_equity",
+  "instrument_class": "us_equity",
+  "kind": "meta_gate",
+  "gates_lanes": ["pa_us_60min", "context_a"],
+  "symbols_included": "all US symbols",
+  "symbols_excluded": [],
+  "detector_params": {
+    "module": "engine.regime.us_regime_gate",
+    "spy_sma_period": 200,
+    "spy_vol_period_days": 20,
+    "spy_vol_threshold_annualized": 0.25,
+    "gate_condition": "(SPY_close < SPY_SMA200) OR (SPY_vol20_annualized > 0.25)",
+    "note": "Vol threshold 0.25 = proxy for VIX > 25 (1:1 monotone in practice). No VIX data on disk; realized-vol substitute used."
+  },
+  "walk_forward": {
+    "method": "Per-year coverage validation against full_stack 5.5y replay",
+    "stop_framework": "n/a — gate is binary suppression, not a stop"
+  },
+  "calibration_per_year_pct_risk_off_days": {
+    "2021": 0.0,
+    "2022": 86.5,
+    "2023": 10.4,
+    "2024": 0.0,
+    "2025": 16.8,
+    "2026YTD": 13.0
+  },
+  "counterfactual_us_h2_family_2022": {
+    "lanes": ["pa_us_60min", "context_a US"],
+    "before_p0_p1c_p2": {"n": 71, "ev_r": -0.301, "sum_r": -21.4},
+    "after_p0_p1c": {"n": 42, "ev_r": -0.101, "sum_r": -4.2},
+    "after_p0_p1c_p2_gate": {"n": 4, "ev_r": 0.125, "sum_r": 0.50},
+    "note": "Gate skipped 67 of 71 trades in 2022 H2-family, eliminating -21.4R drag with zero impact on 2021/2024 bull years."
+  },
+  "counterfactual_us_pool_total_5y": {
+    "before_any": {"n": 423, "ev_r": 0.082, "sum_r": 34.7},
+    "after_p0": {"n": 351, "ev_r": 0.145, "sum_r": 50.9},
+    "after_p0_p1c": {"n": 309, "ev_r": 0.171, "sum_r": 52.8},
+    "after_p0_p1c_p2": {"n": 257, "ev_r": 0.213, "sum_r": 54.7}
+  },
+  "verdict": "DEPLOYED",
+  "verdict_reason": "Cleanly suppresses 2022-style bear market H2-family lanes (n=71→4 with -21.4R drag eliminated). No effect on bull years (2021/2024 0% risk_off). 2025 mid-year DD also caught (16.8% risk_off). Fail-open design: gate returns False if SPY data unavailable.",
+  "policy_weight_assigned": null,
+  "policy_weight_recommended": null,
+  "weight_meaning": "n/a — gate suppresses trades to weight=0 binary, no continuous weighting",
+  "valid_until": "2026-12-09",
+  "commit_hash": "113f6520",
+  "data_snapshot": "2026-06-09 (SPY daily through 2026-05-27)",
+  "last_verified": "2026-06-09",
+  "repro_command": "cd src && .venv/bin/python -c 'from engine.regime.us_regime_gate import compute_regime_signal, is_risk_off'",
+  "related_docs": [
+    "src/engine/regime/us_regime_gate.py",
+    "doc/repro/lane_market_evaluation_2026-06-09.md (origin)",
+    "src/scripts/score_today.py:_us_lane_suppressed_by_regime"
+  ],
+  "lanes_NOT_gated_with_rationale": {
+    "pa_us_dif_pos": "Counterfactual 2026-06-09: 3 trades dropped in 2022 had net +0.44R positive contribution; regime gate would reduce EV. DIF>0 + h=opp natural filter handles bear regimes.",
+    "pa_h2_climax": "STALE lane — already weight=0",
+    "all_CN_lanes": "Different market regime; SPY-based gate not applicable"
+  },
+  "notes": "Re-evaluate calibration if SPY-VIX relationship shifts (e.g. low-vol regime where SPY < SMA200 but realized vol < 25%). Quarterly check recommended via spy_regime.csv refresh."
+}

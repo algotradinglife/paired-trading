@@ -47,6 +47,9 @@ VERDICTS = {
     # Production-active but no formal K=3 walk-forward (imported from docstring).
     # Treated as a production gap under --strict.
     "PENDING_VALIDATION",
+    # Meta-gate / non-lane component that's been deployed with calibration
+    # evidence but doesn't follow the K=3 walk-forward shape.
+    "DEPLOYED",
 }
 
 STATUS_ICONS = {

@@ -72,6 +72,15 @@
       "baseline_file": "pa_us_60min_us_equity.json",
       "production_binding": "src/scripts/score_today.py:1254 (phase-based override of PABottomDetector weight; BULL=0.65 / TR=0.30)",
       "score_today_line": "src/scripts/score_today.py:1378"
+    },
+    {
+      "lane": "us_regime_gate",
+      "pool": "us_equity",
+      "baseline_file": "us_regime_gate.json",
+      "production_binding": "src/engine/regime/us_regime_gate.py::compute_regime_signal + is_risk_off",
+      "score_today_line": "src/scripts/score_today.py:_us_lane_suppressed_by_regime (called in context_a + pa_us_60min blocks)",
+      "kind": "meta_gate",
+      "note": "Not a signal lane — meta-gate that suppresses pa_us_60min + context_a US during risk_off regimes."
     }
   ],
   "pending": [],
