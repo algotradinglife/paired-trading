@@ -41,9 +41,13 @@ from engine.features.macd import ema, macd as compute_macd
 
 Vote = Literal["bull", "bear", "neutral"]
 Direction = Literal["long_call", "long_put", "skip"]
+AmbushPattern = Literal["h2_bottom", "h2_top"]
 
-# Equal weights — open Q-1 in the design memo, settled here for MVP.
-_SOURCE_WEIGHT: float = 0.25
+# Equal weights across the 8-source pool (D-full upgrade 2026-06-08).
+# 4 baseline sources (daily_structure / hourly_state / context / divergence)
+# + 4 new sources (weekly_trend / minute15_state / force_balance / exhaustion).
+# 8 × 0.125 = 1.00; threshold 0.50 = 4-of-8 majority required.
+_SOURCE_WEIGHT: float = 0.125
 
 # Hourly DIF margin: |DIF| must exceed this multiple of 1h ATR(14)
 # to count as a directional vote.  Below the threshold the source
@@ -108,8 +112,15 @@ class DirectionVerdict:
 def _vote_from_daily_structure(
     daily_bars: pd.DataFrame,
     bar_idx: int,
+    ambush_pattern: AmbushPattern = "h2_bottom",
 ) -> DirectionSource:
     """Source A — PA structural phase on daily bars.
+
+    Direction-agnostic with respect to ambush_pattern: a BULL phase is
+    bullish for both bottom-hunting and top-hunting setups, because the
+    phase describes the durable trend, not the trade direction.
+    Caller-facing semantics (the direction-vote synthesis) handle the
+    interplay with the trade side.
 
     Mapping:
         BULL                 → bull
@@ -163,11 +174,29 @@ def _atr(bars: pd.DataFrame, period: int) -> pd.Series:
 def _vote_from_hourly_state(
     hourly_bars: pd.DataFrame | None,
     signal_ts: pd.Timestamp,
+    ambush_pattern: AmbushPattern = "h2_bottom",
 ) -> DirectionSource:
     """Source B — 1h DIF direction at the last 1h bar ≤ signal_ts.
 
-    Bull / bear if DIF exceeds 0.2 × ATR(1h, 14).  Else neutral.  No
-    hourly data → neutral with rationale "no_1h_data".
+    POLARITY-AWARE (2026-06-08): the "h=opposing" rule in PA detection
+    means the hourly timeframe should be moving AGAINST the setup
+    direction.  So when hunting an h2_bottom, a NEGATIVE hourly DIF is
+    the confirmation we want — the source votes BULL.  When hunting an
+    h2_top, a POSITIVE hourly DIF is the confirmation — vote BEAR.
+
+    Bull / bear classification driven by ``ambush_pattern``:
+
+      h2_bottom:
+        DIF < -margin  → vote=bull (h=opposing confirms the bottom setup)
+        DIF > +margin  → vote=bear (h=aligned, weakens the bottom setup)
+        |DIF| ≤ margin → vote=neutral
+
+      h2_top:
+        DIF > +margin  → vote=bear (h=opposing confirms the top setup)
+        DIF < -margin  → vote=bull (h=aligned, weakens the top setup)
+        |DIF| ≤ margin → vote=neutral
+
+    No hourly data → neutral with rationale "no_1h_data".
     """
     if hourly_bars is None or len(hourly_bars) == 0:
         return DirectionSource(
@@ -215,18 +244,38 @@ def _vote_from_hourly_state(
     else:
         margin = _HOURLY_DIF_ATR_MARGIN * atr_val
 
+    # Classify DIF sign vs margin first; then map to bull/bear by polarity.
     if dif_val > margin and dif_val > 0:
-        vote: Vote = "bull"
+        dif_sign: Literal["pos", "neg", "neutral"] = "pos"
     elif dif_val < -margin and dif_val < 0:
-        vote = "bear"
+        dif_sign = "neg"
     else:
-        vote = "neutral"
+        dif_sign = "neutral"
+
+    if ambush_pattern == "h2_bottom":
+        # Hunting a bottom — hourly going AGAINST the setup (DIF<0) is the
+        # h=opposing confirmation we want.  Vote bull when DIF<0.
+        if dif_sign == "neg":
+            vote: Vote = "bull"
+        elif dif_sign == "pos":
+            vote = "bear"
+        else:
+            vote = "neutral"
+    else:  # h2_top
+        if dif_sign == "pos":
+            vote = "bear"
+        elif dif_sign == "neg":
+            vote = "bull"
+        else:
+            vote = "neutral"
 
     return DirectionSource(
         name="hourly_state",
         vote=vote,
         weight=_SOURCE_WEIGHT,
-        rationale=f"dif={dif_val:+.4f} margin={margin:.4f}",
+        rationale=(
+            f"dif={dif_val:+.4f} margin={margin:.4f} pattern={ambush_pattern}"
+        ),
     )
 
 
@@ -234,16 +283,32 @@ def _vote_from_context(
     daily_bars: pd.DataFrame,
     bar_idx: int,
     macd_df: pd.DataFrame | None,
+    ambush_pattern: AmbushPattern = "h2_bottom",
 ) -> DirectionSource:
     """Source C — Context A / B1 bottom-side classifier.
 
-    A (uptrend pullback) → bull
-    B1 (first pullback in new cycle) → bull
-    None → neutral
+    POLARITY-AWARE (2026-06-08): Context A (uptrend pullback) and B1
+    (first pullback in new cycle) are BOTTOM-ONLY pattern recognisers —
+    they identify setups where price has pulled back inside a bull
+    trend.  No top-side analogue is implemented yet (Q-2 in design memo).
+    Therefore:
 
-    Bear-side context classifier does not exist yet (Q-2 in design memo);
-    rationale notes the gap so reviewers can see it on each verdict.
+      ambush_pattern == "h2_bottom":
+        A or B1 → vote=bull
+        None    → vote=neutral
+
+      ambush_pattern == "h2_top":
+        Always vote=neutral, rationale notes the gap explicitly.
+        (Would need a "context-A-top" / "context-B1-top" classifier
+        which doesn't exist yet.)
     """
+    if ambush_pattern == "h2_top":
+        return DirectionSource(
+            name="context",
+            vote="neutral",
+            weight=_SOURCE_WEIGHT,
+            rationale="context not applicable to tops",
+        )
     if macd_df is None:
         return DirectionSource(
             name="context",
@@ -318,6 +383,7 @@ def _vote_from_divergence(
     daily_bars: pd.DataFrame,
     bar_idx: int,
     macd_df: pd.DataFrame | None,
+    ambush_pattern: AmbushPattern = "h2_bottom",
 ) -> DirectionSource:
     """Source D — Conservative PA-native divergence check on daily bars.
 
@@ -327,7 +393,9 @@ def _vote_from_divergence(
 
     Bear divergence (long_put): symmetric on high + hist.
 
-    No MACD provided → neutral.
+    ``ambush_pattern`` is accepted for API symmetry but does not change
+    voting: bull divergence is bullish regardless of which trade side is
+    being scanned, and likewise for bear divergence.
     """
     if macd_df is None:
         return DirectionSource(
@@ -430,40 +498,66 @@ def assess_direction(
     hourly_bars: pd.DataFrame | None,
     bar_idx: int,
     macd_df: pd.DataFrame | None = None,
+    *,
+    ambush_pattern: AmbushPattern = "h2_bottom",
+    weekly_bars: pd.DataFrame | None = None,
+    bars_15: pd.DataFrame | None = None,
 ) -> DirectionVerdict:
-    """Aggregate the four direction sources into a verdict.
+    """Aggregate the eight direction sources into a verdict.
+
+    Source pool (each contributes weight 0.125; threshold 0.50 = 4-of-8):
+
+      1. daily_structure   — PAStructureDetector phase
+      2. hourly_state      — 1h DIF vs ATR margin
+      3. context           — Context A/B1 classifier (bottom-only)
+      4. divergence        — PA-native pivot+hist check
+      5. weekly_trend      — W phase + W DIF (multi-TF backdrop)
+      6. minute15_state    — 15m DIF vs ATR (fine-grain confirmation)
+      7. force_balance     — bull/bear strength over recent window
+      8. exhaustion        — exhausting-side detection
 
     Parameters
     ----------
     daily_bars : pd.DataFrame
         Daily OHLCV (must have at least open/high/low/close + timestamp).
     hourly_bars : pd.DataFrame or None
-        Optional 1h OHLCV.  None → hourly source votes neutral with
-        rationale "no_1h_data".
+        Optional 1h OHLCV.  None → hourly source votes neutral.
     bar_idx : int
-        Positional index into ``daily_bars`` at which to evaluate the
-        direction.
+        Positional index into ``daily_bars`` at which to evaluate.
     macd_df : pd.DataFrame or None
-        Optional daily MACD frame with columns "dif"/"dea"/"hist".  If
-        None the context and divergence sources both vote neutral.
+        Optional daily MACD frame.  None → context + divergence neutral.
+    ambush_pattern : "h2_bottom" | "h2_top"
+        Polarity hint — propagated to every polarity-aware source.
+    weekly_bars : pd.DataFrame or None
+        Optional weekly OHLCV.  None → weekly source neutral.
+    bars_15 : pd.DataFrame or None
+        Optional 15-minute OHLCV.  None → 15m source neutral.
 
     Returns
     -------
     DirectionVerdict
         Direction ∈ {long_call, long_put, skip} with per-source rationale.
     """
+    # Lazy imports to avoid circular dep at module load time
+    from engine.divergence.dir_sources_multitf import (
+        minute15_state_source, weekly_trend_source,
+    )
+    from engine.divergence.dir_sources_context import (
+        exhaustion_source, force_balance_source,
+    )
+
+    _ALL_NAMES = (
+        "daily_structure", "hourly_state", "context", "divergence",
+        "weekly_trend", "minute15_state", "force_balance", "exhaustion",
+    )
+
     if not (0 <= bar_idx < len(daily_bars)):
-        # Degenerate — return a skip with four neutral sources so callers
+        # Degenerate — return a skip with eight neutral sources so callers
         # can serialise the record without special-casing.
         sources = [
-            DirectionSource(name="daily_structure", vote="neutral",
-                            weight=_SOURCE_WEIGHT, rationale="bar_idx_oob"),
-            DirectionSource(name="hourly_state", vote="neutral",
-                            weight=_SOURCE_WEIGHT, rationale="bar_idx_oob"),
-            DirectionSource(name="context", vote="neutral",
-                            weight=_SOURCE_WEIGHT, rationale="bar_idx_oob"),
-            DirectionSource(name="divergence", vote="neutral",
-                            weight=_SOURCE_WEIGHT, rationale="bar_idx_oob"),
+            DirectionSource(name=name, vote="neutral",
+                            weight=_SOURCE_WEIGHT, rationale="bar_idx_oob")
+            for name in _ALL_NAMES
         ]
         return DirectionVerdict(
             direction="skip",
@@ -474,18 +568,47 @@ def assess_direction(
 
     # Source order is fixed — downstream consumers can index by position
     # if they choose to.
-    src_structure = _vote_from_daily_structure(daily_bars, bar_idx)
+    src_structure = _vote_from_daily_structure(
+        daily_bars, bar_idx, ambush_pattern=ambush_pattern,
+    )
 
     if "timestamp" in daily_bars.columns:
         sig_ts = pd.Timestamp(daily_bars["timestamp"].iloc[bar_idx])
     else:
         sig_ts = pd.Timestamp(daily_bars.index[bar_idx])
-    src_hourly = _vote_from_hourly_state(hourly_bars, sig_ts)
+    src_hourly = _vote_from_hourly_state(
+        hourly_bars, sig_ts, ambush_pattern=ambush_pattern,
+    )
 
-    src_context = _vote_from_context(daily_bars, bar_idx, macd_df)
-    src_divergence = _vote_from_divergence(daily_bars, bar_idx, macd_df)
+    src_context = _vote_from_context(
+        daily_bars, bar_idx, macd_df, ambush_pattern=ambush_pattern,
+    )
+    src_divergence = _vote_from_divergence(
+        daily_bars, bar_idx, macd_df, ambush_pattern=ambush_pattern,
+    )
 
-    sources = [src_structure, src_hourly, src_context, src_divergence]
+    # New (D-full) sources
+    src_weekly = weekly_trend_source(
+        weekly_bars, sig_ts, ambush_pattern=ambush_pattern,
+        weight=_SOURCE_WEIGHT,
+    )
+    src_15m = minute15_state_source(
+        bars_15, sig_ts, ambush_pattern=ambush_pattern,
+        weight=_SOURCE_WEIGHT,
+    )
+    src_force = force_balance_source(
+        daily_bars, bar_idx, ambush_pattern=ambush_pattern,
+        weight=_SOURCE_WEIGHT,
+    )
+    src_exhaust = exhaustion_source(
+        daily_bars, bar_idx, ambush_pattern=ambush_pattern,
+        weight=_SOURCE_WEIGHT,
+    )
+
+    sources = [
+        src_structure, src_hourly, src_context, src_divergence,
+        src_weekly, src_15m, src_force, src_exhaust,
+    ]
 
     bull_votes = sum(s.weight for s in sources if s.vote == "bull")
     bear_votes = sum(s.weight for s in sources if s.vote == "bear")

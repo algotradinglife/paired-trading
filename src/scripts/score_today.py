@@ -406,12 +406,78 @@ def _load_bars_15(sym: str, args) -> pd.DataFrame | None:
     return bar_loader.load_bars_json(path)
 
 
+def _load_bars_weekly(sym: str, args) -> pd.DataFrame | None:
+    """Load weekly bars for sym for the DIR weekly_trend source.
+
+    Strategy (mirrors ``_load_bars_60`` quant-first / JSON fallback):
+      1. Try BarStore Parquet at level "W".
+      2. Fall back to legacy JSON snapshot at ``<sym>_weekly.json``.
+      3. Last resort — resample daily bars to W via ``pd.resample('W')``.
+
+    Returns ``None`` if no source yields a usable frame (or daily fallback
+    has < 30 daily bars to resample).
+    """
+    if getattr(args, "quant_data_root", None) is not None:
+        resolved = bar_loader.infer_symbol_and_mic(sym)
+        if resolved is not None:
+            quant_sym, mic = resolved
+            try:
+                return bar_loader.load_bars_quant(quant_sym, mic, "W", args.quant_data_root)
+            except Exception:
+                pass  # fall through to JSON, then to daily-resample
+
+    json_path = args.bars_dir / f"{sym.lower()}_weekly.json"
+    if json_path.exists():
+        try:
+            return bar_loader.load_bars_json(json_path)
+        except Exception:
+            pass  # fall through to daily-resample
+
+    # Daily-resample fallback — only fires if neither Parquet nor JSON works.
+    daily = _load_bars_daily(sym, args)
+    if daily is None or len(daily) < 30:
+        return None
+    return _resample_daily_to_weekly(daily)
+
+
+def _resample_daily_to_weekly(daily: pd.DataFrame) -> pd.DataFrame | None:
+    """Resample a daily OHLCV frame to weekly bars (W-FRI convention).
+
+    Returns a frame with columns ``timestamp, open, high, low, close, volume``.
+    Returns None on degenerate input.
+    """
+    if "timestamp" not in daily.columns or len(daily) == 0:
+        return None
+    df = daily.copy()
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
+    df = df.set_index("timestamp")
+    agg: dict[str, str] = {}
+    for col, how in (
+        ("open", "first"),
+        ("high", "max"),
+        ("low", "min"),
+        ("close", "last"),
+        ("volume", "sum"),
+    ):
+        if col in df.columns:
+            agg[col] = how
+    if not agg:
+        return None
+    weekly = df.resample("W").agg(agg).dropna(subset=["close"]).reset_index()
+    weekly["time"] = weekly["timestamp"].values.astype("datetime64[s]").astype("int64")
+    return weekly
+
+
 def _attach_direction_verdict(
     rec: dict,
     daily_bars: "pd.DataFrame",
     hourly_bars: "pd.DataFrame | None",
     bar_idx: int,
     macd_df: "pd.DataFrame | None" = None,
+    *,
+    ambush_pattern: str = "h2_bottom",
+    weekly_bars: "pd.DataFrame | None" = None,
+    bars_15: "pd.DataFrame | None" = None,
 ) -> None:
     """Annotate ``rec`` with a DirectionVerdict from the DIR module.
 
@@ -427,10 +493,25 @@ def _attach_direction_verdict(
     policy_weight paths.  The verdict is recorded so reviewers can
     sanity-check alignment between the synthesiser and the existing
     PA gates before any consumer starts reading the verdict.
+
+    ``ambush_pattern`` ("h2_bottom" / "h2_top") drives the polarity-aware
+    voting on the hourly / context / 15-min sources.  All four current
+    emit blocks (pa_us_60min, pa_us_dif_pos, pa_h2, pa_cn_bond) emit
+    bottoms, so they pass ``"h2_bottom"``.
+
+    ``weekly_bars`` and ``bars_15`` are accepted so the caller can feed
+    the multi-TF sources (weekly_trend / minute15_state) once the
+    orchestrator wires them into ``assess_direction``.  Until that
+    merge lands here, these are stashed on ``rec`` under the keys
+    ``_dir_weekly_bars_available`` / ``_dir_15m_bars_available`` so the
+    parent session's merge step can verify the wiring without changing
+    this helper's call sites again.
     """
     try:
         verdict: DirectionVerdict = assess_direction(
-            daily_bars, hourly_bars, bar_idx, macd_df=macd_df,
+            daily_bars, hourly_bars, bar_idx,
+            macd_df=macd_df, ambush_pattern=ambush_pattern,
+            weekly_bars=weekly_bars, bars_15=bars_15,
         )
     except Exception as exc:  # pragma: no cover — defensive
         rec["direction_verdict"] = "skip"
@@ -673,6 +754,13 @@ def main() -> int:
             continue
         loaded_symbols += 1
         h_bars = None  # loaded on demand by detector blocks below
+        # DIR multi-TF feeds: cached per symbol so the four bottom emit
+        # blocks (pa_us_60min, pa_us_dif_pos, pa_h2, pa_cn_bond) share
+        # one Parquet hit each.  ``_w_bars`` falls back to a
+        # daily→weekly resample if Parquet "W" / JSON weekly missing.
+        _w_bars: pd.DataFrame | None = None
+        _bars_15_cache: pd.DataFrame | None = None
+        _dir_feeds_loaded: bool = False
         macd_df = macd(bars["close"], hist_scale=1.0)
         streams = compute_feature_streams(bars["close"], macd_df["dif"], macd_df["dea"], macd_df["hist"])
         units = compute_unit_metadata(macd_df["dif"], macd_df["dea"], macd_df["hist"], streams["dif_proximity_zero"])
@@ -892,8 +980,19 @@ def main() -> int:
                     enrich_with_iv_au(pa_calls, pa_date, pa_close, _AU_OPTIONS_DATA_DIR)
                     pa_rec["options_calls"] = pa_calls
                 _annotate_pa_sweet_spots(pa_rec, pool_rules)
+                # DIR multi-TF feed for the four bottom emit blocks:
+                #   - bars_15 already loaded above as _m15_bars (15m sweep)
+                #   - weekly bars loaded lazily, cached per symbol via _w_bars
+                if not _dir_feeds_loaded:
+                    _w_bars = _load_bars_weekly(sym, args)
+                    _bars_15_cache = _m15_bars
+                    _dir_feeds_loaded = True
                 _attach_direction_verdict(
-                    pa_rec, bars, h_bars, pa_sig.bar_idx, macd_df=macd_df,
+                    pa_rec, bars, h_bars, pa_sig.bar_idx,
+                    macd_df=macd_df,
+                    ambush_pattern="h2_bottom",
+                    weekly_bars=_w_bars,
+                    bars_15=_bars_15_cache,
                 )
                 pa_rec["position_size"] = _position_size(pa_rec)
                 scored.append(pa_rec)
@@ -953,8 +1052,16 @@ def main() -> int:
                     "pa_phase": _b_struct.phase,
                 }
                 _annotate_pa_sweet_spots(_b_rec, pool_rules)
+                if not _dir_feeds_loaded:
+                    _w_bars = _load_bars_weekly(sym, args)
+                    _bars_15_cache = _load_bars_15(sym, args)
+                    _dir_feeds_loaded = True
                 _attach_direction_verdict(
-                    _b_rec, bars, h_bars, _b_sig.bar_idx, macd_df=macd_df,
+                    _b_rec, bars, h_bars, _b_sig.bar_idx,
+                    macd_df=macd_df,
+                    ambush_pattern="h2_bottom",
+                    weekly_bars=_w_bars,
+                    bars_15=_bars_15_cache,
                 )
                 _b_rec["position_size"] = _position_size(_b_rec)
                 scored.append(_b_rec)
@@ -1135,8 +1242,16 @@ def main() -> int:
                     "pa_stop_pct": _us_stop_pct,
                 }
                 _annotate_pa_sweet_spots(_us_rec, pool_rules)
+                if not _dir_feeds_loaded:
+                    _w_bars = _load_bars_weekly(sym, args)
+                    _bars_15_cache = _load_bars_15(sym, args)
+                    _dir_feeds_loaded = True
                 _attach_direction_verdict(
-                    _us_rec, bars, h_bars, _us_sig.bar_idx, macd_df=macd_df,
+                    _us_rec, bars, h_bars, _us_sig.bar_idx,
+                    macd_df=macd_df,
+                    ambush_pattern="h2_bottom",
+                    weekly_bars=_w_bars,
+                    bars_15=_bars_15_cache,
                 )
                 _us_rec["position_size"] = _position_size(_us_rec)
                 scored.append(_us_rec)
@@ -1253,8 +1368,16 @@ def main() -> int:
                         _daily_idx = int(_mask.sum()) - 1
                     else:
                         _daily_idx = 0
+                    if not _dir_feeds_loaded:
+                        _w_bars = _load_bars_weekly(sym, args)
+                        _bars_15_cache = _load_bars_15(sym, args)
+                        _dir_feeds_loaded = True
                     _attach_direction_verdict(
-                        _rec60, bars, _bars_60, _daily_idx, macd_df=macd_df,
+                        _rec60, bars, _bars_60, _daily_idx,
+                        macd_df=macd_df,
+                        ambush_pattern="h2_bottom",
+                        weekly_bars=_w_bars,
+                        bars_15=_bars_15_cache,
                     )
                     _rec60["position_size"] = _position_size(_rec60)
                     scored.append(_rec60)
