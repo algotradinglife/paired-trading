@@ -595,7 +595,7 @@ def main() -> int:
             for pa_sig in pa_sigs:
                 if pa_sig.timestamp.date() < cutoff_date:
                     continue
-                pa_weight = PABottomDetector.policy_weight(pa_sig, instrument_class)
+                pa_weight = PABottomDetector.policy_weight(pa_sig, instrument_class, symbol=sym)
                 if pa_weight == 0.0:
                     continue
 
@@ -765,7 +765,11 @@ def main() -> int:
         # Framework: PA structure first → stop from TR floor / recent HL; DIF<0 disabled.
         # K=3 validated: DIF>0 h=opp struct F3=+0.507R; TR phase struct F3=+0.141R.
         # Phase allocation: BULL=full weight, TR/TR_FORMING=half weight, BEAR/UNCLEAR=skip.
-        if instrument_class == "us_equity":
+        # US long-duration treasury ETFs structurally break PA H2 (4/4 folds
+        # negative across hike/yield-peak/cut regimes — see
+        # doc/repro/pa_tlt_diagnostic_2026-06-08.md).  Match the
+        # PABottomDetector.policy_weight() suppression set.
+        if instrument_class == "us_equity" and sym.lower() not in PABottomDetector.US_LONG_BOND_SUPPRESS:
             if h_bars is None:
                 h_bars = _load_bars_60(sym, args)
             _pa_struct_det = PAStructureDetector()
