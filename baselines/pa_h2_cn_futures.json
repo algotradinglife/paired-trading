@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "lane": "pa_h2",
+  "pool": "cn_futures",
+  "instrument_class": "cn_futures",
+  "symbols_included": [],
+  "symbols_included_note": "Mixed CN commodity futures (non-metal, non-bond, non-agri-pos). Specific symbol list not pinned in docstring; pool is defined by routing (instrument_class==cn_futures) rather than an explicit allowlist. requires_verification.",
+  "symbols_excluded": [],
+  "detector_params": {
+    "min_h_legs": 2,
+    "min_quality": 0.3,
+    "ema_threshold": 0.0,
+    "min_gap": 10,
+    "h_filter": "opposing",
+    "note": "Default PABottomDetector defaults. Production routing via pa_detector.py:324-329 (instrument_class==cn_futures branch)."
+  },
+  "walk_forward": {
+    "method": "OOS folds (K-fold count not specified in docstring)",
+    "cutoff1": null,
+    "cutoff2": null,
+    "cutoff3": null,
+    "stop_framework": "ATR x 1.5",
+    "note": "Only F1 and F2 EV numbers cited in docstring line 277. No IS / F3 numbers. requires_verification."
+  },
+  "samples": {
+    "is": {"n": null, "ev_r": null, "win_pct": null},
+    "f1": {"n": null, "ev_r": 0.183, "win_pct": null},
+    "f2": {"n": null, "ev_r": 0.124, "win_pct": null},
+    "f3": {"n": null, "ev_r": null, "win_pct": null}
+  },
+  "samples_full_stack_5y": {
+    "framework": "PA structural stop (live production form)",
+    "note": "Full-stack doc reports pa_h2 lane aggregated to n=102 / +0.189R / win 55.9% with 'CN_METAL 主力' caveat — meaning CN_METAL drives the EV and the cn_futures mixed pool's sub-slice is not separately reported. Per docstring line 277: 'mixed; metal sub-pool drives the EV; monitoring only.'"
+  },
+  "verdict": "marginal",
+  "verdict_reason": "F1+0.183R and F2+0.124R both positive but marginal; no IS / F3 / n cited. Metal sub-pool drives the EV (per docstring & full-stack doc). Production lane intentionally kept at lower weight (0.55 h=opp / 0.35 neutral) for monitoring-only status. Not a STRONG PASS.",
+  "policy_weight_assigned": 0.55,
+  "policy_weight_assigned_breakdown": {
+    "hopp": 0.55,
+    "neutral_or_other": 0.35
+  },
+  "policy_weight_recommended": 0.55,
+  "valid_until": "2026-09-09",
+  "commit_hash": "f0ff0bc5",
+  "data_snapshot": "2026-06-08",
+  "last_verified": "2026-06-09",
+  "last_verified_note": "imported from docstring; re-verification pending",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_pa_standalone.py --pool CN_FUTURES --h-opp-only",
+  "related_docs": [
+    "src/engine/divergence/pa_detector.py:277",
+    "src/engine/divergence/pa_detector.py:324-329",
+    "doc/repro/full_stack_backtest_2026-06-08.md"
+  ],
+  "notes": "Imported from docstring 2026-06-09. Docstring describes this lane as 'monitoring only' with metal sub-pool driving EV. Numbers are sparse (only F1/F2 EV, no n, no IS/F3) — this lane is the most evidence-thin of the six promoted today. CN_METAL sub-pool already has its own baseline (pa_h2_cn_metal_futures.json); this cn_futures pool is the residual mixed slice. requires_verification: need full K-fold numbers + symbol enumeration before next 90-day cycle.",
+  "requires_verification": true
+}

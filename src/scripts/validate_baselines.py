@@ -1,9 +1,17 @@
 """Audit `baselines/*.json` baseline artifacts.
 
-Two modes:
+Modes (mutually compatible):
   default (metadata)  — fast scan: expiry / verdict / staleness / schema
   --full              — also re-execute each baseline's `repro_command`
-                        (slow; opt-in only)
+                        (slow; opt-in only; currently only checks exit code,
+                        TODO: parse structured output and diff against samples)
+  --strict            — exit non-zero on STALE, DRIFT, EXPIRED, BROKEN, or
+                        registry mismatches. Use in CI/cron.
+
+Registry check (always on):
+  baselines/EXPECTED_LANES.json lists (lane, pool) pairs production currently
+  emits. Anything in `expected` missing from filesystem → BROKEN.
+  Anything on filesystem not in `expected`+`pending` → WARN (orphan).
 
 A baseline file is the single source of truth for "what evidence backs this
 lane × pool's policy_weight". Detector docstrings should REF the JSON, not
@@ -11,6 +19,7 @@ inline numbers.
 
 Usage:
     python scripts/validate_baselines.py
+    python scripts/validate_baselines.py --strict
     python scripts/validate_baselines.py --full
     python scripts/validate_baselines.py --lane pa_h2_climax
 """
@@ -24,6 +33,7 @@ import sys
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 BASELINES_DIR = REPO_ROOT / "baselines"
+REGISTRY_PATH = BASELINES_DIR / "EXPECTED_LANES.json"
 
 REQUIRED_FIELDS = (
     "schema_version", "lane", "pool", "verdict",
@@ -34,6 +44,9 @@ REQUIRED_FIELDS = (
 VERDICTS = {
     "STRONG PASS", "PASS", "CONDITIONAL PASS",
     "marginal", "REJECT", "STALE", "DRIFT",
+    # Production-active but no formal K=3 walk-forward (imported from docstring).
+    # Treated as a production gap under --strict.
+    "PENDING_VALIDATION",
 }
 
 STATUS_ICONS = {
@@ -42,8 +55,14 @@ STATUS_ICONS = {
     "EXPIRED": "[XPRD]",
     "STALE":   "[STAL]",
     "DRIFT":   "[DRFT]",
+    "PENDING": "[PEND]",
     "BROKEN":  "[BRKN]",
+    "MISSING": "[MISS]",
+    "ORPHAN":  "[ORPH]",
 }
+
+# Status classes treated as failures under --strict
+STRICT_FAIL_STATUSES = {"BROKEN", "EXPIRED", "STALE", "DRIFT", "PENDING", "MISSING"}
 
 
 def _today() -> dt.date:
@@ -61,7 +80,6 @@ def _check_schema(b: dict) -> list[str]:
             issues.append(f"missing field: {f}")
     if b.get("verdict") not in VERDICTS:
         issues.append(f"unknown verdict: {b.get('verdict')!r}")
-    # sample integrity
     samples = b.get("samples", {})
     for fold, s in samples.items():
         if not isinstance(s, dict):
@@ -77,7 +95,6 @@ def _check_schema(b: dict) -> list[str]:
 
 
 def _check_freshness(b: dict) -> tuple[str, str]:
-    """Return (status, reason)."""
     try:
         valid_until = dt.date.fromisoformat(b["valid_until"])
     except (KeyError, ValueError):
@@ -91,6 +108,20 @@ def _check_freshness(b: dict) -> tuple[str, str]:
     return "OK", f"valid for {days}d"
 
 
+def _check_assigned_vs_recommended(b: dict) -> tuple[bool, str]:
+    """Return (is_consistent, reason). Catches assigned > recommended drift gap."""
+    assigned = b.get("policy_weight_assigned")
+    recommended = b.get("policy_weight_recommended")
+    if recommended is None:
+        return True, ""
+    if assigned is None or assigned == recommended:
+        return True, ""
+    return False, (
+        f"policy_weight_assigned={assigned} != recommended={recommended} "
+        f"(production gap)"
+    )
+
+
 def _audit(b: dict, source: pathlib.Path) -> dict:
     issues = _check_schema(b)
     status, reason = _check_freshness(b)
@@ -100,22 +131,36 @@ def _audit(b: dict, source: pathlib.Path) -> dict:
     lane = b.get("lane", "?")
     pool = b.get("pool", "?")
 
-    # Verdict-specific overrides
     if verdict == "STALE":
         status = "STALE"
         reason = "verdict=STALE (known broken)"
     elif verdict == "DRIFT":
         status = "DRIFT"
-        recommended = b.get("policy_weight_recommended")
-        reason = f"verdict=DRIFT; weight={weight} but recommended={recommended}" if recommended else "verdict=DRIFT (needs re-validation)"
+        consistent, mismatch_reason = _check_assigned_vs_recommended(b)
+        if not consistent:
+            reason = f"verdict=DRIFT; {mismatch_reason}"
+        else:
+            recommended = b.get("policy_weight_recommended")
+            reason = (f"verdict=DRIFT; assigned==recommended={recommended} "
+                      f"(weight bumped to recommended; investigation pending)")
+    elif verdict == "PENDING_VALIDATION":
+        status = "PENDING"
+        reason = f"verdict=PENDING_VALIDATION; weight={weight} (no K=3 baseline)"
     elif issues:
         status = "BROKEN"
         reason = f"schema: {issues[0]}"
 
-    # Sanity: STALE/REJECT should not assign a non-zero live weight
+    # Sanity: STALE/REJECT must not assign a non-zero live weight
     if verdict in {"STALE", "REJECT"} and (weight or 0) > 0:
         status = "BROKEN"
         reason = f"verdict={verdict} but policy_weight={weight} (>0)"
+
+    # Sanity: any verdict with assigned > recommended is a production gap
+    if verdict not in {"STALE", "REJECT"}:
+        consistent, mismatch_reason = _check_assigned_vs_recommended(b)
+        if not consistent and status not in {"BROKEN", "STALE"}:
+            status = "BROKEN"
+            reason = mismatch_reason
 
     return {
         "source": source.name,
@@ -130,14 +175,13 @@ def _audit(b: dict, source: pathlib.Path) -> dict:
 
 
 def _run_repro(b: dict) -> tuple[str, str]:
-    """Execute the JSON's `repro_command` and capture stdout tail."""
+    """Execute repro_command, capture stdout tail. Currently only exit-code check."""
     import shlex
     import subprocess
 
     cmd = b.get("repro_command", "")
     if not cmd:
         return "WARN", "no repro_command"
-    # Strip leading `cd src && ` if present
     cwd = REPO_ROOT
     if cmd.startswith("cd src && "):
         cwd = REPO_ROOT / "src"
@@ -158,7 +202,59 @@ def _run_repro(b: dict) -> tuple[str, str]:
     if proc.returncode != 0:
         return "BROKEN", f"repro exited {proc.returncode}; stderr tail: {proc.stderr[-200:].strip()}"
     tail = "\n".join(proc.stdout.strip().splitlines()[-8:])
-    return "OK", f"repro succeeded; tail:\n{tail}"
+    return "OK", f"repro succeeded (exit-code only — output drift NOT parsed)"
+
+
+def _load_registry() -> dict | None:
+    if not REGISTRY_PATH.exists():
+        return None
+    try:
+        return _load(REGISTRY_PATH)
+    except json.JSONDecodeError:
+        return None
+
+
+def _audit_registry(registry: dict, present_files: set[str]) -> list[dict]:
+    """Cross-check filesystem vs EXPECTED_LANES registry. Returns extra rows."""
+    rows = []
+    expected = registry.get("expected", [])
+    pending = registry.get("pending", [])
+    expected_files = {e["baseline_file"] for e in expected if "baseline_file" in e}
+    pending_files = {p["baseline_file"] for p in pending if "baseline_file" in p}
+    known_files = expected_files | pending_files
+
+    # MISSING: expected but not on disk
+    for entry in expected:
+        bf = entry.get("baseline_file")
+        if bf and bf not in present_files:
+            rows.append({
+                "source": bf,
+                "lane": entry.get("lane", "?"),
+                "pool": entry.get("pool", "?"),
+                "verdict": "REGISTERED",
+                "weight": None,
+                "status": "MISSING",
+                "reason": "registered in EXPECTED_LANES but baseline file not found",
+                "issues": [],
+            })
+
+    # ORPHAN: on disk but not in expected/pending
+    for f in sorted(present_files):
+        if f == "EXPECTED_LANES.json" or f == "README.md":
+            continue
+        if f not in known_files:
+            rows.append({
+                "source": f,
+                "lane": "?",
+                "pool": "?",
+                "verdict": "?",
+                "weight": None,
+                "status": "ORPHAN",
+                "reason": "file present but not listed in EXPECTED_LANES (expected or pending)",
+                "issues": [],
+            })
+
+    return rows
 
 
 def main() -> int:
@@ -166,6 +262,8 @@ def main() -> int:
     p.add_argument("--lane", help="only audit baselines whose lane matches")
     p.add_argument("--full", action="store_true",
                    help="also execute each repro_command (slow)")
+    p.add_argument("--strict", action="store_true",
+                   help="exit non-zero on STALE/DRIFT/EXPIRED/BROKEN/MISSING")
     p.add_argument("--json", action="store_true",
                    help="emit machine-readable JSON instead of table")
     args = p.parse_args()
@@ -179,8 +277,12 @@ def main() -> int:
         print(f"error: no baselines in {BASELINES_DIR}", file=sys.stderr)
         return 2
 
-    results = []
+    results: list[dict] = []
+    present_files = {f.name for f in files}
+
     for f in files:
+        if f.name == "EXPECTED_LANES.json":
+            continue
         try:
             b = _load(f)
         except json.JSONDecodeError as exc:
@@ -200,30 +302,50 @@ def main() -> int:
             row["repro_msg"] = repro_msg
         results.append(row)
 
+    # Registry cross-check (skipped under --lane filter to avoid noise)
+    if not args.lane:
+        registry = _load_registry()
+        if registry is None:
+            results.append({
+                "source": "EXPECTED_LANES.json",
+                "lane": "—", "pool": "—",
+                "verdict": "—", "weight": None,
+                "status": "WARN",
+                "reason": "registry missing or malformed",
+                "issues": [],
+            })
+        else:
+            results.extend(_audit_registry(registry, present_files))
+
     if args.json:
         print(json.dumps(results, indent=2, default=str))
-        return 0 if all(r["status"] in {"OK", "WARN"} for r in results) else 1
+        statuses = {r["status"] for r in results}
+        bad = statuses & (STRICT_FAIL_STATUSES if args.strict else {"BROKEN", "EXPIRED", "MISSING"})
+        return 0 if not bad else 1
 
-    # Table output
     print(f"{'STATUS':6s}  {'LANE':22s}  {'POOL':22s}  {'VERDICT':18s}  {'W':>5s}  REASON")
     print("-" * 110)
-    fail = 0
+
+    fail_strict = 0
+    fail_metadata = 0
     for r in results:
         icon = STATUS_ICONS.get(r["status"], r["status"])
         w = "—" if r["weight"] is None else f"{r['weight']:.2f}"
         print(f"{icon:6s}  {r['lane'][:22]:22s}  {r['pool'][:22]:22s}  {r['verdict'][:18]:18s}  {w:>5s}  {r['reason']}")
-        if r["status"] in {"BROKEN", "EXPIRED"}:
-            fail += 1
+        if r["status"] in {"BROKEN", "EXPIRED", "MISSING"}:
+            fail_metadata += 1
+        if r["status"] in STRICT_FAIL_STATUSES:
+            fail_strict += 1
         if args.full and r.get("repro_status"):
             print(f"        repro: {r['repro_status']}  {r['repro_msg'][:80]}")
 
     print()
-    summary = (f"{len(results)} baselines audited; "
-               f"{fail} BROKEN/EXPIRED; "
-               f"{sum(1 for r in results if r['status']=='STALE')} STALE; "
-               f"{sum(1 for r in results if r['status']=='WARN')} WARN.")
-    print(summary)
-    return 0 if fail == 0 else 1
+    counts = {s: sum(1 for r in results if r["status"] == s) for s in STATUS_ICONS}
+    summary_parts = [f"{n} {s}" for s, n in counts.items() if n]
+    print(f"{len(results)} entries audited; " + "; ".join(summary_parts))
+    if args.strict:
+        return 0 if fail_strict == 0 else 1
+    return 0 if fail_metadata == 0 else 1
 
 
 if __name__ == "__main__":

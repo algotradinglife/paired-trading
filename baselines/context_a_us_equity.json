@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "lane": "context_a",
+  "pool": "us_equity",
+  "instrument_class": "us_equity",
+  "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
+  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy"],
+  "detector_params": {
+    "min_gap": 10,
+    "h_filter": "opposing",
+    "note": "Default ContextADetector(min_gap=10) — see src/engine/divergence/context_a_detector.py. Underlying classify_context() requires: DIF>0, close in 3-10% pullback from 20-bar high, close<EMA20, close>=EMA60*0.98, no recent acceleration bar.",
+    "stop_framework_in_baseline": "ATR x 1.5, max_hold=40 (per backtest_context_a_ev.py)"
+  },
+  "walk_forward": {
+    "method": "K=3 OOS folds",
+    "cutoff1": null,
+    "cutoff2": null,
+    "cutoff3": null,
+    "stop_framework": "ATR x 1.5",
+    "note": "Cutoffs not pinned in detector docstring; need to recover from backtest_context_a_ev.py to fully harden. requires_verification."
+  },
+  "samples": {
+    "is": {"n": 46, "ev_r": -0.304, "win_pct": null},
+    "f1": {"n": 33, "ev_r":  0.106, "win_pct": null},
+    "f2": {"n": 42, "ev_r":  0.179, "win_pct": null},
+    "f3": {"n": 32, "ev_r":  0.574, "win_pct": null}
+  },
+  "samples_aggregate": {
+    "n": 153, "ev_r": 0.100,
+    "note": "Docstring headline aggregate; IS is negative due to incomplete 60m coverage pre-2022 (per docstring)."
+  },
+  "samples_full_stack_5y": {
+    "framework": "PA structural stop (live production form)",
+    "n": 289, "ev_r": 0.105, "win_pct": 55.4,
+    "note": "From doc/repro/full_stack_backtest_2026-06-08.md — largest-volume lane, stable. Direction-consistent with K=3 claim."
+  },
+  "verdict": "CONDITIONAL PASS",
+  "verdict_reason": "3/3 OOS folds positive and improving (F1+0.106 → F2+0.179 → F3+0.574). IS negative due to pre-2022 incomplete 60m coverage. Full-stack 5.5y replay confirms direction (+0.105R EV / win 55%, n=289). policy_weight=0.60 for h=opposing only.",
+  "policy_weight_assigned": 0.60,
+  "policy_weight_recommended": 0.60,
+  "valid_until": "2026-09-09",
+  "commit_hash": "f0ff0bc5",
+  "data_snapshot": "2026-06-08",
+  "last_verified": "2026-06-09",
+  "last_verified_note": "imported from docstring; re-verification pending",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_context_a_ev.py --pool US --h-opp-only",
+  "related_docs": [
+    "src/engine/divergence/context_a_detector.py:7,132",
+    "doc/repro/full_stack_backtest_2026-06-08.md"
+  ],
+  "notes": "Imported from docstring 2026-06-09; walk-forward cutoffs not yet pinned in detector source — re-validate with explicit --cutoff1/2/3 once script flags confirmed. Sample sizes from docstring: IS n=46 / F1 n=33 / F2 n=42 / F3 n=32 (sum=153 matches docstring aggregate).",
+  "requires_verification": true
+}

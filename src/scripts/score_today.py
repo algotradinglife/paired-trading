@@ -831,7 +831,9 @@ def main() -> int:
             rec["position_size"] = _position_size(rec)
             scored.append(rec)
 
-        # BPull scan — cn_metal_futures only (K=3 STRONG PASS: F1=+1.000R F3=+1.008R)
+        # BPull scan — cn_metal_futures only. BASELINE_REF: baselines/bpull_cn_metal_futures.json
+        # (Prior stale comment cited F1=+1.000R F3=+1.008R — those were from the missed-swing
+        # +EMA20 sub-experiment, not the canonical K=3 walk-forward. See BPullDetector docstring.)
         if instrument_class == "cn_metal_futures":
             h_bars = _load_bars_60(sym, args)
             bpull_det = BPullDetector()
@@ -1086,9 +1088,11 @@ def main() -> int:
                 _b_rec["position_size"] = _position_size(_b_rec)
                 scored.append(_b_rec)
 
-        # VFlush scan — cn_metal_futures only (K=3 STRONG PASS, cu+sc only).
+        # VFlush scan — cn_metal_futures only. BASELINE_REF: baselines/vflush_cn_metal_cu_sc.json
+        # 2026-06-09 DRIFT: cu+sc baseline n=4 vs original n=50 claim; production weight
+        # reduced 0.65→0.30 pending root-cause. ag+au excluded (OOS negative).
         # V-shape vertical flush bottoms: deep below EMA + current-bar selling climax,
-        # NO h_leg requirement. ag+au excluded (OOS negative); policy_weight=0.65 for cu+sc.
+        # NO h_leg requirement.
         if instrument_class == "cn_metal_futures":
             if h_bars is None:
                 h_bars = _load_bars_60(sym, args)

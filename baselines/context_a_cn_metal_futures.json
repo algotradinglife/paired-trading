@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "lane": "context_a",
+  "pool": "cn_metal_futures",
+  "instrument_class": "cn_metal_futures",
+  "symbols_included": ["kq_m_shfe_cu", "kq_m_shfe_au", "kq_m_shfe_ag", "kq_m_ine_sc"],
+  "symbols_excluded": ["kq_m_shfe_rb"],
+  "detector_params": {
+    "min_gap": 10,
+    "h_filter": "opposing",
+    "note": "Default ContextADetector(min_gap=10) — see src/engine/divergence/context_a_detector.py. Underlying classify_context() requires: DIF>0, close in 3-10% pullback from 20-bar high, close<EMA20, close>=EMA60*0.98, no recent acceleration bar.",
+    "stop_framework_in_baseline": "ATR x 1.5, max_hold=40 (per backtest_context_a_ev.py)"
+  },
+  "walk_forward": {
+    "method": "K=3 OOS folds",
+    "cutoff1": null,
+    "cutoff2": null,
+    "cutoff3": null,
+    "stop_framework": "ATR x 1.5",
+    "note": "Cutoffs not pinned in detector docstring; need to recover from backtest_context_a_ev.py to fully harden. requires_verification."
+  },
+  "samples": {
+    "is": {"n": 28, "ev_r":  0.143, "win_pct": null},
+    "f1": {"n": 19, "ev_r":  0.342, "win_pct": null},
+    "f2": {"n": 13, "ev_r": -0.192, "win_pct": null},
+    "f3": {"n": 13, "ev_r":  0.619, "win_pct": null}
+  },
+  "samples_aggregate": {
+    "n": 73, "ev_r": 0.220,
+    "note": "Docstring headline aggregate; F2 negative attributed to 2024 regime break."
+  },
+  "samples_full_stack_5y": {
+    "framework": "PA structural stop (live production form)",
+    "note": "Full-stack doc reports context_a aggregate across pools at n=289 / +0.105R / win 55.4%; per-pool CN_METAL slice not explicitly broken out in doc/repro/full_stack_backtest_2026-06-08.md. Placeholder — requires_verification."
+  },
+  "verdict": "CONDITIONAL PASS",
+  "verdict_reason": "2/3 OOS folds positive (F1+0.342, F3+0.619); F2 fail attributed to known 2024 regime break per docstring. Aggregate EV+0.220R/n=73. policy_weight=0.60 for h=opposing only; 0.0 for all other h_rel.",
+  "policy_weight_assigned": 0.60,
+  "policy_weight_recommended": 0.60,
+  "valid_until": "2026-09-09",
+  "commit_hash": "f0ff0bc5",
+  "data_snapshot": "2026-06-08",
+  "last_verified": "2026-06-09",
+  "last_verified_note": "imported from docstring; re-verification pending",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_context_a_ev.py --pool CN_METAL --h-opp-only",
+  "related_docs": [
+    "src/engine/divergence/context_a_detector.py:8,133",
+    "doc/repro/full_stack_backtest_2026-06-08.md"
+  ],
+  "notes": "Imported from docstring 2026-06-09; walk-forward cutoffs not yet pinned in detector source — re-validate with explicit --cutoff1/2/3 once script flags confirmed. F2 regime-break caveat must be retested as 2024 data ages out of the IS window. Sample-size check: docstring sum 28+19+13+13=73 matches aggregate n.",
+  "requires_verification": true
+}

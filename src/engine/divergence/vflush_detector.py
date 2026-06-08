@@ -236,12 +236,18 @@ class VFlushDetector:
 
           cn_metal_futures — cu+sc only | h=opposing (K=3):
             IS=+0.598R(n=22)  F1=+0.722R(n=12)  F2=+0.436R(n=9)  F3=+0.533R(n=7)
-            All 4 folds positive — K=3 STRONG PASS → weight 0.65
+            All 4 folds positive — K=3 STRONG PASS → weight 0.65 (HISTORICAL)
           ag+au excluded (OOS negative; see _VFLUSH_EXCLUDED_CN_METAL):
             ag: IS=-0.375R  F1=+0.554R  F2=-0.375R  F3=+0.667R (inconsistent)
             au: IS=-1.000R  F1=+0.718R  F2=-1.000R  F3=-0.432R (negative EV)
 
           Other instrument classes: not validated → 0.0
+
+        2026-06-09 DRIFT: cu+sc sub-pool reproduced n=4 (cu n=1, sc n=3) vs
+        original docstring n=50. Production signals are ag-dominated path
+        which was never baseline-validated. Weight reduced 0.65 → 0.30
+        pending root-cause investigation (data backfill vs param drift).
+        BASELINE_REF: baselines/vflush_cn_metal_cu_sc.json
 
         Args:
             sig: VFlushSignal to score.
@@ -255,7 +261,7 @@ class VFlushDetector:
             if symbol is not None and symbol.lower() in _VFLUSH_EXCLUDED_CN_METAL:
                 return 0.0
             if rel == "opposing":
-                return 0.65
+                return 0.30  # DRIFT-recommended; was 0.65; see BASELINE_REF
             return 0.0  # non-opposing not validated in K=3 walk-forward
 
         # Not validated on other pools

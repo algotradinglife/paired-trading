@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "description": "Registry of (lane, pool) pairs that production currently emits and therefore MUST have a baseline JSON. validate_baselines.py uses this to detect deleted/missing baselines (silent disappearance class of drift codex flagged).",
+  "last_updated": "2026-06-09",
+  "expected": [
+    {
+      "lane": "bpull",
+      "pool": "cn_metal_futures",
+      "baseline_file": "bpull_cn_metal_futures.json",
+      "production_binding": "src/engine/divergence/bpull_detector.py::BPullDetector.policy_weight",
+      "score_today_line": "src/scripts/score_today.py:848"
+    },
+    {
+      "lane": "vflush",
+      "pool": "cn_metal_futures",
+      "baseline_file": "vflush_cn_metal_cu_sc.json",
+      "production_binding": "src/engine/divergence/vflush_detector.py::VFlushDetector.policy_weight",
+      "score_today_line": "src/scripts/score_today.py:1109"
+    },
+    {
+      "lane": "pa_h2",
+      "pool": "cn_bond",
+      "baseline_file": "pa_h2_cn_bond.json",
+      "production_binding": "src/engine/divergence/pa_detector.py::PABottomDetector.policy_weight (cn_bond branch lines 317-322)",
+      "score_today_line": "src/scripts/score_today.py:1041 (approx; cn_bond branch via instrument_class)"
+    },
+    {
+      "lane": "pa_h2_climax",
+      "pool": "cn_agri_pos",
+      "baseline_file": "pa_h2_climax_cn_agri_pos.json",
+      "production_binding": "src/scripts/score_today.py:1482 (inline lane wiring; policy_weight hardcoded to 0.0 — STALE)",
+      "score_today_line": "src/scripts/score_today.py:1473"
+    },
+    {
+      "lane": "context_a",
+      "pool": "us_equity",
+      "baseline_file": "context_a_us_equity.json",
+      "production_binding": "src/engine/divergence/context_a_detector.py::ContextADetector.policy_weight (us_equity branch line 138-139)",
+      "score_today_line": "src/scripts/score_today.py:1154"
+    },
+    {
+      "lane": "context_a",
+      "pool": "cn_metal_futures",
+      "baseline_file": "context_a_cn_metal_futures.json",
+      "production_binding": "src/engine/divergence/context_a_detector.py::ContextADetector.policy_weight (cn_metal_futures branch line 138-139)",
+      "score_today_line": "src/scripts/score_today.py:1154"
+    },
+    {
+      "lane": "pa_h2",
+      "pool": "us_equity",
+      "baseline_file": "pa_h2_us_equity.json",
+      "production_binding": "src/engine/divergence/pa_detector.py::PABottomDetector.policy_weight (us_equity branch lines 331-350)",
+      "score_today_line": "src/scripts/score_today.py:935 (daily lane); pa_us_60min lane at line 1337"
+    },
+    {
+      "lane": "pa_h2",
+      "pool": "cn_metal_futures",
+      "baseline_file": "pa_h2_cn_metal_futures.json",
+      "production_binding": "src/engine/divergence/pa_detector.py::PABottomDetector.policy_weight (cn_metal_futures branch lines 309-315)",
+      "score_today_line": "src/scripts/score_today.py:935"
+    },
+    {
+      "lane": "pa_h2",
+      "pool": "cn_futures",
+      "baseline_file": "pa_h2_cn_futures.json",
+      "production_binding": "src/engine/divergence/pa_detector.py::PABottomDetector.policy_weight (cn_futures branch lines 324-329)",
+      "score_today_line": "src/scripts/score_today.py:1041 (approx; cn_futures branch via instrument_class)"
+    },
+    {
+      "lane": "pa_us_60min",
+      "pool": "us_equity",
+      "baseline_file": "pa_us_60min_us_equity.json",
+      "production_binding": "src/scripts/score_today.py:1254 (phase-based override of PABottomDetector weight; BULL=0.65 / TR=0.30)",
+      "score_today_line": "src/scripts/score_today.py:1378"
+    }
+  ],
+  "pending": [],
+  "notes": "Anything in `expected` but missing from the filesystem → BROKEN. Anything in the filesystem not in `expected` or `pending` → WARN (orphan). 2026-06-09: promoted 6 lanes (context_a × {us_equity, cn_metal_futures}, pa_h2 × {us_equity, cn_metal_futures, cn_futures}, pa_us_60min × us_equity) from pending → expected. All 6 carry `requires_verification: true` — the JSON values are imported from detector docstrings and full-stack doc, not from a freshly-pinned K=3 walk-forward run. pa_us_60min uses verdict 'PENDING_VALIDATION' which is not in the current VERDICTS set in validate_baselines.py; this will surface as a 'unknown verdict' WARN until either (a) a real K=3 baseline is computed and a valid verdict assigned, or (b) the VERDICTS set is extended."
+}

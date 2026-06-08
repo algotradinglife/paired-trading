@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "lane": "pa_h2",
+  "pool": "us_equity",
+  "instrument_class": "us_equity",
+  "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
+  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy"],
+  "symbols_excluded_reason": "US_LONG_BOND_SUPPRESS frozenset in pa_detector.py:231 — PA H2 fails across hike/yield-peak/cut regimes (tlt n=27 EV=-0.519R, 4/4 folds negative per backtest_pa_us_k3).",
+  "detector_params": {
+    "min_h_legs": 2,
+    "min_quality": 0.3,
+    "ema_threshold": 0.0,
+    "min_gap": 10,
+    "h_filter": "opposing",
+    "trend_filter": "uptrend",
+    "tf": "60min (h_bars=daily)",
+    "note": "Default PABottomDetector defaults from pa_detector.py:109-120. Production routing requires uptrend + h=opposing. legs=1 sub-cell adds +0.10 weight bonus."
+  },
+  "walk_forward": {
+    "method": "K=3 OOS folds (gap-fix corrected); K=2 also reported in docstring",
+    "cutoff1": "see-script (K=3: IS<=2021)",
+    "cutoff2": "see-script (K=3: OOS2=2023H2-2024)",
+    "cutoff3": "see-script (K=3: OOS3>2025)",
+    "stop_framework": "ATR x 1.5",
+    "note": "Cutoffs described qualitatively in docstring lines 245-251 (K=2: IS<=2022 / K=3: IS<=2021 / OOS1=2022-2023H1 / OOS2=2023H2-2024 / OOS3>2025). Not pinned as explicit dates. requires_verification."
+  },
+  "samples": {
+    "is": {"n": 39, "ev_r": -0.095, "win_pct": null},
+    "f1": {"n": 23, "ev_r":  0.348, "win_pct": null},
+    "f2": {"n": 16, "ev_r":  0.682, "win_pct": null},
+    "f3": {"n": 19, "ev_r":  0.097, "win_pct": null}
+  },
+  "samples_k3_uptrend_hopp_legs1_subcell": {
+    "note": "K=3 legs=1 sub-cell, monotone increasing — monitoring-grade per docstring; n too small for production gating but +0.10 weight bonus applied in routing.",
+    "is": {"n": null, "ev_r": null},
+    "f1": {"n": 5,  "ev_r": 0.500},
+    "f2": {"n": 3,  "ev_r": 0.667},
+    "f3": {"n": 10, "ev_r": 0.750}
+  },
+  "samples_prior_2026-06-02": {
+    "note": "K=2 (IS<=2022) baseline from docstring lines 245-247; pre-gap-fix.",
+    "method": "K=2 OOS folds",
+    "uptrend_hopp": {
+      "f1": {"n": 12, "ev_r": 0.625},
+      "f2": {"n": 24, "ev_r": 0.708}
+    },
+    "uptrend_hopp_legs1": {
+      "f1": {"n": 5,  "ev_r": 1.000},
+      "f2": {"n": 10, "ev_r": 0.750}
+    },
+    "downtrend": {
+      "f1": {"n": null, "ev_r": -0.177, "note": "REJECT — suppressed to 0.0"}
+    }
+  },
+  "samples_full_stack_5y": {
+    "framework": "PA structural stop (live production form)",
+    "n": 146, "ev_r": 0.086, "win_pct": 36.3,
+    "note": "From doc/repro/full_stack_backtest_2026-06-08.md — pa_us_60min row. Low win% by design (60min H2 catches 3-5d reversals; TP1 hit rate low, big winners +1.5R pull the mean positive). Direction-consistent with the K=3 corrected baseline."
+  },
+  "verdict": "PASS",
+  "verdict_reason": "K=3 corrected: 3/3 OOS folds positive (F1+0.348, F2+0.682, F3+0.097). F3 marginal but positive. legs=1 sub-cell 4/4 folds positive (incl IS) and monotone increasing. K=2 prior result PASS. Downtrend variant REJECT (F1=-0.177R) and is suppressed to 0.0 in routing (separate cell — see policy_weight_assigned_breakdown). policy_weight=0.80 for uptrend+h=opp, +0.10 bonus for legs=1.",
+  "policy_weight_assigned": 0.80,
+  "policy_weight_assigned_breakdown": {
+    "uptrend_hopp": 0.80,
+    "uptrend_hopp_legs1": 0.90,
+    "uptrend_no_hopp": 0.40,
+    "downtrend": 0.0,
+    "ranging_or_unknown": 0.0
+  },
+  "policy_weight_recommended": 0.80,
+  "valid_until": "2026-09-09",
+  "commit_hash": "f0ff0bc5",
+  "data_snapshot": "2026-06-08",
+  "last_verified": "2026-06-09",
+  "last_verified_note": "imported from docstring; re-verification pending",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_pa_swing.py --pool US --h-opp-only",
+  "repro_command_alt": "cd src && .venv/bin/python scripts/backtest_pa_us_k3.py --pool US",
+  "related_docs": [
+    "src/engine/divergence/pa_detector.py:243-258",
+    "src/engine/divergence/pa_detector.py:331-350",
+    "doc/repro/full_stack_backtest_2026-06-08.md",
+    "doc/repro/pa_tlt_diagnostic_2026-06-08.md"
+  ],
+  "notes": "Docstring carries BOTH K=2 (2026-06-02 baseline) and K=3 corrected (gap-fix) numbers for slightly different cell definitions. K=3 corrected is more rigorous and is what's promoted here as the primary samples; K=2 archived under samples_prior_2026-06-02 for traceability. legs=1 bonus rule applied at policy_weight()::pa_detector.py:343 (base+0.10 when leg_count_down==1). DOCSTRING INCONSISTENCY: line 263 mentions 'cn_structural 2026-06-08' n=46 EV=+0.524R — this is the cn_metal_futures cell, not us_equity; mentioned here only because it sits in the same docstring block. requires_verification: cutoff dates are described in prose (IS<=2021 / OOS2=2023H2-2024 / OOS3>2025) but not pinned as ISO dates in either docstring or any pin file checked.",
+  "requires_verification": true
+}

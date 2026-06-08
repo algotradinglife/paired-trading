@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "lane": "pa_us_60min",
+  "pool": "us_equity",
+  "instrument_class": "us_equity",
+  "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
+  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy"],
+  "symbols_excluded_reason": "US_LONG_BOND_SUPPRESS frozenset (pa_detector.py:231) — short-circuited at score_today.py:1314 before pa_us_60min scan runs.",
+  "detector_params": {
+    "min_h_legs": 2,
+    "min_quality": 0.3,
+    "ema_threshold": 0.0,
+    "min_gap": 35,
+    "h_lookback": 20,
+    "h_filter": "opposing",
+    "trend_filter": "uptrend",
+    "tf": "60min (h_bars=daily for h=opp gate)",
+    "note": "Per score_today.py:1319-1325. min_gap=35 ≈ 1.5 trading days on 60min; min_quality=0.3 is production threshold (pa_swing backtest used 0.1)."
+  },
+  "phase_routing": {
+    "source": "src/scripts/score_today.py:1235-1248,1254 (BULL vs TR/TR_FORMING phase)",
+    "BEAR": "skipped (continue)",
+    "UNCLEAR": "skipped (continue)",
+    "BULL": {"phase_weight": 0.65, "score": 3, "note": "BULL ride per pa_baseline_2026-06-08.md"},
+    "TR": {"phase_weight": 0.30, "score": 2, "note": "Un-gated TR-phase subset not walk-forward validated; lowered from 0.40 → 0.30 per audit memo doc/repro/score_audit_2026-06-08.md §S2"},
+    "TR_FORMING": {"phase_weight": 0.30, "score": 2, "note": "Same as TR"}
+  },
+  "legs1_bonus": {
+    "note": "legs=1 (ABC two-leg pullback completing) bonus is applied via PABottomDetector.policy_weight at score_today.py:1337 — base+0.10. Final weight ceiling 0.90 when BULL+legs=1, 0.40 when TR+legs=1 (TR phase override may not stack with legs=1; requires_verification).",
+    "score_today_line": "src/scripts/score_today.py:1337,1390"
+  },
+  "walk_forward": {
+    "method": "K=2 / K=3 walk-forward referenced via PABottomDetector docstring (pa_detector.py:243-251)",
+    "cutoff1": null,
+    "cutoff2": null,
+    "cutoff3": null,
+    "stop_framework": "swing_low(11-bar) - 0.5% buffer (score_today.py:1346-1372); NOT used as a gate, populates invalidation_level only",
+    "note": "No dedicated pa_us_60min walk-forward baseline exists in detector or score_today docstrings. Phase routing (BULL=0.65 / TR=0.30) is calibrated from score_audit/pa_baseline memos, not a separate WF table. PABottomDetector.policy_weight returns the base+legs1 weight, then score_today overrides with phase_weight."
+  },
+  "samples": {
+    "is": {"n": null, "ev_r": null, "win_pct": null, "note": "No dedicated WF table for pa_us_60min lane. Closest evidence: PABottomDetector us_equity K=3 corrected (see baselines/pa_h2_us_equity.json) — but that's the daily-h2 lane, not the 60min POC lane."},
+    "f1": {"n": null, "ev_r": null, "win_pct": null},
+    "f2": {"n": null, "ev_r": null, "win_pct": null},
+    "f3": {"n": null, "ev_r": null, "win_pct": null}
+  },
+  "samples_full_stack_5y": {
+    "framework": "PA structural stop (live production form, swing_low-based)",
+    "n": 146, "ev_r": 0.086, "win_pct": 36.3,
+    "note": "From doc/repro/full_stack_backtest_2026-06-08.md — pa_us_60min lane. Low win% (36.3%) by design — 60min H2 catches 3-5d reversals, TP1 hit rate low, big winners +1.5R pull mean positive. This is the ONLY end-to-end evidence currently backing the lane's production status."
+  },
+  "verdict": "PENDING_VALIDATION",
+  "verdict_reason": "Production-active (BULL=0.65, TR/TR_FORMING=0.30, +0.10 legs=1 bonus) but lacks a formal walk-forward baseline. Full-stack 5.5y replay shows +0.086R EV / win 36.3% (n=146) per doc/repro/full_stack_backtest_2026-06-08.md — direction-positive but win% is structurally low. The 10-source POC signal_tf_structure + resonance routing path is the only production lane on this code path. Promote to PASS/STRONG PASS pending K=3 walk-forward with explicit cutoffs.",
+  "verdict_unrecognized_note": "PENDING_VALIDATION is not in validate_baselines.py VERDICTS set (line 44-47); validation will flag this as 'unknown verdict'. Intentional — flags that this lane needs the audit script extended or a real K=3 backtest run.",
+  "policy_weight_assigned": 0.65,
+  "policy_weight_assigned_breakdown": {
+    "BULL": 0.65,
+    "BULL_legs1": "0.65 base + 0.10 legs1 bonus — but score_today reads PABottomDetector.policy_weight result, which is 0.80 / 0.90 for uptrend+h=opp+legs=1. Phase routing OVERRIDES the PABottomDetector weight: score_today.py:1254 sets confidence = _us_phase_w regardless of the legs=1 bonus from PABottomDetector. requires_verification — there may be a logical disconnect between the legs=1 bonus path (which is alive at pa_h2_us_equity daily lane) and the pa_us_60min path (which uses phase-weight only).",
+    "TR": 0.30,
+    "TR_FORMING": 0.30,
+    "BEAR_or_UNCLEAR": 0.0
+  },
+  "policy_weight_recommended": 0.65,
+  "valid_until": "2026-09-09",
+  "commit_hash": "f0ff0bc5",
+  "data_snapshot": "2026-06-08",
+  "last_verified": "2026-06-09",
+  "last_verified_note": "imported from production code paths + full-stack doc; no dedicated WF baseline exists — promotion is bookkeeping only",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_pa_swing.py --pool US --tf 60min --h-opp-only",
+  "repro_command_alt": "cd src && .venv/bin/python scripts/backtest_full_stack.py --lane pa_us_60min",
+  "related_docs": [
+    "src/scripts/score_today.py:1235-1254",
+    "src/scripts/score_today.py:1314-1435",
+    "src/engine/divergence/pa_detector.py:243-258",
+    "doc/repro/full_stack_backtest_2026-06-08.md",
+    "doc/repro/score_audit_2026-06-08.md",
+    "doc/repro/pa_baseline_2026-06-08.md"
+  ],
+  "notes": "Production-active but lacks formal walk-forward baseline; full_stack 5.5y shows +0.086R EV / win 36.3% per doc/repro/full_stack_backtest_2026-06-08.md. The phase-based weight assignment (BULL=0.65, TR/TR_FORMING=0.30) comes from pa_baseline_2026-06-08.md / score_audit_2026-06-08.md memos rather than a K=3 walk-forward table. The 10-source POC signal_tf_structure + resonance routing (score_today.py:1416-1432) is the production form. Promotion priority: high — this lane is the largest single emitter on US equity and has no audit trail.",
+  "requires_verification": true
+}
