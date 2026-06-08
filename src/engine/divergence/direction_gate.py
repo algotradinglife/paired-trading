@@ -41,7 +41,14 @@ from typing import Literal
 
 from engine.divergence.signal import DivergenceSignal
 
-InstrumentClass = Literal["us_equity", "cn_futures", "czce", "cn_index_futures", "cn_metal_futures"]
+InstrumentClass = Literal[
+    "us_equity",
+    "cn_futures",
+    "czce",
+    "cn_index_futures",
+    "cn_metal_futures",
+    "cn_bond",
+]
 
 # ---------------------------------------------------------------------------
 # us_equity multiplier tables (current US calibration)
@@ -106,6 +113,12 @@ _TABLES_BY_CLASS = {
     "czce": (TOP_SUBTYPE_MULT_CN, TOP_LEVEL_MULT_CN, TOP_GAP_MULT_CN),
     "cn_index_futures": (TOP_SUBTYPE_MULT_CN, TOP_LEVEL_MULT_CN, TOP_GAP_MULT_CN),
     "cn_metal_futures": (TOP_SUBTYPE_MULT_CN, TOP_LEVEL_MULT_CN, TOP_GAP_MULT_CN),
+    # cn_bond was promoted from cn_futures to a first-class instrument_class
+    # in commit 88eca10 but direction_gate's table was never updated;
+    # score_today --pool CN_BOND raised KeyError until 2026-06-08 (caught by
+    # the doc/repro/score_audit_2026-06-08.md smoke audit).  CN tables are
+    # pass-through and CN_BOND inherits the same gating posture.
+    "cn_bond": (TOP_SUBTYPE_MULT_CN, TOP_LEVEL_MULT_CN, TOP_GAP_MULT_CN),
 }
 
 

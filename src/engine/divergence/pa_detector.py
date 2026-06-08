@@ -55,15 +55,23 @@ class PASignal:
     """A standalone PA pattern signal (independent of MACD state).
 
     Attributes:
-        pattern: pattern name, e.g. "h2_bottom"
+        pattern: pattern name, e.g. "h2_bottom" or "h2_top"
         bar_idx: integer position in the source bars DataFrame
         timestamp: UTC timestamp of the signal bar
         confidence: [0, 1] composite score from feature values
         features: raw PA feature values at signal bar
-        higher_tf_relation: DIF direction on the higher TF
-            ("opposing" = HTF DIF negative for a bottom → validates)
-            ("supporting" = HTF DIF positive → counter-trend context)
-            ("neutral" / None = no HTF data or DIF ≈ 0)
+        higher_tf_relation: DIF direction on the higher TF, encoded
+            relative to the signal direction:
+              For a BOTTOM signal:
+                "opposing"   = HTF DIF negative (HTF bearish — validates bottom)
+                "supporting" = HTF DIF positive (HTF bullish — counter-trend ctx)
+              For a TOP signal (mirrored convention):
+                "opposing"   = HTF DIF positive (HTF bullish — validates top)
+                "supporting" = HTF DIF negative (HTF bearish — counter-trend ctx)
+              "neutral" / None = no HTF data or DIF ≈ 0
+        direction: "long" for a bottom signal, "short" for a top signal.
+            Defaults to "long" for backward compatibility with the bottom
+            detector — older PASignal consumers see no behavioural change.
     """
     pattern: str
     bar_idx: int
@@ -71,6 +79,7 @@ class PASignal:
     confidence: float
     features: dict[str, object]
     higher_tf_relation: str | None = None
+    direction: str = "long"
 
 
 # ---------------------------------------------------------------------------
@@ -363,11 +372,23 @@ class PABottomDetector:
 # ---------------------------------------------------------------------------
 
 def _compute_confidence(row: pd.Series) -> float:
-    """Composite confidence [0, 1] from PA feature values."""
+    """Composite confidence [0, 1] from PA feature values (bottom side)."""
     h_norm = min(float(row["h_leg_count"]) / 3.0, 1.0)
     quality = float(row["bar_quality_bull"])
     climax = float(row["selling_climax_score"])
     return h_norm * 0.35 + quality * 0.45 + climax * 0.20
+
+
+def _compute_confidence_top(row: pd.Series) -> float:
+    """Composite confidence [0, 1] from PA feature values (top side).
+
+    Mirror of ``_compute_confidence``: L-leg count + bear bar quality +
+    buying climax magnitude.
+    """
+    l_norm = min(float(row["l_leg_count"]) / 3.0, 1.0)
+    quality = float(row["bar_quality_bear"])
+    climax = float(row["buying_climax_score"])
+    return l_norm * 0.35 + quality * 0.45 + climax * 0.20
 
 
 def _compute_htf_dif(
@@ -385,7 +406,7 @@ def _htf_relation_at(
     h_ts: np.ndarray,
     h_dif: np.ndarray,
 ) -> str | None:
-    """Return HTF DIF direction at or before ts.
+    """Return HTF DIF direction at or before ts (bottom-signal convention).
 
     "opposing"   — HTF DIF < 0 (bearish — validates a bottom signal)
     "supporting" — HTF DIF > 0 (bullish — counter-trend context)
@@ -405,3 +426,265 @@ def _htf_relation_at(
     if v > 0:
         return "supporting"
     return "neutral"
+
+
+def _htf_relation_at_top(
+    ts: pd.Timestamp,
+    h_ts: np.ndarray,
+    h_dif: np.ndarray,
+) -> str | None:
+    """Return HTF DIF direction at or before ts (top-signal convention).
+
+    Mirror of ``_htf_relation_at`` with the polarity flipped so that
+    "opposing" still means "HTF momentum is going against the proposed
+    reversal":
+
+    "opposing"   — HTF DIF > 0 (bullish — validates a top signal)
+    "supporting" — HTF DIF < 0 (bearish — counter-trend context)
+    "neutral"    — HTF DIF ≈ 0
+    None         — no HTF bar found before ts
+    """
+    ts_np = np.datetime64(ts.to_datetime64())
+    mask = h_ts <= ts_np
+    if not mask.any():
+        return None
+    idx = int(np.flatnonzero(mask)[-1])
+    v = float(h_dif[idx])
+    if not np.isfinite(v):
+        return None
+    if v > 0:
+        return "opposing"
+    if v < 0:
+        return "supporting"
+    return "neutral"
+
+
+# ---------------------------------------------------------------------------
+# Top detector (mirror of PABottomDetector)
+# ---------------------------------------------------------------------------
+
+class PATopDetector:
+    """H2-style standalone swing-top detector from daily OHLCV bars.
+
+    Symmetric mirror of :class:`PABottomDetector`.  Fires when:
+      1. l_leg_count >= min_l_legs  (Brooks L1/L2 failed-rally attempts)
+      2. bar_quality_bear >= min_quality  (bearish reversal bar)
+      3. ema_distance_norm > ema_threshold  (price above EMA — upswing)
+      4. At least min_gap bars since the previous signal
+
+    NOTE on production status:
+      The detection plumbing is symmetric with the validated bottom
+      detector, but the policy weights (see :meth:`policy_weight`) are
+      currently a no-emit stub — every routing path returns 0.0 until a
+      dedicated walk-forward validation pass calibrates them.  This
+      detector is intentionally NOT wired into ``score_today``; it is
+      exposed for backtests and offline analysis only.
+
+    Args:
+        min_l_legs: minimum prior failed-rally attempts (2 = classic L2)
+        min_quality: minimum bearish bar quality score [0, 1]
+        ema_threshold: ema_distance_norm must be above this (> 0 = above EMA)
+        min_gap: minimum bars between consecutive signals
+        h_lookback: lookback window for ``l_leg_count``
+        require_climax: if True, require a buying climax in recent lookback
+        climax_lookback: bars to look back for recent climax
+        climax_threshold: minimum buying climax score in the lookback window
+        require_trend: optional set of trend_structure values to require
+            from a swing-context DataFrame (e.g. {"downtrend"} for a top)
+    """
+
+    def __init__(
+        self,
+        min_l_legs: int = 2,
+        min_quality: float = 0.3,
+        ema_threshold: float = 0.0,
+        min_gap: int = 10,
+        h_lookback: int = 8,
+        require_climax: bool = False,
+        climax_lookback: int = 5,
+        climax_threshold: float = 0.4,
+        require_trend: set[str] | None = None,
+    ) -> None:
+        self.min_l_legs = min_l_legs
+        self.min_quality = min_quality
+        self.ema_threshold = ema_threshold
+        self.min_gap = min_gap
+        self.h_lookback = h_lookback
+        self.require_climax = require_climax
+        self.climax_lookback = climax_lookback
+        self.climax_threshold = climax_threshold
+        self.require_trend = require_trend
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def scan(
+        self,
+        bars: pd.DataFrame,
+        h_bars: pd.DataFrame | None = None,
+        swing_context: pd.DataFrame | None = None,
+    ) -> list[PASignal]:
+        """Scan bars for H2 top patterns (mirror of PABottomDetector.scan).
+
+        Args:
+            bars: OHLCV with 'timestamp', 'open', 'high', 'low',
+                  'close', 'volume' columns
+            h_bars: optional higher-TF (e.g. 60min) bars for HTF relation
+                    annotation.  Must have 'timestamp' and 'close' columns.
+            swing_context: optional swing/trend context DataFrame aligned
+                    to ``bars`` (same columns the bottom detector consumes
+                    — trend_structure, leg_count_up, market_regime).
+
+        Returns:
+            List of PASignal with ``pattern='h2_top'`` and
+            ``direction='short'``, sorted by bar_idx.
+        """
+        if len(bars) == 0:
+            return []
+
+        pa = compute_pa_features(bars, h_lookback=self.h_lookback)
+        h_dif, h_ts = _compute_htf_dif(h_bars) if h_bars is not None else (None, None)
+
+        signals: list[PASignal] = []
+        last_sig_idx = -999
+
+        for i in range(30, len(bars)):
+            if i - last_sig_idx < self.min_gap:
+                continue
+
+            row = pa.iloc[i]
+
+            if int(row["l_leg_count"]) < self.min_l_legs:
+                continue
+            if float(row["bar_quality_bear"]) < self.min_quality:
+                continue
+            if float(row["ema_distance_norm"]) <= self.ema_threshold:
+                continue
+            if self.require_climax:
+                start = max(0, i - self.climax_lookback)
+                recent_climax = pa["buying_climax_score"].iloc[start:i + 1].max()
+                if float(recent_climax) < self.climax_threshold:
+                    continue
+
+            if self.require_trend is not None and swing_context is not None:
+                ts_val = swing_context["trend_structure"].iloc[i]
+                if ts_val not in self.require_trend:
+                    continue
+
+            swing_feats: dict[str, object] = {}
+            if swing_context is not None:
+                row_ctx = swing_context.iloc[i]
+                # Top-side mirror: leg_count_up is the analogue of
+                # leg_count_down used by the bottom routing table.
+                up_legs_col = (
+                    "leg_count_up" if "leg_count_up" in swing_context.columns
+                    else "leg_count_down"
+                )
+                swing_feats = {
+                    "trend_structure": str(row_ctx["trend_structure"]),
+                    "leg_count_up":    int(row_ctx[up_legs_col]),
+                    "market_regime":   str(row_ctx["market_regime"]),
+                }
+
+            confidence = _compute_confidence_top(row)
+            ts = bars["timestamp"].iloc[i]
+            h_rel = _htf_relation_at_top(ts, h_ts, h_dif) if h_dif is not None else None
+
+            clx_start = max(0, i - 5)
+            recent_climax_max_5 = float(
+                pa["buying_climax_score"].iloc[clx_start:i].max()
+            ) if i > 0 else 0.0
+
+            signals.append(PASignal(
+                pattern="h2_top",
+                bar_idx=i,
+                timestamp=ts,
+                confidence=round(confidence, 4),
+                features={
+                    "l_leg_count": int(row["l_leg_count"]),
+                    "bar_quality_bear": round(float(row["bar_quality_bear"]), 4),
+                    "buying_climax_score": round(float(row["buying_climax_score"]), 4),
+                    "recent_climax_max_5": round(recent_climax_max_5, 4),
+                    "ema_distance_norm": round(float(row["ema_distance_norm"]), 4),
+                    "body_compression": bool(row["body_compression"]),
+                    "consec_bull_before": int(row["consec_bull_before"]),
+                    **swing_feats,
+                },
+                higher_tf_relation=h_rel,
+                direction="short",
+            ))
+            last_sig_idx = i
+
+        return signals
+
+    # ------------------------------------------------------------------
+    # Policy weights — SKELETON, no-emit until walk-forward validation
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def policy_weight(
+        sig: PASignal,
+        instrument_class: str = "cn_metal_futures",
+        *,
+        symbol: str | None = None,
+    ) -> float:
+        """Policy weight for a PA H2 top signal.
+
+        SKELETON — needs walk-forward validation.
+
+        This routing table is intentionally a no-emit stub: every
+        instrument_class returns 0.0 so the detector cannot accidentally
+        emit live trades before a dedicated TOP walk-forward validation
+        pass calibrates the weights.  The table preserves the same
+        signature and lane structure as :meth:`PABottomDetector.policy_weight`
+        so that, when validated numbers arrive, swapping them in is a
+        local edit.
+
+        Placeholder lanes (all 0.0 until WF-validated):
+          us_equity downtrend + h=opposing : 0.0
+          us_equity (any other state)      : 0.0
+          cn_metal_futures h=opposing      : 0.0
+          cn_bond h=opposing               : 0.0
+          cn_futures h=opposing            : 0.0
+          everything else                  : 0.0
+
+        Args:
+            sig: the PA top signal (``pattern='h2_top'``)
+            instrument_class: routing class (same vocabulary as the
+                bottom detector — us_equity / cn_metal_futures /
+                cn_bond / cn_futures / czce / cn_agri / ...)
+            symbol: optional lowercased symbol stem, threaded through
+                for symmetry with the bottom detector even though no
+                symbol-level top suppression is active yet.
+
+        Returns:
+            0.0 for every input (current stub behaviour).
+        """
+        # All lanes intentionally suppressed.  Reference ``sig``,
+        # ``instrument_class``, and ``symbol`` so that future calibration
+        # edits can attach numbers without restructuring the signature.
+        _ = (sig, instrument_class, (symbol or "").lower())
+        return 0.0
+
+    @staticmethod
+    def ensemble_weight(
+        pa_sig: PASignal,
+        instrument_class: str,
+        macd_within_bars: int | None,
+        *,
+        symbol: str | None = None,
+    ) -> float:
+        """Ensemble weight for top signals — also a no-emit stub.
+
+        Mirrors :meth:`PABottomDetector.ensemble_weight` so future
+        validation can drop in numbers without changing the call sites.
+        Because :meth:`policy_weight` returns 0.0 across the board, this
+        always returns 0.0 today.
+        """
+        base = PATopDetector.policy_weight(pa_sig, instrument_class, symbol=symbol)
+        if base == 0.0:
+            return 0.0
+        if macd_within_bars is not None and macd_within_bars <= 3:
+            return min(base + 0.15, 1.20)
+        return base

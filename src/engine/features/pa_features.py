@@ -70,6 +70,21 @@ def consecutive_bear_bars(bars: pd.DataFrame) -> pd.Series:
     return pd.Series(result, index=bars.index, name="consec_bear_before")
 
 
+def consecutive_bull_bars(bars: pd.DataFrame) -> pd.Series:
+    """Count of consecutive bull bars immediately before current bar.
+
+    Mirror of ``consecutive_bear_bars``.  A bull bar: close > open.
+    Resets to 0 on any bear bar.
+    """
+    is_bull = (bars["close"] > bars["open"]).astype(int)
+    result = []
+    count = 0
+    for v in is_bull:
+        result.append(count)  # bulls before this bar
+        count = count + 1 if v else 0
+    return pd.Series(result, index=bars.index, name="consec_bull_before")
+
+
 def h_leg_count(bars: pd.DataFrame, lookback: int = 8) -> pd.Series:
     """Number of prior recovery attempts (H1/H2 logic) in lookback window.
 
@@ -93,6 +108,29 @@ def h_leg_count(bars: pd.DataFrame, lookback: int = 8) -> pd.Series:
     return pd.Series(result, index=bars.index, name="h_leg_count")
 
 
+def l_leg_count(bars: pd.DataFrame, lookback: int = 8) -> pd.Series:
+    """Number of prior failed-rally attempts (L1/L2 logic) in lookback window.
+
+    Mirror of ``h_leg_count``.  An 'L-leg' (failed-rally event) at bar j is:
+      close[j] < low[j-1]  (bar closes below previous bar's low)
+
+    Counts such events in the window (t-lookback, t-1) at each bar t.
+    Value 0 = no prior attempt, 1 = L1 fired before, 2 = L2 (classic top) setup.
+    """
+    closes = bars["close"].values
+    lows = bars["low"].values
+    n = len(bars)
+    result = np.zeros(n, dtype=int)
+    for i in range(1, n):
+        start = max(1, i - lookback)
+        count = 0
+        for j in range(start, i):
+            if closes[j] < lows[j - 1]:
+                count += 1
+        result[i] = count
+    return pd.Series(result, index=bars.index, name="l_leg_count")
+
+
 def selling_climax_score(bars: pd.DataFrame, window: int = 20) -> pd.Series:
     """Selling climax score (0-1) — how extreme the current bear move is.
 
@@ -114,6 +152,29 @@ def selling_climax_score(bars: pd.DataFrame, window: int = 20) -> pd.Series:
 
     raw = body_ratio * close_pos_bear * body_vs_max
     return raw.clip(upper=1.0).rename("selling_climax_score")
+
+
+def buying_climax_score(bars: pd.DataFrame, window: int = 20) -> pd.Series:
+    """Buying climax score (0-1) — how extreme the current bull move is.
+
+    Mirror of ``selling_climax_score``.  High score: current bar has large
+    body, closed near its high, and the body is large vs recent bars
+    (potential buying exhaustion candle).
+
+    Formula: bull_body_ratio * body_vs_recent_max * close_at_top
+    """
+    hi = bars["high"]; lo = bars["low"]
+    op = bars["open"]; cl = bars["close"]
+    total = (hi - lo).clip(lower=1e-9)
+    body = (cl - op).abs()
+    body_ratio = body / total
+    close_pos_bull = (cl - lo) / total  # 1 = closed at high
+
+    body_rolling_max = body.rolling(window, min_periods=3).max().clip(lower=1e-9)
+    body_vs_max = body / body_rolling_max
+
+    raw = body_ratio * close_pos_bull * body_vs_max
+    return raw.clip(upper=1.0).rename("buying_climax_score")
 
 
 def body_compression(bars: pd.DataFrame, n: int = 3) -> pd.Series:
@@ -158,8 +219,11 @@ def compute_pa_features(bars: pd.DataFrame, h_lookback: int = 8) -> pd.DataFrame
       bar_quality_bull     float [0-1]  bull reversal quality
       bar_quality_bear     float [0-1]  bear reversal quality
       consec_bear_before   int          consecutive bear bars before current
-      h_leg_count          int          # recovery attempts in lookback window
+      consec_bull_before   int          consecutive bull bars before current
+      h_leg_count          int          # H-leg recovery attempts in lookback
+      l_leg_count          int          # L-leg failed-rally attempts in lookback
       selling_climax_score float [0-1]  selling climax magnitude
+      buying_climax_score  float [0-1]  buying climax magnitude
       body_compression     bool         bodies shrinking over 3 bars
       ema_distance_norm    float        (close - EMA20) / ATR
     """
@@ -167,8 +231,11 @@ def compute_pa_features(bars: pd.DataFrame, h_lookback: int = 8) -> pd.DataFrame
         bar_quality_bull(bars),
         bar_quality_bear(bars),
         consecutive_bear_bars(bars),
+        consecutive_bull_bars(bars),
         h_leg_count(bars, lookback=h_lookback),
+        l_leg_count(bars, lookback=h_lookback),
         selling_climax_score(bars),
+        buying_climax_score(bars),
         body_compression(bars),
         ema_distance_norm(bars),
     ], axis=1)
