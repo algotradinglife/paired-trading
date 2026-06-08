@@ -661,6 +661,17 @@ class PATopDetector:
         Returns:
             0.0 for every input (current stub behaviour).
         """
+        # TODO(2026-06-08, TASK C4): K=3 walk-forward grid validation across
+        # us_60min / cn_metal_daily / cn_bond_daily / cn_commodity_daily
+        # found NO cell that clears (n_oos >= 20 AND EV_oos > 0 AND OOS
+        # folds same sign).  Closest contender — cn_commodity_daily ×
+        # TR_FORMING × h=opp × top_div=True — was n=20 EV=+0.073R with
+        # OOS1/2/3 = -0.25 / +0.43 / -0.005 (sign-unstable).  CN bond
+        # tops fade systematically (-0.44R / n=24 across folds).
+        # See doc/repro/pa_top_wf_2026-06-08.md for the full grid and the
+        # CN-short-emphasis verdict (mixed → leaning no under this config).
+        # Keep weights at 0.0 until 15min-confirm overlay or looser
+        # detector params lift a cell over the promotion bar.
         # All lanes intentionally suppressed.  Reference ``sig``,
         # ``instrument_class``, and ``symbol`` so that future calibration
         # edits can attach numbers without restructuring the signature.
