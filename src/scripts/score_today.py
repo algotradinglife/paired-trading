@@ -1079,6 +1079,12 @@ def main() -> int:
             if h_bars is None:
                 h_bars = _load_bars_60(sym, args)
             vflush_det = VFlushDetector()
+            # Structural stop — v-flush ANCHOR is the signal bar's own low,
+            # NOT the prior PA structural support (vflush by definition
+            # breaks the prior support; the climax low IS the new pivot
+            # low and the natural inflection).  Per user-locked 2026-06-08
+            # "止损线架在支撑线或者压力线附近": for vflush the support
+            # line is the climax low itself.
             for vsig in vflush_det.scan(bars, h_bars):
                 if vsig.timestamp.date() < cutoff_date:
                     continue
@@ -1088,6 +1094,8 @@ def main() -> int:
                 vscore = 3 if vsig.higher_tf_relation == "opposing" else 2
                 vsig_date = vsig.timestamp.date()
                 vclose = float(bars["close"].iloc[vsig.bar_idx])
+                _vflush_low = float(bars["low"].iloc[vsig.bar_idx])
+                _v_inval = round(_vflush_low * 0.99, 4) if _vflush_low < vclose else None
                 vrec: dict = {
                     "symbol": sym,
                     "date": vsig_date.isoformat(),
@@ -1098,7 +1106,7 @@ def main() -> int:
                     "wick_ratio": None,
                     "swing_pct": None,
                     "vol_ratio": None,
-                    "invalidation_level": None,
+                    "invalidation_level": _v_inval,
                     "matched_sweet_spots": [],
                     "policy_rule": "vflush-k3-cn-metal",
                     "policy_weight": vweight,
@@ -1120,6 +1128,8 @@ def main() -> int:
             if h_bars is None:
                 h_bars = _load_bars_60(sym, args)
             ctx_a_det = ContextADetector()
+            # Structural stop on daily — same convention as pa_h2 / pa_cn_bond.
+            _ctxa_struct_det = PAStructureDetector()
             for asig in ctx_a_det.scan(bars, h_bars):
                 if asig.timestamp.date() < cutoff_date:
                     continue
@@ -1129,6 +1139,13 @@ def main() -> int:
                 ascore = 3  # Conditional PASS
                 asig_date = asig.timestamp.date()
                 aclose = float(bars["close"].iloc[asig.bar_idx])
+                _ctxa_struct = _ctxa_struct_det.detect(bars, up_to_idx=asig.bar_idx)
+                _a_inval = (
+                    round(_ctxa_struct.structural_stop, 4)
+                    if _ctxa_struct.structural_stop is not None
+                    and _ctxa_struct.structural_stop < aclose
+                    else None
+                )
                 arec: dict = {
                     "symbol": sym,
                     "date": asig_date.isoformat(),
@@ -1139,7 +1156,7 @@ def main() -> int:
                     "wick_ratio": None,
                     "swing_pct": None,
                     "vol_ratio": None,
-                    "invalidation_level": None,
+                    "invalidation_level": _a_inval,
                     "matched_sweet_spots": [],
                     "policy_rule": "context-a-k3-conditional",
                     "policy_weight": aweight,
@@ -1411,6 +1428,9 @@ def main() -> int:
                 min_gap=10,
                 require_climax=True, climax_threshold=0.4,
             )
+            # Structural stop on daily — pa_h2_climax fires on CN agri
+            # daily PA H2, same shape as cn_metal pa_h2 lane.
+            _agri_struct_det = PAStructureDetector()
             for _agri_sig in _agri_det.scan(bars, h_bars):
                 if _agri_sig.timestamp.date() < cutoff_date:
                     continue
@@ -1418,6 +1438,13 @@ def main() -> int:
                     continue
                 _agri_date  = _agri_sig.timestamp.date()
                 _agri_close = float(bars["close"].iloc[_agri_sig.bar_idx])
+                _agri_struct = _agri_struct_det.detect(bars, up_to_idx=_agri_sig.bar_idx)
+                _agri_inval = (
+                    round(_agri_struct.structural_stop, 4)
+                    if _agri_struct.structural_stop is not None
+                    and _agri_struct.structural_stop < _agri_close
+                    else None
+                )
                 _agri_rec: dict = {
                     "symbol": sym,
                     "date": _agri_date.isoformat(),
@@ -1428,7 +1455,7 @@ def main() -> int:
                     "wick_ratio": None,
                     "swing_pct": None,
                     "vol_ratio": None,
-                    "invalidation_level": None,
+                    "invalidation_level": _agri_inval,
                     "matched_sweet_spots": [],
                     "policy_rule": "pa-h2-agri-climax-hopp",
                     "policy_weight": 0.65,
