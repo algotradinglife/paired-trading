@@ -16,8 +16,9 @@ cover:
   7. Polarity-aware behaviour (2026-06-08):
        - hourly_state: DIF<0 votes BULL under h2_bottom (h=opposing on
          a bottom setup confirms it), and the polarity flips for h2_top.
-       - context: bottom-only patterns — always neutral for h2_top with
-         a "context not applicable to tops" rationale.
+       - context: bottom uses classify_context (A/B1 → bull); top uses
+         classify_context_top (A_top/B1_top → bear).  Both share the
+         same MACD/EMA inputs.
 """
 from __future__ import annotations
 
@@ -277,7 +278,6 @@ class TestContextSource:
         )
         assert src.vote == "neutral"
         assert "no_macd_df" in src.rationale
-        assert "bear context not implemented" in src.rationale
 
     def test_uptrend_pullback_can_vote_bull(self):
         prices = [100 + i * 0.8 for i in range(100)] + [180 - i * 1.2 for i in range(15)]
@@ -296,27 +296,93 @@ class TestContextSource:
             bars, len(bars) - 1, m, ambush_pattern="h2_bottom",
         )
         assert src.vote == "neutral"
-        assert "bear context not implemented" in src.rationale
 
-    def test_h2_top_always_neutral(self):
-        """Context A/B1 are bottom-only patterns — h2_top short-circuits
-        to neutral with an explicit gap message."""
-        prices = [100 + i * 0.8 for i in range(100)] + [180 - i * 1.2 for i in range(15)]
-        bars = _daily_bars(prices)
+    def test_h2_top_invokes_top_classifier(self, monkeypatch):
+        """When ambush_pattern='h2_top', _vote_from_context must call
+        classify_context_top (not classify_context).  Spy on both and
+        assert the top variant runs while the bottom variant does not."""
+        from engine.divergence import pa_direction_assessment as pda
+
+        calls: dict[str, int] = {"bot": 0, "top": 0}
+
+        def fake_bot(bars, i, m, e20, e60):
+            calls["bot"] += 1
+            return None
+
+        def fake_top(bars, i, m, e20, e60):
+            calls["top"] += 1
+            return None
+
+        monkeypatch.setattr(pda, "classify_context", fake_bot)
+        monkeypatch.setattr(pda, "classify_context_top", fake_top)
+
+        bars = _strong_uptrend_daily(180)
         m = compute_macd(bars["close"], hist_scale=1.0)
-        for i in range(100, 113):
-            src = _vote_from_context(bars, i, m, ambush_pattern="h2_top")
-            assert src.vote == "neutral"
-            assert "context not applicable to tops" in src.rationale
+        _ = pda._vote_from_context(
+            bars, len(bars) - 1, m, ambush_pattern="h2_top",
+        )
+        assert calls["top"] == 1, "classify_context_top must run for h2_top"
+        assert calls["bot"] == 0, "classify_context must NOT run for h2_top"
 
-    def test_h2_top_neutral_even_without_macd(self):
+    def test_h2_top_A_top_scenario_votes_bear(self, monkeypatch):
+        """If classify_context_top returns 'A_top', the source must vote
+        bear (selling-into-rally favours puts)."""
+        from engine.divergence import pa_direction_assessment as pda
+
+        monkeypatch.setattr(
+            pda, "classify_context_top",
+            lambda bars, i, m, e20, e60: "A_top",
+        )
+        bars = _strong_uptrend_daily(180)
+        m = compute_macd(bars["close"], hist_scale=1.0)
+        src = pda._vote_from_context(
+            bars, len(bars) - 1, m, ambush_pattern="h2_top",
+        )
+        assert src.vote == "bear"
+        assert "A_top" in src.rationale
+
+    def test_h2_top_B1_top_scenario_votes_bear(self, monkeypatch):
+        """If classify_context_top returns 'B1_top', the source must vote
+        bear (first pullback in new bear cycle favours puts)."""
+        from engine.divergence import pa_direction_assessment as pda
+
+        monkeypatch.setattr(
+            pda, "classify_context_top",
+            lambda bars, i, m, e20, e60: "B1_top",
+        )
+        bars = _strong_uptrend_daily(180)
+        m = compute_macd(bars["close"], hist_scale=1.0)
+        src = pda._vote_from_context(
+            bars, len(bars) - 1, m, ambush_pattern="h2_top",
+        )
+        assert src.vote == "bear"
+        assert "B1_top" in src.rationale
+
+    def test_h2_top_no_context_votes_neutral_with_top_rationale(self, monkeypatch):
+        """When no top-side context fires, rationale is 'no_top_context'
+        (the new top-side gap marker)."""
+        from engine.divergence import pa_direction_assessment as pda
+
+        monkeypatch.setattr(
+            pda, "classify_context_top",
+            lambda bars, i, m, e20, e60: None,
+        )
+        bars = _strong_uptrend_daily(180)
+        m = compute_macd(bars["close"], hist_scale=1.0)
+        src = pda._vote_from_context(
+            bars, len(bars) - 1, m, ambush_pattern="h2_top",
+        )
+        assert src.vote == "neutral"
+        assert src.rationale == "no_top_context"
+
+    def test_h2_top_neutral_when_no_macd(self):
+        """No MACD frame → degrades to neutral regardless of side."""
         bars = _strong_uptrend_daily(120)
         src = _vote_from_context(
             bars, 100, macd_df=None, ambush_pattern="h2_top",
         )
         assert src.vote == "neutral"
-        # h2_top short-circuit takes priority over "no_macd_df" path.
-        assert "context not applicable to tops" in src.rationale
+        assert "no_macd_df" in src.rationale
 
 
 # ---------------------------------------------------------------------------

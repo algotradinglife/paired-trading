@@ -34,7 +34,10 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 
-from engine.divergence.pa_context_classifier import classify_context
+from engine.divergence.pa_context_classifier import (
+    classify_context,
+    classify_context_top,
+)
 from engine.divergence.pa_structure import PAStructureDetector
 from engine.features.macd import ema, macd as compute_macd
 
@@ -285,60 +288,87 @@ def _vote_from_context(
     macd_df: pd.DataFrame | None,
     ambush_pattern: AmbushPattern = "h2_bottom",
 ) -> DirectionSource:
-    """Source C — Context A / B1 bottom-side classifier.
+    """Source C — Context A / B1 (bottom) or A_top / B1_top (top).
 
-    POLARITY-AWARE (2026-06-08): Context A (uptrend pullback) and B1
-    (first pullback in new cycle) are BOTTOM-ONLY pattern recognisers —
-    they identify setups where price has pulled back inside a bull
-    trend.  No top-side analogue is implemented yet (Q-2 in design memo).
-    Therefore:
+    POLARITY-AWARE (2026-06-08): bottom and top contexts are evaluated
+    independently.  Top-side (A_top / B1_top) mirrors the bull-side
+    patterns: A_top = selling-into-rally in a downtrend, B1_top = first
+    pullback in a new bear cycle.
 
       ambush_pattern == "h2_bottom":
-        A or B1 → vote=bull
-        None    → vote=neutral
+        A or B1     → vote=bull
+        None        → vote=neutral, rationale "context=None"
 
       ambush_pattern == "h2_top":
-        Always vote=neutral, rationale notes the gap explicitly.
-        (Would need a "context-A-top" / "context-B1-top" classifier
-        which doesn't exist yet.)
+        A_top or B1_top → vote=bear
+        None            → vote=neutral, rationale "no_top_context"
     """
-    if ambush_pattern == "h2_top":
-        return DirectionSource(
-            name="context",
-            vote="neutral",
-            weight=_SOURCE_WEIGHT,
-            rationale="context not applicable to tops",
-        )
     if macd_df is None:
         return DirectionSource(
             name="context",
             vote="neutral",
             weight=_SOURCE_WEIGHT,
-            rationale="no_macd_df; bear context not implemented",
+            rationale="no_macd_df",
         )
+
     try:
         ema20 = ema(daily_bars["close"], 20)
         ema60 = ema(daily_bars["close"], 60)
+    except Exception as exc:  # pragma: no cover — defensive
+        return DirectionSource(
+            name="context",
+            vote="neutral",
+            weight=_SOURCE_WEIGHT,
+            rationale=f"context_err={exc!s}",
+        )
+
+    if ambush_pattern == "h2_top":
+        try:
+            ctx_top = classify_context_top(
+                daily_bars, bar_idx, macd_df, ema20, ema60,
+            )
+        except Exception as exc:  # pragma: no cover — defensive
+            return DirectionSource(
+                name="context",
+                vote="neutral",
+                weight=_SOURCE_WEIGHT,
+                rationale=f"context_err={exc!s}",
+            )
+        if ctx_top in ("A_top", "B1_top"):
+            return DirectionSource(
+                name="context",
+                vote="bear",
+                weight=_SOURCE_WEIGHT,
+                rationale=f"context={ctx_top}",
+            )
+        return DirectionSource(
+            name="context",
+            vote="neutral",
+            weight=_SOURCE_WEIGHT,
+            rationale="no_top_context",
+        )
+
+    try:
         ctx = classify_context(daily_bars, bar_idx, macd_df, ema20, ema60)
     except Exception as exc:  # pragma: no cover — defensive
         return DirectionSource(
             name="context",
             vote="neutral",
             weight=_SOURCE_WEIGHT,
-            rationale=f"context_err={exc!s}; bear context not implemented",
+            rationale=f"context_err={exc!s}",
         )
     if ctx == "A" or ctx == "B1":
         return DirectionSource(
             name="context",
             vote="bull",
             weight=_SOURCE_WEIGHT,
-            rationale=f"context={ctx}; bear context not implemented",
+            rationale=f"context={ctx}",
         )
     return DirectionSource(
         name="context",
         vote="neutral",
         weight=_SOURCE_WEIGHT,
-        rationale="context=None; bear context not implemented",
+        rationale="context=None",
     )
 
 
