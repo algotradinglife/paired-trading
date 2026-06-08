@@ -15,9 +15,18 @@ per-symbol breakdown tables (§4) plus a handful of single-row filter-rule stats
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 import pandas as pd
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path("data/review")
 
 
 POOL_TO_CSV = {
@@ -146,7 +155,9 @@ def filter_rule_stats(by_pool: dict[str, pd.DataFrame]):
 
 def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--review-dir", type=Path, default=Path("data/review"))
+    p.add_argument("--review-dir", type=Path, default=_default_review_dir(),
+                   help="review CSV dir (env: DERIVED_ROOT → "
+                        "$DERIVED_ROOT/paired-trading/src-data-review)")
     args = p.parse_args()
 
     by_pool: dict[str, pd.DataFrame] = {}

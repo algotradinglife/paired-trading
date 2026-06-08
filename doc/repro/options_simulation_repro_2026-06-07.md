@@ -1,6 +1,6 @@
 # options-simulation 复现 — 2026-06-08
 
-对照 `doc/options-simulation-report-2026-05-31.html`。
+对照 `doc/legacy/options-simulation-report-2026-05-31.html`。
 
 ## 结论
 
@@ -127,5 +127,5 @@ EV 大幅缩水正是 README 预言的"低质信号稀释高质信号"的典型�
 - 工具：`src/tools/repro_options_simulation.py`
 - 信号源：`src/data/review/rr_b_cn_metal.csv`、`rr_b_cn_agri.csv`
 - 期权 payoff 源：`/Volumes/Data Drive/derived/paired-trading/src-data-review/cn_daily_payoffs.csv`
-- 报告原文：`doc/options-simulation-report-2026-05-31.html`
+- 报告原文：`doc/legacy/options-simulation-report-2026-05-31.html`
 - 报告依赖但仓库中找不到的：Black-model + HV20 期权仿真脚本

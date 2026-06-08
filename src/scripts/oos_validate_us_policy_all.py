@@ -13,7 +13,8 @@ Rules under test (precedence order from _apply_us_equity):
   5. F1-top-lagging-soft         (de-weight 0.70)
   6. F8-bottom-weakness-baseline (boost 1.10)
 
-CSV note: `data/review/b_topology_signals_all.csv` was generated 2026-05-23
+CSV note: `b_topology_signals_all.csv` (under review-dir, env var DERIVED_ROOT)
+was generated 2026-05-23
 BEFORE B1 was added to the policy. Its `rule_id` column tags old-B1
 signals as F1 (legacy precedence). This script ignores that column and
 re-classifies every signal under the CURRENT precedence ladder.
@@ -28,6 +29,7 @@ Bootstrap: 5000 resamples, numpy default_rng(42).
 
 from __future__ import annotations
 
+import os
 import sys
 from dataclasses import dataclass
 from datetime import date, timedelta
@@ -37,7 +39,16 @@ from typing import Callable
 import numpy as np
 import pandas as pd
 
-DATA_CSV = Path(__file__).resolve().parents[1] / "data" / "review" / "b_topology_signals_all.csv"
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+DATA_CSV = _default_review_dir() / "b_topology_signals_all.csv"
 OUT_MD = Path(__file__).resolve().parents[2] / "doc" / "us-policy-oos-2026-05-24.md"
 
 HORIZON = 20

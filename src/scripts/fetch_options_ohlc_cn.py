@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from calendar import monthrange
@@ -41,7 +42,17 @@ import pandas as pd
 # Paths & constants
 # ---------------------------------------------------------------------------
 SRC_DIR    = Path(__file__).resolve().parents[1]
-REVIEW_DIR = SRC_DIR / "data" / "review"
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return SRC_DIR / "data" / "review"
+
+
+REVIEW_DIR = _default_review_dir()
 
 SLEEP             = 0.5   # polite rate limiting between API calls
 MIN_BARS_COMPLETE = 5

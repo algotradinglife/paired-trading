@@ -1,6 +1,6 @@
 # crosspool-walkforward 复现 — 2026-06-07
 
-对照 `doc/crosspool-walkforward-report-2026-05-31.html`。
+对照 `doc/legacy/crosspool-walkforward-report-2026-05-31.html`。
 
 ## 结论
 

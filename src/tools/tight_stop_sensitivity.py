@@ -1,22 +1,38 @@
 """Compute realized EV per trade under a tight-stop model on option payoff data.
 
 Inputs:
-  data/review/option_payoffs_topology_b_no_nvda.csv
+  <review_dir>/option_payoffs_topology_b_no_nvda.csv
 
 Outputs:
-  data/review/tight_stop_ev_sensitivity.csv
+  <review_dir>/tight_stop_ev_sensitivity.csv
   ../doc/options-tight-stop-sensitivity-2026-05-24.md
+
+`review_dir` resolves via DERIVED_ROOT env var (preferred) or falls back to
+`src/data/review/` relative to this script. Set DERIVED_ROOT to point at the
+external drive's derived/paired-trading tree.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 SRC = Path(__file__).resolve().parents[1]
-CSV_IN = SRC / "data" / "review" / "option_payoffs_topology_b_no_nvda.csv"
-CSV_OUT = SRC / "data" / "review" / "tight_stop_ev_sensitivity.csv"
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return SRC / "data" / "review"
+
+
+REVIEW_DIR = _default_review_dir()
+CSV_IN = REVIEW_DIR / "option_payoffs_topology_b_no_nvda.csv"
+CSV_OUT = REVIEW_DIR / "tight_stop_ev_sensitivity.csv"
 MD_OUT = SRC.parent / "doc" / "options-tight-stop-sensitivity-2026-05-24.md"
 
 SL_LEVELS = [-0.03, -0.05, -0.10, -0.20, -0.30]

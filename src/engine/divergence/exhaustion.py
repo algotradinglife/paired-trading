@@ -1,7 +1,9 @@
 """Trend-exhaustion candidate detector.
 
 Targets the 30-35% blind-spot bucket revealed by `src/scripts/missed_swing_state.py`
-diagnostic (CSV outputs in `data/review/missed_swing_state_*.csv`): swings
+diagnostic (CSV outputs in `<review_dir>/missed_swing_state_*.csv`, where
+`review_dir` is resolved via the DERIVED_ROOT env var or falls back to
+`src/data/review/`): swings
 where all 3 TFs were aligned same-direction trending — no MACD divergence
 can fire because there's no opposing-momentum container to compare against.
 Spec: `doc/exhaustion-detector-spec-2026-05-26.md`.

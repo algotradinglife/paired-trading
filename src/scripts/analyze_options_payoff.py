@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -41,7 +42,17 @@ from quant_data.storage import ParquetStorage
 # Paths
 # ---------------------------------------------------------------------------
 SRC_DIR    = Path(__file__).resolve().parents[1]
-REVIEW_DIR = SRC_DIR / "data" / "review"
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return SRC_DIR / "data" / "review"
+
+
+REVIEW_DIR = _default_review_dir()
 
 POOL_FILES_US = {
     "US_EQUITY": REVIEW_DIR / "rr_b_us_equity.csv",
@@ -1068,7 +1079,9 @@ def main() -> None:
         help="Data source: 'json' (legacy files) or 'parquet' (quant-data store). Default: json",
     )
     ap.add_argument("-o", "--out", default=None,
-                    help="Output CSV path (default: data/review/option_payoffs_full.csv)")
+                    help="Output CSV path (default: <review_dir>/option_payoffs_full.csv "
+                         "where review_dir honors $DERIVED_ROOT/paired-trading/src-data-review "
+                         "or falls back to src/data/review/)")
     args = ap.parse_args()
 
     out_path = Path(args.out) if args.out else REVIEW_DIR / "option_payoffs_full.csv"

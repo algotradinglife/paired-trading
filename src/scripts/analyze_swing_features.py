@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import glob
+import os
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -32,7 +33,17 @@ import pandas as pd
 
 SRC_DIR    = Path(__file__).resolve().parents[1]
 RAW_DIR    = SRC_DIR / "data" / "raw"
-REVIEW_DIR = SRC_DIR / "data" / "review"
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return SRC_DIR / "data" / "review"
+
+
+REVIEW_DIR = _default_review_dir()
 
 LOOKBACK = 30   # bars before signal to compute features
 MIN_BARS = 25   # minimum bars needed to compute all features

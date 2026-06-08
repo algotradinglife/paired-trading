@@ -1,6 +1,6 @@
 # options-crossmarket 复现 — 2026-06-07
 
-对照 `doc/options-crossmarket-report-2026-05-31.html`。
+对照 `doc/legacy/options-crossmarket-report-2026-05-31.html`。
 
 ## 结论
 
@@ -13,7 +13,7 @@
 - 输入：`data/review/rr_b_{cn_index,cn_agri,cn_metal,us_equity,us_macro}.csv`
 - 信号过滤：`direction=bottom` 且 `higher_relation=opposing`
 - 信号 level 过滤：仅保留原始 `{intra_cycle, inter_segment, inter_cycle}`，剔除 2026-05-31 之后新增的 6 个 `intra_cycle_{dea,hist,slope}` + `intra_cycle_bull_{dea,hist,slope}` 变体（否则样本被稀释 9-10 倍）。
-- Black 模型期权定价脚本已丢失。改用 companion report `options-simulation-report-2026-05-31.html` 中明确公布的 per-outcome ATM 期权回报代理：
+- Black 模型期权定价脚本已丢失。改用 companion report `doc/legacy/options-simulation-report-2026-05-31.html` 中明确公布的 per-outcome ATM 期权回报代理：
   - tp1_tp2 → +67.8%，tp1_max → +25.1%，tp1_stop → -48.9%，max_hold → -75.6%
   - full_stop → -8.8% (4tick) / -41.2% (ATR)
 
@@ -100,4 +100,4 @@ tp1_stop 比例几乎翻倍（7%→14%），是 POOLED EV 下降 3.5pp 的主因
 
 ## 注释
 
-报告所用 Black 期货期权定价脚本未在 2026-06-07 重建时保留。本复现使用 companion `options-simulation-report-2026-05-31.html` 中已公布的 per-outcome 期权回报常量作为代理。POOLED 4tk EV +29.0% 与 companion report 显示的 +36.9%（n=41，仅 CN_AGRI+CN_METAL）方向一致但稍低，主要因为 US_EQUITY/US_MACRO 的 tp1_tp2 比例较低。
+报告所用 Black 期货期权定价脚本未在 2026-06-07 重建时保留。本复现使用 companion `doc/legacy/options-simulation-report-2026-05-31.html` 中已公布的 per-outcome 期权回报常量作为代理。POOLED 4tk EV +29.0% 与 companion report 显示的 +36.9%（n=41，仅 CN_AGRI+CN_METAL）方向一致但稍低，主要因为 US_EQUITY/US_MACRO 的 tp1_tp2 比例较低。

@@ -31,6 +31,14 @@ def _default_payoffs() -> str:
         return str(Path(derived) / "paired-trading" / "src-data-review" / "cn_daily_payoffs.csv")
     return "data/review/cn_daily_payoffs.csv"
 
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path("data/review")
+
 import numpy as np
 import pandas as pd
 
@@ -200,7 +208,9 @@ def median_premium_pct(payoffs_path: Path) -> pd.DataFrame:
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--review-dir", type=Path,
-                   default=Path("data/review"))
+                   default=_default_review_dir(),
+                   help="rr_b_*.csv pool dir (env: DERIVED_ROOT → "
+                        "$DERIVED_ROOT/paired-trading/src-data-review)")
     p.add_argument("--payoffs", default=_default_payoffs(),
                    help="path to cn_daily_payoffs.csv (env: DERIVED_ROOT)")
     args = p.parse_args()

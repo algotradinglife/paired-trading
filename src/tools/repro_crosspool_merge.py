@@ -10,11 +10,21 @@ Verify:
 from __future__ import annotations
 
 import argparse
+import os
 from itertools import combinations
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path("data/review")
+
 
 POOL_TO_CSV = {
     "CN_METAL":  "rr_b_cn_metal.csv",
@@ -94,7 +104,9 @@ def portfolio_sharpe(df: pd.DataFrame) -> float:
 
 def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--review-dir", type=Path, default=Path("data/review"))
+    p.add_argument("--review-dir", type=Path, default=_default_review_dir(),
+                   help="review CSV dir (env: DERIVED_ROOT → "
+                        "$DERIVED_ROOT/paired-trading/src-data-review)")
     args = p.parse_args()
 
     df = load_universe(args.review_dir)

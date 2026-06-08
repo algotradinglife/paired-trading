@@ -24,9 +24,19 @@ We also filter out the 6 new signal levels added since 2026-05-31
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 import pandas as pd
+
+
+def _default_review_dir() -> str:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return str(Path(derived) / "paired-trading" / "src-data-review")
+    return "data/review"
+
 
 POOLS = {
     "CN_INDEX":  "rr_b_cn_index.csv",
@@ -113,8 +123,10 @@ def fmt_row(label: str, s: dict, ref: dict | None = None) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--review-dir", default="data/review",
-                    help="Directory containing rr_b_*.csv files")
+    ap.add_argument("--review-dir", default=_default_review_dir(),
+                    help="Directory containing rr_b_*.csv files "
+                         "(env: DERIVED_ROOT → "
+                         "$DERIVED_ROOT/paired-trading/src-data-review)")
     ap.add_argument("--all-levels", action="store_true",
                     help="Use all sig_levels (incl. 6 new variants); default is "
                          "to restrict to original {intra_cycle, inter_segment, "

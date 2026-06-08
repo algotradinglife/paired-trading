@@ -29,6 +29,7 @@ Bootstrap: 5000 resamples with replacement, numpy default_rng(42)
 
 from __future__ import annotations
 
+import os
 import sys
 from datetime import date, timedelta
 from pathlib import Path
@@ -36,7 +37,16 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-DATA_CSV = Path(__file__).resolve().parents[1] / "data" / "review" / "cn_b_topology_signals_all.csv"
+
+def _default_review_dir() -> Path:
+    """Default review dir; honors DERIVED_ROOT env var, falls back to src/data/review."""
+    derived = os.environ.get("DERIVED_ROOT")
+    if derived:
+        return Path(derived) / "paired-trading" / "src-data-review"
+    return Path(__file__).resolve().parents[1] / "data" / "review"
+
+
+DATA_CSV = _default_review_dir() / "cn_b_topology_signals_all.csv"
 OUT_MD = Path(__file__).resolve().parents[2] / "doc" / "cn-top-supp-fade-oos-2026-05-24.md"
 
 HORIZON = 20

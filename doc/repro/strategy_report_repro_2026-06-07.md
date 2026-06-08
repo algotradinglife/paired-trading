@@ -1,6 +1,6 @@
 # strategy-report 复现 — 2026-06-07
 
-对照 `doc/strategy-report-2026-05-30.html`（《MACD动能策略 — 跨池实证研究报告》）。
+对照 `doc/legacy/strategy-report-2026-05-30.html`（《MACD动能策略 — 跨池实证研究报告》）。
 
 ## 结论
 
