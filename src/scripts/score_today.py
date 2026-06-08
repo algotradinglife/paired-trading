@@ -48,6 +48,7 @@ from engine.divergence.pa_direction_assessment import (
 )
 from engine.divergence.pa_structure import PAStructureDetector
 from engine.divergence.vflush_detector import VFlushDetector
+from engine.regime.us_regime_gate import compute_regime_signal, is_risk_off
 from engine.features.macd import macd
 from engine.features.streams import compute_feature_streams
 from engine.features.swing_context import compute_swing_context
@@ -380,6 +381,37 @@ _BUCKET_TESTS = {
     "wick_low": in_tercile_low, "wick_mid": in_tercile_mid, "wick_high": in_tercile_high,
     "vol_low": in_tercile_low, "vol_mid": in_tercile_mid, "vol_high": in_tercile_high,
 }
+
+
+# P2 regime gate (2026-06-09 lane × market eval):
+# SPY-based risk_off detector for pa_us_60min + context_a US suppression.
+# Lazy-loaded; cache lives for the lifetime of one score_today invocation.
+_US_REGIME_CACHE: dict = {"signal": None, "loaded": False}
+
+
+def _get_us_regime_signal(args) -> pd.DataFrame | None:
+    """Lazy-load SPY daily and compute regime signal. Returns None if SPY
+    bars are unavailable (gate becomes a no-op — no suppression)."""
+    if _US_REGIME_CACHE["loaded"]:
+        return _US_REGIME_CACHE["signal"]
+    _US_REGIME_CACHE["loaded"] = True
+    try:
+        spy_bars = _load_bars_daily("spy", args)
+    except Exception:
+        spy_bars = None
+    if spy_bars is None or len(spy_bars) < 200:
+        return None
+    _US_REGIME_CACHE["signal"] = compute_regime_signal(spy_bars)
+    return _US_REGIME_CACHE["signal"]
+
+
+def _us_lane_suppressed_by_regime(sig_date, args) -> bool:
+    """Return True if US H2-family lanes should be suppressed at sig_date.
+    Returns False when SPY data unavailable — bias to NOT suppressing."""
+    sig = _get_us_regime_signal(args)
+    if sig is None:
+        return False
+    return is_risk_off(sig, sig_date)
 
 
 def _load_bars_daily(sym: str, args) -> pd.DataFrame | None:
@@ -1165,6 +1197,9 @@ def main() -> int:
         # CONDITIONAL PASS K=3: h=opposing only; policy_weight=0.60.
         # US: OOS F1=+0.106R / F2=+0.179R / F3=+0.574R (3/3 positive).
         # CN_METAL: F1=+0.342R / F2=−0.192R / F3=+0.619R (F2 2024 regime known).
+        # 2026-06-09 P2 regime gate: US side suppressed during risk_off
+        # (SPY < SMA200 OR 20d vol > 25%). 2022 H2 family kept only 4 of
+        # 71 trades after gate, dropping -21.4R drag from the lane.
         if instrument_class in ("us_equity", "cn_metal_futures"):
             if h_bars is None:
                 h_bars = _load_bars_60(sym, args)
@@ -1176,6 +1211,9 @@ def main() -> int:
                     continue
                 aweight = ContextADetector.policy_weight(asig, instrument_class, symbol=sym)
                 if aweight == 0.0:
+                    continue
+                # P2 regime gate (US only)
+                if instrument_class == "us_equity" and _us_lane_suppressed_by_regime(asig.timestamp, args):
                     continue
                 ascore = 3  # Conditional PASS
                 asig_date = asig.timestamp.date()
@@ -1367,6 +1405,9 @@ def main() -> int:
                     # DIA n=10 EV-0.40, XLK n=14 EV-0.14, QQQ n=11 EV-0.14,
                     # XLRE n=4 EV-0.75. See doc/repro/lane_market_evaluation_2026-06-09.md.
                     if sym.upper() in _PA_US_60MIN_SUPPRESS:
+                        continue
+                    # P2 regime gate (2026-06-09): suppress during risk_off
+                    if _us_lane_suppressed_by_regime(_s60.timestamp, args):
                         continue
                     _w60 = PABottomDetector.policy_weight(_s60, instrument_class, symbol=sym)
                     if _w60 == 0.0:
