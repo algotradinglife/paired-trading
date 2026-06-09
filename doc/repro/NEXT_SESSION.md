@@ -2,14 +2,19 @@
 
 读这一篇就能接管。下一 session 开头：`读 doc/repro/NEXT_SESSION.md 继续`。
 
-## 当前状态快照（commit `86c91584`，origin/main 已同步）
+## 当前状态快照（commit `f1b29ae1`，本地领先 origin/main 3 个 commit 未 push）
 
 - **Baselines dashboard**: **10 OK / 1 STALE**（仅 `pa_h2_climax` STALE/weight-0；其 anchor 已随 harness fix re-baseline，repro 现在 within tolerance）。无 PENDING。
-- **Drift gate**: `src/scripts/validate_baselines.py --full` 现在做**真漂移检测**（full_stack per-(lane,symbol) primary anchor）。每周 cron（Mon 08:53）跑 `src/scripts/drift_gate.sh`，只在真 `[DRFT]` / `FULL_STACK_UNAVAILABLE` 时报警（`logs/drift-gate/ALERTS.log`）。
-- **Tests**: 486 passed。
+- **Drift gate**: `src/scripts/validate_baselines.py --full` 现在做**真漂移检测**（full_stack per-(lane,symbol) primary anchor）。每周 cron（Mon 08:53）跑 `src/scripts/drift_gate.sh`，只在真 `[DRFT]` / `FULL_STACK_UNAVAILABLE` 时报警（`logs/drift-gate/ALERTS.log`）。**新**：full_stack 现在吐真 `data_hash`（不再 None），drift 的"数据 vs 代码"归因机制已解锁——待某 baseline 在有意 re-baseline 时把 emitted hash 写进 `data_snapshot_hash` 才端到端亮起。
+- **Tests**: 490 passed（+4 `tests/test_full_stack_data_hash.py`）。
 - **Memory**: 37 entries 自动加载（含 jj、broad-market suppress、regime-gate 不可移植、baselines-as-auditable、retired-and-historical 等）。
 
 完整快照在 `STATUS.md` 顶部 sync 块 + "baselines/ infrastructure" 段。
+
+## 两个 bounded cleanup —— 都已完成 ✅
+
+- **data_hash 接线** ✅（commit `52db5c6d`）：`backtest_full_stack.replay_pool` 累积 daily+60min bars（key `"{symbol}@{level}"`），`main` 跨 pool 合并经 `compute_data_hash` 吐确定性 sha256。Codex：no actionable issues。**剩余 opt-in**：要端到端亮起归因，需在一次有意 re-baseline 时把 emitted hash 写入 baseline 的 `data_snapshot_hash`（README 标 reserved，验证器只加注解、不改 verdict）。
+- **pa_us_dif_pos TR-0.30 子 cell K=3** ✅（commit `f1b29ae1`）：**KEEP 0.30**。daily лане 按 PAStructure phase 加权（BULL=0.65 / TR,TR_FORMING=0.30）。扩 `backtest_pa_us_k3.py` 加 phase tag + 生产 gate 切片：子集**全是 TR_FORMING**（纯 TR n=0），且 gate-drop 后占 daily 生产信号 86%。生产 1.5×ATR 框架下 n=36 EV+0.069R、F1<0 —— 不过 3/3-OOS 关（不 promote），但 4 个变体全正 EV（不 suppress）。状态从 placeholder→validated-marginal，**无生产权重变更**。证据：`doc/repro/pa_us_dif_pos_tr_k3_2026-06-10.md`、baseline `samples_k3_phase_tr_forming_2026-06-10`。Backlog 线索：TR_FORMING 在 2.0×ATR 跳到 +0.410R/4-of-4（stop-width-by-phase，未做）。
 
 ## 自上次 handoff 起已完成
 
@@ -35,10 +40,12 @@
 
 ## 也可以做的 bounded cleanups（小、确定性高）
 
+两个原列项（pa_us_dif_pos TR-0.30 K=3、data_hash 接线）均已完成，见上方"两个 bounded cleanup"段。
+
 | 项目 | 说明 | 起点 |
 |------|------|------|
-| **pa_us_dif_pos TR-0.30 子 cell K=3** | 未 gate 的 TR/TR_FORMING 子集 weight 0.30 仍是 placeholder。跑 focused K=3（mirror 本 session 的 pa_us_60min 做法）定 weight。 | `baselines/pa_h2_us_equity.json`；`backtest_pa_swing.py` / `backtest_pa_us_k3.py` |
-| **data_hash 接线** | `compute_data_hash` 已实现但 full_stack 输出 `data_hash=None`，drift 的"数据 vs 代码"归因目前空转。把 full_stack 加载的 bars 喂进去即可启用。 | `backtest_full_stack.py`（`_lane_*` 后；`compute_data_hash` in `_baseline_output.py`）|
+| **data_snapshot_hash 端到端启用** | data_hash producer 已通；要让 drift 的"数据 vs 代码"注解真正触发，需在一次有意 re-baseline 时把 full_stack emitted hash 写进某 baseline 的 `data_snapshot_hash`（仅当认可当前数据快照为可信源时）。 | `baselines/*.json` 的 `data_snapshot_hash`；emitted hash 来自 `backtest_full_stack.py --out-json` |
+| **TR_FORMING stop-width-by-phase** | TR_FORMING 在 2.0×ATR 跳到 +0.410R/4-of-4 折正。phase-conditional stop（TR_FORMING 用更宽止损）是真优化线索，但改生产止损模型（现为 structural stop），daily lane 仍 monitoring 时低优先。 | `doc/repro/pa_us_dif_pos_tr_k3_2026-06-10.md` Backlog 段 |
 
 ## 已废除的方向（不要重试）
 
