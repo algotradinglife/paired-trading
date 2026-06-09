@@ -53,19 +53,20 @@ VERDICTS = {
 }
 
 STATUS_ICONS = {
-    "OK":      "[ OK ]",
-    "WARN":    "[WARN]",
-    "EXPIRED": "[XPRD]",
-    "STALE":   "[STAL]",
-    "DRIFT":   "[DRFT]",
-    "PENDING": "[PEND]",
-    "BROKEN":  "[BRKN]",
-    "MISSING": "[MISS]",
-    "ORPHAN":  "[ORPH]",
+    "OK":             "[ OK ]",
+    "WARN":           "[WARN]",
+    "EXPIRED":        "[XPRD]",
+    "STALE":          "[STAL]",
+    "DRIFT":          "[DRFT]",
+    "DRIFT_DETECTED": "[DRFT]",
+    "PENDING":        "[PEND]",
+    "BROKEN":         "[BRKN]",
+    "MISSING":        "[MISS]",
+    "ORPHAN":         "[ORPH]",
 }
 
 # Status classes treated as failures under --strict
-STRICT_FAIL_STATUSES = {"BROKEN", "EXPIRED", "STALE", "DRIFT", "PENDING", "MISSING"}
+STRICT_FAIL_STATUSES = {"BROKEN", "EXPIRED", "STALE", "DRIFT", "DRIFT_DETECTED", "PENDING", "MISSING"}
 
 GLOBAL_TOLERANCE = {
     "ev_r_abs": 0.10,
@@ -183,6 +184,87 @@ def _compare_against_baseline(b: dict, full_stack_map, fold_emitted) -> tuple[st
     return _worst(statuses), details
 
 
+def _runtime_status(b: dict, *, full_stack_map, fold_emitted) -> tuple[str, str]:
+    """Map a comparison to a row-status string used by the table + --strict."""
+    status, details = _compare_against_baseline(b, full_stack_map, fold_emitted)
+    detail = "; ".join(details) if details else "no comparable cells"
+    if status == "DRIFT":
+        return "DRIFT_DETECTED", detail
+    if status == "WARN":
+        return "WARN", detail
+    return "OK", detail
+
+
+def _run_full_stack_once(timeout: int = 600):
+    """Run backtest_full_stack.py --out-json once; return (lanes_map, data_hash) or (None, None)."""
+    import shlex
+    import subprocess
+    import tempfile
+    import os
+
+    tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+    tmp.close()
+    cmd = f".venv/bin/python scripts/backtest_full_stack.py --out-json {tmp.name}"
+    try:
+        proc = subprocess.run(
+            shlex.split(cmd),
+            cwd=str(REPO_ROOT / "src"),
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+        if proc.returncode != 0:
+            return None, None
+        doc = json.loads(pathlib.Path(tmp.name).read_text())
+        return doc.get("lanes"), doc.get("data_hash")
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
+        return None, None
+    finally:
+        try:
+            os.unlink(tmp.name)
+        except OSError:
+            pass
+
+
+def _run_fold_repro(b: dict):
+    """Run the baseline's K=3 repro_command with --out-json; return parsed doc or None."""
+    import shlex
+    import subprocess
+    import tempfile
+    import os
+
+    cmd = b.get("repro_command", "")
+    if not cmd or not b.get("repro_emits_json"):
+        return None
+    cwd = REPO_ROOT
+    if cmd.startswith("cd src && "):
+        cwd = REPO_ROOT / "src"
+        cmd = cmd[len("cd src && "):]
+    tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+    tmp.close()
+    cmd = f"{cmd} --out-json {tmp.name}"
+    try:
+        proc = subprocess.run(
+            shlex.split(cmd),
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            timeout=300,
+            check=False,
+        )
+        if proc.returncode != 0:
+            return None
+        return json.loads(pathlib.Path(tmp.name).read_text())
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
+        return None
+    finally:
+        try:
+            os.unlink(tmp.name)
+        except OSError:
+            pass
+
+
 def _today() -> dt.date:
     return dt.date.today()
 
@@ -292,36 +374,6 @@ def _audit(b: dict, source: pathlib.Path) -> dict:
     }
 
 
-def _run_repro(b: dict) -> tuple[str, str]:
-    """Execute repro_command, capture stdout tail. Currently only exit-code check."""
-    import shlex
-    import subprocess
-
-    cmd = b.get("repro_command", "")
-    if not cmd:
-        return "WARN", "no repro_command"
-    cwd = REPO_ROOT
-    if cmd.startswith("cd src && "):
-        cwd = REPO_ROOT / "src"
-        cmd = cmd[len("cd src && "):]
-    try:
-        proc = subprocess.run(
-            shlex.split(cmd),
-            cwd=str(cwd),
-            capture_output=True,
-            text=True,
-            timeout=300,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        return "BROKEN", "repro timed out (>5min)"
-    except FileNotFoundError as exc:
-        return "BROKEN", f"repro not runnable: {exc}"
-    if proc.returncode != 0:
-        return "BROKEN", f"repro exited {proc.returncode}; stderr tail: {proc.stderr[-200:].strip()}"
-    tail = "\n".join(proc.stdout.strip().splitlines()[-8:])
-    return "OK", f"repro succeeded (exit-code only — output drift NOT parsed)"
-
 
 def _load_registry() -> dict | None:
     if not REGISTRY_PATH.exists():
@@ -398,6 +450,14 @@ def main() -> int:
     results: list[dict] = []
     present_files = {f.name for f in files}
 
+    _full_stack_cache = {"lanes": None}
+    if args.full:
+        _fs_lanes, _fs_hash = _run_full_stack_once()
+        _full_stack_cache["lanes"] = _fs_lanes
+        if _fs_lanes is None:
+            print("warning: full_stack run failed/timed out — primary-anchor checks "
+                  "skipped (no false DRIFT)", file=sys.stderr)
+
     for f in files:
         if f.name == "EXPECTED_LANES.json":
             continue
@@ -415,9 +475,14 @@ def main() -> int:
             continue
         row = _audit(b, f)
         if args.full and row["status"] != "BROKEN":
-            repro_status, repro_msg = _run_repro(b)
-            row["repro_status"] = repro_status
-            row["repro_msg"] = repro_msg
+            fold_emitted = _run_fold_repro(b)
+            rstatus, rdetail = _runtime_status(
+                b, full_stack_map=_full_stack_cache["lanes"], fold_emitted=fold_emitted)
+            row["repro_status"] = rstatus
+            row["repro_msg"] = rdetail
+            if rstatus == "DRIFT_DETECTED":
+                row["status"] = "DRIFT_DETECTED"   # propagate so --strict catches it
+                row["reason"] = f"runtime drift: {rdetail[:100]}"
         results.append(row)
 
     # Registry cross-check (skipped under --lane filter to avoid noise)

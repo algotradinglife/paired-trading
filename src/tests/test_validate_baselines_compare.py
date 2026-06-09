@@ -1,4 +1,7 @@
-from scripts.validate_baselines import _resolve_tolerance, _aggregate_symbols, GLOBAL_TOLERANCE
+from scripts.validate_baselines import (
+    _resolve_tolerance, _aggregate_symbols, GLOBAL_TOLERANCE,
+)
+
 
 
 def test_resolve_tolerance_uses_global_default():
@@ -141,3 +144,22 @@ def test_compare_n_zero_skips_n_pct():
     # baseline n == 0 must not divide-by-zero; ev within tol -> OK
     st, _ = _compare_cell(_cell(0, 0.20), _cell(99, 0.22), TOL)
     assert st == "OK"
+
+
+from scripts.validate_baselines import _runtime_status
+
+
+def test_runtime_status_ok_within_tolerance():
+    b = _baseline()
+    fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.10, "win_pct": 64.0},
+                          "t": {"n": 20, "ev_r": 0.14, "win_pct": 66.0}}}
+    status, _ = _runtime_status(b, full_stack_map=fs, fold_emitted=None)
+    assert status == "OK"
+
+
+def test_runtime_status_drift_flags_DRIFT_DETECTED():
+    b = _baseline()
+    fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.90, "win_pct": 64.0},
+                          "t": {"n": 20, "ev_r": 0.90, "win_pct": 66.0}}}
+    status, detail = _runtime_status(b, full_stack_map=fs, fold_emitted=None)
+    assert status == "DRIFT_DETECTED"
