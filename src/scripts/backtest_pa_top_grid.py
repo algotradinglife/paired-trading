@@ -190,7 +190,11 @@ def simulate_short(
                 # Convert remaining drift into R units (short: profit = entry - cl)
                 return 0.5 + 0.5 * float(np.clip((entry - cl) / risk, -3, 3))
     idx_fin = min(entry_idx + max_hold, len(bars) - 1)
-    return float(np.clip((entry - float(bars["close"].iloc[idx_fin])) / risk, -3, 3))
+    mark = float(np.clip((entry - float(bars["close"].iloc[idx_fin])) / risk, -3, 3))
+    # TP1 banked but ran to the hold boundary → credit +0.5R partial exit (shared boundary bug).
+    if hit_tp1:
+        return 0.5 + 0.5 * mark
+    return mark
 
 
 def top_divergence_flag(hist: pd.Series, idx: int, lookback: int = DIV_LOOKBACK) -> bool:

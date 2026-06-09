@@ -110,7 +110,12 @@ def simulate_trade(bars, entry_idx, stop_mult, atr_series, max_hold):
             if offset == max_hold:
                 return 0.5 + 0.5 * float(np.clip((cl - entry) / risk, -3, 3))
     idx_fin = min(entry_idx + max_hold, len(bars) - 1)
-    return float(np.clip((float(bars["close"].iloc[idx_fin]) - entry) / risk, -3, 3))
+    mark = float(np.clip((float(bars["close"].iloc[idx_fin]) - entry) / risk, -3, 3))
+    # TP1 banked but the trade ran to the hold boundary → credit the +0.5R partial
+    # exit rather than scoring raw mark-to-market (shared boundary bug; see pa_atop).
+    if hit_tp1:
+        return 0.5 + 0.5 * mark
+    return mark
 
 
 def main():

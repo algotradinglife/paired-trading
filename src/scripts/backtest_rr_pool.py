@@ -299,13 +299,14 @@ def simulate_trade(
                 realized = 0.5 * 1.0 + 0.5 * float(np.clip(mark, -3.0, 3.0))
                 return "tp1_max", realized, bars_to_tp1, offset
 
-    # Never reached TP1, max hold
     idx_final = min(entry_idx + MAX_HOLD, len(bars) - 1)
     cl_final = float(bars["close"].iloc[idx_final])
-    mark = mark_pnl(cl_final) / risk_r
-    realized = float(np.clip(mark, -3.0, 3.0))
+    mark = float(np.clip(mark_pnl(cl_final) / risk_r, -3.0, 3.0))
     bars_final = idx_final - entry_idx
-    return "max_hold", realized, None, bars_final
+    # TP1 banked but ran to the hold boundary → credit +0.5R partial exit (shared boundary bug).
+    if reached_tp1:
+        return "tp1_max", 0.5 + 0.5 * mark, bars_to_tp1, bars_final
+    return "max_hold", mark, None, bars_final
 
 
 # ---------------------------------------------------------------------------

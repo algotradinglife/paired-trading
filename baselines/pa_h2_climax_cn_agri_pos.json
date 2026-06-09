@@ -55,21 +55,36 @@
   },
   "samples_full_stack_5y": {
     "framework": "PA structural stop (live production form)",
-    "n": 64, "ev_r": -0.040, "win_pct": 46.9,
-    "year_breakdown": {
-      "2021": {"n": 9, "ev_r": -0.102},
-      "2022": {"n": 17, "ev_r": 0.011},
-      "2023": {"n": 12, "ev_r": 0.315},
-      "2024": {"n": 11, "ev_r": -0.005},
-      "2025": {"n": 9, "ev_r": -0.904},
-      "2026YTD": {"n": 6, "ev_r": 0.424}
+    "n": 53, "ev_r": 0.056, "win_pct": 43.4,
+    "refresh": {
+      "date": "2026-06-10",
+      "reason": "Re-baselined after the shared TP1-at-boundary harness fix (simulate_trade / _simulate_forward now credit the +0.5R partial exit when TP1 was banked at the hold boundary). Numbers are the live full_stack replay over the 4 included symbols (dce_p already excluded 2026-06-09).",
+      "effect": "ev_r moved -0.040 (5-symbol, pre-fix) -> +0.056 (4-symbol, post-fix). Verdict stays STALE: the marginally-positive 5y EV does not undo the K=3 non-reproducibility (F2 -0.444R, F3 -0.316R)."
     },
     "symbol_breakdown": {
-      "kq_m_dce_p": {"n": 11, "ev_r": -0.361, "win_pct": 36},
-      "kq_m_czce_ma": {"n": 15, "ev_r": -0.132, "win_pct": 47},
-      "kq_m_dce_m": {"n": 14, "ev_r": 0.039, "win_pct": 43},
-      "kq_m_czce_sr": {"n": 11, "ev_r": 0.109, "win_pct": 55},
-      "kq_m_czce_ta": {"n": 13, "ev_r": 0.126, "win_pct": 54}
+      "kq_m_czce_ma": {"n": 15, "ev_r": -0.188, "win_pct": 33.3},
+      "kq_m_czce_sr": {"n": 11, "ev_r": 0.419, "win_pct": 54.5},
+      "kq_m_czce_ta": {"n": 13, "ev_r": 0.039, "win_pct": 46.2},
+      "kq_m_dce_m": {"n": 14, "ev_r": 0.047, "win_pct": 42.9}
+    },
+    "prior_snapshot_2026_06_08": {
+      "note": "Frozen pre-fix, pre-dce_p-exclusion 5-symbol snapshot. Per-year R values are not regenerable from full_stack --out-json; retained as historical evidence for the 2025 collapse that drove the STALE verdict.",
+      "n": 64, "ev_r": -0.040, "win_pct": 46.9,
+      "year_breakdown": {
+        "2021": {"n": 9, "ev_r": -0.102},
+        "2022": {"n": 17, "ev_r": 0.011},
+        "2023": {"n": 12, "ev_r": 0.315},
+        "2024": {"n": 11, "ev_r": -0.005},
+        "2025": {"n": 9, "ev_r": -0.904},
+        "2026YTD": {"n": 6, "ev_r": 0.424}
+      },
+      "symbol_breakdown": {
+        "kq_m_dce_p": {"n": 11, "ev_r": -0.361, "win_pct": 36},
+        "kq_m_czce_ma": {"n": 15, "ev_r": -0.132, "win_pct": 47},
+        "kq_m_dce_m": {"n": 14, "ev_r": 0.039, "win_pct": 43},
+        "kq_m_czce_sr": {"n": 11, "ev_r": 0.109, "win_pct": 55},
+        "kq_m_czce_ta": {"n": 13, "ev_r": 0.126, "win_pct": 54}
+      }
     }
   },
   "claimed_baseline_unreproducible": {
@@ -90,7 +105,7 @@
   ],
   "fold_date_ranges": {"is": ["start", "2022-12-31"], "f1": ["2023-01-01", "2024-06-30"], "f2": ["2024-07-01", "2024-12-31"], "f3": ["2025-01-01", "end"]},
   "verdict": "STALE",
-  "verdict_reason": "Prior K=3 STRONG PASS NOT REPRODUCIBLE. F1 close (+0.622R vs +0.640R) but F2/F3 are negative under multiple cutoffs. Full-stack 5.5y replay also negative due to 2025 cluster.",
+  "verdict_reason": "Prior K=3 STRONG PASS NOT REPRODUCIBLE. F1 close (+0.622R vs +0.640R) but F2/F3 are negative under multiple cutoffs. Full-stack 5y replay is only marginally positive (+0.056R after the 2026-06-10 TP1-at-boundary harness fix) — not enough to undo the K=3 failure.",
   "policy_weight_assigned": 0.0,
   "policy_weight_prior": 0.65,
   "valid_until": "2026-09-08",

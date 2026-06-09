@@ -132,8 +132,11 @@ def simulate_trade(
 
     idx_final = min(entry_idx + MAX_HOLD, len(bars) - 1)
     cl_final = float(bars["close"].iloc[idx_final])
-    mark = (cl_final - entry) / risk_r
-    return "max_hold", float(np.clip(mark, -3.0, 3.0))
+    mark = float(np.clip((cl_final - entry) / risk_r, -3.0, 3.0))
+    # TP1 banked but ran to the hold boundary → credit +0.5R partial exit (shared boundary bug).
+    if reached_tp1:
+        return "tp1_max", 0.5 + 0.5 * mark
+    return "max_hold", mark
 
 
 def get_h_trend(ts: pd.Timestamp, h_bars: pd.DataFrame, h_dif: pd.Series) -> str | None:

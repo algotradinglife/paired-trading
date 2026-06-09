@@ -140,12 +140,15 @@ def _simulate_forward(
             if off == max_hold:
                 tail = float(np.clip((cl - entry_close) / risk, -3, 3))
                 return SimOutcome("tp1_max", 0.5 + 0.5 * tail, off)
-    # Reached end of window without hitting TP1
+    # Window ended (or bars ran out) before a terminal TP2/stop.
     last_off = min(max_hold, len(bars) - entry_idx - 1)
     if last_off <= 0:
         return None
     last_close = float(bars["close"].iloc[entry_idx + last_off])
     r = float(np.clip((last_close - entry_close) / risk, -3, 3))
+    # TP1 banked but ran to the boundary → credit +0.5R partial exit (shared boundary bug).
+    if hit_tp1:
+        return SimOutcome("tp1_max", 0.5 + 0.5 * r, last_off)
     return SimOutcome("max_hold", r, last_off)
 
 
