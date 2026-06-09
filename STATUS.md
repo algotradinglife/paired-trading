@@ -432,17 +432,59 @@ In rough priority order (descending), as of `d4b933d0`:
 
 Repo conventions / strategic decisions are mirrored in Claude's project
 memory at `~/.claude/projects/-Users-huhan-code-trading-paired-trading/memory/`
-(migrated 2026-06-09 from the pre-rename `...-macd-momentum/memory/` path):
+(consolidated 2026-06-09 from two pre-rename `...-macd-momentum/memory/`
+paths; see `MEMORY.md` for the live index).  37 entries:
 
+**Project direction & strategic decisions**
 - `project_signal_source.md` — DIF retirement, PA is the active lane
-- `project_vcs_jj.md` — jj (Jujutsu) is the VCS, not raw git
 - `project_baselines_infra.md` — baselines/ JSONs are the single source of truth
 - `project_broad_market_suppress.md` — DIA/SPY/XLU H2 suppression is structural
-- `feedback_options_style.md` — recommend + parallelize when listing options
-- `feedback_signal_must_have_macro.md` — every signal report must lead
-  with multi-TF + trend structure + context bull/bear
 - `feedback_regime_gate_not_portable.md` — bottom-reversal lanes can't take a trend filter
-- `MEMORY.md` — index
+- `project_retired_and_historical.md` — DIF detectors + old policy/data/scope: dead, don't re-explore (with reasons)
+
+**Methodology & philosophy**
+- `project_signals_are_posterior.md` — output continuous confidence, not discrete events
+- `project_multitimeframe_is_fusion_not_layer.md` — multi-TF is a fusion layer (aligns with DIR)
+- `project_recall_first_paradigm.md` — MACD divergence only catches 5-11% of swings
+- `project_scope_analysis_only.md` — analysis/probability only, no trade execution
+- `project_scope_expanded_to_candle_geometry.md` — candle geometry + Brooks/Xiao since 2026-05-25
+- `project_goal_code_implementation.md` — theory exists to be programmable
+- `project_options_left_side_entry.md` — options allow left-side entry with tight stops
+- `project_instrument_class_aware.md` — us_equity / cn_futures dual calibration
+
+**Collaboration preferences (feedback)**
+- `feedback_options_style.md` — recommend + parallelize when listing options
+- `project_vcs_jj.md` — jj (Jujutsu) is the VCS, not raw git
+- `feedback_signal_must_have_macro.md` — every signal report leads with multi-TF + structure + context
+- `feedback_codex_review_default.md` — auto-run codex review after generating code/analysis
+- `feedback_codex_review_after_fix.md` — codex review after each fix/feature commit
+- `feedback_autonomous_commit.md` — commit logical units autonomously, conventional format
+- `feedback_no_pseudocode_during_concept_walkthrough.md` — concept phase: clarify, don't code
+- `feedback_song_jianyi_no_fusion.md` — keep Song's system standalone, no premature fusion
+- `feedback_multi_tf_sweet_spot_timing_pitfall.md` — align bar-session semantics before multi-TF bucketing
+
+**Live lanes & validated findings**
+- `project_h_opposing_validated_universal.md` — bottom+opp cross-pool strong signal, K=3 STRONG PASS
+- `project_h_opposing_temporal_stability.md` — 2024 failure was CN-commodity regime, not rate cuts
+- `project_cn_bond_pool.md` — CN_BOND default pool (TF/T/TS), bottom×h=opp EV +0.958R
+- `project_bpull_detector.md` — CN_METAL DIF>0 EMA20 pullback, rb excluded, CN_BOND rejected
+- `project_vflush_detector.md` — V-flush bottom, cu/sc only, 90% non-overlap with PA H2
+- `project_pa_standalone_detector.md` — PA H2; CN_METAL PASS, CN_AGRI rejected
+- `project_swing_context_backtest.md` — US 60min uptrend+h=opp; CN_METAL inverted
+- `project_swing_hypothesis_validated.md` — tight/wick dual independent signals
+- `project_validated_bottom_setup.md` — bottom+leading+opposing, Codex-validated (Bonferroni)
+
+**Options layer**
+- `project_options_entry_timing.md` — IV 16-17% at signal vs 6-7% old flow
+- `project_ag_options_swing_findings.md` — htf=supporting + wide stop EV 1.685x
+- `project_ddline_options_findings.md` — ag/au work, cu/rb all-negative EV
+- `project_cn_options_intraday_tqsdk.md` — SHFE/DCE/CZCE symbol formats + coverage
+- `project_position_size_in_score_today.md` — full/half/light/watch tiers
+
+**Reference**
+- `reference_codex_cli.md` — `codex review --uncommitted` is the pre-commit pre-flight
+
+(`MEMORY.md` is the index, not counted in the 37.)
 
 `CLAUDE.md` at the repo root carries the original wiki-generation task
 brief (historical, completed 2026-05-21).  Future Claude sessions
