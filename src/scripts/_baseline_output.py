@@ -32,26 +32,6 @@ def compute_data_hash(bars: list[tuple[str, pd.DataFrame]]) -> str:
     return "sha256:" + h.hexdigest()
 
 
-_PERIOD_TO_FOLD = {"IS": "is", "OOS1": "f1", "OOS2": "f2", "OOS3": "f3"}
-
-
-def fold_samples_from_period_df(df, r_col: str = "r", period_col: str = "period") -> dict:
-    """Build the {is,f1,f2,f3} samples dict from a trades DataFrame whose rows
-    carry a period label (IS/OOS1/OOS2/OOS3) and a realized-R column."""
-    out: dict[str, dict] = {}
-    for raw_label, key in _PERIOD_TO_FOLD.items():
-        sub = df[df[period_col] == raw_label]
-        if len(sub):
-            out[key] = {
-                "n": int(len(sub)),
-                "ev_r": round(float(sub[r_col].mean()), 3),
-                "win_pct": round(float((sub[r_col] > 0).mean() * 100), 1),
-            }
-        else:
-            out[key] = {"n": None, "ev_r": None, "win_pct": None}
-    return out
-
-
 _KINDS = ("folds", "full_stack")
 
 
