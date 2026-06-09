@@ -162,3 +162,14 @@ def test_runtime_status_drift_flags_DRIFT_DETECTED():
                           "t": {"n": 20, "ev_r": 0.90, "win_pct": 66.0}}}
     status, detail = _runtime_status(b, full_stack_map=fs, emitted_data_hash=None)
     assert status == "DRIFT_DETECTED"
+
+
+def test_unavailable_full_stack_skips_primary_no_mass_drift():
+    # main() converts an empty/zero-trade full_stack (lanes={}) to None and emits
+    # a FULL_STACK_UNAVAILABLE token. A None map must SKIP the primary anchor
+    # (status OK), not mass-DRIFT every lane against an empty map.
+    b = _baseline()
+    status, _ = _compare_against_baseline(b, None, None)
+    assert status == "OK"
+    st, _ = _runtime_status(b, full_stack_map=None, emitted_data_hash=None)
+    assert st == "OK"

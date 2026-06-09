@@ -405,11 +405,16 @@ def main() -> int:
     _full_stack_cache = {"lanes": None, "hash": None}
     if args.full:
         _fs_lanes, _fs_hash = _run_full_stack_once()
-        _full_stack_cache["lanes"] = _fs_lanes
+        # Empty lanes ({}) means full_stack ran but produced zero trades — a
+        # severe regression or data outage. Treat it like an unavailable run
+        # (skip primary checks rather than mass-DRIFT every lane), but emit a
+        # grep-able token so the drift gate alerts instead of passing silently.
+        _full_stack_cache["lanes"] = _fs_lanes or None
         _full_stack_cache["hash"] = _fs_hash
-        if _fs_lanes is None:
-            print("warning: full_stack run failed/timed out — primary-anchor checks "
-                  "skipped (no false DRIFT)", file=sys.stderr)
+        if not _fs_lanes:
+            print("[WARN] FULL_STACK_UNAVAILABLE: full_stack produced no per-lane "
+                  "data (crash, timeout, or zero trades) — primary-anchor checks "
+                  "skipped; investigate.", file=sys.stderr)
 
     for f in files:
         if f.name == "EXPECTED_LANES.json":

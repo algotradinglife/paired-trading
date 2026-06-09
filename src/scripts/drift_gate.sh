@@ -32,16 +32,21 @@ fi
 .venv/bin/python scripts/validate_baselines.py --full >"$LOG" 2>&1
 status=$?
 
-# Alert only on a row whose STATUS is drift ([DRFT] icon) — a real, non-masked
-# drift on a healthy lane. The repro line of a known-broken STALE lane also
-# prints "DRIFT_DETECTED" (e.g. pa_h2_climax near-zero sign flip); matching the
-# row icon instead of the word avoids crying wolf on those accepted states.
-if grep -qF '[DRFT]' "$LOG"; then
-  echo "$(date '+%F %T')  DRIFT — see $LOG" >>"$LOG_DIR/ALERTS.log"
-  /usr/bin/osascript -e 'display notification "Baseline DRIFT_DETECTED — see logs/drift-gate/ALERTS.log" with title "paired-trading drift gate"' 2>/dev/null || true
+# Alert when EITHER:
+#  - a row's STATUS is drift ([DRFT] icon) — a real, non-masked drift on a
+#    healthy lane (the known-broken STALE climax lane prints "DRIFT_DETECTED" in
+#    its repro line but stays [STAL], so matching the icon avoids crying wolf); OR
+#  - full_stack produced no per-lane data (FULL_STACK_UNAVAILABLE) — a zero-trade
+#    collapse or data outage that would otherwise pass silently.
+if grep -qF '[DRFT]' "$LOG" || grep -q 'FULL_STACK_UNAVAILABLE' "$LOG"; then
+  echo "$(date '+%F %T')  DRIFT/UNAVAILABLE — see $LOG" >>"$LOG_DIR/ALERTS.log"
+  /usr/bin/osascript -e 'display notification "Baseline drift gate fired — see logs/drift-gate/ALERTS.log" with title "paired-trading drift gate"' 2>/dev/null || true
 fi
 
-# retain only the 12 most-recent run logs
-ls -1t "$LOG_DIR"/drift_*.log 2>/dev/null | tail -n +13 | xargs -r rm -f
+# retain only the 12 most-recent run logs (portable: no GNU-only `xargs -r`,
+# which BSD/macOS xargs rejects — the documented cron environment)
+ls -1t "$LOG_DIR"/drift_*.log 2>/dev/null | tail -n +13 | while IFS= read -r f; do
+  rm -f "$f"
+done
 
 exit "$status"

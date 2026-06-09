@@ -564,19 +564,24 @@ def main() -> int:
         df.to_csv(args.out_csv, index=False)
         print(f"\nWrote {len(df)} trades → {args.out_csv}")
 
-    if args.out_json is not None and not df.empty:
+    if args.out_json is not None:
+        # Always emit (even on empty df) so the validator distinguishes a
+        # zero-trade run (severe regression / data outage → lanes={}) from a
+        # crashed/unparseable run. Skipping the write here would let a collapse
+        # to zero trades read as "no comparable data" and silently pass --full.
         from scripts._baseline_output import write_baseline_output
-        ls = df.groupby(["lane", "symbol"]).agg(
-            n=("realized_r", "size"),
-            ev_r=("realized_r", "mean"),
-            win_pct=("realized_r", lambda s: (s > 0).mean() * 100),
-        ).round(3)
         lanes: dict[str, dict] = {}
-        for (lane, symbol), r in ls.iterrows():
-            lanes.setdefault(lane, {})[symbol] = {
-                "n": int(r["n"]), "ev_r": float(r["ev_r"]),
-                "win_pct": round(float(r["win_pct"]), 1),
-            }
+        if not df.empty:
+            ls = df.groupby(["lane", "symbol"]).agg(
+                n=("realized_r", "size"),
+                ev_r=("realized_r", "mean"),
+                win_pct=("realized_r", lambda s: (s > 0).mean() * 100),
+            ).round(3)
+            for (lane, symbol), r in ls.iterrows():
+                lanes.setdefault(lane, {})[symbol] = {
+                    "n": int(r["n"]), "ev_r": float(r["ev_r"]),
+                    "win_pct": round(float(r["win_pct"]), 1),
+                }
         write_baseline_output(args.out_json, kind="full_stack", lanes=lanes,
                               data_hash=None)
         print(f"\nWrote backtest_output_v1 → {args.out_json}")
