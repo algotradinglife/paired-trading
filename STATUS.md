@@ -128,6 +128,30 @@ Current dashboard (`validate_baselines.py --full`, commit `0d95a209`):
 [ OK ]  vflush         cn_metal_futures  STRONG PASS         0.65
 ```
 
+### Automated drift gate (cron, 2026-06-09)
+
+`src/scripts/drift_gate.sh` runs `validate_baselines.py --full` on a **weekly
+local crontab** (Mon 08:53 local) so future code/data changes that move the
+numbers get caught without manual checks.
+
+- Alerts **only on a real `[DRFT]` row** (a non-masked drift on a healthy lane).
+  The accepted STALE (`pa_h2_climax`) / PENDING (`pa_us_60min`) states are NOT
+  treated as drift — no weekly false alarms. (`pa_h2_climax`'s repro line still
+  prints `DRIFT_DETECTED` for its near-zero sign flip, but the row stays STALE
+  and the gate's icon-grep ignores it.)
+- Output: `logs/drift-gate/drift_<ts>.log` (newest 12 kept; `logs/` is
+  gitignored) + an `ALERTS.log` entry + a macOS notification when a healthy
+  lane drifts.
+- Runs **locally** (not a cloud routine) because full_stack reads Parquet from
+  the external drive `/Volumes/Data Drive/`. cron already has that access on
+  this machine (other crontab jobs use it). The script self-sets
+  `DERIVED_ROOT`/`MARKET_DATA` since cron has no shell profile.
+- Manage: `crontab -e` → edit/remove the `# paired-trading baseline drift gate`
+  line (cadence `53 8 * * 1`). The crontab entry is per-machine, not in the repo.
+- Caveats: the external drive must be mounted when it fires (else it logs an
+  error, no false alert); cron-context macOS notifications can be flaky, so
+  `logs/drift-gate/ALERTS.log` is the reliable signal.
+
 ## What this is
 
 A multi-period analysis + paired-trading engine for the joint analysis
