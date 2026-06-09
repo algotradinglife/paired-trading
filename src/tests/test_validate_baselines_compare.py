@@ -69,3 +69,57 @@ def test_compare_win_pct_is_warn_only():
 def test_compare_skips_n_pct_when_baseline_n_null():
     st, _ = _compare_cell(_cell(None, 0.20), _cell(99, 0.22), TOL)
     assert st == "OK"
+
+
+from scripts.validate_baselines import _compare_against_baseline
+
+
+def _baseline():
+    return {
+        "lane": "pa_h2", "pool": "cn_bond",
+        "full_stack_lane": "pa_cn_bond",
+        "symbols_included": ["tf", "t"],
+        "samples_full_stack_5y": {"n": 40, "ev_r": 0.12, "win_pct": 65.0},
+        "samples": {"f1": {"n": 16, "ev_r": 0.22, "win_pct": None}},
+        "data_snapshot_hash": "sha256:OLD",
+    }
+
+
+def test_primary_anchor_ok():
+    fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.10, "win_pct": 64.0},
+                          "t": {"n": 20, "ev_r": 0.14, "win_pct": 66.0}}}
+    status, details = _compare_against_baseline(_baseline(), fs, None)
+    assert status == "OK"
+
+
+def test_primary_anchor_drift():
+    fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.40, "win_pct": 64.0},
+                          "t": {"n": 20, "ev_r": 0.50, "win_pct": 66.0}}}
+    status, details = _compare_against_baseline(_baseline(), fs, None)
+    assert status == "DRIFT"
+    assert any("full_stack" in d for d in details)
+
+
+def test_fold_secondary_drift():
+    fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.10, "win_pct": 64.0},
+                          "t": {"n": 20, "ev_r": 0.14, "win_pct": 66.0}}}
+    fold_emitted = {"samples": {"f1": {"n": 16, "ev_r": 0.80, "win_pct": None}}}
+    status, details = _compare_against_baseline(_baseline(), fs, fold_emitted)
+    assert status == "DRIFT"
+    assert any(d.startswith("f1") for d in details)
+
+
+def test_data_changed_attribution():
+    fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.40, "win_pct": 64.0},
+                          "t": {"n": 20, "ev_r": 0.50, "win_pct": 66.0}}}
+    fold_emitted = {"data_hash": "sha256:NEW"}
+    status, details = _compare_against_baseline(_baseline(), fs, fold_emitted)
+    assert status == "DRIFT"
+    assert any("data changed" in d for d in details)
+
+
+def test_no_full_stack_lane_skips_primary():
+    b = _baseline()
+    del b["full_stack_lane"]
+    status, details = _compare_against_baseline(b, {}, None)
+    assert status == "OK"

@@ -135,6 +135,54 @@ def _compare_cell(base: dict, now: dict, tol: dict) -> tuple[str, str]:
     return "OK", "within tolerance"
 
 
+_FOLD_KEYS = ("is", "f1", "f2", "f3")
+
+
+def _worst(statuses: list) -> str:
+    if "DRIFT" in statuses:
+        return "DRIFT"
+    if "WARN" in statuses:
+        return "WARN"
+    return "OK"
+
+
+def _compare_against_baseline(b: dict, full_stack_map, fold_emitted) -> tuple[str, list]:
+    """Returns (status, details). status in {OK, WARN, DRIFT}. Pure; no I/O."""
+    tol = _resolve_tolerance(b)
+    statuses: list[str] = []
+    details: list[str] = []
+
+    fsl = b.get("full_stack_lane")
+    base_fs = b.get("samples_full_stack_5y")
+    if fsl and base_fs and full_stack_map is not None:
+        lane_block = full_stack_map.get(fsl, {})
+        now = _aggregate_symbols(lane_block, b.get("symbols_included", []))
+        st, d = _compare_cell(base_fs, now, tol)
+        statuses.append(st)
+        details.append(f"full_stack[{fsl}]: {d}")
+
+    if fold_emitted and fold_emitted.get("samples"):
+        base_samples = b.get("samples", {})
+        now_samples = fold_emitted["samples"]
+        for key in _FOLD_KEYS:
+            bc, nc = base_samples.get(key), now_samples.get(key)
+            if not bc or not nc:
+                continue
+            if bc.get("ev_r") is None or nc.get("ev_r") is None:
+                continue
+            st, d = _compare_cell(bc, nc, tol)
+            statuses.append(st)
+            details.append(f"{key}: {d}")
+
+    emitted_hash = (fold_emitted or {}).get("data_hash")
+    base_hash = b.get("data_snapshot_hash")
+    if emitted_hash and base_hash and emitted_hash != base_hash:
+        verb = "data changed -> re-baseline" if "DRIFT" in statuses else "data changed (no drift)"
+        details.append(verb)
+
+    return _worst(statuses), details
+
+
 def _today() -> dt.date:
     return dt.date.today()
 
