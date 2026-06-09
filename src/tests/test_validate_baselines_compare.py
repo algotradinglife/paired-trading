@@ -25,3 +25,47 @@ def test_aggregate_symbols_n_weighted():
 
 def test_aggregate_symbols_empty_returns_zero_n():
     assert _aggregate_symbols({}, ["cu"]) == {"n": 0, "ev_r": None, "win_pct": None}
+
+
+from scripts.validate_baselines import _compare_cell
+
+TOL = _resolve_tolerance({})
+
+
+def _cell(n, ev, win=None):
+    return {"n": n, "ev_r": ev, "win_pct": win}
+
+
+def test_compare_within_tolerance_ok():
+    st, _ = _compare_cell(_cell(50, 0.20), _cell(50, 0.25), TOL)
+    assert st == "OK"
+
+
+def test_compare_ev_drift():
+    st, d = _compare_cell(_cell(50, 0.20), _cell(50, 0.40), TOL)
+    assert st == "DRIFT" and "ev_r" in d
+
+
+def test_compare_sign_flip_is_drift():
+    st, _ = _compare_cell(_cell(50, 0.05), _cell(50, -0.05), TOL)
+    assert st == "DRIFT"
+
+
+def test_compare_n_inflation_drift():
+    st, d = _compare_cell(_cell(50, 0.20), _cell(70, 0.20), TOL)
+    assert st == "DRIFT" and "n " in d
+
+
+def test_compare_tiny_n_downgrades_to_warn():
+    st, _ = _compare_cell(_cell(6, 0.20), _cell(6, 0.90), TOL)
+    assert st == "WARN"
+
+
+def test_compare_win_pct_is_warn_only():
+    st, _ = _compare_cell(_cell(50, 0.20, 60.0), _cell(50, 0.20, 80.0), TOL)
+    assert st == "WARN"
+
+
+def test_compare_skips_n_pct_when_baseline_n_null():
+    st, _ = _compare_cell(_cell(None, 0.20), _cell(99, 0.22), TOL)
+    assert st == "OK"

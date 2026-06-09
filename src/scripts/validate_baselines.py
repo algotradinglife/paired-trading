@@ -98,6 +98,43 @@ def _aggregate_symbols(lane_block: dict, symbols: list) -> dict:
             "win_pct": round(win, 1) if win is not None else None}
 
 
+def _compare_cell(base: dict, now: dict, tol: dict) -> tuple[str, str]:
+    """Compare one baseline cell vs emitted cell. Returns (status, detail).
+    status in {OK, WARN, DRIFT}. DRIFT downgrades to WARN when baseline n < min_n."""
+    issues: list[str] = []
+    drift = False
+    warn = False
+
+    b_ev, n_ev = base.get("ev_r"), now.get("ev_r")
+    if b_ev is not None and n_ev is not None:
+        if tol.get("sign_flip") and (b_ev > 0) != (n_ev > 0) and abs(b_ev - n_ev) > 1e-9:
+            issues.append(f"ev_r sign flip {b_ev:+.3f}->{n_ev:+.3f}")
+            drift = True
+        if abs(n_ev - b_ev) > tol["ev_r_abs"]:
+            issues.append(f"ev_r {b_ev:+.3f}->{n_ev:+.3f} (d{n_ev - b_ev:+.3f})")
+            drift = True
+
+    b_n, n_n = base.get("n"), now.get("n")
+    if b_n and n_n is not None:
+        if abs(n_n - b_n) / b_n > tol["n_pct"]:
+            issues.append(f"n {b_n}->{n_n} (>{tol['n_pct']:.0%})")
+            drift = True
+
+    wp = tol.get("win_pct_pp")
+    b_w, n_w = base.get("win_pct"), now.get("win_pct")
+    if wp is not None and b_w is not None and n_w is not None and abs(n_w - b_w) > wp:
+        issues.append(f"win_pct {b_w:.1f}->{n_w:.1f} (>{wp}pp)")
+        warn = True
+
+    if drift and b_n is not None and b_n < tol["min_n"]:
+        return "WARN", f"tiny-n(<{tol['min_n']}): " + "; ".join(issues)
+    if drift:
+        return "DRIFT", "; ".join(issues)
+    if warn:
+        return "WARN", "; ".join(issues)
+    return "OK", "within tolerance"
+
+
 def _today() -> dt.date:
     return dt.date.today()
 
