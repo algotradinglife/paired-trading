@@ -85,7 +85,8 @@
     "actual_n": [18, 9, 17]
   },
   "production_binding": [
-    "src/engine/divergence/pa_detector.py:275"
+    "src/scripts/score_today.py:129",
+    "src/scripts/score_today.py:1553"
   ],
   "fold_date_ranges": {"is": ["start", "2022-12-31"], "f1": ["2023-01-01", "2024-06-30"], "f2": ["2024-07-01", "2024-12-31"], "f3": ["2025-01-01", "end"]},
   "verdict": "STALE",
