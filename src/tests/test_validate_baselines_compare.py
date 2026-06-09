@@ -30,6 +30,15 @@ def test_aggregate_symbols_empty_returns_zero_n():
     assert _aggregate_symbols({}, ["cu"]) == {"n": 0, "ev_r": None, "win_pct": None}
 
 
+def test_aggregate_symbols_case_insensitive():
+    # full_stack emits uppercase US tickers; baseline lists lowercase
+    block = {"QQQ": {"n": 10, "ev_r": 0.20, "win_pct": 60.0},
+             "DIA": {"n": 30, "ev_r": 0.00, "win_pct": 40.0}}
+    cell = _aggregate_symbols(block, ["qqq", "dia"])
+    assert cell["n"] == 40
+    assert cell["ev_r"] == 0.05
+
+
 from scripts.validate_baselines import _compare_cell
 
 TOL = _resolve_tolerance({})

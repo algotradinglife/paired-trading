@@ -86,8 +86,11 @@ def _resolve_tolerance(b: dict) -> dict:
 def _aggregate_symbols(lane_block: dict, symbols: list) -> dict:
     """n-weighted aggregate of {symbol: cell} over the given symbols.
     Weighted mean of per-symbol ev_r == overall ev_r (EV is a per-trade mean)."""
-    cells = [lane_block[s] for s in symbols
-             if s in lane_block and lane_block[s].get("n")]
+    # Case-insensitive symbol match: backtest_full_stack emits US tickers
+    # uppercase (QQQ) while baselines list them lowercase (qqq).
+    ci = {k.lower(): v for k, v in lane_block.items()}
+    cells = [ci[s.lower()] for s in symbols
+             if s.lower() in ci and ci[s.lower()].get("n")]
     total_n = sum(c["n"] for c in cells)
     if total_n == 0:
         return {"n": 0, "ev_r": None, "win_pct": None}
