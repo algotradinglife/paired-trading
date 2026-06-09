@@ -14,6 +14,15 @@ stands; consult linked docs / commits for the details.
 > `lane_market_evaluation_2026-06-09.md`, `max_hold_experiment_2026-06-09.md`,
 > `cn_regime_gate_reject_2026-06-09.md`.
 
+> **Sync 2026-06-09 (baseline validation v2)** — `validate_baselines.py --full`
+> now does real drift detection: one `backtest_full_stack.py --out-json` run
+> (per-`(lane,symbol)`) is the primary anchor, diffed per baseline against
+> `samples_full_stack_5y` with tolerance (ev ±0.10R / sign-flip / n ±25%).
+> schema v2 adds `full_stack_lane` + `tolerance_policy` + `production_binding` +
+> `fold_date_ranges`.  Dashboard: 9 OK / 1 STALE / 1 PENDING (the 2 US lanes
+> re-baselined post-suppression — EV/win improved).  See the "baselines/
+> infrastructure" section below and `docs/superpowers/specs|plans/2026-06-09-baseline-validation-schema*.md`.
+
 > **Audit / sync 2026-06-08 (late session)** — added the strategic-
 > layer **DIR module** (8-source synthesiser + 60min POC), the
 > **F1 TR-position-aware** daily_structure vote, and **structural
@@ -72,10 +81,39 @@ Reject decisions ≈ deploy decisions in PnL value. See `doc/repro/p2_followups_
 
 - 11 entries audited via `scripts/validate_baselines.py`
 - `EXPECTED_LANES.json` registry catches deleted/missing files
-- `--strict` mode for CI: STALE/DRIFT/PENDING/EXPIRED/BROKEN/MISSING → exit 1
+- `--strict` mode for CI: STALE/DRIFT/PENDING/EXPIRED/BROKEN/MISSING/DRIFT_DETECTED → exit 1
 - Verdicts: STRONG PASS / PASS / CONDITIONAL PASS / marginal / REJECT / STALE / DRIFT / PENDING_VALIDATION / DEPLOYED
 
-Current dashboard:
+**`--full` real drift detection (2026-06-09, schema v2):** `--full` now parses
+real backtest output and diffs it against each baseline instead of only checking
+the repro exit code. Mechanism:
+
+- One `backtest_full_stack.py --out-json` run (per-`(lane, symbol)` cells via the
+  shared `scripts/_baseline_output.py` contract) is the **primary anchor**,
+  shared across all baselines in a pass.
+- Each baseline maps to a lane via the v2 field **`full_stack_lane`**; the
+  validator filters that lane's cells to the baseline's `symbols_included`
+  (case-insensitive), n-weighted aggregates, and compares to
+  `samples_full_stack_5y`.
+- **Tolerance** (global default + optional per-baseline `tolerance_policy`):
+  `ev_r ±0.10R` / strict sign-flip / `n ±25%` → `DRIFT_DETECTED`;
+  `win_pct ±10pp` → WARN; `min_n 10` downgrades tiny-n drift to WARN.
+  Runtime drift never masks a known-broken metadata verdict (STALE/EXPIRED/…).
+- Fail-open: if the full_stack run fails/times out, primary checks are skipped
+  (no false DRIFT). The validator never rewrites a baseline's `verdict`.
+- **Schema v2 fields** (all optional; v1 still validates): `full_stack_lane`,
+  `tolerance_policy`, `production_binding`, `fold_date_ranges`, reserved
+  `data_snapshot_hash`. See `baselines/README.md`.
+- A "folds-secondary" check was designed then **dropped** — baselines record a
+  config+symbol-scoped fold subset the K=3 scripts don't cleanly expose; the
+  full_stack anchor is correct and sufficient.
+- `data_snapshot_hash`/`compute_data_hash` is in place but **unwired**
+  (full_stack emits `data_hash=None`) — data-vs-code drift attribution is a
+  documented follow-up.
+- Design + plan: `docs/superpowers/specs/2026-06-09-baseline-validation-schema-design.md`,
+  `docs/superpowers/plans/2026-06-09-baseline-validation-schema.md`.
+
+Current dashboard (`validate_baselines.py --full`, commit `0d95a209`):
 ```
 [ OK ]  bpull          cn_metal_futures  STRONG PASS         0.75
 [ OK ]  context_a      cn_metal_futures  CONDITIONAL PASS    0.60
