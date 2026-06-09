@@ -67,6 +67,36 @@ STATUS_ICONS = {
 # Status classes treated as failures under --strict
 STRICT_FAIL_STATUSES = {"BROKEN", "EXPIRED", "STALE", "DRIFT", "PENDING", "MISSING"}
 
+GLOBAL_TOLERANCE = {
+    "ev_r_abs": 0.10,
+    "sign_flip": True,
+    "n_pct": 0.25,
+    "win_pct_pp": 10.0,
+    "min_n": 10,
+}
+
+
+def _resolve_tolerance(b: dict) -> dict:
+    tol = dict(GLOBAL_TOLERANCE)
+    tol.update(b.get("tolerance_policy") or {})
+    return tol
+
+
+def _aggregate_symbols(lane_block: dict, symbols: list) -> dict:
+    """n-weighted aggregate of {symbol: cell} over the given symbols.
+    Weighted mean of per-symbol ev_r == overall ev_r (EV is a per-trade mean)."""
+    cells = [lane_block[s] for s in symbols
+             if s in lane_block and lane_block[s].get("n")]
+    total_n = sum(c["n"] for c in cells)
+    if total_n == 0:
+        return {"n": 0, "ev_r": None, "win_pct": None}
+    ev = sum(c["n"] * c["ev_r"] for c in cells) / total_n
+    win_cells = [c for c in cells if c.get("win_pct") is not None]
+    win_n = sum(c["n"] for c in win_cells)
+    win = (sum(c["n"] * c["win_pct"] for c in win_cells) / win_n) if win_n else None
+    return {"n": total_n, "ev_r": round(ev, 3),
+            "win_pct": round(win, 1) if win is not None else None}
+
 
 def _today() -> dt.date:
     return dt.date.today()
