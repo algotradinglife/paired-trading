@@ -123,3 +123,21 @@ def test_no_full_stack_lane_skips_primary():
     del b["full_stack_lane"]
     status, details = _compare_against_baseline(b, {}, None)
     assert status == "OK"
+
+
+def test_compare_zero_baseline_ev_no_false_signflip():
+    # baseline EV exactly 0, small positive now-EV within ev_r_abs -> OK (no false sign-flip)
+    st, _ = _compare_cell(_cell(50, 0.0), _cell(50, 0.05), TOL)
+    assert st == "OK"
+
+
+def test_compare_zero_baseline_ev_large_move_still_drifts():
+    # baseline EV 0, large now-EV exceeds ev_r_abs -> DRIFT via magnitude check
+    st, _ = _compare_cell(_cell(50, 0.0), _cell(50, 0.30), TOL)
+    assert st == "DRIFT"
+
+
+def test_compare_n_zero_skips_n_pct():
+    # baseline n == 0 must not divide-by-zero; ev within tol -> OK
+    st, _ = _compare_cell(_cell(0, 0.20), _cell(99, 0.22), TOL)
+    assert st == "OK"

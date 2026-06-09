@@ -107,7 +107,7 @@ def _compare_cell(base: dict, now: dict, tol: dict) -> tuple[str, str]:
 
     b_ev, n_ev = base.get("ev_r"), now.get("ev_r")
     if b_ev is not None and n_ev is not None:
-        if tol.get("sign_flip") and (b_ev > 0) != (n_ev > 0) and abs(b_ev - n_ev) > 1e-9:
+        if tol.get("sign_flip") and ((b_ev > 0 and n_ev < 0) or (b_ev < 0 and n_ev > 0)):
             issues.append(f"ev_r sign flip {b_ev:+.3f}->{n_ev:+.3f}")
             drift = True
         if abs(n_ev - b_ev) > tol["ev_r_abs"]:
