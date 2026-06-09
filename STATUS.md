@@ -19,9 +19,10 @@ stands; consult linked docs / commits for the details.
 > (per-`(lane,symbol)`) is the primary anchor, diffed per baseline against
 > `samples_full_stack_5y` with tolerance (ev ±0.10R / sign-flip / n ±25%).
 > schema v2 adds `full_stack_lane` + `tolerance_policy` + `production_binding` +
-> `fold_date_ranges`.  Dashboard: 9 OK / 1 STALE / 1 PENDING (the 2 US lanes
-> re-baselined post-suppression — EV/win improved).  See the "baselines/
-> infrastructure" section below and `docs/superpowers/specs|plans/2026-06-09-baseline-validation-schema*.md`.
+> `fold_date_ranges`.  Dashboard: 10 OK / 1 STALE (the 2 US lanes re-baselined
+> post-suppression — EV/win improved; `pa_us_60min` K=3-validated → PASS
+> 2026-06-09, the last PENDING cleared).  See the "baselines/ infrastructure"
+> section below and `docs/superpowers/specs|plans/2026-06-09-baseline-validation-schema*.md`.
 
 > **Audit / sync 2026-06-08 (late session)** — added the strategic-
 > layer **DIR module** (8-source synthesiser + 60min POC), the
@@ -113,7 +114,7 @@ the repro exit code. Mechanism:
 - Design + plan: `docs/superpowers/specs/2026-06-09-baseline-validation-schema-design.md`,
   `docs/superpowers/plans/2026-06-09-baseline-validation-schema.md`.
 
-Current dashboard (`validate_baselines.py --full`, commit `0d95a209`):
+Current dashboard (`validate_baselines.py --full`, commit `a69d7688`):
 ```
 [ OK ]  bpull          cn_metal_futures  STRONG PASS         0.75
 [ OK ]  context_a      cn_metal_futures  CONDITIONAL PASS    0.60
@@ -123,7 +124,7 @@ Current dashboard (`validate_baselines.py --full`, commit `0d95a209`):
 [ OK ]  pa_h2          cn_futures        marginal            0.55
 [ OK ]  pa_h2          cn_metal_futures  STRONG PASS         0.75
 [ OK ]  pa_h2          us_equity         PASS                0.80
-[PEND]  pa_us_60min    us_equity         PENDING_VALIDATION  0.65
+[ OK ]  pa_us_60min    us_equity         PASS                0.65
 [ OK ]  us_regime_gate us_equity         DEPLOYED               —
 [ OK ]  vflush         cn_metal_futures  STRONG PASS         0.65
 ```
@@ -135,10 +136,10 @@ local crontab** (Mon 08:53 local) so future code/data changes that move the
 numbers get caught without manual checks.
 
 - Alerts **only on a real `[DRFT]` row** (a non-masked drift on a healthy lane).
-  The accepted STALE (`pa_h2_climax`) / PENDING (`pa_us_60min`) states are NOT
-  treated as drift — no weekly false alarms. (`pa_h2_climax`'s repro line still
-  prints `DRIFT_DETECTED` for its near-zero sign flip, but the row stays STALE
-  and the gate's icon-grep ignores it.)
+  Accepted known-broken states (e.g. STALE `pa_h2_climax`) are NOT treated as
+  drift — no weekly false alarms. (`pa_h2_climax`'s repro line still prints
+  `DRIFT_DETECTED` for its near-zero sign flip, but the row stays STALE and the
+  gate's icon-grep ignores it.)
 - Output: `logs/drift-gate/drift_<ts>.log` (newest 12 kept; `logs/` is
   gitignored) + an `ALERTS.log` entry + a macOS notification when a healthy
   lane drifts.
