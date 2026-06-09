@@ -1355,10 +1355,13 @@ def main() -> int:
                 # 0.426).  H2 bottoms close back into the range by construction, so
                 # close-position-in-TR is structurally incompatible with the H2
                 # signal shape — the gate is dead, not selective.  Dropping the
-                # gate lifts annual fires 5 → ~20 (4x).  TR weight cut to 0.30 to
-                # reflect that the un-gated TR-phase subset has not been
-                # independently walk-forward validated (BULL still rides 0.65
-                # from pa_baseline_2026-06-08.md).
+                # gate lifts annual fires 5 → ~20 (4x).  TR weight cut to 0.30
+                # when the un-gated TR-phase subset was still unvalidated.
+                # K=3 (2026-06-10, doc/repro/pa_us_dif_pos_tr_k3_2026-06-10.md):
+                # the subset is entirely TR_FORMING (n=36, EV+0.069R) — positive
+                # but marginal, fails the 3/3-OOS bar, so 0.30 is held as a
+                # validated-marginal weight (no raise, no suppress). BULL rides
+                # 0.65 from pa_baseline_2026-06-08.md.
                 _us_phase_w = 0.65 if _us_struct.phase == "BULL" else 0.30
                 _us_score = 3 if _us_struct.phase == "BULL" else 2
                 _us_date  = _us_sig.timestamp.date()

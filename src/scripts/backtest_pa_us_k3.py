@@ -29,6 +29,7 @@ import pandas as pd
 
 from data import bar_loader
 from engine.divergence.pa_detector import PABottomDetector, PASignal
+from engine.divergence.pa_structure import PAStructureDetector
 from engine.features.macd import macd as compute_macd
 
 DEFAULT_BARS_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
@@ -38,6 +39,11 @@ MIN_GAP      = 10
 WEEKLY_EMA   = 20
 
 US_SYMBOLS = ["spy", "qqq", "iwm", "gld", "tlt", "nvda", "dia", "gdx", "xlf", "xlk"]
+
+# Mirrors production pa_us_dif_pos suppression so the phase cell reflects the
+# symbols that actually emit: US_LONG_BOND_SUPPRESS (tlt/tlh/iei/ief/shy) +
+# _PA_US_DIF_POS_SUPPRESS (dia, spy). Only the members present in US_SYMBOLS.
+SUPPRESSED = frozenset({"tlt", "dia", "spy"})
 
 CUTOFF_IS   = pd.Timestamp("2022-12-31", tz="UTC")
 CUTOFF_OOS1 = pd.Timestamp("2023-12-31", tz="UTC")
@@ -129,6 +135,7 @@ def main() -> None:
         min_h_legs=2, min_quality=args.min_quality,
         ema_threshold=0.0, min_gap=MIN_GAP,
     )
+    struct_det = PAStructureDetector()
 
     all_records: list[dict] = []
 
@@ -159,6 +166,12 @@ def main() -> None:
             )
             dif_val = float(macd_df["dif"].iloc[sig.bar_idx])
             w_up    = bool(weekly_up.iloc[sig.bar_idx])
+            # PAStructure phase at the signal bar — same call production uses to
+            # weight the pa_us_dif_pos lane (score_today.py:1341,1362).
+            struct = struct_det.detect(bars, up_to_idx=sig.bar_idx)
+            entry_close = float(bars["close"].iloc[sig.bar_idx])
+            struct_stop_ok = (struct.structural_stop is not None
+                              and struct.structural_stop < entry_close)
             all_records.append({
                 "symbol":    sym,
                 "bar_idx":   sig.bar_idx,
@@ -169,6 +182,9 @@ def main() -> None:
                 "dif":       round(dif_val, 6),
                 "dif_pos":   dif_val > 0,
                 "weekly_up": w_up,
+                "phase":     struct.phase,
+                "struct_stop_ok": struct_stop_ok,
+                "suppressed": sym in SUPPRESSED,
                 "confidence": sig.confidence,
                 **{k: v for k, v in sig.features.items()
                    if k in ("h_leg_count", "bar_quality_bull",
@@ -228,6 +244,27 @@ def main() -> None:
     row("DIF>0 h=opp w↓",   dif_pos[dif_pos["h_rel"] == "opposing"] [~w_up[dif_pos[dif_pos["h_rel"] == "opposing"].index]])
     row("DIF>0 h=sup",      dif_pos[dif_pos["h_rel"] == "supporting"])
     row("DIF>0 h=unk",      dif_pos[dif_pos["h_rel"].isin(["neutral"]) | dif_pos["h_rel"].isna()])
+
+    print("\n── PA structural phase × production pa_us_dif_pos gate ──")
+    print("   gate = DIF>0 & h=opposing & phase∉{BEAR,UNCLEAR} & structural_stop<close")
+    gate = df[df["dif_pos"] & (df["h_rel"] == "opposing")
+              & ~df["phase"].isin(["BEAR", "UNCLEAR"]) & df["struct_stop_ok"]]
+    gate_prod = gate[~gate["suppressed"]]
+    for tag, g in [("raw(incl suppressed)", gate),
+                   ("production(excl tlt/dia/spy)", gate_prod)]:
+        print(f"\n  [{tag}]  gated n={len(g)}")
+        row("  BULL (w=0.65)",          g[g["phase"] == "BULL"])
+        row("  TR+TR_FORMING (w=0.30)", g[g["phase"].isin(["TR", "TR_FORMING"])])
+        row("    TR",                   g[g["phase"] == "TR"])
+        row("    TR_FORMING",           g[g["phase"] == "TR_FORMING"])
+    base = df[df["dif_pos"] & (df["h_rel"] == "opposing")
+              & ~df["phase"].isin(["BEAR", "UNCLEAR"])]
+    n_pass = int(base["struct_stop_ok"].sum())
+    print(f"\n  structural_stop<close pass: {n_pass}/{len(base)} "
+          f"of DIF>0 h=opp phase∉{{BEAR,UNCLEAR}}")
+    if len(gate_prod):
+        print("  production gated phase dist:",
+              gate_prod["phase"].value_counts().to_dict())
 
     print("\n── Weekly trend breakdown (h=opposing) ──")
     pct_up = w_up[opp.index].mean()

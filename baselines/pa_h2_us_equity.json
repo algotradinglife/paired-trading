@@ -44,6 +44,22 @@
     "f2": {"n": 3,  "ev_r": 0.667},
     "f3": {"n": 10, "ev_r": 0.750}
   },
+  "samples_k3_phase_tr_forming_2026-06-10": {
+    "note": "PA-structural-phase weighting of the LIVE pa_us_dif_pos lane (score_today.py:1362: BULL=0.65 / TR,TR_FORMING=0.30) — distinct axis from policy_weight()'s trend_structure routing below. K=3 via backtest_pa_us_k3.py with PAStructureDetector phase tags + production gate (DIF>0 & h=opp & phase not in {BEAR,UNCLEAR} & structural_stop<close), suppressed symbols (tlt/dia/spy) removed. ATR x 1.5 WF framework. Full memo: doc/repro/pa_us_dif_pos_tr_k3_2026-06-10.md.",
+    "method": "K=3 OOS folds (IS<=2022 / F1=2023 / F2=2024 / F3=2025+)",
+    "verdict": "KEEP 0.30 — validated-marginal / monitoring-grade (was un-validated placeholder)",
+    "TR_FORMING_w0.30": {
+      "n": 36, "ev_r": 0.069, "hit_pct": 36.0,
+      "folds": {"is": -0.222, "f1": -0.125, "f2": 0.562, "f3": 0.033},
+      "note": "Whole subset is TR_FORMING (pure TR n=0). 2/3 OOS folds positive (F1<0), IS<0 — below the 3/3-OOS bar that promoted pa_us_60min. Positive but marginal at the production 1.5xATR stop. 86% of production-gated daily signals fire here post B1-1 gate-drop."
+    },
+    "BULL_w0.65": {
+      "n": 6, "ev_r": 1.083, "hit_pct": 83.0,
+      "note": "Thin; confirms direction, too small to raise from 0.65."
+    },
+    "robustness": "TR_FORMING never negative across 4 variants (1.5/2.0 xATR x mq 0.3/0.1: +0.069/+0.049/+0.410/+0.199R) but only clearly positive (4/4 folds) at the wider 2.0xATR stop — forming-range whipsaw signature. Stop-width-by-phase noted as backlog, not implemented.",
+    "decision": "Do not raise (fails 3/3-OOS), do not suppress (positive EV). Weight held at 0.30; status placeholder -> validated-marginal. No production code/weight change."
+  },
   "samples_prior_2026-06-02": {
     "note": "K=2 (IS<=2022) baseline from docstring lines 245-247; pre-gap-fix.",
     "method": "K=2 OOS folds",
