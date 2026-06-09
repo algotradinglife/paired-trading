@@ -326,12 +326,15 @@ rallies have no edge (negative across folds, both pools); BEAR is too thin to
 validate. The dominant cell's *aggregate* EV is negative, so no cutoff reframe
 rescues it.
 
-**"Puts must be in MVP" — open options** (the PA-top/put edge is now disproven
-two mechanisms deep): (1) **B1_top** — the deferred first-pullback-after-break
-sibling (lowest-cost next probe); (2) accept no PA-based put lane and express
-downside via the options layer / portfolio hedge. Decision with user. The
-bear-side context classifier (`classify_context_top`, A_top/B1_top) remains
-available for DIR voting.
+**"Puts must be in MVP" — DECIDED 2026-06-10: no PA-based put lane.** The
+PA-top/put edge is disproven three mechanisms deep (H2-mirror ×2 + A_top) with a
+consistent structural cause (tops are diffuse fatigue, not events; the
+confirmed-downtrend regime puts need is sparse in this data). B1_top was NOT
+pursued — it shares A_top's core problem. Downside will be expressed via the
+options layer / portfolio hedge instead, not a PA top detector. The bear-side
+context classifier (`classify_context_top`, A_top/B1_top) remains available for
+DIR voting only. **Do not re-attempt a PA top/put detector** without a new
+mechanism class and fresh evidence.
 
 ## Data layout
 
@@ -458,11 +461,10 @@ In rough priority order (descending), as of `d4b933d0`:
 1. **POC alignment data accrual** — `pa_us_60min` is the only lane on
    the 10-source path.  Wait for ~50+ live samples before tuning the
    proportional 0.50 threshold or rolling the path out to daily lanes.
-2. **PA TOP — put-lane decision** — three mechanisms now REJECT (H2-mirror
-   ×2 + A_top sell-the-rally, see "PA TOP" section above). Remaining options
-   for "puts must be in MVP": probe **B1_top** (first pullback after break) or
-   accept no PA-based put lane (express downside via options/hedge). Decision
-   with user.
+2. **PA TOP — RESOLVED 2026-06-10: no PA-based put lane.** Three mechanisms
+   REJECT (H2-mirror ×2 + A_top); decided to express downside via the options
+   layer / portfolio hedge, not a PA top detector. B1_top not pursued. See the
+   "PA TOP" section above. (No longer an open followup.)
 3. **DIR audit followups (3 of 5 still open)** — `doc/repro/
    dir_verdict_alignment_2026-06-08.md`: (a) daily_structure was
    structurally biased neutral pre-F1 — F1 partially addresses;
