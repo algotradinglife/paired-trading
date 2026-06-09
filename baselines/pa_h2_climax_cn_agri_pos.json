@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lane": "pa_h2_climax",
+  "full_stack_lane": "pa_h2_climax",
   "pool": "cn_agri_pos",
   "instrument_class": "cn_futures",
   "symbols_included": ["kq_m_dce_m", "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr"],
@@ -83,6 +84,10 @@
     "actual_f3": -0.316,
     "actual_n": [18, 9, 17]
   },
+  "production_binding": [
+    "src/engine/divergence/pa_detector.py:275"
+  ],
+  "fold_date_ranges": {"is": ["start", "2022-12-31"], "f1": ["2023-01-01", "2024-06-30"], "f2": ["2024-07-01", "2024-12-31"], "f3": ["2025-01-01", "end"]},
   "verdict": "STALE",
   "verdict_reason": "Prior K=3 STRONG PASS NOT REPRODUCIBLE. F1 close (+0.622R vs +0.640R) but F2/F3 are negative under multiple cutoffs. Full-stack 5.5y replay also negative due to 2025 cluster.",
   "policy_weight_assigned": 0.0,

@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lane": "context_a",
+  "full_stack_lane": "context_a",
   "pool": "cn_metal_futures",
   "instrument_class": "cn_metal_futures",
   "symbols_included": ["kq_m_shfe_cu", "kq_m_shfe_au", "kq_m_shfe_ag", "kq_m_ine_sc"],
@@ -39,6 +40,10 @@
     "framework": "PA structural stop (live production form)",
     "note": "Full-stack doc reports context_a aggregate across pools at n=289 / +0.105R / win 55.4%; per-pool CN_METAL slice not explicitly broken out in doc/repro/full_stack_backtest_2026-06-08.md. Placeholder — requires_verification."
   },
+  "production_binding": [
+    "src/engine/divergence/context_a_detector.py:8",
+    "src/engine/divergence/context_a_detector.py::_CONTEXT_A_EXCLUDED_CN_METAL"
+  ],
   "verdict": "CONDITIONAL PASS",
   "verdict_reason": "2/3 OOS folds positive (F1+0.342, F3+0.619); F2 fail attributed to known 2024 regime break per docstring. Aggregate EV+0.220R/n=73. policy_weight=0.60 for h=opposing only; 0.0 for all other h_rel.",
   "policy_weight_assigned": 0.60,

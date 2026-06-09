@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lane": "pa_h2",
+  "full_stack_lane": "pa_h2",
   "pool": "cn_metal_futures",
   "instrument_class": "cn_metal_futures",
   "symbols_included": ["kq_m_shfe_cu", "kq_m_shfe_au", "kq_m_shfe_ag", "kq_m_ine_sc"],
@@ -46,6 +47,10 @@
     "n": 102, "ev_r": 0.189, "win_pct": 55.9,
     "note": "From doc/repro/full_stack_backtest_2026-06-08.md — pa_h2 lane (CN_METAL is the dominant pool). Direction-consistent with K=3 corrected baseline."
   },
+  "production_binding": [
+    "src/engine/divergence/pa_detector.py:260-266",
+    "src/engine/divergence/pa_detector.py:309-315"
+  ],
   "verdict": "STRONG PASS",
   "verdict_reason": "K=3 corrected: 3/3 OOS folds positive (F1+0.348, F2+0.682, F3+0.097). F3 is marginal (+0.097R) but still positive. IS=-0.095R is mildly negative but does not invalidate OOS. Confirmation run via cn_structural Parquet shows even stronger numbers (n=46 EV+0.524R, all 3 folds positive). TR phase sub-cell is the strongest (EV+0.666R/n=38). Full-stack 5.5y replay confirms (+0.189R EV / win 55.9%, n=102).",
   "policy_weight_assigned": 0.75,

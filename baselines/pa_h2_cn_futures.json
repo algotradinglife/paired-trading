@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lane": "pa_h2",
+  "full_stack_lane": "pa_h2",
   "pool": "cn_futures",
   "instrument_class": "cn_futures",
   "symbols_included": [],
@@ -32,6 +33,9 @@
     "framework": "PA structural stop (live production form)",
     "note": "Full-stack doc reports pa_h2 lane aggregated to n=102 / +0.189R / win 55.9% with 'CN_METAL 主力' caveat — meaning CN_METAL drives the EV and the cn_futures mixed pool's sub-slice is not separately reported. Per docstring line 277: 'mixed; metal sub-pool drives the EV; monitoring only.'"
   },
+  "production_binding": [
+    "src/engine/divergence/pa_detector.py:324-329"
+  ],
   "verdict": "marginal",
   "verdict_reason": "F1+0.183R and F2+0.124R both positive but marginal; no IS / F3 / n cited. Metal sub-pool drives the EV (per docstring & full-stack doc). Production lane intentionally kept at lower weight (0.55 h=opp / 0.35 neutral) for monitoring-only status. Not a STRONG PASS.",
   "policy_weight_assigned": 0.55,

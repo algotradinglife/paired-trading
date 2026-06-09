@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lane": "pa_h2",
+  "full_stack_lane": "pa_cn_bond",
   "pool": "cn_bond",
   "instrument_class": "cn_bond",
   "symbols_included": ["kq_m_cffex_tf", "kq_m_cffex_t", "kq_m_cffex_ts"],
@@ -31,6 +32,10 @@
     "n": 73, "ev_r": 0.123, "win_pct": 65.8,
     "note": "Direction-consistent positive; magnitude 0.123R vs 0.548R aggregate suggests baseline was sample-period-favorable. F2=+1.500R(n=6) is a tiny-n outlier that won't repeat."
   },
+  "production_binding": [
+    "src/engine/divergence/pa_detector.py:268-271",
+    "src/engine/divergence/pa_detector.py:307-312"
+  ],
   "verdict": "STRONG PASS",
   "verdict_reason": "Reproduced EXACTLY 2026-06-09: n=31 EV+0.548R F1+0.219(n=16) F2+1.500(n=6) F3+0.500(n=9). Full-stack confirms direction (+0.123R EV / win 66%). Caveat: F2+1.500R(n=6) is small-sample outlier and aggregate EV is overstated.",
   "policy_weight_assigned": 0.70,

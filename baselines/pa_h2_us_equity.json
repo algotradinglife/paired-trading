@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lane": "pa_h2",
+  "full_stack_lane": "pa_us_dif_pos",
   "pool": "us_equity",
   "instrument_class": "us_equity",
   "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
@@ -63,6 +64,10 @@
     "n": 146, "ev_r": 0.086, "win_pct": 36.3,
     "note": "From doc/repro/full_stack_backtest_2026-06-08.md — pa_us_60min row. Low win% by design (60min H2 catches 3-5d reversals; TP1 hit rate low, big winners +1.5R pull the mean positive). Direction-consistent with the K=3 corrected baseline."
   },
+  "production_binding": [
+    "src/engine/divergence/pa_detector.py:243-258",
+    "src/scripts/score_today.py::_PA_US_DIF_POS_SUPPRESS"
+  ],
   "verdict": "PASS",
   "verdict_reason": "K=3 corrected: 3/3 OOS folds positive (F1+0.348, F2+0.682, F3+0.097). F3 marginal but positive. legs=1 sub-cell 4/4 folds positive (incl IS) and monotone increasing. K=2 prior result PASS. Downtrend variant REJECT (F1=-0.177R) and is suppressed to 0.0 in routing (separate cell — see policy_weight_assigned_breakdown). policy_weight=0.80 for uptrend+h=opp, +0.10 bonus for legs=1.",
   "policy_weight_assigned": 0.80,

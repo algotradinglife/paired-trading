@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lane": "pa_us_60min",
+  "full_stack_lane": "pa_us_60min",
   "pool": "us_equity",
   "instrument_class": "us_equity",
   "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
@@ -54,6 +55,10 @@
     "n": 146, "ev_r": 0.086, "win_pct": 36.3,
     "note": "From doc/repro/full_stack_backtest_2026-06-08.md — pa_us_60min lane. Low win% (36.3%) by design — 60min H2 catches 3-5d reversals, TP1 hit rate low, big winners +1.5R pull mean positive. This is the ONLY end-to-end evidence currently backing the lane's production status."
   },
+  "production_binding": [
+    "src/scripts/score_today.py:1235-1254",
+    "src/scripts/score_today.py::_PA_US_60MIN_SUPPRESS"
+  ],
   "verdict": "PENDING_VALIDATION",
   "verdict_reason": "Production-active (BULL=0.65, TR/TR_FORMING=0.30, +0.10 legs=1 bonus) but lacks a formal walk-forward baseline. Full-stack 5.5y replay shows +0.086R EV / win 36.3% (n=146) per doc/repro/full_stack_backtest_2026-06-08.md — direction-positive but win% is structurally low. The 10-source POC signal_tf_structure + resonance routing path is the only production lane on this code path. Promote to PASS/STRONG PASS pending K=3 walk-forward with explicit cutoffs.",
   "verdict_unrecognized_note": "PENDING_VALIDATION is not in validate_baselines.py VERDICTS set (line 44-47); validation will flag this as 'unknown verdict'. Intentional — flags that this lane needs the audit script extended or a real K=3 backtest run.",

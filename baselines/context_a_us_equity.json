@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lane": "context_a",
+  "full_stack_lane": "context_a",
   "pool": "us_equity",
   "instrument_class": "us_equity",
   "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
@@ -40,6 +41,10 @@
     "n": 289, "ev_r": 0.105, "win_pct": 55.4,
     "note": "From doc/repro/full_stack_backtest_2026-06-08.md — largest-volume lane, stable. Direction-consistent with K=3 claim."
   },
+  "production_binding": [
+    "src/engine/divergence/context_a_detector.py:7",
+    "src/engine/divergence/context_a_detector.py::_CONTEXT_A_EXCLUDED_US"
+  ],
   "verdict": "CONDITIONAL PASS",
   "verdict_reason": "3/3 OOS folds positive and improving (F1+0.106 → F2+0.179 → F3+0.574). IS negative due to pre-2022 incomplete 60m coverage. Full-stack 5.5y replay confirms direction (+0.105R EV / win 55%, n=289). policy_weight=0.60 for h=opposing only.",
   "policy_weight_assigned": 0.60,

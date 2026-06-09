@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lane": "vflush",
+  "full_stack_lane": "vflush",
   "pool": "cn_metal_futures",
   "scope": "cu_sc",
   "instrument_class": "cn_metal_futures",
@@ -49,6 +50,10 @@
     "ag": "IS=-0.375R",
     "au": "IS=-1.000R"
   },
+  "production_binding": [
+    "src/engine/divergence/vflush_detector.py:29-32"
+  ],
+  "fold_date_ranges": {"is": ["start", "2023-12-31"], "f1": ["2024-01-01", "2024-12-31"], "f2": ["2025-01-01", "2025-06-30"], "f3": ["2025-07-01", "end"]},
   "verdict": "STRONG PASS",
   "verdict_reason": "2026-06-09 v2 root cause: prior DRIFT verdict was a FALSE ALARM caused by backtest_vflush.py using a truncated JSON loader (cu/sc 60min only covers 2026); full_stack uses Parquet (full history) and confirms cu+sc n=42 over 5.5y, consistent with docstring n=50 claim. Detector + production routing are correct.",
   "policy_weight_assigned": 0.65,

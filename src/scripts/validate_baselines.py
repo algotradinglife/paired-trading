@@ -2,9 +2,9 @@
 
 Modes (mutually compatible):
   default (metadata)  — fast scan: expiry / verdict / staleness / schema
-  --full              — also re-execute each baseline's `repro_command`
-                        (slow; opt-in only; currently only checks exit code,
-                        TODO: parse structured output and diff against samples)
+  --full              — run backtest_full_stack.py once and diff each baseline's
+                        full_stack primary anchor (samples_full_stack_5y) against
+                        the live replay; slow but runs the full stack only once
   --strict            — exit non-zero on STALE, DRIFT, EXPIRED, BROKEN, or
                         registry mismatches. Use in CI/cron.
 
@@ -378,7 +378,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--lane", help="only audit baselines whose lane matches")
     p.add_argument("--full", action="store_true",
-                   help="also execute each repro_command (slow)")
+                   help="run backtest_full_stack once and diff each baseline's full_stack primary anchor (slow)")
     p.add_argument("--strict", action="store_true",
                    help="exit non-zero on STALE/DRIFT/EXPIRED/BROKEN/MISSING")
     p.add_argument("--json", action="store_true",
