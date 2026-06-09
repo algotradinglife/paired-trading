@@ -9,10 +9,16 @@ Gate condition (risk_off = True):
   SPY close < SPY 200-day SMA
   OR 20-day realized vol (annualized) > 25%
 
-The realized-vol threshold of 0.25 (25% annualized) is a proxy for VIX > 25;
-the two are 1:1 monotonic in practice. SPY 200dma below catches sustained
-bear markets; realized-vol catches sharp single-week panics that 200dma
-misses (e.g. Aug 2024 carry unwind).
+The realized-vol threshold of 0.25 (25% annualized) is a CALIBRATED
+substitute for VIX > 25 — not equivalent. VIX is forward implied vol;
+realized vol is backward looking, and the two diverge during high
+hedging demand (calm tape but rich IV), post-shock IV crush, or
+vol-control / dealer-positioning regimes. The 0.25 threshold matched
+the 2022 sustained-bear flagging in counterfactual replay, but was NOT
+walk-forward calibrated and may need re-tuning if SPY-VIX correlation
+shifts. SPY 200dma below catches sustained bear markets; realized-vol
+catches sharp single-week panics that 200dma misses (e.g. Aug 2024
+carry unwind).
 
 Validation on full_stack 5.5y per year:
   2021: risk_off 0.0% of days   — bull

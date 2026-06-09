@@ -4,7 +4,13 @@
   "pool": "us_equity",
   "instrument_class": "us_equity",
   "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
-  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy"],
+  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy", "dia", "spy", "xlu"],
+  "symbols_excluded_2026-06-09_addition": {
+    "added": ["dia", "spy", "xlu"],
+    "doc": "doc/repro/lane_market_evaluation_2026-06-09.md",
+    "evidence": "DIA n=13 EV-0.090R; SPY n=9 EV-0.199R; XLU n=11 EV-0.258R. Broad-market/defensive ETFs don't fit H2 reversal timing.",
+    "implementation": "src/engine/divergence/context_a_detector.py::_CONTEXT_A_EXCLUDED_US"
+  },
   "detector_params": {
     "min_gap": 10,
     "h_filter": "opposing",

@@ -66,8 +66,11 @@ US_SYMBOLS = ["SPY", "QQQ", "IWM", "DIA", "GLD", "GDX", "XLF", "XLK",
               "TLT", "NVDA", "XLB", "XLE", "XLRE", "XLU"]
 CN_METAL = ["kq_m_shfe_cu", "kq_m_shfe_au", "kq_m_shfe_ag", "kq_m_ine_sc"]
 CN_BOND = ["kq_m_cffex_tf", "kq_m_cffex_t", "kq_m_cffex_ts"]
-CN_AGRI_POS = ["kq_m_dce_m", "kq_m_dce_p",
+CN_AGRI_POS = ["kq_m_dce_m",
                "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr"]
+# kq_m_dce_p removed 2026-06-09 — palm oil 64% full_stop rate / -3.97R 5y;
+# mirrors production score_today._CN_AGRI_POS_SYMBOLS exclusion.
+# See doc/repro/agri_pos_dce_p_diagnosis_2026-06-09.md.
 US_LONG_BOND_SUPPRESS = {"tlt", "tlh", "iei", "ief", "shy"}
 
 POOL_TO_SYMBOLS = {

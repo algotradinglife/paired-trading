@@ -4,8 +4,14 @@
   "pool": "us_equity",
   "instrument_class": "us_equity",
   "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
-  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy"],
+  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy", "dia", "xlk", "qqq", "xlre", "spy"],
   "symbols_excluded_reason": "US_LONG_BOND_SUPPRESS frozenset (pa_detector.py:231) — short-circuited at score_today.py:1314 before pa_us_60min scan runs.",
+  "symbols_excluded_2026-06-09_addition": {
+    "added": ["dia", "xlk", "qqq", "xlre", "spy"],
+    "doc": "doc/repro/lane_market_evaluation_2026-06-09.md",
+    "evidence": "P0/P1c: DIA n=10 EV-0.40R win 20%; XLK n=14 EV-0.14R win 29%; QQQ n=11 EV-0.14R win 27%; XLRE n=4 EV-0.75R win 0%; SPY n=25 EV-0.04R win 32%. Broad-market and large-cap-tech 60min reversals don't trigger the expected V-shape recoil.",
+    "implementation": "src/scripts/score_today.py::_PA_US_60MIN_SUPPRESS"
+  },
   "detector_params": {
     "min_h_legs": 2,
     "min_quality": 0.3,

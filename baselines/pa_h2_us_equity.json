@@ -4,8 +4,14 @@
   "pool": "us_equity",
   "instrument_class": "us_equity",
   "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
-  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy"],
+  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy", "dia", "spy"],
   "symbols_excluded_reason": "US_LONG_BOND_SUPPRESS frozenset in pa_detector.py:231 — PA H2 fails across hike/yield-peak/cut regimes (tlt n=27 EV=-0.519R, 4/4 folds negative per backtest_pa_us_k3).",
+  "symbols_excluded_2026-06-09_addition": {
+    "added": ["dia", "spy"],
+    "doc": "doc/repro/lane_market_evaluation_2026-06-09.md",
+    "evidence": "P1c: DIA n=8 EV-0.026R; SPY n=9 EV-0.088R. Broad-market H2 reversals on daily are slow-moving and frequently max_hold-clip below TP1. Same structural reasoning as context_a US and pa_us_60min exclusions.",
+    "implementation": "src/scripts/score_today.py::_PA_US_DIF_POS_SUPPRESS — applied to the pa_us_dif_pos lane (US daily PA H2 in score_today; this baseline JSON represents that lane)"
+  },
   "detector_params": {
     "min_h_legs": 2,
     "min_quality": 0.3,

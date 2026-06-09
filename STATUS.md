@@ -1,7 +1,18 @@
 # paired-trading — project status
 
-Snapshot at 2026-06-08.  Read this first to know where the project
+Snapshot at 2026-06-09.  Read this first to know where the project
 stands; consult linked docs / commits for the details.
+
+> **Sync 2026-06-09** — full P0→P3 PnL push following the lane × market
+> evaluation.  Cumulative EV +0.131R → +0.247R (+89% in-sample).
+> K=3 OOS replay shows +23.39R total improvement (+0.060R per OOS trade
+> across n=389; OOS EV +0.284R → +0.344R).  US pool went
+> +0.082R → +0.260R (+217%).  2022 US H2-family drag (-21.4R) eliminated.
+> 4 reject decisions documented (avoiding ~-26R of incorrect changes).
+> baselines/ infrastructure (11 entries) + EXPECTED_LANES registry now
+> the single source of truth.  See `doc/repro/baselines_v2_2026-06-09.md`,
+> `lane_market_evaluation_2026-06-09.md`, `max_hold_experiment_2026-06-09.md`,
+> `cn_regime_gate_reject_2026-06-09.md`.
 
 > **Audit / sync 2026-06-08 (late session)** — added the strategic-
 > layer **DIR module** (8-source synthesiser + 60min POC), the
@@ -10,6 +21,74 @@ stands; consult linked docs / commits for the details.
 > code-as-of `d4b933d0`.  See `doc/repro/score_audit_2026-06-08.md`,
 > `dir_verdict_alignment_2026-06-08.md`, and the commit timeline
 > below for narrative.
+
+## 2026-06-09 lane × market deployment summary
+
+Cumulative production deltas (full_stack 5.5y replay, post-P0+P1c+P2+P3):
+
+```
+                       baseline         current production    Δ
+EV/trade in-sample     +0.131R          +0.247R               +89%
+sum R (5.5y)           +124.52R         +192.18R              +54%
+EV/trade K=3 OOS       +0.284R          +0.344R               +0.060R/trade
+sum R K=3 OOS          +110.42R         +133.81R              +23.39R
+US pool:               +0.082R       →  +0.260R               +217%
+2022 US H2 family:     -21.4R drag   →  +0.5R                95% eliminated
+```
+
+**OOS qualifier (K=3 MARGINAL PASS, not STRONG)**: F1 +15.02R / F3 +7.49R
+both PASS; F2 only +0.87R / n=75. Improvement concentrated in bpull and
+context_a (lanes with avg-hold previously at the 20-bar cap). max_hold=30
+is a provisional global default; per-lane defaults are cleaner. See
+`doc/repro/max_hold_experiment_2026-06-09.md` for K=3 fold table.
+
+### DEPLOYED changes
+
+| Tier | Change | Location | R impact |
+|------|--------|----------|----------|
+| P0 | `_CONTEXT_A_EXCLUDED_CN_METAL` = {sc} | `context_a_detector.py` | sc was 0% win n=10 -8.86R |
+| P0 | `_CONTEXT_A_EXCLUDED_US` = {DIA,SPY,XLU} | `context_a_detector.py` | broad-market not H2-fittable |
+| P0 | `_PA_US_60MIN_SUPPRESS` = {DIA,XLK,QQQ,XLRE} | `score_today.py:120` | per-symbol negatives |
+| P1c | +SPY to `_PA_US_60MIN_SUPPRESS` | `score_today.py:120` | structural broad-market |
+| P1c | new `_PA_US_DIF_POS_SUPPRESS` = {DIA,SPY} | `score_today.py:130` | same principle |
+| P1a | bug fix: `load_bars_quant_or_json` | `backtest_vflush.py`, `backtest_bpull.py` | killed vflush DRIFT false alarm |
+| P2 | US regime gate (SPY 200dma + 20d vol) | `engine/regime/us_regime_gate.py` | suppresses pa_us_60min + context_a US during risk_off |
+| P3 | max_hold daily 20 → 30 | `backtest_full_stack.py` | K=3 MARGINAL PASS +23.39R OOS |
+| housekeeping | `_CN_AGRI_POS_SYMBOLS` remove kq_m_dce_p | `score_today.py:124` | palm oil 64% full_stop rate, scoped for future climax reactivation |
+
+### REJECTED (with evidence)
+
+| Decision | Avoided R |
+|----------|-----------|
+| TP1 1R → 0.75R (P2/A) | -6.4R |
+| pa_us_dif_pos regime gate (P2/C) | -0.44R |
+| CN_METAL regime gate (composite/per-sym/SPY-port) | -10 to -19R |
+| **Cumulative avoided** | **~-26R** |
+
+Reject decisions ≈ deploy decisions in PnL value. See `doc/repro/p2_followups_2026-06-09.md`,
+`cn_regime_gate_reject_2026-06-09.md`.
+
+### baselines/ infrastructure (single source of truth)
+
+- 11 entries audited via `scripts/validate_baselines.py`
+- `EXPECTED_LANES.json` registry catches deleted/missing files
+- `--strict` mode for CI: STALE/DRIFT/PENDING/EXPIRED/BROKEN/MISSING → exit 1
+- Verdicts: STRONG PASS / PASS / CONDITIONAL PASS / marginal / REJECT / STALE / DRIFT / PENDING_VALIDATION / DEPLOYED
+
+Current dashboard:
+```
+[ OK ]  bpull          cn_metal_futures  STRONG PASS         0.75
+[ OK ]  context_a      cn_metal_futures  CONDITIONAL PASS    0.60
+[ OK ]  context_a      us_equity         CONDITIONAL PASS    0.60
+[STAL]  pa_h2_climax   cn_agri_pos       STALE               0.00
+[ OK ]  pa_h2          cn_bond           STRONG PASS         0.70
+[ OK ]  pa_h2          cn_futures        marginal            0.55
+[ OK ]  pa_h2          cn_metal_futures  STRONG PASS         0.75
+[ OK ]  pa_h2          us_equity         PASS                0.80
+[PEND]  pa_us_60min    us_equity         PENDING_VALIDATION  0.65
+[ OK ]  us_regime_gate us_equity         DEPLOYED               —
+[ OK ]  vflush         cn_metal_futures  STRONG PASS         0.65
+```
 
 ## What this is
 

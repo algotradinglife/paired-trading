@@ -4,7 +4,13 @@
   "pool": "cn_metal_futures",
   "instrument_class": "cn_metal_futures",
   "symbols_included": ["kq_m_shfe_cu", "kq_m_shfe_au", "kq_m_shfe_ag", "kq_m_ine_sc"],
-  "symbols_excluded": ["kq_m_shfe_rb"],
+  "symbols_excluded": ["kq_m_shfe_rb", "kq_m_ine_sc"],
+  "symbols_excluded_2026-06-09_addition": {
+    "added": ["kq_m_ine_sc"],
+    "doc": "doc/repro/lane_market_evaluation_2026-06-09.md",
+    "evidence": "kq_m_ine_sc n=10 EV-0.886R, win 0% (zero winners). Crude oil reversal pattern is OPEC/geopolitical-driven, not technical.",
+    "implementation": "src/engine/divergence/context_a_detector.py::_CONTEXT_A_EXCLUDED_CN_METAL"
+  },
   "detector_params": {
     "min_gap": 10,
     "h_filter": "opposing",
