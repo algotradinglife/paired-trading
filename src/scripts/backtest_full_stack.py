@@ -536,6 +536,9 @@ def main() -> int:
                    help="ISO date — only emit signals on/after this")
     p.add_argument("--out-csv", type=Path,
                    default=_default_review_dir() / "full_stack_backtest.csv")
+    p.add_argument("--out-json", type=Path, default=None,
+                   help="Write backtest_output_v1 per-(lane,symbol) JSON for "
+                        "validate_baselines.py --full")
     p.add_argument("--max-hold-daily", type=int, default=30,
                    help="Daily bar hold-cap for non-60min lanes (default 30; "
                         "raised from 20 per max_hold_experiment_2026-06-09.md: "
@@ -560,6 +563,23 @@ def main() -> int:
         args.out_csv.parent.mkdir(parents=True, exist_ok=True)
         df.to_csv(args.out_csv, index=False)
         print(f"\nWrote {len(df)} trades → {args.out_csv}")
+
+    if args.out_json is not None and not df.empty:
+        from scripts._baseline_output import write_baseline_output
+        ls = df.groupby(["lane", "symbol"]).agg(
+            n=("realized_r", "size"),
+            ev_r=("realized_r", "mean"),
+            win_pct=("realized_r", lambda s: (s > 0).mean() * 100),
+        ).round(3)
+        lanes: dict[str, dict] = {}
+        for (lane, symbol), r in ls.iterrows():
+            lanes.setdefault(lane, {})[symbol] = {
+                "n": int(r["n"]), "ev_r": float(r["ev_r"]),
+                "win_pct": round(float(r["win_pct"]), 1),
+            }
+        write_baseline_output(args.out_json, kind="full_stack", lanes=lanes,
+                              data_hash=None)
+        print(f"\nWrote backtest_output_v1 → {args.out_json}")
 
     agg = aggregate(df)
     print("\n=== HEADLINE ===")
