@@ -23,6 +23,18 @@ def test_simulate_short_profits_on_downmove():
     assert r is not None and r > 0  # price fell → short profits
 
 
+def test_simulate_short_tp1_at_boundary_credits_partial_exit():
+    # entry 100, ATR 1, stop_mult 1.5 → stop 101.5, tp1 98.5, tp2 97.
+    # TP1 is first touched ONLY on the last hold bar (offset==max_hold), then the
+    # close fades back to entry (mark-to-market = 0). The fixed sim must credit the
+    # banked TP1 (0.5 + 0.5*mtm = 0.5), not score it as flat (the pre-fix bug → 0.0).
+    closes = [100, 100, 100]
+    bars = _bars(closes, highs=[100.5] * 3, lows=[99.8, 99.8, 98.4])
+    atr = pd.Series([1.0] * 3)
+    r = simulate_short(bars, 0, atr, stop_mult=1.5, max_hold=2)
+    assert r == 0.5
+
+
 def test_simulate_short_stopped_on_upmove():
     closes = [100, 100, 100, 100, 100]
     bars = _bars(closes, highs=[102.0] * 5, lows=[99.8] * 5)  # high 102 ≥ stop 101.5

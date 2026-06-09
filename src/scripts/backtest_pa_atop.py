@@ -83,7 +83,14 @@ def simulate_short(bars: pd.DataFrame, entry_idx: int, atr_series: pd.Series,
             if offset == max_hold:
                 return 0.5 + 0.5 * float(np.clip((entry - cl) / risk, -3, 3))
     idx_fin = min(entry_idx + max_hold, len(bars) - 1)
-    return float(np.clip((entry - float(bars["close"].iloc[idx_fin])) / risk, -3, 3))
+    mtm = float(np.clip((entry - float(bars["close"].iloc[idx_fin])) / risk, -3, 3))
+    # If TP1 was banked (incl. on the final/boundary bar), credit the partial exit
+    # rather than scoring raw mark-to-market — otherwise a TP1-then-fade trade at the
+    # holding boundary is mis-scored as a full loss. (The shared simulate_trade/
+    # simulate_short pattern in the other harnesses has the same latent boundary bug.)
+    if hit_tp1:
+        return 0.5 + 0.5 * mtm
+    return mtm
 
 
 def htf_relation_top(ts: pd.Timestamp, h_ts: np.ndarray, h_dif: np.ndarray) -> str | None:
