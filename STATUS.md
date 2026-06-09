@@ -431,13 +431,17 @@ In rough priority order (descending), as of `d4b933d0`:
 ## Memory & instructions
 
 Repo conventions / strategic decisions are mirrored in Claude's project
-memory at `~/.claude/projects/-Users-huhan-code-trading-macd-momentum/memory/`:
+memory at `~/.claude/projects/-Users-huhan-code-trading-paired-trading/memory/`
+(migrated 2026-06-09 from the pre-rename `...-macd-momentum/memory/` path):
 
 - `project_signal_source.md` — DIF retirement, PA is the active lane
 - `project_vcs_jj.md` — jj (Jujutsu) is the VCS, not raw git
+- `project_baselines_infra.md` — baselines/ JSONs are the single source of truth
+- `project_broad_market_suppress.md` — DIA/SPY/XLU H2 suppression is structural
 - `feedback_options_style.md` — recommend + parallelize when listing options
 - `feedback_signal_must_have_macro.md` — every signal report must lead
   with multi-TF + trend structure + context bull/bear
+- `feedback_regime_gate_not_portable.md` — bottom-reversal lanes can't take a trend filter
 - `MEMORY.md` — index
 
 `CLAUDE.md` at the repo root carries the original wiki-generation task
