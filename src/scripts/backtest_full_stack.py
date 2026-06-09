@@ -49,6 +49,19 @@ from engine.divergence.pa_structure import PAStructureDetector
 from engine.divergence.vflush_detector import VFlushDetector
 from engine.features.macd import macd as compute_macd
 from engine.features.swing_context import compute_swing_context
+from scripts._baseline_output import compute_data_hash, write_baseline_output
+
+
+def _data_hash_for_bars(bars_map: dict[str, pd.DataFrame]) -> str | None:
+    """Hash every bar series that fed the replay (daily + 60min per symbol).
+
+    None when no bars loaded, so validate_baselines.py --full distinguishes a
+    data outage from a concrete snapshot. Keys are "{symbol}@{level}" so a
+    symbol's daily and 60min series never collide on one key.
+    """
+    if not bars_map:
+        return None
+    return compute_data_hash(list(bars_map.items()))
 
 
 def _default_review_dir() -> Path:
@@ -420,16 +433,22 @@ def _load_bars(sym: str, level: str) -> pd.DataFrame | None:
 
 
 def replay_pool(pool: str, since_ts: pd.Timestamp,
-                max_hold_daily: int = 20, max_hold_60min: int = 140) -> list[dict]:
+                max_hold_daily: int = 20, max_hold_60min: int = 140,
+                ) -> tuple[list[dict], dict[str, pd.DataFrame]]:
+    """Returns (trade rows, bars that fed the replay keyed "{symbol}@{level}")."""
     instrument_class = POOL_TO_CLASS[pool]
     rows: list[dict] = []
+    bars_used: dict[str, pd.DataFrame] = {}
     for sym in POOL_TO_SYMBOLS[pool]:
         daily = _load_bars(sym, "D")
         if daily is None or len(daily) < 100:
             print(f"  {sym}: no daily")
             continue
+        bars_used[f"{sym}@D"] = daily
         h_bars = _load_bars(sym, "60min")
         bars_60 = h_bars  # alias for pa_us_60min
+        if h_bars is not None and len(h_bars):
+            bars_used[f"{sym}@60min"] = h_bars
         macd_df = compute_macd(daily["close"], hist_scale=1.0)
 
         # Collect raw signals from all relevant lanes
@@ -486,7 +505,7 @@ def replay_pool(pool: str, since_ts: pd.Timestamp,
             })
         print(f"  {sym}: {len(rows)} cumulative rows after this symbol")
 
-    return rows
+    return rows, bars_used
 
 
 def aggregate(df: pd.DataFrame) -> dict:
@@ -553,12 +572,14 @@ def main() -> int:
     since_ts = pd.Timestamp(args.since, tz="UTC")
     pools = list(POOL_TO_SYMBOLS) if args.pool == "ALL" else [args.pool]
     all_rows: list[dict] = []
+    bars_used: dict[str, pd.DataFrame] = {}
     for pool in pools:
         print(f"\n=== {pool} ({POOL_TO_CLASS[pool]}) ===")
-        rows = replay_pool(pool, since_ts,
-                           max_hold_daily=args.max_hold_daily,
-                           max_hold_60min=args.max_hold_60min)
+        rows, pool_bars = replay_pool(pool, since_ts,
+                                      max_hold_daily=args.max_hold_daily,
+                                      max_hold_60min=args.max_hold_60min)
         all_rows.extend(rows)
+        bars_used.update(pool_bars)
         print(f"{pool}: {len(rows)} trades")
 
     df = pd.DataFrame(all_rows)
@@ -572,7 +593,6 @@ def main() -> int:
         # zero-trade run (severe regression / data outage → lanes={}) from a
         # crashed/unparseable run. Skipping the write here would let a collapse
         # to zero trades read as "no comparable data" and silently pass --full.
-        from scripts._baseline_output import write_baseline_output
         lanes: dict[str, dict] = {}
         if not df.empty:
             ls = df.groupby(["lane", "symbol"]).agg(
@@ -586,7 +606,7 @@ def main() -> int:
                     "win_pct": round(float(r["win_pct"]), 1),
                 }
         write_baseline_output(args.out_json, kind="full_stack", lanes=lanes,
-                              data_hash=None)
+                              data_hash=_data_hash_for_bars(bars_used))
         print(f"\nWrote backtest_output_v1 → {args.out_json}")
 
     agg = aggregate(df)
