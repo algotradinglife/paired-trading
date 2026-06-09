@@ -41,3 +41,32 @@ def test_fold_samples_maps_periods_and_computes():
     assert out["f1"] == {"n": 1, "ev_r": 0.5, "win_pct": 100.0}
     assert out["f2"] == {"n": 2, "ev_r": 0.5, "win_pct": 50.0}
     assert out["f3"] == {"n": None, "ev_r": None, "win_pct": None}
+
+
+# Task 3 -----------------------------------------------------------------------
+import json
+from scripts._baseline_output import write_baseline_output, SCHEMA
+
+
+def test_write_folds_output(tmp_path):
+    p = tmp_path / "out.json"
+    write_baseline_output(p, kind="folds", lane="bpull", pool="cn_metal_futures",
+                          samples={"is": {"n": 1, "ev_r": 0.1, "win_pct": 100.0}},
+                          data_hash="sha256:abc", params_echo={"stop_mult": 1.5})
+    doc = json.loads(p.read_text())
+    assert doc["schema"] == SCHEMA and doc["kind"] == "folds"
+    assert doc["lane"] == "bpull" and doc["samples"]["is"]["n"] == 1
+
+
+def test_write_full_stack_output(tmp_path):
+    p = tmp_path / "fs.json"
+    lanes = {"bpull": {"kq_m_shfe_cu": {"n": 17, "ev_r": 0.13, "win_pct": 64.0}}}
+    write_baseline_output(p, kind="full_stack", lanes=lanes, data_hash="sha256:def")
+    doc = json.loads(p.read_text())
+    assert doc["kind"] == "full_stack" and doc["lanes"]["bpull"]["kq_m_shfe_cu"]["n"] == 17
+
+
+def test_write_rejects_unknown_kind(tmp_path):
+    import pytest
+    with pytest.raises(ValueError):
+        write_baseline_output(tmp_path / "x.json", kind="bogus")
