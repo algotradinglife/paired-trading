@@ -38,8 +38,8 @@
   },
   "samples_full_stack_5y": {
     "framework": "PA structural stop (live production form)",
-    "n": 289, "ev_r": 0.105, "win_pct": 55.4,
-    "note": "From doc/repro/full_stack_backtest_2026-06-08.md — largest-volume lane, stable. Direction-consistent with K=3 claim."
+    "n": 178, "ev_r": 0.162, "win_pct": 57.9,
+    "note": "Re-baselined 2026-06-09 to current full_stack (post max_hold 20->30 + US broad-market suppression deploy). Prior 2026-06-08: n=289 ev_r=0.105 win=55.4. n dropped and EV/win rose as suppression removed losing broad-market trades — expected improvement, not regression."
   },
   "production_binding": [
     "src/engine/divergence/context_a_detector.py:7",
@@ -50,10 +50,10 @@
   "policy_weight_assigned": 0.60,
   "policy_weight_recommended": 0.60,
   "valid_until": "2026-10-06",
-  "commit_hash": "f0ff0bc5",
-  "data_snapshot": "2026-06-08",
+  "commit_hash": "3796cfa2",
+  "data_snapshot": "2026-06-09",
   "last_verified": "2026-06-09",
-  "last_verified_note": "imported from docstring; re-verification pending",
+  "last_verified_note": "full_stack anchor re-baselined 2026-06-09 via validate_baselines.py --full at commit 3796cfa2",
   "repro_command": "cd src && .venv/bin/python scripts/backtest_context_a_ev.py --pool US --h-opp-only",
   "related_docs": [
     "src/engine/divergence/context_a_detector.py:7,132",

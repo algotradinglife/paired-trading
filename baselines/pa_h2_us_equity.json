@@ -61,8 +61,8 @@
   },
   "samples_full_stack_5y": {
     "framework": "PA structural stop (live production form)",
-    "n": 146, "ev_r": 0.086, "win_pct": 36.3,
-    "note": "From doc/repro/full_stack_backtest_2026-06-08.md — pa_us_60min row. Low win% by design (60min H2 catches 3-5d reversals; TP1 hit rate low, big winners +1.5R pull the mean positive). Direction-consistent with the K=3 corrected baseline."
+    "n": 66, "ev_r": 0.137, "win_pct": 59.1,
+    "note": "Re-baselined 2026-06-09 to current full_stack pa_us_dif_pos lane (this baseline's actual full_stack_lane). Prior value (n=146 ev_r=0.086 win=36.3) was mistakenly the pa_us_60min row. Current numbers reflect post max_hold 20->30 + US broad-market suppression deploy — EV/win up as suppression removed losing broad-market trades."
   },
   "production_binding": [
     "src/engine/divergence/pa_detector.py:243-258",
@@ -80,10 +80,10 @@
   },
   "policy_weight_recommended": 0.80,
   "valid_until": "2026-10-20",
-  "commit_hash": "f0ff0bc5",
-  "data_snapshot": "2026-06-08",
+  "commit_hash": "3796cfa2",
+  "data_snapshot": "2026-06-09",
   "last_verified": "2026-06-09",
-  "last_verified_note": "imported from docstring; re-verification pending",
+  "last_verified_note": "full_stack anchor re-baselined 2026-06-09 via validate_baselines.py --full at commit 3796cfa2 (also corrected lane mislabel)",
   "repro_command": "cd src && .venv/bin/python scripts/backtest_pa_swing.py --pool US --h-opp-only",
   "repro_command_alt": "cd src && .venv/bin/python scripts/backtest_pa_us_k3.py --pool US",
   "related_docs": [

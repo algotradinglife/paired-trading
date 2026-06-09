@@ -22,6 +22,11 @@ def compute_data_hash(bars: list[tuple[str, pd.DataFrame]]) -> str:
 
     Faithful to what fed the EV: catches middle-row edits, OHLC revisions,
     truncation/insertion (first+last rows included via full serialization).
+
+    NOT yet wired into production: backtest_full_stack.py currently emits
+    data_hash=None, so the validator's data-vs-code drift attribution is inert.
+    Wire this (accumulate the loaded bars in the full_stack replay and pass them
+    here) when drift diagnosis needs to distinguish data refresh from code change.
     """
     h = hashlib.sha256()
     for symbol, df in sorted(bars, key=lambda t: t[0]):

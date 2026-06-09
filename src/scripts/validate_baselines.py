@@ -433,8 +433,12 @@ def main() -> int:
                 emitted_data_hash=_full_stack_cache["hash"])
             row["repro_status"] = rstatus
             row["repro_msg"] = rdetail
-            if rstatus == "DRIFT_DETECTED":
-                row["status"] = "DRIFT_DETECTED"   # propagate so --strict catches it
+            # Propagate runtime drift to the row status (so --strict catches it),
+            # but don't mask a known-broken metadata verdict (STALE/EXPIRED/etc.) —
+            # those are the stronger, already-failing signal.
+            if rstatus == "DRIFT_DETECTED" and row["status"] not in {
+                    "BROKEN", "STALE", "EXPIRED", "MISSING"}:
+                row["status"] = "DRIFT_DETECTED"
                 row["reason"] = f"runtime drift: {rdetail[:100]}"
         results.append(row)
 
