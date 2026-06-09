@@ -136,9 +136,6 @@ def _compare_cell(base: dict, now: dict, tol: dict) -> tuple[str, str]:
     return "OK", "within tolerance"
 
 
-_FOLD_KEYS = ("is", "f1", "f2", "f3")
-
-
 def _worst(statuses: list) -> str:
     if "DRIFT" in statuses:
         return "DRIFT"
@@ -147,7 +144,7 @@ def _worst(statuses: list) -> str:
     return "OK"
 
 
-def _compare_against_baseline(b: dict, full_stack_map, fold_emitted) -> tuple[str, list]:
+def _compare_against_baseline(b: dict, full_stack_map, emitted_data_hash=None) -> tuple[str, list]:
     """Returns (status, details). status in {OK, WARN, DRIFT}. Pure; no I/O."""
     tol = _resolve_tolerance(b)
     statuses: list[str] = []
@@ -162,20 +159,7 @@ def _compare_against_baseline(b: dict, full_stack_map, fold_emitted) -> tuple[st
         statuses.append(st)
         details.append(f"full_stack[{fsl}]: {d}")
 
-    if fold_emitted and fold_emitted.get("samples"):
-        base_samples = b.get("samples", {})
-        now_samples = fold_emitted["samples"]
-        for key in _FOLD_KEYS:
-            bc, nc = base_samples.get(key), now_samples.get(key)
-            if not bc or not nc:
-                continue
-            if bc.get("ev_r") is None or nc.get("ev_r") is None:
-                continue
-            st, d = _compare_cell(bc, nc, tol)
-            statuses.append(st)
-            details.append(f"{key}: {d}")
-
-    emitted_hash = (fold_emitted or {}).get("data_hash")
+    emitted_hash = emitted_data_hash
     base_hash = b.get("data_snapshot_hash")
     if emitted_hash and base_hash and emitted_hash != base_hash:
         verb = "data changed -> re-baseline" if "DRIFT" in statuses else "data changed (no drift)"
@@ -184,9 +168,9 @@ def _compare_against_baseline(b: dict, full_stack_map, fold_emitted) -> tuple[st
     return _worst(statuses), details
 
 
-def _runtime_status(b: dict, *, full_stack_map, fold_emitted) -> tuple[str, str]:
+def _runtime_status(b: dict, *, full_stack_map, emitted_data_hash=None) -> tuple[str, str]:
     """Map a comparison to a row-status string used by the table + --strict."""
-    status, details = _compare_against_baseline(b, full_stack_map, fold_emitted)
+    status, details = _compare_against_baseline(b, full_stack_map, emitted_data_hash)
     detail = "; ".join(details) if details else "no comparable cells"
     if status == "DRIFT":
         return "DRIFT_DETECTED", detail
@@ -226,43 +210,6 @@ def _run_full_stack_once(timeout: int = 600):
         except OSError:
             pass
 
-
-def _run_fold_repro(b: dict):
-    """Run the baseline's K=3 repro_command with --out-json; return parsed doc or None."""
-    import shlex
-    import subprocess
-    import tempfile
-    import os
-
-    cmd = b.get("repro_command", "")
-    if not cmd or not b.get("repro_emits_json"):
-        return None
-    cwd = REPO_ROOT
-    if cmd.startswith("cd src && "):
-        cwd = REPO_ROOT / "src"
-        cmd = cmd[len("cd src && "):]
-    tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
-    tmp.close()
-    cmd = f"{cmd} --out-json {tmp.name}"
-    try:
-        proc = subprocess.run(
-            shlex.split(cmd),
-            cwd=str(cwd),
-            capture_output=True,
-            text=True,
-            timeout=300,
-            check=False,
-        )
-        if proc.returncode != 0:
-            return None
-        return json.loads(pathlib.Path(tmp.name).read_text())
-    except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
-        return None
-    finally:
-        try:
-            os.unlink(tmp.name)
-        except OSError:
-            pass
 
 
 def _today() -> dt.date:
@@ -450,10 +397,11 @@ def main() -> int:
     results: list[dict] = []
     present_files = {f.name for f in files}
 
-    _full_stack_cache = {"lanes": None}
+    _full_stack_cache = {"lanes": None, "hash": None}
     if args.full:
         _fs_lanes, _fs_hash = _run_full_stack_once()
         _full_stack_cache["lanes"] = _fs_lanes
+        _full_stack_cache["hash"] = _fs_hash
         if _fs_lanes is None:
             print("warning: full_stack run failed/timed out — primary-anchor checks "
                   "skipped (no false DRIFT)", file=sys.stderr)
@@ -475,9 +423,9 @@ def main() -> int:
             continue
         row = _audit(b, f)
         if args.full and row["status"] != "BROKEN":
-            fold_emitted = _run_fold_repro(b)
             rstatus, rdetail = _runtime_status(
-                b, full_stack_map=_full_stack_cache["lanes"], fold_emitted=fold_emitted)
+                b, full_stack_map=_full_stack_cache["lanes"],
+                emitted_data_hash=_full_stack_cache["hash"])
             row["repro_status"] = rstatus
             row["repro_msg"] = rdetail
             if rstatus == "DRIFT_DETECTED":

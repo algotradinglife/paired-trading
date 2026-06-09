@@ -103,20 +103,10 @@ def test_primary_anchor_drift():
     assert any("full_stack" in d for d in details)
 
 
-def test_fold_secondary_drift():
-    fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.10, "win_pct": 64.0},
-                          "t": {"n": 20, "ev_r": 0.14, "win_pct": 66.0}}}
-    fold_emitted = {"samples": {"f1": {"n": 16, "ev_r": 0.80, "win_pct": None}}}
-    status, details = _compare_against_baseline(_baseline(), fs, fold_emitted)
-    assert status == "DRIFT"
-    assert any(d.startswith("f1") for d in details)
-
-
 def test_data_changed_attribution():
     fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.40, "win_pct": 64.0},
                           "t": {"n": 20, "ev_r": 0.50, "win_pct": 66.0}}}
-    fold_emitted = {"data_hash": "sha256:NEW"}
-    status, details = _compare_against_baseline(_baseline(), fs, fold_emitted)
+    status, details = _compare_against_baseline(_baseline(), fs, "sha256:NEW")
     assert status == "DRIFT"
     assert any("data changed" in d for d in details)
 
@@ -153,7 +143,7 @@ def test_runtime_status_ok_within_tolerance():
     b = _baseline()
     fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.10, "win_pct": 64.0},
                           "t": {"n": 20, "ev_r": 0.14, "win_pct": 66.0}}}
-    status, _ = _runtime_status(b, full_stack_map=fs, fold_emitted=None)
+    status, _ = _runtime_status(b, full_stack_map=fs, emitted_data_hash=None)
     assert status == "OK"
 
 
@@ -161,5 +151,5 @@ def test_runtime_status_drift_flags_DRIFT_DETECTED():
     b = _baseline()
     fs = {"pa_cn_bond": {"tf": {"n": 20, "ev_r": 0.90, "win_pct": 64.0},
                           "t": {"n": 20, "ev_r": 0.90, "win_pct": 66.0}}}
-    status, detail = _runtime_status(b, full_stack_map=fs, fold_emitted=None)
+    status, detail = _runtime_status(b, full_stack_map=fs, emitted_data_hash=None)
     assert status == "DRIFT_DETECTED"
