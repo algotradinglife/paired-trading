@@ -110,12 +110,63 @@ vflush 完全不咬——avg 只 3.5d，因为 V-shape reversal 信号 TP1 通�
 4. **更新 baseline JSON 的 samples_full_stack_5y** —— 反映新的实测数字
 5. **新增 caveat：单年波动加大**——2022 pa_h2 单年恶化是真实成本
 
+## K=3 Walk-Forward 验证（2026-06-09 后续）
+
+In-sample 优化嫌疑澄清。Cutoffs 与 bpull/vflush re-validation 一致：
+
+```
+IS  ≤ 2023-12-31  (3yr 训练)
+F1  = 2024 全年   (1yr OOS)
+F2  = 2025 H1     (6mo OOS)
+F3  > 2025-06-30  (1yr OOS，最新)
+```
+
+### Aggregate per-fold
+
+| Fold | n | EV20 | sum20 | EV30 | sum30 | ΔEV | Δsum | Verdict |
+|------|---|------|-------|------|-------|-----|------|---------|
+| IS | 389 | +0.111R | +43.04 | +0.150R | +58.37 | +0.039 | +15.33 | (train) |
+| **F1** | 158 | +0.292R | +46.16 | +0.387R | +61.18 | +0.095 | **+15.02** | **PASS** ✓ |
+| **F2** | 75 | +0.354R | +26.56 | +0.366R | +27.43 | +0.012 | +0.87 | neutral |
+| **F3** | 156 | +0.242R | +37.70 | +0.290R | +45.19 | +0.048 | **+7.49** | **PASS** ✓ |
+
+**OOS 累计 (F1+F2+F3)**: baseline +110.42R → experiment +133.81R = **+23.39R 改进**
+
+### Per-lane × per-fold (OOS only)
+
+| Lane | F1 ΔR | F2 ΔR | F3 ΔR | OOS Δ | K=3 verdict |
+|------|-------|-------|-------|-------|-------------|
+| bpull | +6.92(n35) | +0.77(n19) | +3.27(n26) | **+10.96R** | **PASS** ⭐ |
+| context_a | +8.61(n60) | -0.92(n20) | +2.54(n55) | **+10.23R** | **PASS** ⭐ |
+| pa_h2 | +0.77(n13) | +0.98(n11) | +0.27(n17) | +2.02R | PASS |
+| pa_cn_bond | +0.45(n7) | +0.14(n4) | +1.34(n10) | +1.94R | PASS |
+| pa_us_dif_pos | -0.46(n10) | +0.78(n10) | +0.41(n15) | +0.73R | marginal |
+| pa_us_60min | 0 | 0 | 0 | 0 | neutral (n/a) |
+| vflush | -0.27(n6) | 0 | 0 | -0.27R | neutral |
+| **pa_h2_climax** | **-0.99(n11)** | **-0.87(n5)** | **-0.35(n10)** | **-2.21R** | **FAIL** ⚠ |
+
+### Verdict 总结
+
+**K=3 MARGINAL PASS（聚合层面）**：
+- ✓ F1 / F3 PASS（+15R / +7.5R OOS）
+- ⚠ F2 仅 +0.87R（6 个月小样本 75 trade，刚过正）
+- 没有 OOS fold FAIL（EV 恶化 > 0.05R）
+
+**Per-lane K=3 结论**：
+- ⭐ **bpull / context_a 强 PASS**：3 折 OOS 几乎全正、累计 +21R，结构性受益确认
+- ✓ **pa_h2 / pa_cn_bond PASS**：3 折全正
+- ➖ **pa_us_dif_pos marginal**：F1 负 -0.46R 拖累，2026-06-09 实验显示的 +1.67R 5.5y 总账，OOS 只占 +0.73R——说明大部分提升来自 IS。**该 lane 单独 max_hold=30 决策需要审慎**
+- ⚠ **pa_h2_climax FAIL**（OOS 3 折全负）——但该 lane 已 STALE 权重=0，FAIL 无实际影响
+- 0 影响：pa_us_60min（使用 max_hold_60min=140 未改动），vflush（avg hold 3.5d 不咬 cap）
+
+**决策**：保留 max_hold=30 默认。OOS +23.39R 是真改善，F2 弱但未失败。pa_us_dif_pos 边缘和 pa_h2_climax FAIL 都不撤销 deployment——前者收益小（+0.73R OOS）、后者是 STALE lane。
+
 ## 限制 / Caveats
 
 - **TP1/TP2 simulation 假设固定 1R / 2R 距离**——没考虑 ATR 演变
-- **max_hold=30 没做 walk-forward**——这是 in-sample 优化；理论上需要 K=3 验证才 production-grade
+- **K=3 MARGINAL PASS**（不是 STRONG PASS）：F2 仅 +0.87R/n=75 接近 neutral，应监控
 - **2022 pa_h2 -1.77R 恶化**是真实代价，不是噪声
-- **pa_us_dif_pos 改善源自 2022 单年大增**——n=5 sample，需要 forward 验证
+- **pa_us_dif_pos OOS +0.73R**（vs 5.5y 总 +1.67R）暗示一半改善来自 IS——单 lane 决策要小心
 - **vflush 例外**说明这个改动不是普适——某些 fast-signal lane 不受益
 
 ## 复现
