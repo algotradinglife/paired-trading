@@ -304,23 +304,34 @@ source files (`engine/divergence/{hicd,dif_slope,dea_div}{,_bull}.py`).
 The classical 3 emit from `engine/divergence/detector.py` which does
 not carry a banner — production behaviour is gated by score_today.
 
-## PA TOP — two-strike stall (Path B pending)
+## PA TOP — three mechanisms tried, all REJECT
 
-PA TOP detection has failed to find ANY promotable cell in two
-walk-forward framings (commits `1e6c65e`, `b2a3519`):
+PA TOP detection has failed to find ANY promotable cell across **three**
+mechanisms:
 
-| Framing                              | Result                                   |
-|--------------------------------------|------------------------------------------|
+| Framing / mechanism | Result |
+|---------------------|--------|
 | C4 counter-trend (PA H2 mirror, 1.5×ATR, 40 bar) | 0 cells promote; cn_bond worst |
-| Step 2 trend-follow (2.5×ATR, 80 bar, BEAR phase) | 0 cells promote; CN_METAL gets worse  |
+| Step 2 trend-follow (2.5×ATR, 80 bar, BEAR phase) | 0 cells promote; CN_METAL gets worse |
+| **Path B — A_top sell-the-rally (2026-06-10)** | **REJECT — no promotable cell** (see `doc/repro/pa_atop_wf_2026-06-10.md`) |
 
-The user's strategic premise "puts must be in MVP" stands.  The
-mechanism — H2-mirror tops — has been disproven in both natural
-framings.  Path B (replace TOP signal source — exhaustion-anchored,
-divergence-driven, or other) is the open decision.  Bear-side context
-classifier (`classify_context_top` with A_top / B1_top) is implemented
-in `pa_context_classifier.py` (commit `c834bc7`) and ready to plug in
-when a new TOP detector lands.
+**Path B reframe (`classify_context_top == "A_top"`, sell rallies in a confirmed
+downtrend, the context_A mirror)** was the chosen replacement for the disproven
+H2-mirror. Harness `src/scripts/backtest_pa_atop.py` (K=3, US_EQUITY + CN_METAL).
+Outcome: the **BULL-phase sanity gate held** (US A_top BULL = −0.185R — selling
+rallies in an uptrend is correctly the death case, so the reframe LOGIC is
+sound), but A_top fires overwhelmingly in **TR_FORMING** (US 621/651, CN 92/94),
+not in a PAStructure-confirmed **BEAR** phase (US n=15, CN n=2). TR_FORMING
+rallies have no edge (negative across folds, both pools); BEAR is too thin to
+validate. The dominant cell's *aggregate* EV is negative, so no cutoff reframe
+rescues it.
+
+**"Puts must be in MVP" — open options** (the PA-top/put edge is now disproven
+two mechanisms deep): (1) **B1_top** — the deferred first-pullback-after-break
+sibling (lowest-cost next probe); (2) accept no PA-based put lane and express
+downside via the options layer / portfolio hedge. Decision with user. The
+bear-side context classifier (`classify_context_top`, A_top/B1_top) remains
+available for DIR voting.
 
 ## Data layout
 
@@ -447,10 +458,11 @@ In rough priority order (descending), as of `d4b933d0`:
 1. **POC alignment data accrual** — `pa_us_60min` is the only lane on
    the 10-source path.  Wait for ~50+ live samples before tuning the
    proportional 0.50 threshold or rolling the path out to daily lanes.
-2. **PA TOP path B decision** — H2-mirror has failed twice; replace
-   with exhaustion-anchored / divergence-driven / failed-bull TOP
-   detector.  User commitment "puts must be in MVP" stands; mechanism
-   is the open call.
+2. **PA TOP — put-lane decision** — three mechanisms now REJECT (H2-mirror
+   ×2 + A_top sell-the-rally, see "PA TOP" section above). Remaining options
+   for "puts must be in MVP": probe **B1_top** (first pullback after break) or
+   accept no PA-based put lane (express downside via options/hedge). Decision
+   with user.
 3. **DIR audit followups (3 of 5 still open)** — `doc/repro/
    dir_verdict_alignment_2026-06-08.md`: (a) daily_structure was
    structurally biased neutral pre-F1 — F1 partially addresses;
