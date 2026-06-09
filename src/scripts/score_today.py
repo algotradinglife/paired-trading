@@ -118,11 +118,16 @@ POOL_INSTRUMENT_CLASS: dict[str, str] = {
 
 # PA H2 climax — STALE 2026-06-08: original K=3 STRONG PASS NOT REPRODUCIBLE.
 # Full-stack 5.5y: EV -0.040R / n=64 / win 47%. 2025 alone -0.904R EV / n=9.
-# kq_m_dce_p alone -0.361R / n=11. Lane suspended (policy_weight=0 below).
-# See doc/repro/pa_h2_climax_anomaly_2026-06-08.md
+# Lane suspended (policy_weight=0 below).
+#
+# kq_m_dce_p (palm oil) EXCLUDED 2026-06-09 — n=11, EV-0.361R, full_stop rate
+# 64% (worst in pool). Root cause: pivot-low stop too tight for palm oil
+# intraday vol; 3 of 7 losses were 1-2 bar noise stop-outs. See
+# doc/repro/agri_pos_dce_p_diagnosis_2026-06-09.md.
+#
 # BASELINE_REF: baselines/pa_h2_climax_cn_agri_pos.json
 _CN_AGRI_POS_SYMBOLS: frozenset[str] = frozenset({
-    "kq_m_dce_m", "kq_m_dce_p",
+    "kq_m_dce_m",
     "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr",
 })
 

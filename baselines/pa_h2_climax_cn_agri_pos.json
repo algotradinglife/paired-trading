@@ -3,8 +3,32 @@
   "lane": "pa_h2_climax",
   "pool": "cn_agri_pos",
   "instrument_class": "cn_futures",
-  "symbols_included": ["kq_m_dce_m", "kq_m_dce_p", "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr"],
-  "symbols_excluded": ["kq_m_dce_y", "kq_m_dce_i", "kq_m_dce_j"],
+  "symbols_included": ["kq_m_dce_m", "kq_m_czce_ta", "kq_m_czce_ma", "kq_m_czce_sr"],
+  "symbols_excluded": ["kq_m_dce_y", "kq_m_dce_i", "kq_m_dce_j", "kq_m_dce_p"],
+  "dce_p_excluded_rationale": {
+    "decision_date": "2026-06-09",
+    "evidence_doc": "doc/repro/agri_pos_dce_p_diagnosis_2026-06-09.md",
+    "summary": "dce_p (palm oil) full_stack 5.5y: n=11, EV-0.361R, sum -3.97R, full_stop rate 64% (worst of 5 pool symbols).",
+    "root_causes": [
+      "Structural pivot-low stop too tight for palm oil intraday volatility — 3 of 7 losses had stop_pct < 5%, killed in 1-2 bars (noise stop-out, not signal failure)",
+      "2025 alone -3.00R / 3 trades / 3 full_stops — drives 75% of total drag",
+      "Winners are small (avg +0.7R) while losers are all -1R full_stops; no asymmetric R/R buffer"
+    ],
+    "comparison_in_pool": {
+      "kq_m_czce_sr_full_stop_pct": 18,
+      "kq_m_czce_ta_full_stop_pct": 31,
+      "kq_m_czce_ma_full_stop_pct": 47,
+      "kq_m_dce_m_full_stop_pct": 50,
+      "kq_m_dce_p_full_stop_pct": 64,
+      "note": "dce_p stops out almost twice as often as similar agri commodities; pivot stop method not robust on this underlying."
+    },
+    "post_exclusion_estimate": {
+      "n": 53,
+      "sum_r": 1.39,
+      "ev_r": 0.026,
+      "note": "Removes 11 trades; lane goes from -0.040R (STALE) to +0.026R EV. Still not strong enough to undo STALE verdict on its own, but stops being a net negative."
+    }
+  },
   "detector_params": {
     "min_h_legs": 2,
     "min_quality": 0.3,
