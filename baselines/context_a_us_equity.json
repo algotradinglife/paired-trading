@@ -44,7 +44,7 @@
   "verdict_reason": "3/3 OOS folds positive and improving (F1+0.106 → F2+0.179 → F3+0.574). IS negative due to pre-2022 incomplete 60m coverage. Full-stack 5.5y replay confirms direction (+0.105R EV / win 55%, n=289). policy_weight=0.60 for h=opposing only.",
   "policy_weight_assigned": 0.60,
   "policy_weight_recommended": 0.60,
-  "valid_until": "2026-09-09",
+  "valid_until": "2026-10-06",
   "commit_hash": "f0ff0bc5",
   "data_snapshot": "2026-06-08",
   "last_verified": "2026-06-09",

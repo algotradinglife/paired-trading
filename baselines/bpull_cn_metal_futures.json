@@ -45,7 +45,7 @@
   "verdict": "STRONG PASS",
   "verdict_reason": "K=3 all OOS folds positive (F1+0.148, F2+0.706, F3+0.361). Full-stack 5.5y replay direction-consistent (+0.179R EV / win 58%). Reproduced 2026-06-08 with pinned cutoffs; rb exclusion is critical (rb stand-alone -0.207R/n=51 would flip F1 to -0.332R if included).",
   "policy_weight_assigned": 0.75,
-  "valid_until": "2026-09-08",
+  "valid_until": "2026-10-27",
   "commit_hash": "2fab5c1f",
   "data_snapshot": "2026-06-08",
   "last_verified": "2026-06-09",

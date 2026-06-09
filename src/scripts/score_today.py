@@ -391,20 +391,41 @@ _BUCKET_TESTS = {
 # P2 regime gate (2026-06-09 lane × market eval):
 # SPY-based risk_off detector for pa_us_60min + context_a US suppression.
 # Lazy-loaded; cache lives for the lifetime of one score_today invocation.
-_US_REGIME_CACHE: dict = {"signal": None, "loaded": False}
+# 2026-06-09 (post-codex #2): availability also exposed via
+# get_regime_gate_status() so downstream consumers can stamp scorecard
+# records with regime_gate_available=False when the gate fail-opens.
+_US_REGIME_CACHE: dict = {"signal": None, "loaded": False, "unavailable_reason": None}
 
 
 def _get_us_regime_signal(args) -> pd.DataFrame | None:
     """Lazy-load SPY daily and compute regime signal. Returns None if SPY
-    bars are unavailable (gate becomes a no-op — no suppression)."""
+    bars are unavailable (gate becomes a no-op — no suppression).
+
+    Logs to stderr ONCE per invocation when unavailable, so a missing SPY
+    snapshot doesn't silently disable the gate (codex review 2026-06-09 #2)."""
     if _US_REGIME_CACHE["loaded"]:
         return _US_REGIME_CACHE["signal"]
     _US_REGIME_CACHE["loaded"] = True
     try:
         spy_bars = _load_bars_daily("spy", args)
-    except Exception:
+    except Exception as exc:
         spy_bars = None
-    if spy_bars is None or len(spy_bars) < 200:
+        _US_REGIME_CACHE["unavailable_reason"] = f"SPY load raised {type(exc).__name__}: {exc}"
+    if spy_bars is None:
+        if _US_REGIME_CACHE["unavailable_reason"] is None:
+            _US_REGIME_CACHE["unavailable_reason"] = "SPY daily bars not found"
+    elif len(spy_bars) < 200:
+        _US_REGIME_CACHE["unavailable_reason"] = (
+            f"SPY daily bars insufficient ({len(spy_bars)} bars, need ≥200 for SMA200)"
+        )
+        spy_bars = None
+    if spy_bars is None:
+        print(
+            f"[regime_gate] FAIL-OPEN: {_US_REGIME_CACHE['unavailable_reason']}; "
+            f"US H2-family suppression DISABLED for this run. "
+            f"See engine/regime/us_regime_gate.py + STATUS.md.",
+            file=sys.stderr,
+        )
         return None
     _US_REGIME_CACHE["signal"] = compute_regime_signal(spy_bars)
     return _US_REGIME_CACHE["signal"]
@@ -417,6 +438,21 @@ def _us_lane_suppressed_by_regime(sig_date, args) -> bool:
     if sig is None:
         return False
     return is_risk_off(sig, sig_date)
+
+
+def get_regime_gate_status() -> dict:
+    """Public accessor for scorecard / report consumers.
+
+    Returns dict with:
+      available: bool        — True if gate is functioning
+      reason: str | None     — why unavailable (only when available=False)
+
+    Call AFTER score_today's main loop has processed at least one US
+    instrument (which triggers lazy SPY load)."""
+    return {
+        "available": _US_REGIME_CACHE["signal"] is not None,
+        "reason": _US_REGIME_CACHE.get("unavailable_reason"),
+    }
 
 
 def _load_bars_daily(sym: str, args) -> pd.DataFrame | None:

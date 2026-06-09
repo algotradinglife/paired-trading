@@ -43,7 +43,7 @@
   "verdict_reason": "2/3 OOS folds positive (F1+0.342, F3+0.619); F2 fail attributed to known 2024 regime break per docstring. Aggregate EV+0.220R/n=73. policy_weight=0.60 for h=opposing only; 0.0 for all other h_rel.",
   "policy_weight_assigned": 0.60,
   "policy_weight_recommended": 0.60,
-  "valid_until": "2026-09-09",
+  "valid_until": "2026-10-13",
   "commit_hash": "f0ff0bc5",
   "data_snapshot": "2026-06-08",
   "last_verified": "2026-06-09",
