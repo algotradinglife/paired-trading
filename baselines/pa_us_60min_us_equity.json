@@ -37,18 +37,28 @@
     "score_today_line": "src/scripts/score_today.py:1337,1390"
   },
   "walk_forward": {
-    "method": "K=2 / K=3 walk-forward referenced via PABottomDetector docstring (pa_detector.py:243-251)",
-    "cutoff1": null,
-    "cutoff2": null,
-    "cutoff3": null,
-    "stop_framework": "swing_low(11-bar) - 0.5% buffer (score_today.py:1346-1372); NOT used as a gate, populates invalidation_level only",
-    "note": "No dedicated pa_us_60min walk-forward baseline exists in detector or score_today docstrings. Phase routing (BULL=0.65 / TR=0.30) is calibrated from score_audit/pa_baseline memos, not a separate WF table. PABottomDetector.policy_weight returns the base+legs1 weight, then score_today overrides with phase_weight."
+    "method": "K=3 walk-forward (standard annual folds) on the uptrend + h=opposing 60min cell, via backtest_pa_swing.py --dataset us_60min",
+    "cutoff1": "2022-12-31",
+    "cutoff2": "2023-12-31",
+    "cutoff3": "2024-12-31",
+    "stop_framework": "ATR x 1.5 in the WF harness; production lane uses swing_low(11-bar) - 0.5% buffer (score_today.py:1346-1372) as invalidation_level (not a gate)",
+    "note": "Validated 2026-06-09. Robust across framings: alternate K=3 (cutoffs 2023-12-31 / 2024-12-31 / 2025-06-30) and the default K=2 both give all-OOS-folds-positive on uptrend+h=opp — 8/8 OOS folds positive across the 3 framings, none negative. Thin per-fold n shifts with the cut but no OOS fold is ever negative."
+  },
+  "fold_date_ranges": {
+    "is": ["start", "2022-12-31"],
+    "f1": ["2023-01-01", "2023-12-31"],
+    "f2": ["2024-01-01", "2024-12-31"],
+    "f3": ["2025-01-01", "end"]
   },
   "samples": {
-    "is": {"n": null, "ev_r": null, "win_pct": null, "note": "No dedicated WF table for pa_us_60min lane. Closest evidence: PABottomDetector us_equity K=3 corrected (see baselines/pa_h2_us_equity.json) — but that's the daily-h2 lane, not the 60min POC lane."},
-    "f1": {"n": null, "ev_r": null, "win_pct": null},
-    "f2": {"n": null, "ev_r": null, "win_pct": null},
-    "f3": {"n": null, "ev_r": null, "win_pct": null}
+    "is": {"n": 18, "ev_r": -0.111, "win_pct": null, "note": "2022 bear backdrop; uptrend+h=opp underperforms in risk_off — the deployed US regime gate suppresses these periods in production."},
+    "f1": {"n": 11, "ev_r": 0.545, "win_pct": null},
+    "f2": {"n": 4,  "ev_r": 0.250, "win_pct": null, "note": "thin n; see walk_forward.note for robustness across alternate framings"},
+    "f3": {"n": 25, "ev_r": 0.519, "win_pct": null}
+  },
+  "samples_aggregate": {
+    "n": 58, "ev_r": 0.310, "win_pct": 48.0,
+    "note": "uptrend + h=opposing 60min cell (the BULL-ride production path); 3/3 OOS folds positive."
   },
   "samples_full_stack_5y": {
     "framework": "PA structural stop (live production form, swing_low-based)",
@@ -59,9 +69,8 @@
     "src/scripts/score_today.py:1235-1254",
     "src/scripts/score_today.py::_PA_US_60MIN_SUPPRESS"
   ],
-  "verdict": "PENDING_VALIDATION",
-  "verdict_reason": "Production-active (BULL=0.65, TR/TR_FORMING=0.30, +0.10 legs=1 bonus) but lacks a formal walk-forward baseline. Full-stack 5.5y replay shows +0.086R EV / win 36.3% (n=146) per doc/repro/full_stack_backtest_2026-06-08.md — direction-positive but win% is structurally low. The 10-source POC signal_tf_structure + resonance routing path is the only production lane on this code path. Promote to PASS/STRONG PASS pending K=3 walk-forward with explicit cutoffs.",
-  "verdict_unrecognized_note": "PENDING_VALIDATION is not in validate_baselines.py VERDICTS set (line 44-47); validation will flag this as 'unknown verdict'. Intentional — flags that this lane needs the audit script extended or a real K=3 backtest run.",
+  "verdict": "PASS",
+  "verdict_reason": "K=3 walk-forward validated 2026-06-09 (backtest_pa_swing us_60min, uptrend + h=opposing cell): 3/3 OOS folds positive (F1+0.545/n=11, F2+0.250/n=4, F3+0.519/n=25), aggregate +0.310R n=58 hit 48%. Robust — all OOS folds positive across two alternate cutoff framings + K=2 (8/8 OOS folds positive, none negative). IS negative (-0.111) confined to 2022 bear, which the deployed US regime gate suppresses. NOT STRONG PASS: non-monotone + F2 thin (n=4). policy_weight stays 0.65 (BULL) — the result supports the existing production weight, does not justify raising. The TR/TR_FORMING 0.30 sub-cell remains separately un-validated.",
   "policy_weight_assigned": 0.65,
   "policy_weight_assigned_breakdown": {
     "BULL": 0.65,
@@ -71,12 +80,12 @@
     "BEAR_or_UNCLEAR": 0.0
   },
   "policy_weight_recommended": 0.65,
-  "valid_until": "2026-08-09",
-  "commit_hash": "f0ff0bc5",
-  "data_snapshot": "2026-06-08",
+  "valid_until": "2026-12-06",
+  "commit_hash": "7ab6c65d",
+  "data_snapshot": "2026-06-09",
   "last_verified": "2026-06-09",
-  "last_verified_note": "imported from production code paths + full-stack doc; no dedicated WF baseline exists — promotion is bookkeeping only",
-  "repro_command": "cd src && .venv/bin/python scripts/backtest_pa_swing.py --pool US --tf 60min --h-opp-only",
+  "last_verified_note": "K=3 walk-forward run 2026-06-09 (uptrend+h=opp 60min); PENDING_VALIDATION -> PASS. policy_weight unchanged at 0.65.",
+  "repro_command": "cd src && .venv/bin/python scripts/backtest_pa_swing.py --dataset us_60min --cutoff1 2022-12-31 --cutoff2 2023-12-31 --cutoff3 2024-12-31",
   "repro_command_alt": "cd src && .venv/bin/python scripts/backtest_full_stack.py --lane pa_us_60min",
   "related_docs": [
     "src/scripts/score_today.py:1235-1254",
@@ -86,6 +95,6 @@
     "doc/repro/score_audit_2026-06-08.md",
     "doc/repro/pa_baseline_2026-06-08.md"
   ],
-  "notes": "Production-active but lacks formal walk-forward baseline; full_stack 5.5y shows +0.086R EV / win 36.3% per doc/repro/full_stack_backtest_2026-06-08.md. The phase-based weight assignment (BULL=0.65, TR/TR_FORMING=0.30) comes from pa_baseline_2026-06-08.md / score_audit_2026-06-08.md memos rather than a K=3 walk-forward table. The 10-source POC signal_tf_structure + resonance routing (score_today.py:1416-1432) is the production form. Promotion priority: high — this lane is the largest single emitter on US equity and has no audit trail.",
-  "requires_verification": true
+  "notes": "K=3 walk-forward validated 2026-06-09 (PENDING_VALIDATION -> PASS). uptrend+h=opp 60min cell: aggregate +0.310R / n=58 / hit 48%, 3/3 OOS folds positive, robust across 3 cutoff framings. Full_stack 5.5y +0.086R / win 36.3% (drift gate: within tolerance). OPEN ITEMS: (1) TR/TR_FORMING 0.30 sub-cell still un-validated (NEXT_SESSION followup #4); (2) legs=1 bonus vs phase-weight override interaction at score_today.py:1254,1337 — see policy_weight_assigned_breakdown.BULL_legs1, still needs a code-logic check.",
+  "requires_verification": false
 }
