@@ -3,6 +3,18 @@
 Snapshot at 2026-06-09.  Read this first to know where the project
 stands; consult linked docs / commits for the details.
 
+> **Phase A (2026-06-10)** — Xiao right-side chain machinery landed:
+> `engine/features/trendline.py` + `TBreakDetector` (alert-only,
+> policy_weight=0) + `engine/divergence/alert_chain.py` (pre-gate
+> divergence alerts × tbreak → put/call candidates) +
+> `scripts/scan_tbreak_chain.py` (~0.5-2 events/symbol-year across
+> US / CN_COMMODITY / CN_BOND). **NOT a production lane; no baselines;
+> NO EV claims** — premium-space validation happens post-migration.
+> Strategy doc: `doc/design/paired_options_direction_2026-06-10.md`;
+> spec: `docs/superpowers/specs/2026-06-10-phase-a-tbreak-chain-design.md`.
+> Env note: repo-rename had left `.venv` entry-point shims pointing at the
+> old `macd-momentum` path — fixed via `uv sync --reinstall` (525→527 tests).
+
 > **Sync 2026-06-09** — full P0→P3 PnL push following the lane × market
 > evaluation.  Cumulative EV +0.131R → +0.247R (+89% in-sample).
 > K=3 OOS replay shows +23.39R total improvement (+0.060R per OOS trade
