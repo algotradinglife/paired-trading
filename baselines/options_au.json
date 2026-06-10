@@ -18,13 +18,13 @@
   "samples": {
     "is": {
       "n": 37,
-      "ev_mult": 1.31,
-      "win_pct": 45.9
+      "ev_mult": 1.097,
+      "win_pct": 40.5
     },
     "oos": {
       "n": 48,
-      "ev_mult": 2.37,
-      "win_pct": 83.3
+      "ev_mult": 2.137,
+      "win_pct": 72.9
     },
     "by_year": {
       "2021": {
@@ -34,23 +34,23 @@
       },
       "2022": {
         "n": 13,
-        "ev_mult": 1.692,
-        "win_pct": 53.8
+        "ev_mult": 1.183,
+        "win_pct": 38.5
       },
       "2023": {
         "n": 16,
-        "ev_mult": 1.467,
+        "ev_mult": 1.389,
         "win_pct": 56.2
       },
       "2024": {
         "n": 26,
-        "ev_mult": 2.776,
-        "win_pct": 96.2
+        "ev_mult": 2.353,
+        "win_pct": 80.8
       },
       "2025": {
         "n": 18,
-        "ev_mult": 2.071,
-        "win_pct": 72.2
+        "ev_mult": 2.062,
+        "win_pct": 66.7
       },
       "2026": {
         "n": 4,
@@ -62,19 +62,19 @@
   "cells": {
     "rank1": {
       "n": 85,
-      "ev_mult": 1.908,
-      "win_pct": 67.1
+      "ev_mult": 1.684,
+      "win_pct": 58.8
     },
     "by_emitter": {
       "bpull": {
         "n": 51,
-        "ev_mult": 1.927,
-        "win_pct": 66.7
+        "ev_mult": 1.655,
+        "win_pct": 58.8
       },
       "context_a": {
         "n": 23,
-        "ev_mult": 2.127,
-        "win_pct": 78.3
+        "ev_mult": 1.902,
+        "win_pct": 65.2
       },
       "pa_h2": {
         "n": 11,
@@ -85,6 +85,6 @@
   },
   "verdict": "PROMOTE",
   "reliability": "MODEL_DOMINATED",
-  "verdict_reason": "IS ev_mult=1.31 (n=37), OOS ev_mult=2.37 (n=48); modeled_fraction=0.788 -> reliability=MODEL_DOMINATED. When MODEL_DOMINATED the verdict reflects the IV assumption, not market edge (IV-sensitive); treat as monitoring-grade.",
+  "verdict_reason": "IS ev_mult=1.097 (n=37), OOS ev_mult=2.137 (n=48); modeled_fraction=0.788 -> reliability=MODEL_DOMINATED. When MODEL_DOMINATED the verdict reflects the IV assumption, not market edge (IV-sensitive); treat as monitoring-grade.",
   "data_snapshot": "2026-06-10"
 }

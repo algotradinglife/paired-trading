@@ -27,21 +27,22 @@ def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
     first bar with date >= entry_date.
     """
     sym = contract_sym.lower()
-    files = sorted(data_dir.glob(f"{sym}_*_daily.json")) + sorted(data_dir.glob(f"{sym}_daily.json"))
-    bars = None
+    # Newest dated snapshot first (most complete history), then the rolling file.
+    # Try each until one actually covers entry_date — don't stop at the first
+    # file with bars, or a stale snapshot spuriously forces the model fallback.
+    files = (sorted(data_dir.glob(f"{sym}_*_daily.json"), reverse=True)
+             + sorted(data_dir.glob(f"{sym}_daily.json")))
     for p in files:
         doc = json.loads(p.read_text())
-        if doc.get("bars"):
-            bars = doc["bars"]
-            break
-    if not bars:
-        return None
-    df = pd.DataFrame(bars)
-    df["date"] = pd.to_datetime(df["time"], unit="s", utc=True).dt.date
-    df = df[df["date"] >= entry_date].sort_values("date").reset_index(drop=True)
-    if df.empty:
-        return None
-    return df.head(max_hold + 5)[["open", "high", "low", "close"]].reset_index(drop=True)
+        bars = doc.get("bars")
+        if not bars:
+            continue
+        df = pd.DataFrame(bars)
+        df["date"] = pd.to_datetime(df["time"], unit="s", utc=True).dt.date
+        df = df[df["date"] >= entry_date].sort_values("date").reset_index(drop=True)
+        if not df.empty:
+            return df.head(max_hold + 5)[["open", "high", "low", "close"]].reset_index(drop=True)
+    return None
 
 
 def model_option_daily(strike: float, expiry: date, entry_date: date,
@@ -50,11 +51,14 @@ def model_option_daily(strike: float, expiry: date, entry_date: date,
     """Black-76 synthetic OPTION daily-OHLC over the underlying path.
 
     Each day prices the call at the day's underlying high/low/close (so the
-    exit-sim can check take/stop). T = (expiry - day)/365 in years.
+    exit-sim can check take/stop). T = (expiry - day)/365 in years. The path is
+    truncated at expiry — past expiry the option no longer trades, so simulating
+    further would mark intrinsic value on post-expiry underlying moves.
     """
     ul = underlying.copy()
     ul["date"] = pd.to_datetime(ul["timestamp"], utc=True).dt.date
-    ul = ul[ul["date"] >= entry_date].sort_values("date").reset_index(drop=True)
+    ul = ul[(ul["date"] >= entry_date) & (ul["date"] <= expiry)]
+    ul = ul.sort_values("date").reset_index(drop=True)
     if ul.empty:
         return None
     ul = ul.head(max_hold + 5)

@@ -41,12 +41,18 @@ emission and attributes premium P&L. Spec/plan:
 | underlying | verdict | reliability | IS ev_mult (n) | OOS ev_mult (n) | modeled_fraction | market_n |
 |---|---|---|---|---|---|---|
 | ag | PROMOTE | MODEL_DOMINATED | 1.186 (50) | 1.093 (32) | 0.951 | 4 |
-| au | PROMOTE | MODEL_DOMINATED | 1.31 (37) | 2.37 (48) | 0.788 | 18 |
+| au | PROMOTE | MODEL_DOMINATED | 1.097 (37) | 2.137 (48) | 0.788 | 18 |
 
 By emitter (ev_mult): ag — bpull 1.213, pa_h2 1.147, context_a 1.026; au —
-context_a 2.127, bpull 1.927, pa_h2 1.364. Win-rate is low (ag rank1 ~13%) with
+context_a 1.902, bpull 1.655, pa_h2 1.364. Win-rate is low (ag rank1 ~13%) with
 ev_mult>1 — the option long-tail asymmetry (few large winners), consistent with
 the validated DD-line shape.
+
+(Numbers reflect the Codex-review fixes: the modeled path is truncated at
+contract expiry — previously it priced past expiry, inflating au's multiples —
+and the real-data loader now tries all dated snapshots before falling back to
+the model. The expiry fix lowered au IS 1.31→1.097 / OOS 2.37→2.137; ag was
+unaffected.)
 
 ## The decisive caveat: IV sensitivity under model dominance
 
@@ -54,8 +60,8 @@ au, by IV assumption (everything else fixed):
 
 | IV | IS ev_mult | OOS ev_mult | verdict |
 |---|---|---|---|
-| 0.20 (placeholder) | 0.632 | 1.509 | REGIME_ONLY |
-| 0.085 (pinned) | 1.31 | 2.37 | PROMOTE |
+| 0.20 (placeholder) | 0.479 | 1.186 | REGIME_ONLY |
+| 0.085 (pinned) | 1.097 | 2.137 | PROMOTE |
 
 Lower entry IV → cheaper entry premium → larger premium multiples on the same
 underlying move. With ~79% of au trades (and ~95% of ag) priced by the model,

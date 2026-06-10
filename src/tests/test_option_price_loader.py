@@ -48,6 +48,16 @@ def test_model_option_daily_prices_with_black76():
     assert float(df["high"].iloc[0]) >= float(df["close"].iloc[0])
 
 
+def test_model_option_daily_truncates_at_expiry():
+    # 40-day underlying path but the option expires on day 10 -> the modeled
+    # path must stop at expiry (no post-expiry pricing rows).
+    ul = _ul([9000] * 40)  # 2025-09-01 .. 2025-10-10
+    df = model_option_daily(strike=9000, expiry=date(2025, 9, 10),
+                            entry_date=date(2025, 9, 1), underlying=ul,
+                            iv=0.18, max_hold=30)
+    assert len(df) == 10  # 2025-09-01 .. 2025-09-10 inclusive
+
+
 from engine.options.option_price_loader import premium_path
 
 

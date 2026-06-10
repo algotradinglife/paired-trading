@@ -22,10 +22,10 @@ from itertools import product
 import numpy as np
 import pandas as pd
 
-from engine.options.option_exit import simulate_entry
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+from engine.options.option_exit import simulate_entry
 
 
 # ---------------------------------------------------------------------------
