@@ -22,13 +22,24 @@ These are the easy-to-miss blockers. Handle them first.
    the Mac one. The real work here is **API compatibility**, not fetching: see
    "Data-access contract" below. `uv sync` fails until this source resolves.
 
-2. **The auto-memory / lessons store — out of repo, machine-path-keyed.**
-   Lives at `~/.claude/projects/-Users-huhan-code-trading-paired-trading/memory/`
-   (38 files: `MEMORY.md` index + 37 entries of decisions, feedback, validated
-   findings). It is keyed to the *machine path*, so it will not appear on the new
-   box. **➜ Copy it** to the new machine under the new path slug, e.g.
-   `~/.claude/projects/-home-<user>-code-trading-paired-trading/memory/`.
-   A version-controlled digest that DOES travel with the repo is **`doc/LESSONS.md`**.
+2. **The auto-memory / lessons store — IN the repo since 2026-06-10, symlinked
+   into the harness path.** The canonical store is **`memory/` at the repo root**
+   (39 files: `MEMORY.md` index + 38 entries of decisions, feedback, validated
+   findings) — it now travels with `git clone` and its history is versioned.
+   The Claude Code harness, however, reads it from a *machine-path-keyed*
+   location, so after cloning **➜ create one symlink** (the path slug is your
+   absolute repo path with `/` → `-`):
+
+   ```bash
+   mkdir -p ~/.claude/projects/-home-<user>-code-trading-paired-trading
+   ln -s ~/code/trading/paired-trading/memory \
+         ~/.claude/projects/-home-<user>-code-trading-paired-trading/memory
+   ```
+
+   Side effect to know: the harness writes memory during sessions, and jj
+   (colocated) auto-snapshots the working copy — memory edits will fold into
+   whatever change is in flight. Either accept mixed commits or `jj split`
+   them out before describing. A prose digest also exists at **`doc/LESSONS.md`**.
 
 ---
 
@@ -138,8 +149,8 @@ this project commits with `jj` (`jj describe -m ... && jj new`), not `git`.
 
 1. `doc/repro/NEXT_SESSION.md` — the handoff; read this first.
 2. `STATUS.md` — current system state (lanes, baselines, infra).
-3. `doc/LESSONS.md` — distilled, version-controlled lessons (digest of the
-   out-of-repo auto-memory; see §0.2).
+3. `memory/MEMORY.md` — the auto-memory index (39 in-repo entries; symlink
+   setup in §0.2). `doc/LESSONS.md` is its prose digest.
 4. `doc/repro/*.md` (32 docs) — validated findings, REJECT decisions, repro recipes.
 5. `docs/superpowers/specs|plans/*` (8 docs) — designs (baseline-validation,
    PA-TOP, options-attribution).
