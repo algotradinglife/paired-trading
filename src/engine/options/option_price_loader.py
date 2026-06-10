@@ -13,7 +13,8 @@ import pandas as pd
 
 from engine.options.cn_ag_selector import _bs_call_price
 
-IV_ASSUMPTION = {"ag": 0.18, "au": 0.20}  # pinned later from observed ATM IV
+IV_ASSUMPTION = {"ag": 0.13, "au": 0.085}  # pinned 2026-06-10 from observed ATM IV
+# medians (ag n=6 med 0.131; au n=32 med 0.085). See doc/repro/options_attribution_2026-06-10.md.
 _RISK_FREE = 0.02
 
 

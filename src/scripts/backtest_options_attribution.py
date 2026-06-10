@@ -79,6 +79,11 @@ def _aggregate(underlying: str, trades: list[dict], market_n: int, model_n: int)
     modeled_fraction = round(model_n / total, 3) if total else None
     # A fold with no trades counts as non-profitable (ev 0.0) for the verdict.
     verdict = verdict_for(is_c["ev_mult"] or 0.0, oos_c["ev_mult"] or 0.0)
+    # Reliability gate: when most P&L is Black-76-priced (the emitted strikes
+    # lack market data), the verdict reflects the IV assumption, not market
+    # edge — and is IV-sensitive. Flag it so the verdict isn't over-trusted.
+    reliability = ("MODEL_DOMINATED" if (modeled_fraction or 0.0) > 0.5
+                   else "MARKET_BACKED")
     return {
         "lane": f"options_{underlying}",
         "underlying": UL_SYMBOL[underlying],
@@ -94,9 +99,12 @@ def _aggregate(underlying: str, trades: list[dict], market_n: int, model_n: int)
         "cells": {"rank1": _cell(trades),
                   "by_emitter": {em: _cell(r) for em, r in sorted(by_emitter.items())}},
         "verdict": verdict,
+        "reliability": reliability,
         "verdict_reason": (f"IS ev_mult={is_c['ev_mult']} (n={is_c['n']}), "
                            f"OOS ev_mult={oos_c['ev_mult']} (n={oos_c['n']}); "
-                           f"modeled_fraction={modeled_fraction}."),
+                           f"modeled_fraction={modeled_fraction} -> reliability={reliability}. "
+                           f"When MODEL_DOMINATED the verdict reflects the IV assumption, "
+                           f"not market edge (IV-sensitive); treat as monitoring-grade."),
         "data_snapshot": "2026-06-10",
     }
 

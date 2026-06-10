@@ -1,0 +1,90 @@
+{
+  "lane": "options_ag",
+  "underlying": "kq_m_shfe_ag",
+  "emission_binding": "score_today.py:940-1303; cn_ag_selector.select_otm_calls",
+  "entry": "signal-day close, Rank-1 OTM call (cn_metal bottom, score>=3)",
+  "exit": {
+    "take1": 2.0,
+    "take2": 4.0,
+    "stop_ticks": 5,
+    "tick": 1.0,
+    "max_hold_days": 30
+  },
+  "pricing": {
+    "market_n": 4,
+    "model_n": 78,
+    "modeled_fraction": 0.951
+  },
+  "samples": {
+    "is": {
+      "n": 50,
+      "ev_mult": 1.186,
+      "win_pct": 20.0
+    },
+    "oos": {
+      "n": 32,
+      "ev_mult": 1.093,
+      "win_pct": 18.8
+    },
+    "by_year": {
+      "2021": {
+        "n": 9,
+        "ev_mult": 1.164,
+        "win_pct": 22.2
+      },
+      "2022": {
+        "n": 21,
+        "ev_mult": 1.313,
+        "win_pct": 23.8
+      },
+      "2023": {
+        "n": 20,
+        "ev_mult": 1.063,
+        "win_pct": 15.0
+      },
+      "2024": {
+        "n": 13,
+        "ev_mult": 1.019,
+        "win_pct": 15.4
+      },
+      "2025": {
+        "n": 15,
+        "ev_mult": 1.188,
+        "win_pct": 26.7
+      },
+      "2026": {
+        "n": 4,
+        "ev_mult": 0.978,
+        "win_pct": 0.0
+      }
+    }
+  },
+  "cells": {
+    "rank1": {
+      "n": 82,
+      "ev_mult": 1.15,
+      "win_pct": 19.5
+    },
+    "by_emitter": {
+      "bpull": {
+        "n": 46,
+        "ev_mult": 1.213,
+        "win_pct": 23.9
+      },
+      "context_a": {
+        "n": 23,
+        "ev_mult": 1.026,
+        "win_pct": 8.7
+      },
+      "pa_h2": {
+        "n": 13,
+        "ev_mult": 1.147,
+        "win_pct": 23.1
+      }
+    }
+  },
+  "verdict": "PROMOTE",
+  "reliability": "MODEL_DOMINATED",
+  "verdict_reason": "IS ev_mult=1.186 (n=50), OOS ev_mult=1.093 (n=32); modeled_fraction=0.951 -> reliability=MODEL_DOMINATED. When MODEL_DOMINATED the verdict reflects the IV assumption, not market edge (IV-sensitive); treat as monitoring-grade.",
+  "data_snapshot": "2026-06-10"
+}
