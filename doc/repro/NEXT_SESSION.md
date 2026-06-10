@@ -2,11 +2,11 @@
 
 读这一篇就能接管。下一 session 开头：`读 doc/repro/NEXT_SESSION.md 继续`。
 
-## 当前状态快照（origin/main 同步至 `8a69ea6f`，三个 cleanup commit 已 push；本 handoff 更新为其后续 doc commit）
+## 当前状态快照（`d273e793` 已 push 到 origin/main；其后 spec/plan + 期权层 slice-1（11 task）+ codex 修复 = 本地领先，**未 push**）
 
 - **Baselines dashboard**: **10 OK / 1 STALE**（仅 `pa_h2_climax` STALE/weight-0；其 anchor 已随 harness fix re-baseline，repro 现在 within tolerance）。无 PENDING。
 - **Drift gate**: `src/scripts/validate_baselines.py --full` 现在做**真漂移检测**（full_stack per-(lane,symbol) primary anchor）。每周 cron（Mon 08:53）跑 `src/scripts/drift_gate.sh`，只在真 `[DRFT]` / `FULL_STACK_UNAVAILABLE` 时报警（`logs/drift-gate/ALERTS.log`）。**新**：full_stack 现在吐真 `data_hash`（不再 None），drift 的"数据 vs 代码"归因机制已解锁——待某 baseline 在有意 re-baseline 时把 emitted hash 写进 `data_snapshot_hash` 才端到端亮起。
-- **Tests**: 490 passed（+4 `tests/test_full_stack_data_hash.py`）。
+- **Tests**: 504 passed（含期权层 slice-1 的 option_exit / price_loader / emission_faithfulness / attribution_aggregate）。
 - **Memory**: 37 entries 自动加载（含 jj、broad-market suppress、regime-gate 不可移植、baselines-as-auditable、retired-and-historical 等）。
 
 完整快照在 `STATUS.md` 顶部 sync 块 + "baselines/ infrastructure" 段。
@@ -30,13 +30,20 @@
 
 设计/计划文档：`docs/superpowers/specs|plans/2026-06-09-baseline-validation-schema*.md`、`...2026-06-10-pa-top-path-b*.md`。
 
-## 推荐的下一个主线：期权层（需要 brainstorm）
+## 期权层 slice-1（验证+可审计）—— 已完成 ✅（subagent-driven，11 task）
 
-**Why now**：刚决定"下行用期权/对冲层表达"（不做 PA put detector）。但期权层目前 `score_today` 只 *emit* `options_calls`，**没有系统化 P&L attribution / backtest**——它现在是系统表达上行+下行的承重墙，却未验证。
+走完 brainstorm → spec → plan → implement。**结论：MODEL_DOMINATED，期权层在 emit 的精确 strike 上仍未被市场数据验证。**
 
-**建议**：开新 session，走 brainstorm → spec → plan → implement（和本 session 的 baseline-validation / PA TOP 一样的流程）。需要 clean context，别在长 session 末尾硬上。
+- **建了什么**：`scripts/backtest_options_attribution.py` 忠实复刻 score_today 的 ag/au `options_calls` emission（4 emitter：bpull/pa_h2/context_a/divergence，gate 全部对齐生产 `score_today.py:940-1303`——pa_h2 含 BULL-phase skip；divergence 恒 0=DIF off，有 test 守）→ 信号日买 Rank-1 OTM call → 已验证 DD-line 退出（`simulate_entry`：take1=2x/take2=4x/stop=5tick/30d）→ 真实期权数据为主 + Black-76 兑底（`modeled_fraction` 披露）→ IS/OOS fold + verdict + reliability。
+- **结果**（`baselines/options_{ag,au}.json`，pinned IV ag0.13/au0.085）：ag PROMOTE（IS1.186/OOS1.093，modeled **0.951**，market_n=4）；au PROMOTE（IS1.097/OOS2.137，modeled **0.788**，market_n=18）。**两者 reliability=MODEL_DOMINATED**：79-95% P&L 是模型定价，verdict 随 IV 假设摆动（au 在 IV0.20↔0.085 之间 REGIME_ONLY↔PROMOTE 翻转）。精确 emit strike 的日线市场覆盖太薄。
+- **交叉验证**：au 在高 IV 下 REGIME_ONLY 与 `project_ddline_options_findings`（au B1/B2 IS 失败=2025 金牛 regime）一致；但 DD-line 用的是更厚的 option intraday K线路径，本 harness 没用（刻意绑 emit 的精确日线 strike）。
+- **证据**：`doc/repro/options_attribution_2026-06-10.md`；spec/plan `docs/superpowers/specs|plans/2026-06-10-options-attribution*`。Codex 审过两轮（P1 expiry 截断 + 2 个 P2 全修）。
+- **澄清**：handoff 旧 caveat "pricer 没活下来" 被纠正——Black 定价器在 selector 里一直能用；当年只丢了一个 bespoke RR 模拟脚本。
 
-**Caveat**：option pricer（Black-model）当年 migration 没活下来（`options_simulation` repro 卡在这）；做期权层 P&L 可能要先重建 pricer。
+### 期权层下一步（要市场验证的 verdict，二选一）
+1. **拉 emit strike 的真实期权数据**（TqSdk intraday/daily，见 `project_cn_options_intraday_tqsdk`）把 modeled_fraction 压下来；或
+2. **改用流动 ATM 近月 proxy** 归因（接受小 strike 失配换市场定价）。
++ 期权 baseline 接 `validate_baselines --full` / drift-gate（slice-1 刻意没做）。
 
 ## 也可以做的 bounded cleanups（小、确定性高）
 
