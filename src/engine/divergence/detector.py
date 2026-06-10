@@ -455,6 +455,7 @@ def detect_all_divergences(
     *,
     level_id: str = "1D",
     instrument_class: str = "us_equity",
+    gate: bool = True,
 ) -> list[DivergenceSignal]:
     """Build all events and run all three divergence detectors.
 
@@ -464,6 +465,10 @@ def detect_all_divergences(
       - "us_equity" (default): apply US-tuned top de-weight multipliers
       - "cn_futures": pass-through (no top de-weight) — CN tops are
         empirically positive, US calibration over-penalizes
+
+    `gate=False` returns the raw pre-direction-gate signals — used by the
+    alert layer (engine/divergence/alert_chain.py), which needs top signals
+    at raw confidence. Production callers keep the default gate=True.
     """
     # Normalize all inputs to a 0..N-1 RangeIndex so event start_idx / end_idx /
     # peak_bar_idx (returned by builders) are interchangeable with iloc positions
@@ -488,6 +493,7 @@ def detect_all_divergences(
     signals += detect_dif_bull_slope_reversal(ohlc, dif, hist, level_id=level_id)
     signals += detect_dea_bull_divergence(ohlc, dif, hist, level_id=level_id)
 
-    signals = gate_signals(signals, instrument_class=instrument_class)
+    if gate:
+        signals = gate_signals(signals, instrument_class=instrument_class)
     signals.sort(key=lambda s: (s.candidate_bar_idx, s.level))
     return signals
