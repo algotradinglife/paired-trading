@@ -79,18 +79,17 @@ def fit_trendline(
     if len(pivots) < 2:
         return None
 
-    # Scan pairs from the most recent backwards: (p1 older, p2 newer).
-    for j in range(len(pivots) - 1, 0, -1):
-        p2 = pivots[j]
-        for i in range(j - 1, -1, -1):
-            p1 = pivots[i]
-            rising = values[p2] > values[p1]
-            if (kind == "support" and rising) or (kind == "resistance" and not rising):
-                return Trendline(
-                    kind=kind,
-                    idx1=p1, price1=float(values[p1]),
-                    idx2=p2, price2=float(values[p2]),
-                )
-        # Newest pivot has no valid partner — older pairs would be stale lines;
-        # fall through and try the previous pivot as p2.
-    return None
+    # STRICTLY the two most recent confirmed pivots (codex review 2026-06-10):
+    # falling back to older pairs would resurrect stale lines after a
+    # lower-low / higher-high invalidates the trend, and equal pivots are
+    # not a valid rising support / falling resistance.
+    p1, p2 = pivots[-2], pivots[-1]
+    if kind == "support" and not (values[p2] > values[p1]):
+        return None
+    if kind == "resistance" and not (values[p2] < values[p1]):
+        return None
+    return Trendline(
+        kind=kind,
+        idx1=p1, price1=float(values[p1]),
+        idx2=p2, price2=float(values[p2]),
+    )

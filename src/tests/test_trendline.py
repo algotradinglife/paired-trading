@@ -95,6 +95,41 @@ def test_fit_resistance_line_on_falling_highs():
     assert tl.slope == pytest.approx(-0.3)
 
 
+def test_lower_low_invalidates_old_support_line():
+    """Codex P2 (2026-06-10): a newer confirmed LOWER low must kill the old
+    rising support — no fallback to stale pivot pairs."""
+    rows = UPTREND_ROWS + [
+        (10.0,  9.0,  9.5),   # 13
+        ( 9.0,  7.0,  8.0),   # 14  pivot low 7.0 (lower low)
+        ( 9.5,  8.5,  9.0),   # 15
+        (10.0,  9.0,  9.5),   # 16  pivot 14 confirmed here (n=2)
+        (10.5,  9.5, 10.0),   # 17
+    ]
+    bars = make_bars(rows)
+    tl = fit_trendline(bars, up_to_idx=17, kind="support", pivot_n=2)
+    assert tl is None
+
+
+def test_equal_resistance_highs_are_rejected():
+    """Codex P2 (2026-06-10): equal pivot highs are NOT a falling resistance."""
+    rows = [
+        ( 9.0,  8.0,  8.5),   # 0
+        (10.5,  9.5, 10.0),   # 1
+        (12.0, 10.5, 11.0),   # 2  pivot high 12.0
+        (10.5,  9.0,  9.5),   # 3
+        ( 9.5,  8.0,  8.5),   # 4
+        ( 9.0,  7.5,  8.0),   # 5
+        ( 9.5,  8.0,  9.0),   # 6
+        (12.0,  9.0,  9.8),   # 7  pivot high 12.0 (equal retest)
+        ( 9.5,  8.0,  8.5),   # 8
+        ( 8.5,  7.0,  7.5),   # 9
+        ( 8.0,  6.5,  7.0),   # 10
+    ]
+    bars = make_bars(rows)
+    tl = fit_trendline(bars, up_to_idx=10, kind="resistance", pivot_n=2)
+    assert tl is None
+
+
 def test_causality_prefix_invariance():
     """Fitting at up_to_idx=k must not change when future bars are appended."""
     bars = make_bars(UPTREND_ROWS)
