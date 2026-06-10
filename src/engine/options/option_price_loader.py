@@ -11,6 +11,11 @@ from pathlib import Path
 
 import pandas as pd
 
+from engine.options.cn_ag_selector import _bs_call_price
+
+IV_ASSUMPTION = {"ag": 0.18, "au": 0.20}  # pinned later from observed ATM IV
+_RISK_FREE = 0.02
+
 
 def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
                       max_hold: int) -> pd.DataFrame | None:
@@ -36,3 +41,29 @@ def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
     if df.empty:
         return None
     return df.head(max_hold + 5)[["open", "high", "low", "close"]].reset_index(drop=True)
+
+
+def model_option_daily(strike: float, expiry: date, entry_date: date,
+                       underlying: pd.DataFrame, iv: float, max_hold: int,
+                       r: float = _RISK_FREE) -> pd.DataFrame | None:
+    """Black-76 synthetic OPTION daily-OHLC over the underlying path.
+
+    Each day prices the call at the day's underlying high/low/close (so the
+    exit-sim can check take/stop). T = (expiry - day)/365 in years.
+    """
+    ul = underlying.copy()
+    ul["date"] = pd.to_datetime(ul["timestamp"], utc=True).dt.date
+    ul = ul[ul["date"] >= entry_date].sort_values("date").reset_index(drop=True)
+    if ul.empty:
+        return None
+    ul = ul.head(max_hold + 5)
+    rows = []
+    for _, b in ul.iterrows():
+        T = max((expiry - b["date"]).days, 0) / 365.0
+        rows.append({
+            "open":  _bs_call_price(float(b["open"]),  strike, T, r, iv),
+            "high":  _bs_call_price(float(b["high"]),  strike, T, r, iv),
+            "low":   _bs_call_price(float(b["low"]),   strike, T, r, iv),
+            "close": _bs_call_price(float(b["close"]), strike, T, r, iv),
+        })
+    return pd.DataFrame(rows)

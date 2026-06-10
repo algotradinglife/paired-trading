@@ -27,3 +27,22 @@ def test_load_option_daily_returns_ohlc_from_entry(tmp_path):
 
 def test_load_option_daily_missing_returns_none(tmp_path):
     assert load_option_daily("ag9999c1", date(2025, 1, 1), tmp_path, max_hold=30) is None
+
+
+from engine.options.option_price_loader import model_option_daily
+
+
+def _ul(prices):
+    idx = pd.date_range("2025-09-01", periods=len(prices), freq="D", tz="UTC")
+    return pd.DataFrame({"timestamp": idx, "open": prices, "high": prices,
+                         "low": prices, "close": prices, "volume": [1] * len(prices)})
+
+
+def test_model_option_daily_prices_with_black76():
+    ul = _ul([9000, 9100, 9300, 9200])  # underlying rises -> call gains
+    df = model_option_daily(strike=9000, expiry=date(2025, 12, 17),
+                            entry_date=date(2025, 9, 1), underlying=ul,
+                            iv=0.18, max_hold=30)
+    assert len(df) == 4
+    assert float(df["close"].iloc[2]) > float(df["close"].iloc[0])
+    assert float(df["high"].iloc[0]) >= float(df["close"].iloc[0])
