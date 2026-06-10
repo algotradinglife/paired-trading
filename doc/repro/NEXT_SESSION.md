@@ -2,6 +2,11 @@
 
 读这一篇就能接管。下一 session 开头：`读 doc/repro/NEXT_SESSION.md 继续`。
 
+> **战略方向（2026-06-10，迁移后优先读）**：标的-期权配对交易的问题盘点与路线图
+> 已写入 **`doc/design/paired_options_direction_2026-06-10.md`** —— put 侧按肖体系
+> 重新立项（权利金空间验证，非标的 R 空间）、机制提取清单、数据回填需求规格、
+> Phase A-D 路线图。迁移到新服务器后以该文档为深度讨论起点。
+
 ## 当前状态快照（`d273e793` 已 push 到 origin/main；其后 spec/plan + 期权层 slice-1（11 task）+ codex 修复 = 本地领先，**未 push**）
 
 - **Baselines dashboard**: **10 OK / 1 STALE**（仅 `pa_h2_climax` STALE/weight-0；其 anchor 已随 harness fix re-baseline，repro 现在 within tolerance）。无 PENDING。
