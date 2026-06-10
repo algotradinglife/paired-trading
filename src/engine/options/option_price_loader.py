@@ -67,3 +67,15 @@ def model_option_daily(strike: float, expiry: date, entry_date: date,
             "close": _bs_call_price(float(b["close"]), strike, T, r, iv),
         })
     return pd.DataFrame(rows)
+
+
+def premium_path(contract_sym: str, *, strike: float, expiry: date,
+                 entry_date: date, data_dir: Path, underlying: pd.DataFrame,
+                 iv: float, max_hold: int, min_cover: int = 5):
+    """Return (option_daily_ohlc, source). Market if the real contract has
+    >= min_cover rows from entry_date, else Black-76 model."""
+    real = load_option_daily(contract_sym, entry_date, data_dir, max_hold)
+    if real is not None and len(real) >= min_cover:
+        return real, "market"
+    model = model_option_daily(strike, expiry, entry_date, underlying, iv, max_hold)
+    return model, "model"
