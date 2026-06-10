@@ -2,7 +2,7 @@
 
 读这一篇就能接管。下一 session 开头：`读 doc/repro/NEXT_SESSION.md 继续`。
 
-## 当前状态快照（commit `f1b29ae1`，本地领先 origin/main 3 个 commit 未 push）
+## 当前状态快照（origin/main 同步至 `8a69ea6f`，三个 cleanup commit 已 push；本 handoff 更新为其后续 doc commit）
 
 - **Baselines dashboard**: **10 OK / 1 STALE**（仅 `pa_h2_climax` STALE/weight-0；其 anchor 已随 harness fix re-baseline，repro 现在 within tolerance）。无 PENDING。
 - **Drift gate**: `src/scripts/validate_baselines.py --full` 现在做**真漂移检测**（full_stack per-(lane,symbol) primary anchor）。每周 cron（Mon 08:53）跑 `src/scripts/drift_gate.sh`，只在真 `[DRFT]` / `FULL_STACK_UNAVAILABLE` 时报警（`logs/drift-gate/ALERTS.log`）。**新**：full_stack 现在吐真 `data_hash`（不再 None），drift 的"数据 vs 代码"归因机制已解锁——待某 baseline 在有意 re-baseline 时把 emitted hash 写进 `data_snapshot_hash` 才端到端亮起。
