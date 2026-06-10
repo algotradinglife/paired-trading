@@ -1,7 +1,7 @@
 # Options-layer P&L attribution — ag/au — design
 
 **Date:** 2026-06-10
-**Status:** Drafted — pending user spec-review, then implementation plan
+**Status:** Codex-reviewed (2 P2 emission-faithfulness fixes applied) — pending user spec-review, then implementation plan
 **Scope:** First slice of the options-layer initiative = "validate & make auditable" (not extend, not infra-rebuild).
 
 ## Problem & framing
@@ -12,7 +12,14 @@ The futures lanes just gained rigorous `baselines/` + `validate_baselines.py --f
 
 ## Key facts established (grounded interfaces)
 
-- **Live emission gate** (`src/scripts/score_today.py:906-925`): `instrument_class == "cn_metal_futures"` AND `sym.endswith("_ag"|"_au")` AND `sig.direction == "bottom"` AND `score >= 3` (`_OPTIONS_MIN_SCORE`). Then `mm_pct = _compute_mm_pct(sig, bars, entry_close)` (`score_today.py:68`) and `select_otm_calls(entry_close, sig_date, mm_target_pct=mm_pct)`. Same block repeats for the other detector loops (`score_today.py:974, 1086, 1168`).
+- **Live emission gate**: `instrument_class == "cn_metal_futures"` AND `sym.endswith("_ag"|"_au")` AND `sig.direction == "bottom"` AND `score >= 3` (`_OPTIONS_MIN_SCORE`). There are exactly **4 ag/au emitters**, each in its own detector loop (verified by reading `score_today`, corrected per Codex review):
+  | emitter | emit site | `mm_target_pct`? |
+  |---|---|---|
+  | divergence main scan | `913/923` | **yes** — `_compute_mm_pct(sig, bars, entry_close)` (`score_today.py:68`); the signal carries `reference_bar_idx`/`candidate_bar_idx`/`price_side` |
+  | BPull | `977/981` | no — `select_otm_calls(bentry_close, bsig_date)` |
+  | PA H2 | `1092/1096` | no — `select_otm_calls(pa_close, pa_date)` |
+  | Context A | `1293/1301` | no — `select_otm_calls(aclose, asig_date)` |
+  **VFlush does NOT emit options** (the `options_calls: None` at `1230` is never populated for ag/au) and the cn_bond PA H2 loop (`1168`) excludes ag/au. Both are outside the attribution universe.
 - **`select_otm_calls(underlying_price, signal_date, n_strikes=3, mm_target_pct=None)`** (`src/engine/options/cn_ag_selector.py:78`; `_au` twin in `cn_au_selector.py`) returns dicts: `{strike, otm_pct, expiry_month, contract_sym (e.g. "ag2507c8300"), days_to_expiry, mm_target_pct, is_mm_strike}`. Expiry = first 20-60 DTE contract.
 - **Pricers already present** in each selector: `_bs_call_price(...)` (Black model, line 192), `estimate_iv(...)` (229), `lookup_option_price(...)` (290, real-data), `enrich_with_iv(...)` (376).
 - **Real option data**: `data/options/cn/{ag,au}/{contract}_*.json` (daily; TqSdk intraday also available per `project_cn_options_intraday_tqsdk`). Coverage is partial; 2026 signals may lack ready IV.
@@ -43,13 +50,18 @@ Reuses (does not duplicate): the detector path from `score_today`, `select_otm_c
 
 ## Section 2 — Stage 1: replay signals
 
-Walk ag/au daily futures bars. Regenerate **bottom** signals through the same detector loops that `score_today` runs, and apply the live gate where it attaches `options_calls`: `direction == "bottom"` AND `score >= 3`. There are **4 emission sites** in `score_today` (`913/923, 977/981, 1092/1096, 1168`), one per detector loop — **the plan enumerates the exact detector set** from these sites rather than guessing it here. Enforce the same `min_gap` the live path uses. Output: one record per gated signal with `sig_date`, `entry_close`, the `sig` object (for `_compute_mm_pct`), and the year (for folds).
+Walk ag/au daily futures bars. Regenerate **bottom** signals through the **4 emitting detector loops only** — divergence main scan, BPull, PA H2, Context A (NOT VFlush, NOT cn_bond; see Key facts table) — and apply the live gate where each attaches `options_calls`: `direction == "bottom"` AND `score >= 3`. Each loop runs its own detector with the same params `score_today` uses and enforces the same `min_gap`. Output: one record per gated signal tagged with its **emitter** (so Stage 2 replays the correct call signature), plus `sig_date`, `entry_close`, the `sig` object, and the year (for folds).
 
-**Faithfulness requirement:** the score computation must match `score_today` (same detector params, same scoring). The cleanest implementation reuses the `score_today` scoring helper directly rather than re-deriving it. (Plan step will confirm whether that helper is importable in isolation or needs a small refactor.)
+**Faithfulness requirement:** the score and signal set per emitter must match `score_today` (same detector params, same scoring). The plan confirms whether each emitter's scan + scoring is importable in isolation or needs a small shared refactor rather than re-deriving it.
 
 ## Section 3 — Stage 2: emission
 
-For each gated signal: `mm_pct = _compute_mm_pct(sig, bars, entry_close)`; `calls = select_otm_calls(entry_close, sig_date, mm_target_pct=mm_pct)` (ag) / `select_otm_calls_au(...)` (au). The emitted list is the attribution universe. **Primary = `calls` sorted by `otm_pct` ascending → index 0 (Rank 1).** Tag the `is_mm_strike` contract for the secondary mm-cell.
+Replay **each emitter's exact live call signature** (per the Key facts table) — this is a per-emitter detail, not a uniform call:
+- **divergence main scan only**: `mm_pct = _compute_mm_pct(sig, bars, entry_close)` then `select_otm_calls(entry_close, sig_date, mm_target_pct=mm_pct)`. Only this signal type carries the `reference_bar_idx`/`candidate_bar_idx`/`price_side` fields `_compute_mm_pct` needs.
+- **BPull / PA H2 / Context A**: `select_otm_calls(entry_close, sig_date)` with **no** `mm_target_pct` (mirrors live; calling `_compute_mm_pct` on these would crash and would diverge from production).
+- ag → `select_otm_calls`, au → `select_otm_calls_au`.
+
+The emitted list is the attribution universe. **Primary = `calls` sorted by `otm_pct` ascending → index 0 (Rank 1).** The `is_mm_strike` tag (only ever set on divergence-emitter calls) drives the secondary mm-cell.
 
 ## Section 4 — Stage 3: price-loader (the one real abstraction)
 
