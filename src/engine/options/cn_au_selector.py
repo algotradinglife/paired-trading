@@ -343,6 +343,8 @@ def enrich_with_iv_au(
     signal_date: date,
     underlying_price: float,
     data_dir: Path,
+    *,
+    quant_root: Path | None = None,
 ) -> list[dict]:
     """Add 'option_price', 'iv', and 'price_source' fields to each au call dict in-place.
 
@@ -353,6 +355,9 @@ def enrich_with_iv_au(
     Sets option_price/iv/price_source to None when no price data is available.
     Returns the same list (mutated).
     """
+    from data.bar_loader import DEFAULT_QUANT_ROOT
+    from data.option_store import get_store
+    from engine.options.black76 import implied_vol
     from engine.options.tqsdk_feed import fetch_live_option_prices
 
     from datetime import date as _date
@@ -364,6 +369,8 @@ def enrich_with_iv_au(
     if use_live:
         live_prices = fetch_live_option_prices(syms)  # all-None if creds not set
 
+    store = get_store(quant_root if quant_root is not None else DEFAULT_QUANT_ROOT)
+
     for call in calls:
         sym: str = call["contract_sym"]
         dte: int = call["days_to_expiry"]
@@ -371,6 +378,9 @@ def enrich_with_iv_au(
 
         price = live_prices.get(sym) if use_live else None
         source = "live"
+        if price is None:
+            price = store.close_on(sym, signal_date)
+            source = "store"
         if price is None:
             price = lookup_option_price_au(sym, signal_date, data_dir)
             source = "file"
@@ -380,7 +390,11 @@ def enrich_with_iv_au(
         call["iv"] = None
 
         if price is not None and price > 0:
-            iv = estimate_iv_au(price, float(strike), underlying_price, dte)
+            opt_type = sym.rstrip("0123456789")[-1].upper()
+            iv = implied_vol(
+                price, underlying_price, float(strike), dte / 365.0,
+                opt_type=opt_type,
+            )
             call["iv"] = round(iv * 100, 2) if iv is not None else None
 
     return calls

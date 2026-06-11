@@ -37,7 +37,10 @@ OI 优先/volume 兜底 + 滚月规则，从单月合约只读派生），CN_MET
 |------|------|
 | **SPY 1h 2021-2024 稀疏洞**（每年约 1000 bar vs QQQ/IWM 的 4000；733 天 vs 1530 天，仅 2025 起完整）| SPY 的一切 60min 回测结论不可用（样本偏 2025 后）；QQQ/IWM 完整。疑似某次早期 sync 配置不同，建议按 QQQ 同配置重 sync SPY 1h 2021-2024 |
 | INE sc（单月合约 + 主连都缺）| vflush lane 只剩 cu（验证时 cu/sc 双标的）|
-| CN 期权数据格式变更：新库为 parquet 按行权价铺开，旧引擎读 `data/options/cn/*` JSON | `test_options_emission_faithfulness` 3 个失败；期权归因 harness 不可运行。**策略侧后续自己写 options 读取 seam**，但需确认新库 CN 期权 ag/au 日线覆盖回溯到 2024（旧验证窗口）|
+| ~~CN 期权数据格式变更~~ → **策略侧 OptionStore seam 已完成（2026-06-11）**，live 链读取正常（ag 2026-06-05 链 72 合约）。剩余为纯数据缺口，见下三行 | — |
+| **期权历史日线回填**：现仅 ~6 周（2026-04-27 起）。P0 归因修复需 ag/au 回溯到 2024 | 权利金空间验证（put 立项前提）被挡 |
+| **期权行权价窗口错位**：ATM±4 按同步当日价格抓取，标的偏离后信号选的 strike 不在库内（例：ag 跌至 18522，库内 2607 链从 19900 起）| live 建议 price/IV 部分 n/a；建议 pipeline 改为按当日结算价滚动 ATM±N 或全链同步 |
+| **期权 15min + bid/ask**（design doc §5）| 肖式 tick 级止损模拟不可行；按 put 研究排期 |
 | US 15min 缺（仅 d/5min/1h）| DIR `minute15_state` 投票在 US 全部降级 neutral；可由 5min 聚合，希望 pipeline 直接提供 15min 避免策略侧重采样语义风险 |
 | US weekly 缺 | DIR `weekly_trend` backdrop 在 US 降级；可由 daily 聚合，同上 |
 

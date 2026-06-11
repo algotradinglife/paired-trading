@@ -19,14 +19,28 @@ _RISK_FREE = 0.02
 
 
 def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
-                      max_hold: int) -> pd.DataFrame | None:
+                      max_hold: int, *,
+                      quant_root: Path | None = None) -> pd.DataFrame | None:
     """Real OPTION daily-OHLC frame from entry_date forward (<= max_hold+5 rows).
 
-    Reads {contract}_{YYYYMMDD}_daily.json (newest) or {contract}_daily.json.
-    Returns None when no file/bars cover entry_date. Index reset; row 0 is the
-    first bar with date >= entry_date.
+    Tries the quant-cli OptionStore parquet first (``quant_root`` defaults
+    to the data/quant symlink), then the legacy JSON files:
+    {contract}_{YYYYMMDD}_daily.json (newest) or {contract}_daily.json.
+    Returns None when no source covers entry_date. Index reset; row 0 is
+    the first bar with date >= entry_date.
     """
     sym = contract_sym.lower()
+
+    from data.bar_loader import DEFAULT_QUANT_ROOT
+    from data.option_store import get_store
+    store = get_store(quant_root if quant_root is not None else DEFAULT_QUANT_ROOT)
+    pq = store.load_contract_daily(sym)
+    if pq is not None:
+        pq = pq[pq["date"] >= entry_date].reset_index(drop=True)
+        if not pq.empty:
+            return pq.head(max_hold + 5)[
+                ["open", "high", "low", "close"]
+            ].reset_index(drop=True)
     # Newest dated snapshot first (most complete history), then the rolling file.
     # Try each until one actually covers entry_date — don't stop at the first
     # file with bars, or a stale snapshot spuriously forces the model fallback.
