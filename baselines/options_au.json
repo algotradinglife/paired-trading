@@ -1,4 +1,5 @@
 {
+  "schema_version": 1,
   "lane": "options_au",
   "underlying": "kq_m_shfe_au",
   "emission_binding": "score_today.py:940-1303; cn_au_selector.select_otm_calls",
@@ -86,5 +87,11 @@
   "verdict": "PROMOTE",
   "reliability": "MODEL_DOMINATED",
   "verdict_reason": "IS ev_mult=1.097 (n=37), OOS ev_mult=2.137 (n=48); modeled_fraction=0.788 -> reliability=MODEL_DOMINATED. When MODEL_DOMINATED the verdict reflects the IV assumption, not market edge (IV-sensitive); treat as monitoring-grade.",
-  "data_snapshot": "2026-06-10"
+  "data_snapshot": "2026-06-10",
+  "pool": "cn_options_au",
+  "policy_weight_assigned": 0.0,
+  "valid_until": "2026-12-10",
+  "commit_hash": "b5f59a5",
+  "last_verified": "2026-06-10",
+  "notes_schema": "attribution baseline (premium-mult space, not an emit-lane policy weight); fields above added 2026-06-12 to satisfy validator schema — policy_weight_assigned=0.0 because no emit lane consumes this baseline"
 }

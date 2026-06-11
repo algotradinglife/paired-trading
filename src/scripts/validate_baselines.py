@@ -50,6 +50,11 @@ VERDICTS = {
     # Meta-gate / non-lane component that's been deployed with calibration
     # evidence but doesn't follow the K=3 walk-forward shape.
     "DEPLOYED",
+    # Options-attribution baselines (premium-multiple space, IS/OOS folds;
+    # see backtest_options_attribution.verdict_for). PROMOTE may carry a
+    # MODEL_DOMINATED reliability caveat — read the baseline's reliability
+    # field, the verdict alone is not deployment-grade.
+    "PROMOTE", "REGIME_ONLY",
 }
 
 STATUS_ICONS = {

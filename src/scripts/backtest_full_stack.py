@@ -58,10 +58,23 @@ def _data_hash_for_bars(bars_map: dict[str, pd.DataFrame]) -> str | None:
     None when no bars loaded, so validate_baselines.py --full distinguishes a
     data outage from a concrete snapshot. Keys are "{symbol}@{level}" so a
     symbol's daily and 60min series never collide on one key.
+
+    Bars stamped on the current UTC date are EXCLUDED: during a live CN
+    session (or an incremental sync) the in-flight day's bars change
+    minute to minute, which made the hash unstable across same-day runs
+    and rendered the data-vs-code drift attribution meaningless. The
+    hash therefore covers the closed history only; appending a new
+    completed day still moves it (that IS a data change).
     """
     if not bars_map:
         return None
-    return compute_data_hash(list(bars_map.items()))
+    today = pd.Timestamp.now(tz="UTC").normalize()
+    closed = {}
+    for key, df in bars_map.items():
+        if "timestamp" in df.columns:
+            df = df[df["timestamp"] < today]
+        closed[key] = df
+    return compute_data_hash(list(closed.items()))
 
 
 def _default_review_dir() -> Path:

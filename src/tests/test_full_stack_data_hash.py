@@ -34,6 +34,24 @@ def test_deterministic_regardless_of_insertion_order():
     assert a == b
 
 
+def test_current_day_bars_excluded_for_same_day_stability():
+    # Bars stamped on the current UTC date are in-flight (live session /
+    # incremental sync); two runs minutes apart must hash identically.
+    # Historical bars still move the hash.
+    hist = _df([1.0, 2.0, 3.0])
+    today = pd.Timestamp.now(tz="UTC").normalize()
+    with_today = pd.concat([hist, pd.DataFrame({
+        "timestamp": [today + pd.Timedelta(hours=3)],
+        "open": [9.0], "high": [9.0], "low": [9.0],
+        "close": [9.0], "volume": [1],
+    })], ignore_index=True)
+    assert (_data_hash_for_bars({"cu@60min": hist})
+            == _data_hash_for_bars({"cu@60min": with_today}))
+    edited_hist = _df([1.0, 9.0, 3.0])
+    assert (_data_hash_for_bars({"cu@60min": hist})
+            != _data_hash_for_bars({"cu@60min": edited_hist}))
+
+
 def test_daily_and_60min_keyed_distinctly_both_contribute():
     # Same symbol's daily and 60min must not collide on one key; a change to
     # only the 60min series must move the hash.
