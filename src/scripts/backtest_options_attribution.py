@@ -51,9 +51,28 @@ def fold_of(year: int) -> str:
     return "is" if year <= IS_CUTOFF_YEAR else "oos"
 
 
-def _apply_cost(price: float, cost_bps: int) -> float:
-    """Apply a cost in basis points (bps) to a price."""
-    return price * (1.0 + cost_bps / 10_000.0)
+def _entry_for_path(opt: "pd.DataFrame", *, tick: float, stop_ticks: int) -> dict | None:
+    """Entry dict for simulate_entry, in GROSS price space.
+
+    Returns None when the path has no bar at ENTRY_OFFSET (codex P2:
+    falling back to row 0 would reintroduce the signal-day-close
+    look-ahead the offset exists to avoid) or the offset close is
+    non-positive.  Costs are NOT applied here — the simulation runs on
+    gross prices and _net_mult applies the round trip once at the end
+    (codex P2: a cost-adjusted entry fed into simulate_entry made
+    _net_mult double-count the entry side and inflated stop/take
+    thresholds).
+    """
+    if len(opt) <= ENTRY_OFFSET:
+        return None
+    entry_price = float(opt["close"].iloc[ENTRY_OFFSET])
+    if entry_price <= 0:
+        return None
+    return {
+        "entry_idx": ENTRY_OFFSET,
+        "entry_price": entry_price,
+        "stop_price": entry_price - stop_ticks * tick,
+    }
 
 
 def _net_mult(gross_mult: float) -> float:
@@ -208,11 +227,11 @@ def run(underlying: str) -> dict:
             continue
 
         # AC-3: use next tradable bar close (offset ENTRY_OFFSET) as entry
-        # to avoid signal-day close look-ahead bias.  Row 0 = signal-day close,
-        # row `entry_offset` = close `entry_offset` trading days later.
-        entry_idx = min(ENTRY_OFFSET, len(opt) - 1)
-        entry_price = float(opt["close"].iloc[entry_idx])
-        if entry_price <= 0:
+        # to avoid signal-day close look-ahead bias.  Paths without a bar
+        # at the offset are SKIPPED (no row-0 fallback); the simulation
+        # runs on gross prices — costs are applied once in _net_mult.
+        entry = _entry_for_path(opt, tick=tick, stop_ticks=STOP_TICKS)
+        if entry is None:
             continue
 
         if src == "market":
@@ -220,12 +239,6 @@ def run(underlying: str) -> dict:
         else:
             model_n += 1
 
-        # AC-3: apply transaction costs to entry
-        net_entry_price = _apply_cost(entry_price, ROUND_TRIP_COST_BPS // 2)
-        stop_price = net_entry_price - STOP_TICKS * tick
-
-        entry = {"entry_idx": entry_idx, "entry_price": net_entry_price,
-                 "stop_price": stop_price}
         res = simulate_entry(opt, entry, **EXIT)
 
         # Gross multiple = what simulate_entry returns (pre-cost exit)

@@ -38,3 +38,8 @@ paired-trading 仓库**用 jj (Jujutsu)** 做版本管理，与 git 共置（col
 补充说明：
 - 当前 main 分支 bookmark 已通过 `jj bookmark track main --remote=origin` 启用追踪
 - 当前 working copy change id 不稳定（每次 amend 都换 id），但 commit 在 git 侧的 SHA 稳定
+
+**混提交防护（2026-06-12 教训）：`jj describe` 前必须先 `jj st` 核对文件清单。**
+jj 自动快照会把用户/其他 session 的在途改动卷进当前 change —— 2026-06-12
+把用户的 attribution 改动（+174 行）混进了我的 coverage-script 提交并 push。
+若发现外来文件：用 `jj split <我的文件> -m "..."` 拆分后再 describe/push。
