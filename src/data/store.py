@@ -249,12 +249,13 @@ class BarStore:
                 # The polygon feed includes pre/post-market bars the legacy
                 # feed did not (they inflated H2 signal counts ~3x and
                 # flipped per-symbol EV signs). Keep only bars fully inside
-                # the regular session — see _US_SESSION_OPEN note.
+                # the regular session — see _US_SESSION_OPEN note. The close
+                # bound is calendar-aware (13:00 ET on NYSE half-days).
                 end_et = df["datetime"].dt.tz_convert("America/New_York")
                 start_t = (end_et - _LEVEL_TO_OFFSET[level]).dt.time
-                end_t = end_et.dt.time
+                close_t = BarStore._us_session_close_times(end_et)
                 df = df[
-                    (start_t >= _US_SESSION_OPEN) & (end_t <= _US_SESSION_CLOSE)
+                    (start_t >= _US_SESSION_OPEN) & (end_et.dt.time <= close_t)
                 ].copy()
         elif exchange in _US_MICS and level == "D":
             df["datetime"] = BarStore._us_daily_session_close(df["datetime"], exchange)
@@ -290,6 +291,27 @@ class BarStore:
             .drop_duplicates(subset=["timestamp"], keep="last")
             .reset_index(drop=True)
         )
+
+    @staticmethod
+    def _us_session_close_times(end_et: pd.Series) -> pd.Series:
+        """Per-bar regular-session close time (ET) for the bar's ET date.
+
+        Uses the exchange calendar so half-days close at 13:00 ET; bars on
+        non-session dates get a sentinel that drops them.
+        """
+        close_by_date: dict = {}
+        for d in end_et.dt.date.unique():
+            try:
+                if calendars.is_session("XNYS", d):
+                    close_utc = pd.Timestamp(calendars.session_close("XNYS", d))
+                    close_by_date[d] = (
+                        close_utc.tz_convert("America/New_York").time()
+                    )
+                else:
+                    close_by_date[d] = time(0, 0)  # non-session: drop all
+            except Exception:
+                close_by_date[d] = _US_SESSION_CLOSE  # OOB dates: fixed bound
+        return end_et.dt.date.map(close_by_date)
 
     @staticmethod
     def _us_daily_session_close(dts: pd.Series, exchange: str) -> list:

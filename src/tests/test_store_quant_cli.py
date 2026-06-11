@@ -112,6 +112,21 @@ def test_us_intraday_keeps_only_legacy_session_bars(tmp_path):
     ]
 
 
+def test_us_intraday_respects_early_close_sessions(tmp_path):
+    # 2024-11-29 (Black Friday) closes 13:00 ET. Bars after the early
+    # close are post-market and must be dropped despite ending <= 16:00.
+    # EST: 23:00 Beijing 11-28 == 10:00 ET start (end 11:00, keep);
+    #      2:00 Beijing 11-30 == 13:00 ET start (end 14:00, post -> drop)
+    _write(tmp_path, "hour", "SPY.AMEX", [
+        _bar(datetime(2024, 11, 29, 23, 0)),  # 10:00-11:00 ET -> keep
+        _bar(datetime(2024, 11, 30, 2, 0)),   # 13:00-14:00 ET post-close -> drop
+    ])
+    bf = BarStore(tmp_path).load_barframe("SPY", "XNYS", "60min", as_of=AS_OF)
+    assert list(bf.df["timestamp"]) == [
+        pd.Timestamp("2024-11-29 16:00", tz="UTC"),  # end 11:00 ET
+    ]
+
+
 def test_cn_intraday_not_session_filtered(tmp_path):
     # CN night-session bars must survive (the US regular-session rule
     # must not leak into CN handling)
