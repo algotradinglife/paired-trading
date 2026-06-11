@@ -12,15 +12,18 @@ derives a main-contract continuous series strategy-side, read-only:
   - **No lookahead**: the main contract for trading day *d* is decided
     from the *prior* session's settlement metric.  The first session
     bootstraps on itself.
-  - **Roll rule**: a challenger with a LATER expiry must beat the
-    incumbent for ``confirm_days`` consecutive settlements; the switch
-    takes effect the next session.  Earlier expiries never become main
-    again (forward-only).  An incumbent with no bars at *d* NOR LATER
-    (truly expired/delisted) forces an immediate roll; a transient
-    one-day hole keeps the incumbent and the daily series simply skips
-    that date — rolling on a hole would be a PERMANENT switch to an
-    illiquid far month under the forward-only constraint, which is far
-    worse than a one-session gap.
+  - **Roll rule**: a challenger must beat the incumbent for
+    ``confirm_days`` consecutive settlements; the switch takes effect
+    the next session.  On clean data the winner only ever moves to
+    later expiries (a natural forward roll); confirmed BACKWARD moves
+    are allowed deliberately — they are the self-healing path out of
+    junk eras (store missing the era's true main months, or a
+    mid-backfill mixed state), where a hard forward-only ratchet locks
+    onto illiquid far months forever (observed 2026-06-11 during a
+    live pipeline backfill).  An incumbent with no bars at *d* NOR
+    LATER (truly expired/delisted) forces an immediate roll; a
+    transient one-day hole keeps the incumbent and the daily series
+    simply skips that date.
   - **Intraday slicing**: a contract's intraday bars are assigned to
     trading days CN-style — night-session bars (period_end after 16:00,
     or before ~04:00 the next calendar morning) belong to the NEXT
@@ -139,7 +142,7 @@ def _load_daily_panel(
 
 
 def build_main_schedule(
-    root: Path, exchange: str, product: str, *, confirm_days: int = 1
+    root: Path, exchange: str, product: str, *, confirm_days: int = 3
 ) -> dict[date, str]:
     """Per trading date, the canonical month of the main contract."""
     key = (str(root), exchange, product, confirm_days)
@@ -155,9 +158,13 @@ def build_main_schedule(
     all_dates: list[date] = sorted({d for df in panel.values() for d in df.index})
 
     def metric(d: date) -> dict[str, float]:
+        # OI is trusted only when ALL active contracts carry it — during
+        # an incremental pipeline re-sync only SOME files have OI>0, and
+        # mixing scales would let a freshly-synced far month hijack the
+        # schedule from a true main still carrying OI=0.
         oi = {m: float(df.loc[d, "open_interest"])
               for m, df in panel.items() if d in df.index}
-        if any(v > 0 for v in oi.values()):
+        if oi and all(v > 0 for v in oi.values()):
             return oi
         return {m: float(df.loc[d, "volume"])
                 for m, df in panel.items() if d in df.index}
@@ -181,17 +188,23 @@ def build_main_schedule(
             # incumbent truly expired/delisted — forced roll.  (A mere
             # one-day hole keeps the incumbent; the daily series just
             # skips that date.)
-            later = [m for m in active_d if m > main] or sorted(active_d)
-            scores = {m: mp.get(m, float("-inf")) for m in later}
+            scores = {m: mp.get(m, float("-inf")) for m in active_d}
             if all(v == float("-inf") for v in scores.values()):
                 md = metric(d)
-                scores = {m: md.get(m, float("-inf")) for m in later}
+                scores = {m: md.get(m, float("-inf")) for m in active_d}
             main = max(scores, key=scores.get)
             streak_month, streak = None, 0
         else:
-            challengers = {m for m in mp if m > main}
-            if challengers and main in mp:
-                leader = max(challengers, key=lambda m: mp[m])
+            # Challenger = the strongest contract by the prior settlement,
+            # in EITHER direction.  On clean data the argmax only ever
+            # moves to later expiries (a natural forward roll); allowing
+            # confirmed backward moves is the self-healing path out of
+            # junk eras (store missing the era's true main months, or a
+            # mid-backfill mixed state) — a hard forward-only ratchet
+            # locks onto far months forever once poisoned.
+            others = {m for m in mp if m != main}
+            if others and main in mp:
+                leader = max(others, key=lambda m: mp[m])
                 if mp[leader] > mp[main]:
                     streak = streak + 1 if streak_month == leader else 1
                     streak_month = leader
@@ -302,7 +315,7 @@ def synthesize_continuous(
     product: str,
     level: str,
     *,
-    confirm_days: int = 1,
+    confirm_days: int = 3,
 ) -> pd.DataFrame:
     """Continuous main-contract series in the raw store schema.
 

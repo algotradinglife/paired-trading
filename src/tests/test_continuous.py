@@ -90,6 +90,21 @@ def test_bootstrap_picks_max_metric_first_session(tmp_path):
     assert sched[date(2025, 3, 3)] == "202504"
 
 
+def test_partial_oi_coverage_falls_back_to_volume(tmp_path):
+    # Mid-backfill state: a far month was re-synced WITH OI while the true
+    # main still carries OI=0. OI must only be trusted when ALL active
+    # contracts have it; otherwise the freshly-synced far month would
+    # hijack the schedule.
+    _two_contract_store(
+        tmp_path,
+        vols_a=[90] * 5, vols_b=[10] * 5,   # A is the real main by volume
+        ois_a=[0.0] * 5, ois_b=[800.0] * 5,  # only B re-synced with OI
+    )
+    sched = continuous.build_main_schedule(tmp_path, "SHFE", "cu", confirm_days=2)
+    assert sched[date(2025, 3, 3)] == "202504"   # volume rules; B does not hijack
+    assert sched[date(2025, 3, 7)] == "202504"
+
+
 def test_oi_preferred_over_volume_when_present(tmp_path):
     # B dominates volume but A dominates OI -> A is main
     _two_contract_store(
@@ -117,17 +132,32 @@ def test_roll_requires_consecutive_confirmation(tmp_path):
     assert sched[date(2025, 3, 7)] == "202505"   # streak=2 -> switch
 
 
-def test_forward_only_never_rolls_back(tmp_path):
-    # main is B (later month); A (earlier) spikes for many days -> stays B
+def test_brief_backward_spike_does_not_switch(tmp_path):
+    # main is B (later month); A (earlier) spikes for ONE day only ->
+    # confirmation absorbs it, stays B
     _two_contract_store(
         tmp_path,
-        vols_a=[10, 99, 99, 99, 99],
-        vols_b=[90, 20, 20, 20, 20],
+        vols_a=[10, 99, 20, 20, 20],
+        vols_b=[90, 80, 80, 80, 80],
     )
     sched = continuous.build_main_schedule(tmp_path, "SHFE", "cu", confirm_days=2)
-    # bootstrap: B? no — bootstrap argmax day1 = A(90) vs B... vols_a[0]=10, vols_b[0]=90 -> B
     assert sched[date(2025, 3, 3)] == "202505"
     assert sched[date(2025, 3, 7)] == "202505"
+
+
+def test_sustained_flip_recovers_even_backward(tmp_path):
+    # Self-healing over the forward-only ratchet: when the schedule lands
+    # on a far month (junk-era artifact / mid-backfill store) and an
+    # EARLIER month is persistently dominant, the schedule must recover —
+    # a hard forward-only ratchet would lock out the true main forever.
+    _two_contract_store(
+        tmp_path,
+        vols_a=[10, 95, 95, 95, 95],   # A = earlier month, true main
+        vols_b=[90, 20, 20, 20, 20],   # B briefly looked dominant on day1
+    )
+    sched = continuous.build_main_schedule(tmp_path, "SHFE", "cu", confirm_days=2)
+    assert sched[date(2025, 3, 3)] == "202505"   # bootstrap on day1 data
+    assert sched[date(2025, 3, 7)] == "202504"   # recovered to the true main
 
 
 def test_expired_incumbent_forces_roll(tmp_path):
@@ -287,14 +317,33 @@ def test_barstore_synthesizes_continuous_for_zero_suffix(tmp_path):
     assert str(bf.df["timestamp"].iloc[0]) == "2025-03-03 00:00:00+00:00"
 
 
-def test_barstore_prefers_real_continuous_file_when_present(tmp_path):
+def test_barstore_prefers_real_continuous_file_with_longer_coverage(tmp_path):
+    # Provider continuous file covering MORE sessions than synthesis wins.
     from data.store import BarStore
     from datetime import timezone
-    _two_contract_store(tmp_path, vols_a=[90] * 5, vols_b=[10] * 5)
-    _write(tmp_path, "daily", "SHFE.cu0", [_bar(D[0], 555, 1)])
+    _two_contract_store(tmp_path, vols_a=[90] * 5, vols_b=[10] * 5)  # 5 sessions
+    extra = [datetime(2025, 2, d) for d in (24, 25, 26)]
+    _write(tmp_path, "daily", "SHFE.cu0",
+           [_bar(dt, 555, 1) for dt in extra] + [_bar(d, 555, 1) for d in D])
     bf = BarStore(tmp_path).load_barframe(
         "cu0", "XSHF", "D",
         as_of=datetime(2026, 1, 1, tzinfo=timezone.utc),
     )
-    assert len(bf.df) == 1
+    assert len(bf.df) == 8
     assert bf.df["close"].iloc[0] == 555.0
+
+
+def test_barstore_synthesis_wins_over_stub_continuous_file(tmp_path):
+    # Mid-backfill: the pipeline may have created a continuous file with
+    # only a few recent rows. Synthesis from contract months covers more
+    # sessions and must win until the provider file catches up.
+    from data.store import BarStore
+    from datetime import timezone
+    _two_contract_store(tmp_path, vols_a=[90] * 5, vols_b=[10] * 5)  # 5 sessions
+    _write(tmp_path, "daily", "SHFE.cu0", [_bar(D[4], 555, 1)])      # 1-row stub
+    bf = BarStore(tmp_path).load_barframe(
+        "cu0", "XSHF", "D",
+        as_of=datetime(2026, 1, 1, tzinfo=timezone.utc),
+    )
+    assert len(bf.df) == 5
+    assert bf.df["close"].iloc[0] == 100.0   # synthesized series

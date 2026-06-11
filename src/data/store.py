@@ -185,20 +185,29 @@ class BarStore:
             raise ValueError("as_of must be tz-aware (UTC)")
 
         path = self._root / folder / f"{fname}.parquet"
-        if path.exists():
-            df_raw = pd.read_parquet(path)
-        elif (
+        df_raw = pd.read_parquet(path) if path.exists() else None
+        if (
             exchange in _MIC_TO_EXCHANGE
             and re.fullmatch(r"[A-Za-z]{1,2}0", symbol)
         ):
-            # No provider continuous file — synthesize the main-contract
-            # series from individual contract months (data/continuous.py).
+            # Continuous symbol: synthesize the main-contract series from
+            # individual contract months (data/continuous.py) and use
+            # whichever source covers more sessions — a mid-backfill
+            # provider file may be a few-row stub, while a completed
+            # backfill should win over synthesis.
             from data import continuous
 
-            df_raw = continuous.synthesize_continuous(
-                self._root, _MIC_TO_EXCHANGE[exchange], symbol[:-1], level
-            )
-        else:
+            try:
+                synth = continuous.synthesize_continuous(
+                    self._root, _MIC_TO_EXCHANGE[exchange], symbol[:-1], level
+                )
+            except ValueError:
+                synth = None
+            if synth is not None and (
+                df_raw is None or len(synth) > len(df_raw)
+            ):
+                df_raw = synth
+        if df_raw is None:
             raise ValueError(
                 f"No data found for {symbol}/{exchange}/{level}: {path}"
             )

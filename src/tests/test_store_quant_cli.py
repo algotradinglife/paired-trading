@@ -189,7 +189,7 @@ def test_missing_file_raises_value_error_with_path(tmp_path):
 
 def test_continuous_symbol_without_contracts_raises(tmp_path):
     (tmp_path / "daily").mkdir()
-    with pytest.raises(ValueError, match="No contract files"):
+    with pytest.raises(ValueError, match="No data found"):
         BarStore(tmp_path).load_barframe("cu0", "XSHF", "D", as_of=AS_OF)
 
 
