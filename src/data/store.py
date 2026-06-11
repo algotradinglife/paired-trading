@@ -1,94 +1,119 @@
-"""BarStore — adapter between quant-data's ParquetStorage and BarFrame.
+"""BarStore — adapter between the quant-cli flat Parquet store and BarFrame.
 
-Reads OHLCV bars written by quant-data (Minishare/Polygon feeds) and
-returns them as BarFrame objects, applying the correct period_end
-timestamp semantics and column-name mapping.
+Reads OHLCV bars written by the quant-cli data layer (``quant sync``,
+~/workspace/quant) and returns BarFrame objects with the same timestamp
+contract the legacy quant-data pipeline produced, so detector calibration
+carries over unchanged.
 
-Design notes:
-  - No existing macd-momentum files are modified; this is a pure addition.
-  - `provider="quant_data"` and `adjustment_mode="none"` because
-    Minishare/Polygon data via quant-data is raw (no split adjustment).
-  - Daily US bars (NYSE/NASDAQ): quant-data stores the bar datetime as
-    market-close UTC; we confirm period_end via exchange_calendars so the
-    timestamp contract is the same as the alphavantage loader.
-  - Intraday and non-US bars: the stored datetime IS the period_end —
-    passed through directly.
-  - Column mapping: quant-data → BarFrame
-      datetime        → timestamp   (tz-aware UTC)
-      open_price      → open
-      high_price      → high
-      low_price       → low
-      close_price     → close
-      volume          → volume      (kept as-is)
+Store layout (flat, one file per symbol per interval):
+
+    {root}/{daily,hour,min15,min5,weekly}/{FILENAME}.parquet
+
+with the 8-column schema ``datetime`` (naive), ``open/high/low/close``,
+``volume``, ``turnover``, ``open_interest``.
+
+Timestamp semantics (and how they map to the legacy contract):
+
+  - CN intraday: stored naive Beijing, period-END (minishare/tushare
+    convention) -> localized Asia/Shanghai -> UTC.  Identical instants to
+    the legacy store, which converted to naive UTC at fetch time.
+  - CN + US daily/weekly: stored as naive midnight date markers -> labeled
+    UTC midnight as-is (legacy behaviour; converting via Shanghai would
+    shift the calendar date).  Exception: US daily is re-stamped to the
+    exchange session close via exchange_calendars, matching the legacy
+    loader.
+  - US intraday: stored naive in the fetch host's local tz (Beijing),
+    period-START (polygon epoch passed through ``datetime.fromtimestamp``)
+    -> localized Asia/Shanghai -> UTC -> shifted +interval to period-END.
+    NOTE: the legacy store passed polygon start-stamps through unshifted
+    (mislabelled as period_end), so US intraday timestamps here are
+    +interval vs. the pre-migration data; expect baseline drift.  The shift
+    is required for the as_of leak guard to be sound in live scoring.
+    CAVEAT: localization is only correct for data synced on a host in
+    Asia/Shanghai; see quant-cli ``fetchers/polygon.py``.
+
+Filename mapping:
+
+  - CN futures: ``{EXCHANGE}.{symbol}`` (e.g. SHFE.cu0, CZCE.MA0) — symbol
+    case is the caller's (bar_loader emits lowercase for SHFE/DCE/INE,
+    uppercase for CZCE/CFFEX, matching the store's files).
+  - US: ``{SYMBOL}.AMEX`` (vnpy-style suffix used for all US tickers).
+
+Writing/fetching is no longer this module's job — run ``quant sync`` in
+~/workspace/quant instead (the legacy ``BarStore.update()`` is gone).
 """
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import pandas as pd
 
 from data import calendars
 from data.bar_frame import BarFrame, canonical_payload_hash
-from quant_data.models import Exchange as QExchange, Interval
-from quant_data.storage.parquet import ParquetStorage
-
-if TYPE_CHECKING:
-    pass
-
 
 # ---------------------------------------------------------------------------
-# Exchange / interval mappings
+# Mapping tables
 # ---------------------------------------------------------------------------
 
-# macd-momentum MIC string → quant-data Exchange enum
-_EXCHANGE_MAP: dict[str, QExchange] = {
-    "XNYS": QExchange.NYSE,
-    "XNAQ": QExchange.NASDAQ,
-    "XSHG": QExchange.SSE,
-    "XSHE": QExchange.SZSE,
-    "XSHF": QExchange.SHFE,
-    "XDCE": QExchange.DCE,
-    "XZCE": QExchange.CZCE,
-    "XCFE": QExchange.CFFEX,
-    "XINE": QExchange.INE,
-    "XGFE": QExchange.GFEX,
+# macd-momentum level string → store folder
+_LEVEL_TO_FOLDER: dict[str, str] = {
+    "D":     "daily",
+    "W":     "weekly",
+    "60min": "hour",
+    "15min": "min15",
+    "5min":  "min5",
 }
 
-# Reverse map for logging / source_query construction
-_QEXCHANGE_TO_MIC: dict[QExchange, str] = {v: k for k, v in _EXCHANGE_MAP.items()}
-
-# macd-momentum level string → quant-data Interval enum
-_LEVEL_TO_INTERVAL: dict[str, Interval] = {
-    "D":     Interval.DAILY,
-    "W":     Interval.WEEKLY,
-    "60min": Interval.HOUR_1,
-    "4h":    Interval.HOUR_4,
-    "30min": Interval.MINUTE_30,
-    "15min": Interval.MINUTE_15,
-    "5min":  Interval.MINUTE_5,
-    "1min":  Interval.MINUTE_1,
+# MIC → store filename exchange prefix (CN futures)
+_MIC_TO_EXCHANGE: dict[str, str] = {
+    "XSHF": "SHFE",
+    "XDCE": "DCE",
+    "XZCE": "CZCE",
+    "XCFE": "CFFEX",
+    "XINE": "INE",
+    "XGFE": "GFEX",
 }
-_INTERVAL_TO_LEVEL: dict[Interval, str] = {v: k for k, v in _LEVEL_TO_INTERVAL.items()}
 
-# US exchanges that use exchange_calendars for period_end timestamp derivation
-_US_EXCHANGES: frozenset[QExchange] = frozenset({QExchange.NYSE, QExchange.NASDAQ})
+_US_MICS: frozenset[str] = frozenset({"XNYS", "XNAQ"})
+
+_INTRADAY_LEVELS: frozenset[str] = frozenset({"60min", "15min", "5min"})
+
+# US intraday stamps are polygon window STARTS; shift to period-end so the
+# BarFrame contract (and the as_of leak guard) hold.  CN intraday is already
+# period-end stamped (minishare/tushare convention) — no shift.
+_LEVEL_TO_OFFSET: dict[str, pd.Timedelta] = {
+    "60min": pd.Timedelta(hours=1),
+    "15min": pd.Timedelta(minutes=15),
+    "5min":  pd.Timedelta(minutes=5),
+}
+
+_LOCAL_TZ = "Asia/Shanghai"
 
 
-# ---------------------------------------------------------------------------
-# Datafeed factory
-# ---------------------------------------------------------------------------
+def _map_level(level: str) -> str:
+    try:
+        return _LEVEL_TO_FOLDER[level]
+    except KeyError:
+        supported = sorted(_LEVEL_TO_FOLDER.keys())
+        raise KeyError(
+            f"Level {level!r} not available in the quant-cli store. "
+            f"Supported: {supported}"
+        ) from None
 
-def _make_datafeed(exchange: QExchange):
-    """Return the appropriate datafeed instance for the given exchange."""
-    if exchange in _US_EXCHANGES:
-        from quant_data.datafeed import PolygonDatafeed
-        return PolygonDatafeed()
-    else:
-        from quant_data.datafeed import MinishareDatafeed
-        return MinishareDatafeed()
+
+def _map_filename(symbol: str, exchange: str) -> str:
+    if exchange in _US_MICS:
+        return f"{symbol.upper()}.AMEX"
+    prefix = _MIC_TO_EXCHANGE.get(exchange)
+    if prefix is None:
+        supported = sorted(_MIC_TO_EXCHANGE.keys() | _US_MICS)
+        raise KeyError(
+            f"Exchange {exchange!r} not in BarStore exchange map. "
+            f"Supported: {supported}"
+        )
+    return f"{prefix}.{symbol}"
 
 
 # ---------------------------------------------------------------------------
@@ -96,26 +121,20 @@ def _make_datafeed(exchange: QExchange):
 # ---------------------------------------------------------------------------
 
 class BarStore:
-    """Reads quant-data's ParquetStorage and returns BarFrame objects.
+    """Reads the quant-cli Parquet store and returns BarFrame objects.
 
     Args:
-        data_root: directory passed to ParquetStorage — should be the
-            same root used when writing data (e.g. ``./data/quant``).
+        data_root: store root (e.g. ``/mnt/c/Users/hhusl/quant_data`` or a
+            symlink such as ``src/data/quant``).
 
     Example::
 
         store = BarStore(Path("data/quant"))
         bf = store.load_barframe("SPY", "XNYS", "D")
-        store.update("SPY", "XNYS", "D",
-                     start=datetime(2020, 1, 1, tzinfo=timezone.utc))
     """
 
     def __init__(self, data_root: Path | str) -> None:
-        self._storage = ParquetStorage(data_root)
-
-    # ------------------------------------------------------------------
-    # Public interface
-    # ------------------------------------------------------------------
+        self._root = Path(data_root)
 
     def load_barframe(
         self,
@@ -130,71 +149,50 @@ class BarStore:
         """Read stored bars and return a BarFrame.
 
         Args:
-            symbol: ticker or contract code (e.g. "SPY", "RB2501").
-            exchange: MIC string matching _EXCHANGE_MAP (e.g. "XNYS").
+            symbol: ticker or contract code (e.g. "SPY", "cu0", "MA0").
+            exchange: MIC string (e.g. "XNYS", "XSHF").
             level: macd-momentum level string (e.g. "D", "60min").
             start: optional lower bound for the returned bars (UTC).
             end: optional upper bound for the returned bars (UTC).
             as_of: snapshot time for BarFrame.as_of (default: now UTC).
                    Mid-session bars whose period_end > as_of are dropped.
 
-        Returns:
-            BarFrame with period_end timestamps and provider="quant_data".
-
         Raises:
             KeyError: if exchange or level is not in the mapping tables.
-            ValueError: if the stored data is empty or fails BarFrame validation.
+            ValueError: if the data file is missing/empty or fails
+                BarFrame validation.
         """
-        q_exchange = self._map_exchange(exchange)
-        interval = self._map_level(level)
+        folder = _map_level(level)
+        fname = _map_filename(symbol, exchange)
 
         if as_of is None:
             as_of = datetime.now(timezone.utc)
         elif as_of.tzinfo is None:
             raise ValueError("as_of must be tz-aware (UTC)")
 
-        df_raw = self._storage.load_bar_data(
-            symbol, q_exchange, interval,
-            start=start or datetime.min,
-            end=end or datetime.max,
-        )
-
-        if isinstance(df_raw, type(iter([]))):
-            # chunk_size was not set so we should have a DataFrame, but guard anyway
-            import itertools
-            df_raw = pd.concat(list(df_raw), ignore_index=True)
-
-        if df_raw.empty:
+        path = self._root / folder / f"{fname}.parquet"
+        if not path.exists():
             raise ValueError(
-                f"No data found for {symbol}/{exchange}/{level} in "
-                f"{self._storage._root}"
+                f"No data found for {symbol}/{exchange}/{level}: {path}"
             )
 
-        df = self._build_bar_df(df_raw, symbol, exchange, level, interval)
+        df = self._build_bar_df(pd.read_parquet(path), symbol, exchange, level)
+
+        if start is not None:
+            df = df[df["timestamp"] >= pd.Timestamp(start)]
+        if end is not None:
+            df = df[df["timestamp"] <= pd.Timestamp(end)]
+        df = df.reset_index(drop=True)
 
         # Mid-session leak guard — drop bars whose period_end > as_of
         pre_filter_n = len(df)
         df = df[df["timestamp"] <= pd.Timestamp(as_of)].reset_index(drop=True)
         if df.empty:
             raise ValueError(
-                f"quant_data {symbol}/{exchange}/{level}: every bar's "
-                f"period_end is after as_of={as_of.isoformat()} "
-                f"(pre_filter_n={pre_filter_n})."
+                f"quant store {symbol}/{exchange}/{level}: no bars remain "
+                f"(pre-as_of n={pre_filter_n}, as_of={as_of.isoformat()}, "
+                f"start={start}, end={end})."
             )
-
-        payload_hash = canonical_payload_hash(df)
-        last_completed_ts = df["timestamp"].iloc[-1].to_pydatetime()
-
-        # calendar_version: use exchange_calendars for US; synthetic string
-        # for CN (quant-data does not use exchange_calendars internally).
-        cal_version = self._calendar_version(exchange, level)
-
-        # session_policy: quant-data fetches regular-session bars only
-        session_policy = "regular"
-
-        source_query = (
-            f"quant_data://{q_exchange.value}/{symbol}/{interval.value}"
-        )
 
         return BarFrame(
             df=df,
@@ -202,76 +200,18 @@ class BarStore:
             symbol=symbol.upper(),
             level=level,
             exchange=exchange,
-            calendar_version=cal_version,
+            calendar_version=self._calendar_version(exchange),
             adjustment_mode="none",
-            session_policy=session_policy,
-            source_query=source_query,
+            session_policy="regular",
+            source_query=f"quant_cli://{folder}/{fname}",
             as_of=as_of,
-            last_completed_ts=last_completed_ts,
-            payload_hash=payload_hash,
+            last_completed_ts=df["timestamp"].iloc[-1].to_pydatetime(),
+            payload_hash=canonical_payload_hash(df),
         )
-
-    def update(
-        self,
-        symbol: str,
-        exchange: str,
-        level: str,
-        start: datetime,
-        end: datetime | None = None,
-        *,
-        datafeed=None,
-    ) -> int:
-        """Fetch and store bars via the appropriate datafeed.
-
-        Calls DataManager.update() with the right datafeed (PolygonDatafeed
-        for NYSE/NASDAQ, MinishareDatafeed for CN exchanges).
-
-        Args:
-            symbol: ticker or contract code.
-            exchange: MIC string (e.g. "XNYS", "XSHF").
-            level: macd-momentum level string (e.g. "D", "60min").
-            start: earliest date to fetch (UTC-aware or naive).
-            end: latest date to fetch (default: now UTC).
-            datafeed: explicit datafeed instance to use (overrides auto-select).
-
-        Returns:
-            Number of new bars written to storage.
-        """
-        from quant_data import DataManager
-
-        q_exchange = self._map_exchange(exchange)
-        interval = self._map_level(level)
-        if datafeed is None:
-            datafeed = _make_datafeed(q_exchange)
-
-        manager = DataManager(datafeed=datafeed, storage=self._storage)
-        return manager.update(symbol, q_exchange, interval, start, end)
 
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
-
-    @staticmethod
-    def _map_exchange(exchange: str) -> QExchange:
-        try:
-            return _EXCHANGE_MAP[exchange]
-        except KeyError:
-            supported = sorted(_EXCHANGE_MAP.keys())
-            raise KeyError(
-                f"Exchange {exchange!r} not in BarStore exchange map. "
-                f"Supported: {supported}"
-            ) from None
-
-    @staticmethod
-    def _map_level(level: str) -> Interval:
-        try:
-            return _LEVEL_TO_INTERVAL[level]
-        except KeyError:
-            supported = sorted(_LEVEL_TO_INTERVAL.keys())
-            raise KeyError(
-                f"Level {level!r} not in BarStore level map. "
-                f"Supported: {supported}"
-            ) from None
 
     @staticmethod
     def _build_bar_df(
@@ -279,66 +219,22 @@ class BarStore:
         symbol: str,
         exchange: str,
         level: str,
-        interval: Interval,
     ) -> pd.DataFrame:
-        """Convert a quant-data DataFrame to BarFrame's expected format.
-
-        quant-data columns:
-            datetime, open_price, high_price, low_price, close_price,
-            volume, amount, open_interest
-
-        BarFrame required:  timestamp (UTC tz-aware), open, high, low, close
-        BarFrame optional:  volume, open_interest
-        """
+        """Convert a quant-cli store DataFrame to BarFrame's expected format."""
         df = df_raw.copy()
 
-        # Ensure datetime is tz-aware UTC
         if not pd.api.types.is_datetime64_any_dtype(df["datetime"]):
             df["datetime"] = pd.to_datetime(df["datetime"])
-        if df["datetime"].dt.tz is None:
-            df["datetime"] = df["datetime"].dt.tz_localize("UTC")
-        else:
-            df["datetime"] = df["datetime"].dt.tz_convert("UTC")
 
-        # For US daily bars: map stored datetime → XNYS/XNAQ session_close
-        # so the timestamp is the canonical period_end from exchange_calendars,
-        # matching the alphavantage/polygon loaders.
-        q_exchange_name = _EXCHANGE_MAP.get(exchange)
-        if (
-            q_exchange_name in _US_EXCHANGES
-            and interval == Interval.DAILY
-        ):
-            # The stored datetime is the bar date at market close in UTC.
-            # Re-derive via calendars.session_close to be consistent with
-            # the alphavantage loader.
-            mic = exchange  # e.g. "XNYS"
-            timestamps: list[pd.Timestamp | None] = []
-            import exchange_calendars as _ecals
-            cal = _ecals.get_calendar(mic)
-            cal_lower = cal.first_session.date()
-            cal_upper = cal.last_session.date()
-            for dt in df["datetime"]:
-                date_obj = pd.Timestamp(dt).date()
-                try:
-                    if not calendars.is_session(mic, date_obj):
-                        # Non-session date stored (e.g. weekend/holiday) —
-                        # drop it (same as alphavantage loader).
-                        timestamps.append(None)
-                        continue
-                    timestamps.append(
-                        pd.Timestamp(calendars.session_close(mic, date_obj))
-                    )
-                except _ecals.errors.DateOutOfBounds:
-                    if date_obj < cal_lower:
-                        timestamps.append(None)  # historic OOB — drop
-                    else:
-                        raise RuntimeError(
-                            f"Bar date {date_obj} exceeds exchange_calendars "
-                            f"{mic} upper bound {cal_upper}. "
-                            f"Run `pip install --upgrade exchange-calendars`."
-                        ) from None
-
-            df["datetime"] = timestamps
+        if level in _INTRADAY_LEVELS:
+            # Naive Beijing wall-clock → UTC (see module docstring)
+            df["datetime"] = (
+                df["datetime"].dt.tz_localize(_LOCAL_TZ).dt.tz_convert("UTC")
+            )
+            if exchange in _US_MICS:
+                df["datetime"] = df["datetime"] + _LEVEL_TO_OFFSET[level]
+        elif exchange in _US_MICS and level == "D":
+            df["datetime"] = BarStore._us_daily_session_close(df["datetime"], exchange)
             df = df[df["datetime"].notna()].copy()
             if df.empty:
                 raise ValueError(
@@ -347,27 +243,18 @@ class BarStore:
                     f"non-session dates)."
                 )
             df["datetime"] = pd.DatetimeIndex(df["datetime"]).tz_convert("UTC")
+        else:
+            # Daily/weekly date markers: label the naive midnight as UTC
+            df["datetime"] = df["datetime"].dt.tz_localize("UTC")
 
-        # Column rename: quant-data → BarFrame
-        df = df.rename(columns={
-            "datetime":    "timestamp",
-            "open_price":  "open",
-            "high_price":  "high",
-            "low_price":   "low",
-            "close_price": "close",
-        })
+        df = df.rename(columns={"datetime": "timestamp"})
 
-        # Keep only BarFrame-allowed columns (drop amount, etc.)
         keep = ["timestamp", "open", "high", "low", "close", "volume", "open_interest"]
         df = df[[c for c in keep if c in df.columns]]
 
-        # Ensure numeric price columns
         for col in ("open", "high", "low", "close"):
             df[col] = pd.to_numeric(df[col], errors="coerce")
-
-        # Drop any rows where price data is NaN after coercion
-        price_cols = ["open", "high", "low", "close"]
-        df = df.dropna(subset=price_cols).reset_index(drop=True)
+        df = df.dropna(subset=["open", "high", "low", "close"]).reset_index(drop=True)
 
         if df.empty:
             raise ValueError(
@@ -375,37 +262,52 @@ class BarStore:
                 f"after cleaning."
             )
 
-        # Sort and dedup by timestamp
-        df = df.sort_values("timestamp").drop_duplicates(
-            subset=["timestamp"], keep="last"
-        ).reset_index(drop=True)
-
-        return df
+        return (
+            df.sort_values("timestamp")
+            .drop_duplicates(subset=["timestamp"], keep="last")
+            .reset_index(drop=True)
+        )
 
     @staticmethod
-    def _calendar_version(exchange: str, level: str) -> str:
-        """Build a calendar_version string consistent with existing loaders.
+    def _us_daily_session_close(dts: pd.Series, exchange: str) -> list:
+        """Map naive trade-date markers to exchange session-close timestamps.
 
-        For US exchanges (XNYS/XNAQ): delegate to calendars.calendar_version_for
-        since we use exchange_calendars for period_end stamping.
-        For CN exchanges: synthetic version string (quant-data doesn't use
-        exchange_calendars internally).
+        Non-session dates (weekend/holiday) map to None and are dropped by
+        the caller, same as the legacy loader.
         """
-        q_exchange = _EXCHANGE_MAP.get(exchange)
-        if q_exchange in _US_EXCHANGES:
-            # Use the same MIC the calendars module expects
-            mic = exchange  # "XNYS" or "XNAQ"
+        import exchange_calendars as _ecals
+
+        mic = "XNYS"  # NYSE and NASDAQ share the same session calendar
+        cal = _ecals.get_calendar(mic)
+        cal_lower = cal.first_session.date()
+        cal_upper = cal.last_session.date()
+
+        timestamps: list[pd.Timestamp | None] = []
+        for dt in dts:
+            date_obj = pd.Timestamp(dt).date()
             try:
-                return str(calendars.calendar_version_for(mic))
-            except Exception:
-                # XNAQ is not in calendars.SUPPORTED_EXCHANGES; fall back
-                # to XNYS (NYSE and NASDAQ share the same session calendar)
+                if not calendars.is_session(mic, date_obj):
+                    timestamps.append(None)
+                    continue
+                timestamps.append(
+                    pd.Timestamp(calendars.session_close(mic, date_obj))
+                )
+            except _ecals.errors.DateOutOfBounds:
+                if date_obj < cal_lower:
+                    timestamps.append(None)  # historic OOB — drop
+                else:
+                    raise RuntimeError(
+                        f"Bar date {date_obj} exceeds exchange_calendars "
+                        f"{mic} upper bound {cal_upper}. "
+                        f"Run `pip install --upgrade exchange-calendars`."
+                    ) from None
+        return timestamps
+
+    @staticmethod
+    def _calendar_version(exchange: str) -> str:
+        if exchange in _US_MICS:
+            try:
                 return str(calendars.calendar_version_for("XNYS"))
-        else:
-            # CN / other: synthetic string identifying the quant-data version
-            try:
-                import quant_data as _qd
-                qd_version = _qd.__version__
-            except AttributeError:
-                qd_version = "unknown"
-            return f"quant_data=={qd_version}+{exchange}"
+            except Exception:
+                return "XNYS-unknown"
+        return f"quant_cli+{exchange}"
