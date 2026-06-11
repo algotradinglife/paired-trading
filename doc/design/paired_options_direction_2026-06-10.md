@@ -1,6 +1,6 @@
-# 标的-期权配对交易：问题盘点与方向文档
+# 标的-期权方向性择时：问题盘点与方向文档
 
-**日期**: 2026-06-10
+**日期**: 2026-06-10 (updated 2026-06-11: clarified this is directional option timing, not delta-neutral paired trading)
 **状态**: 方向性文档（迁移到新服务器后作为深度讨论的起点）
 **读者**: 迁移后的新 session / 未来的自己
 **配套阅读**: `doc/design/xiao_options_timing_design_2026-06-08.md`（肖体系期权 timing 设计稿）、
@@ -12,6 +12,11 @@
 
 用标的分析寻找潜在顶/底，用对应的**浅虚 naked call/put** 入场出场，获取相对标的腿的超额收益。
 方向选择的依据：肖老师（飞天期权）的实战体系——CN 期货为主，**她偏重 put**，其学生可复制此打法。
+
+> ⚠️ **重要免责：** 本系统是**方向性期权择时**（directional option timing），
+> 并非 Delta 中性配对交易（delta-neutral pairs trading）。
+> 当前实现没有组合 delta 汇总、底层对冲腿或动态再平衡。
+> 策略通过期权权利金 stop/take 管理风险，不依赖底层期货对冲。
 
 ---
 

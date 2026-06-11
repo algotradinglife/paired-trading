@@ -77,3 +77,30 @@ def test_premium_path_falls_back_to_model(tmp_path):
                            entry_date=date(2025, 9, 1), data_dir=tmp_path,
                            underlying=ul, iv=0.18, max_hold=30, min_cover=5)
     assert src == "model" and df is not None
+
+
+from engine.options.black76 import black76_price
+
+
+def test_model_option_daily_matches_black76():
+    """Regression: model_option_daily must produce prices consistent
+    with black76_price() — verify fixed F/K/T/r/sigma match exactly."""
+    ul = _ul([6000, 6100, 6200])
+    strike = 6100.0
+    expiry = date(2025, 9, 10)
+    entry = date(2025, 9, 1)  # aligns with _ul date_range start
+    r = 0.02
+    iv = 0.13
+    df = model_option_daily(strike=strike, expiry=expiry, entry_date=entry,
+                            underlying=ul, iv=iv, max_hold=30, r=r)
+    assert df is not None and len(df) == 3
+    # Each OHLC field must equal black76_price(F, K, T, r, iv, "C")
+    for i, (_, b) in enumerate(ul.iterrows()):
+        T = max((expiry - entry).days - i, 0) / 365.0
+        expected = black76_price(float(b["close"]), strike, T, r, iv, "C")
+        assert abs(float(df["close"].iloc[i]) - expected) < 1e-6, \
+            f"row {i}: model {df['close'].iloc[i]:.6f} != black76 {expected:.6f} (T={T:.4f})"
+    # Spot-check the review's F=6000, K=6100, T=9/365, sigma=13% case (day 0)
+    T0 = 9.0 / 365.0
+    b76 = black76_price(6000.0, 6100.0, T0, 0.02, 0.13, "C")
+    assert abs(float(df["close"].iloc[0]) - b76) < 1e-6

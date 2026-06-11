@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from engine.options.cn_ag_selector import _bs_call_price
+from engine.options.black76 import black76_price
 
 IV_ASSUMPTION = {"ag": 0.13, "au": 0.085}  # pinned 2026-06-10 from observed ATM IV
 # medians (ag n=6 med 0.131; au n=32 med 0.085). See doc/repro/options_attribution_2026-06-10.md.
@@ -92,10 +92,10 @@ def model_option_daily(strike: float, expiry: date, entry_date: date,
     for _, b in ul.iterrows():
         T = max((expiry - b["date"]).days, 0) / 365.0
         rows.append({
-            "open":  _bs_call_price(float(b["open"]),  strike, T, r, iv),
-            "high":  _bs_call_price(float(b["high"]),  strike, T, r, iv),
-            "low":   _bs_call_price(float(b["low"]),   strike, T, r, iv),
-            "close": _bs_call_price(float(b["close"]), strike, T, r, iv),
+            "open":  black76_price(float(b["open"]),  strike, T, r, iv, "C"),
+            "high":  black76_price(float(b["high"]),  strike, T, r, iv, "C"),
+            "low":   black76_price(float(b["low"]),   strike, T, r, iv, "C"),
+            "close": black76_price(float(b["close"]), strike, T, r, iv, "C"),
         })
     return pd.DataFrame(rows)
 

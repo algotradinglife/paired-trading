@@ -1,7 +1,15 @@
 """Attribution backtest for score_today's ag/au options_calls emission.
 Replays the live emission, prices each Rank-1 OTM call (real data + Black-76
 fallback), simulates the validated DD-line exit, aggregates IS/OOS folds.
-Spec: docs/superpowers/specs/2026-06-10-options-attribution-design.md"""
+
+Spec: docs/superpowers/specs/2026-06-10-options-attribution-design.md
+
+Fixes applied 2026-06-11 per review t_54083f1a:
+  - AC-3: entry on next tradable bar close (not signal-day close); transaction
+    costs (commission + slippage bps); gross and net metrics reported; verdict
+    based on net metrics.
+  - AC-4: verdict downgraded to REGIME_ONLY when modeled_fraction > 0.5;
+    PROMOTE never emitted from model-dominated results."""
 from __future__ import annotations
 
 import argparse
@@ -28,14 +36,50 @@ UL_SYMBOL = {"ag": "kq_m_shfe_ag", "au": "kq_m_shfe_au"}
 EXIT = dict(take1_mult=2.0, take2_mult=4.0, max_hold=30)
 STOP_TICKS = 5
 
+# AC-3: avoid signal-day close bias — enter on next tradable bar's close.
+# 0 = signal-day close (old behaviour), 1 = next bar close (recommended).
+ENTRY_OFFSET = 1
+
+# AC-3: round-trip transaction costs (commission + slippage in basis points).
+# Aggressive estimate: 10 bps commission + 10 bps slippage = 20 bps round-trip.
+COMMISSION_BPS = 10
+SLIPPAGE_BPS = 10
+ROUND_TRIP_COST_BPS = COMMISSION_BPS + SLIPPAGE_BPS
+
 
 def fold_of(year: int) -> str:
     return "is" if year <= IS_CUTOFF_YEAR else "oos"
 
 
-def verdict_for(is_ev: float, oos_ev: float) -> str:
-    """EV_mult > 1.0 = profit. PROMOTE iff both folds profitable; REGIME_ONLY
-    iff only OOS; REJECT iff neither."""
+def _apply_cost(price: float, cost_bps: int) -> float:
+    """Apply a cost in basis points (bps) to a price."""
+    return price * (1.0 + cost_bps / 10_000.0)
+
+
+def _net_mult(gross_mult: float) -> float:
+    """Net premium multiple accounting for round-trip transaction costs.
+
+    Half the round-trip cost is applied at entry (buying the option at
+    a slightly worse price) and half at exit (selling at a slightly
+    worse price).  For a 20 bps round trip:
+      net_mult = gross_mult * (1 - 0.001) / (1 + 0.001)
+               ≈ gross_mult * 0.998
+    """
+    half = ROUND_TRIP_COST_BPS / 20_000.0
+    return round(gross_mult * (1.0 - half) / (1.0 + half), 4)
+
+
+def verdict_for(is_ev: float, oos_ev: float, *, model_dominated: bool = False) -> str:
+    """EV_mult > 1.0 = profit.
+
+    When model_dominated is True (modeled_fraction > 0.5), PROMOTE is
+    never returned — the verdict is capped at REGIME_ONLY (monitoring-grade)
+    per AC-4.  Only market-backed results may reach PROMOTE."""
+    if model_dominated:
+        if oos_ev > 1.0:
+            return "REGIME_ONLY"
+        return "REJECT"
+    # Market-backed (or fully market) verdicts
     if is_ev > 1.0 and oos_ev > 1.0:
         return "PROMOTE"
     if oos_ev > 1.0:
@@ -55,19 +99,31 @@ def _expiry_from_calls(call: dict, underlying: str):
     return fn(year, month)
 
 
-def _cell(rows: list[dict]) -> dict:
+def _cell(rows: list[dict], key: str = "mult") -> dict:
+    """:param key: 'mult' for gross, 'net_mult' for net."""
     if not rows:
         return {"n": 0, "ev_mult": None, "win_pct": None}
-    mults = [t["mult"] for t in rows]
+    mults = [t[key] for t in rows]
     return {"n": len(rows),
             "ev_mult": round(sum(mults) / len(mults), 3),
             "win_pct": round(sum(1 for m in mults if m > 1.0) / len(mults) * 100, 1)}
 
 
-def _aggregate(underlying: str, trades: list[dict], market_n: int, model_n: int) -> dict:
+def _aggregate(underlying: str, trades: list[dict],
+               market_n: int, model_n: int,
+               gross: bool = False) -> dict:
+    """Aggregate trades into a structured report.
+
+    When ``gross`` is True, builds the gross-metrics report (pre-cost).
+    When False, builds the net-metrics report (post-cost) and bases the
+    verdict on net metrics.
+    """
+    key = "mult" if gross else "net_mult"
+    label = "gross" if gross else "net"
+
     is_rows = [t for t in trades if fold_of(t["year"]) == "is"]
     oos_rows = [t for t in trades if fold_of(t["year"]) == "oos"]
-    is_c, oos_c = _cell(is_rows), _cell(oos_rows)
+    is_c, oos_c = _cell(is_rows, key), _cell(oos_rows, key)
 
     by_year: dict[int, list] = {}
     by_emitter: dict[str, list] = {}
@@ -77,34 +133,52 @@ def _aggregate(underlying: str, trades: list[dict], market_n: int, model_n: int)
 
     total = market_n + model_n
     modeled_fraction = round(model_n / total, 3) if total else None
+    model_dominated = (modeled_fraction or 0.0) > 0.5
+
     # A fold with no trades counts as non-profitable (ev 0.0) for the verdict.
-    verdict = verdict_for(is_c["ev_mult"] or 0.0, oos_c["ev_mult"] or 0.0)
-    # Reliability gate: when most P&L is Black-76-priced (the emitted strikes
-    # lack market data), the verdict reflects the IV assumption, not market
-    # edge — and is IV-sensitive. Flag it so the verdict isn't over-trusted.
-    reliability = ("MODEL_DOMINATED" if (modeled_fraction or 0.0) > 0.5
-                   else "MARKET_BACKED")
-    return {
+    verdict = verdict_for(is_c["ev_mult"] or 0.0, oos_c["ev_mult"] or 0.0,
+                          model_dominated=model_dominated)
+    reliability = ("MODEL_DOMINATED" if model_dominated else "MARKET_BACKED")
+
+    entry_desc = f"next-bar close (offset={ENTRY_OFFSET}), Rank-1 OTM call (directional bottom, score>=3)"
+    costs_desc = f"commission={COMMISSION_BPS}bps + slippage={SLIPPAGE_BPS}bps = {ROUND_TRIP_COST_BPS}bps r/t"
+
+    base = {
         "lane": f"options_{underlying}",
         "underlying": UL_SYMBOL[underlying],
         "emission_binding": f"score_today.py:940-1303; cn_{underlying}_selector.select_otm_calls",
-        "entry": "signal-day close, Rank-1 OTM call (cn_metal bottom, score>=3)",
+        "entry": entry_desc,
+        "cost_model": costs_desc,
+        "entry_offset": ENTRY_OFFSET,
         "exit": {"take1": EXIT["take1_mult"], "take2": EXIT["take2_mult"],
                  "stop_ticks": STOP_TICKS, "tick": TICK[underlying],
                  "max_hold_days": EXIT["max_hold"]},
         "pricing": {"market_n": market_n, "model_n": model_n,
                     "modeled_fraction": modeled_fraction},
-        "samples": {"is": is_c, "oos": oos_c,
-                    "by_year": {str(y): _cell(r) for y, r in sorted(by_year.items())}},
-        "cells": {"rank1": _cell(trades),
-                  "by_emitter": {em: _cell(r) for em, r in sorted(by_emitter.items())}},
-        "verdict": verdict,
+    }
+
+    suffix = "_gross" if gross else ""
+    return {
+        **base,
+        "samples": {
+            f"is{suffix}": is_c,
+            f"oos{suffix}": oos_c,
+            f"by_year{suffix}": {str(y): _cell(r, key) for y, r in sorted(by_year.items())},
+        },
+        "cells": {
+            f"rank1{suffix}": _cell(trades, key),
+            f"by_emitter{suffix}": {em: _cell(r, key) for em, r in sorted(by_emitter.items())},
+        },
+        f"verdict{suffix}": verdict,
         "reliability": reliability,
-        "verdict_reason": (f"IS ev_mult={is_c['ev_mult']} (n={is_c['n']}), "
-                           f"OOS ev_mult={oos_c['ev_mult']} (n={oos_c['n']}); "
-                           f"modeled_fraction={modeled_fraction} -> reliability={reliability}. "
-                           f"When MODEL_DOMINATED the verdict reflects the IV assumption, "
-                           f"not market edge (IV-sensitive); treat as monitoring-grade."),
+        f"verdict_reason{suffix}": (
+            f"IS {label}_ev_mult={is_c['ev_mult']} (n={is_c['n']}), "
+            f"OOS {label}_ev_mult={oos_c['ev_mult']} (n={oos_c['n']}); "
+            f"modeled_fraction={modeled_fraction} -> reliability={reliability}. "
+            f"Costs: {costs_desc}. "
+            f"Entry: signal-day close offset {ENTRY_OFFSET} bar(s). "
+            f"Verdict on {label} metrics."
+        ),
         "data_snapshot": "2026-06-10",
     }
 
@@ -132,26 +206,62 @@ def run(underlying: str) -> dict:
                                 underlying=bars, iv=iv, max_hold=EXIT["max_hold"])
         if opt is None or opt.empty:
             continue
-        entry_price = float(opt["close"].iloc[0])
+
+        # AC-3: use next tradable bar close (offset ENTRY_OFFSET) as entry
+        # to avoid signal-day close look-ahead bias.  Row 0 = signal-day close,
+        # row `entry_offset` = close `entry_offset` trading days later.
+        entry_idx = min(ENTRY_OFFSET, len(opt) - 1)
+        entry_price = float(opt["close"].iloc[entry_idx])
         if entry_price <= 0:
             continue
+
         if src == "market":
             market_n += 1
         else:
             model_n += 1
-        entry = {"entry_idx": 0, "entry_price": entry_price,
-                 "stop_price": entry_price - STOP_TICKS * tick}
+
+        # AC-3: apply transaction costs to entry
+        net_entry_price = _apply_cost(entry_price, ROUND_TRIP_COST_BPS // 2)
+        stop_price = net_entry_price - STOP_TICKS * tick
+
+        entry = {"entry_idx": entry_idx, "entry_price": net_entry_price,
+                 "stop_price": stop_price}
         res = simulate_entry(opt, entry, **EXIT)
-        trades.append({"year": e.sig_date.year, "emitter": e.emitter,
-                       "mult": res["mult"], "source": src})
-    return _aggregate(underlying, trades, market_n, model_n)
+
+        # Gross multiple = what simulate_entry returns (pre-cost exit)
+        gross_mult = res["mult"]
+        # Net multiple: half the round-trip cost at entry and half at exit
+        net_mult = _net_mult(gross_mult)
+
+        trades.append({
+            "year": e.sig_date.year,
+            "emitter": e.emitter,
+            "mult": round(gross_mult, 4),
+            "net_mult": round(net_mult, 4),
+            "source": src,
+        })
+
+    return {
+        "gross": _aggregate(underlying, trades, market_n, model_n, gross=True),
+        "net": _aggregate(underlying, trades, market_n, model_n, gross=False),
+    }
 
 
 def main() -> None:
+    global ENTRY_OFFSET, ROUND_TRIP_COST_BPS
     ap = argparse.ArgumentParser()
     ap.add_argument("--underlying", choices=["ag", "au"], required=True)
     ap.add_argument("--out-json", type=Path, default=None)
+    ap.add_argument("--entry-offset", type=int, default=ENTRY_OFFSET,
+                    help="Bars to skip after signal date for entry (0=signal close, 1=next close)")
+    ap.add_argument("--cost-bps", type=int, default=ROUND_TRIP_COST_BPS,
+                    help="Round-trip cost in bps (default 20 = 10 commission + 10 slippage)")
     args = ap.parse_args()
+
+    # Override globals from CLI args
+    ENTRY_OFFSET = args.entry_offset
+    ROUND_TRIP_COST_BPS = args.cost_bps
+
     baseline = run(args.underlying)
     print(json.dumps(baseline, indent=2, default=str))
     if args.out_json:
