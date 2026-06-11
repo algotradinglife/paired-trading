@@ -23,27 +23,32 @@ def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
                       quant_root: Path | None = None) -> pd.DataFrame | None:
     """Real OPTION daily-OHLC frame from entry_date forward (<= max_hold+5 rows).
 
-    Tries the quant-cli OptionStore parquet first (``quant_root`` defaults
-    to the data/quant symlink), then the legacy JSON files:
-    {contract}_{YYYYMMDD}_daily.json (newest) or {contract}_daily.json.
-    Returns None when no source covers entry_date. Index reset; row 0 is
-    the first bar with date >= entry_date.
+    Reads both the quant-cli OptionStore parquet (``quant_root`` defaults
+    to the data/quant symlink) and the legacy JSON files
+    ({contract}_{YYYYMMDD}_daily.json newest first, then
+    {contract}_daily.json) and returns whichever covers MORE sessions —
+    a mid-backfill parquet stub must not shadow a complete JSON path
+    (and vice versa). Returns None when no source covers entry_date.
+    Index reset; row 0 is the first bar with date >= entry_date.
     """
     sym = contract_sym.lower()
 
     from data.bar_loader import DEFAULT_QUANT_ROOT
     from data.option_store import get_store
     store = get_store(quant_root if quant_root is not None else DEFAULT_QUANT_ROOT)
+    pq_frame: pd.DataFrame | None = None
     pq = store.load_contract_daily(sym)
     if pq is not None:
         pq = pq[pq["date"] >= entry_date].reset_index(drop=True)
         if not pq.empty:
-            return pq.head(max_hold + 5)[
+            pq_frame = pq.head(max_hold + 5)[
                 ["open", "high", "low", "close"]
             ].reset_index(drop=True)
+
     # Newest dated snapshot first (most complete history), then the rolling file.
     # Try each until one actually covers entry_date — don't stop at the first
     # file with bars, or a stale snapshot spuriously forces the model fallback.
+    json_frame: pd.DataFrame | None = None
     files = (sorted(data_dir.glob(f"{sym}_*_daily.json"), reverse=True)
              + sorted(data_dir.glob(f"{sym}_daily.json")))
     for p in files:
@@ -55,8 +60,15 @@ def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
         df["date"] = pd.to_datetime(df["time"], unit="s", utc=True).dt.date
         df = df[df["date"] >= entry_date].sort_values("date").reset_index(drop=True)
         if not df.empty:
-            return df.head(max_hold + 5)[["open", "high", "low", "close"]].reset_index(drop=True)
-    return None
+            json_frame = df.head(max_hold + 5)[
+                ["open", "high", "low", "close"]
+            ].reset_index(drop=True)
+            break
+
+    candidates = [f for f in (pq_frame, json_frame) if f is not None]
+    if not candidates:
+        return None
+    return max(candidates, key=len)
 
 
 def model_option_daily(strike: float, expiry: date, entry_date: date,

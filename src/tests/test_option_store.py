@@ -147,6 +147,32 @@ def test_enrich_with_iv_uses_store_prices(tmp_path):
     assert c["iv"] is not None and 0 < c["iv"] < 100
 
 
+def test_load_option_daily_prefers_longer_source(tmp_path):
+    # Mid-backfill: a 1-row parquet stub must not shadow a legacy JSON
+    # file that actually covers the path (mirrors the BarStore
+    # continuous-file rule).
+    import json as _json
+    from engine.options.option_price_loader import load_option_daily
+    _write(tmp_path, "SHFE.ag2607C19900", [_bar(datetime(2026, 5, 5), 255)])
+    json_dir = tmp_path / "json"
+    json_dir.mkdir()
+
+    def epoch(d):
+        return int(pd.Timestamp(d, tz="UTC").timestamp())
+
+    bars = [
+        {"time": epoch("2026-05-05"), "open": 250, "high": 256, "low": 249, "close": 255},
+        {"time": epoch("2026-05-06"), "open": 255, "high": 261, "low": 254, "close": 260},
+        {"time": epoch("2026-05-07"), "open": 260, "high": 266, "low": 259, "close": 265},
+    ]
+    (json_dir / "ag2607c19900_daily.json").write_text(_json.dumps({"bars": bars}))
+    df = load_option_daily(
+        "ag2607c19900", date(2026, 5, 5), json_dir,
+        max_hold=30, quant_root=tmp_path,
+    )
+    assert list(df["close"]) == [255, 260, 265]   # JSON (3 rows) beats stub (1)
+
+
 def test_load_option_daily_parquet_first(tmp_path):
     from engine.options.option_price_loader import load_option_daily
     _write(tmp_path, "SHFE.ag2607C19900", [
