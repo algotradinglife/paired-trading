@@ -24,7 +24,11 @@ Timestamp semantics (and how they map to the legacy contract):
     loader.
   - US intraday: stored naive in the fetch host's local tz (Beijing),
     period-START (polygon epoch passed through ``datetime.fromtimestamp``)
-    -> localized Asia/Shanghai -> UTC -> shifted +interval to period-END.
+    -> localized Asia/Shanghai -> UTC -> shifted +interval to period-END
+    -> filtered to the NYSE regular session (period_end in (9:30, 16:00]
+    ET; the new feed carries pre/post-market bars the legacy feed did not,
+    which inflated H2 signal counts ~3x and flipped per-symbol EV signs —
+    verified against the pa_us_60min QQQ baseline cell 2026-06-11).
     NOTE: the legacy store passed polygon start-stamps through unshifted
     (mislabelled as period_end), so US intraday timestamps here are
     +interval vs. the pre-migration data; expect baseline drift.  The shift
@@ -45,7 +49,7 @@ Writing/fetching is no longer this module's job — run ``quant sync`` in
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, time, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -90,6 +94,15 @@ _LEVEL_TO_OFFSET: dict[str, pd.Timedelta] = {
 }
 
 _LOCAL_TZ = "Asia/Shanghai"
+
+# US regular session bounds. A bar is kept only when its FULL window
+# [period_end - interval, period_end] lies inside the session — any bar
+# straddling the 09:30 open mixes premarket trades into its OHLC.  For
+# 60min this keeps period_end in (10:00, 16:00], which reproduces the
+# legacy-feed pa_us_60min baseline cells exactly (IWM n=15 EV+0.633R,
+# QQQ n=11; verified 2026-06-11).
+_US_SESSION_OPEN = time(9, 30)
+_US_SESSION_CLOSE = time(16, 0)
 
 
 def _map_level(level: str) -> str:
@@ -233,6 +246,16 @@ class BarStore:
             )
             if exchange in _US_MICS:
                 df["datetime"] = df["datetime"] + _LEVEL_TO_OFFSET[level]
+                # The polygon feed includes pre/post-market bars the legacy
+                # feed did not (they inflated H2 signal counts ~3x and
+                # flipped per-symbol EV signs). Keep only bars fully inside
+                # the regular session — see _US_SESSION_OPEN note.
+                end_et = df["datetime"].dt.tz_convert("America/New_York")
+                start_t = (end_et - _LEVEL_TO_OFFSET[level]).dt.time
+                end_t = end_et.dt.time
+                df = df[
+                    (start_t >= _US_SESSION_OPEN) & (end_t <= _US_SESSION_CLOSE)
+                ].copy()
         elif exchange in _US_MICS and level == "D":
             df["datetime"] = BarStore._us_daily_session_close(df["datetime"], exchange)
             df = df[df["datetime"].notna()].copy()

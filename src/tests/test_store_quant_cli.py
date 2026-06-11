@@ -78,27 +78,60 @@ def test_cn_weekly_reads_weekly_folder_midnight_utc(tmp_path):
 
 
 def test_us_hourly_start_stamp_shifted_to_period_end(tmp_path):
-    # 22:00 Beijing == 14:00 UTC window START (polygon) -> period_end 15:00 UTC
-    _write(tmp_path, "hour", "SPY.AMEX", [_bar(datetime(2025, 3, 3, 22, 0))])
+    # 23:00 Beijing == 15:00 UTC window START (polygon, 10:00 ET)
+    # -> period_end 16:00 UTC (11:00 ET)
+    _write(tmp_path, "hour", "SPY.AMEX", [_bar(datetime(2025, 3, 3, 23, 0))])
     bf = BarStore(tmp_path).load_barframe("SPY", "XNYS", "60min", as_of=AS_OF)
-    assert list(bf.df["timestamp"]) == [pd.Timestamp("2025-03-03 15:00", tz="UTC")]
+    assert list(bf.df["timestamp"]) == [pd.Timestamp("2025-03-03 16:00", tz="UTC")]
 
 
 def test_us_5min_start_stamp_shifted_to_period_end(tmp_path):
-    _write(tmp_path, "min5", "SPY.AMEX", [_bar(datetime(2025, 3, 3, 22, 0))])
+    # 22:30 Beijing == 09:30 ET start -> period_end 09:35 ET == 14:35 UTC
+    _write(tmp_path, "min5", "SPY.AMEX", [_bar(datetime(2025, 3, 3, 22, 30))])
     bf = BarStore(tmp_path).load_barframe("SPY", "XNYS", "5min", as_of=AS_OF)
-    assert list(bf.df["timestamp"]) == [pd.Timestamp("2025-03-03 14:05", tz="UTC")]
+    assert list(bf.df["timestamp"]) == [pd.Timestamp("2025-03-03 14:35", tz="UTC")]
+
+
+def test_us_intraday_keeps_only_legacy_session_bars(tmp_path):
+    # Legacy-feed contract (verified vs pa_us_60min baseline cells
+    # 2026-06-11): keep period_end in (10:00, 16:00] ET. The 09:00-10:00
+    # ET bar is dropped too — its OHLC mixes 09:00-09:30 premarket trades
+    # and the bar did not exist in the legacy feed.
+    # 2025-03-03 is EST (UTC-5); Beijing naive start-stamps:
+    _write(tmp_path, "hour", "SPY.AMEX", [
+        _bar(datetime(2025, 3, 3, 21, 0)),   # 08:00-09:00 ET premarket  -> drop
+        _bar(datetime(2025, 3, 3, 22, 0)),   # 09:00-10:00 ET first bar  -> drop
+        _bar(datetime(2025, 3, 3, 23, 0)),   # 10:00-11:00 ET            -> keep
+        _bar(datetime(2025, 3, 4, 4, 0)),    # 15:00-16:00 ET            -> keep
+        _bar(datetime(2025, 3, 4, 5, 0)),    # 16:00-17:00 ET post       -> drop
+    ])
+    bf = BarStore(tmp_path).load_barframe("SPY", "XNYS", "60min", as_of=AS_OF)
+    assert list(bf.df["timestamp"]) == [
+        pd.Timestamp("2025-03-03 16:00", tz="UTC"),  # end 11:00 ET
+        pd.Timestamp("2025-03-03 21:00", tz="UTC"),  # end 16:00 ET
+    ]
+
+
+def test_cn_intraday_not_session_filtered(tmp_path):
+    # CN night-session bars must survive (the US regular-session rule
+    # must not leak into CN handling)
+    _write(tmp_path, "hour", "SHFE.cu0", [
+        _bar(datetime(2025, 3, 3, 22, 0)),   # night session 21:00-22:00
+        _bar(datetime(2025, 3, 4, 1, 0)),    # night session 00:00-01:00
+    ])
+    bf = BarStore(tmp_path).load_barframe("cu0", "XSHF", "60min", as_of=AS_OF)
+    assert len(bf.df) == 2
 
 
 def test_us_hourly_as_of_guard_excludes_in_flight_bar(tmp_path):
-    # Bar covering 14:00-15:00 UTC must NOT be visible at as_of 14:30
+    # Bar covering 16:00-17:00 UTC must NOT be visible at as_of 16:30
     _write(tmp_path, "hour", "SPY.AMEX", [
-        _bar(datetime(2025, 3, 3, 21, 0)),   # 13:00-14:00 UTC -> end 14:00
-        _bar(datetime(2025, 3, 3, 22, 0)),   # 14:00-15:00 UTC -> end 15:00
+        _bar(datetime(2025, 3, 3, 23, 0)),   # 15:00-16:00 UTC -> end 16:00
+        _bar(datetime(2025, 3, 4, 0, 0)),    # 16:00-17:00 UTC -> end 17:00
     ])
-    as_of = datetime(2025, 3, 3, 14, 30, tzinfo=timezone.utc)
+    as_of = datetime(2025, 3, 3, 16, 30, tzinfo=timezone.utc)
     bf = BarStore(tmp_path).load_barframe("SPY", "XNYS", "60min", as_of=as_of)
-    assert list(bf.df["timestamp"]) == [pd.Timestamp("2025-03-03 14:00", tz="UTC")]
+    assert list(bf.df["timestamp"]) == [pd.Timestamp("2025-03-03 16:00", tz="UTC")]
 
 
 def test_us_daily_maps_to_session_close(tmp_path):

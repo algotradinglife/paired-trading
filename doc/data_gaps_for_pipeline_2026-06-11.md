@@ -27,6 +27,7 @@ API 同源，预期可行但需 pipeline 确认）。若不可行，备选是 Tq
 
 | 缺口 | 影响 |
 |------|------|
+| **SPY 1h 2021-2024 稀疏洞**（每年约 1000 bar vs QQQ/IWM 的 4000；733 天 vs 1530 天，仅 2025 起完整）| SPY 的一切 60min 回测结论不可用（样本偏 2025 后）；QQQ/IWM 完整。疑似某次早期 sync 配置不同，建议按 QQQ 同配置重 sync SPY 1h 2021-2024 |
 | INE sc（单月合约 + 主连都缺）| vflush lane 只剩 cu（验证时 cu/sc 双标的）|
 | CN 期权数据格式变更：新库为 parquet 按行权价铺开，旧引擎读 `data/options/cn/*` JSON | `test_options_emission_faithfulness` 3 个失败；期权归因 harness 不可运行。**策略侧后续自己写 options 读取 seam**，但需确认新库 CN 期权 ag/au 日线覆盖回溯到 2024（旧验证窗口）|
 | US 15min 缺（仅 d/5min/1h）| DIR `minute15_state` 投票在 US 全部降级 neutral；可由 5min 聚合，希望 pipeline 直接提供 15min 避免策略侧重采样语义风险 |
@@ -49,3 +50,8 @@ API 同源，预期可行但需 pipeline 确认）。若不可行，备选是 Tq
   period-START，含盘前盘后。**若抓取机时区改变，存量与增量会错位** —
   建议 pipeline 改为显式时区（这是一个潜在 footgun，非当前阻塞）。
 - 策略侧适配逻辑见 `src/data/store.py` 模块 docstring。
+- **US 盘前盘后 bar**：新 feed 含 4:00-20:00 ET 全时段；旧 feed（策略校准
+  基础）仅常规时段且无每日首根钟点 bar。策略侧已在 seam 过滤（period_end
+  ∈ [9:30+interval, 16:00] ET，经 baseline cell 逐位复现验证 —— 见
+  `doc/repro/us_backtest_post_migration_2026-06-11.md`）。pipeline 无需
+  改动；仅提示如果未来改 sync 时段配置请同步告知。
