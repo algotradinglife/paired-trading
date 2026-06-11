@@ -15,8 +15,12 @@ derives a main-contract continuous series strategy-side, read-only:
   - **Roll rule**: a challenger with a LATER expiry must beat the
     incumbent for ``confirm_days`` consecutive settlements; the switch
     takes effect the next session.  Earlier expiries never become main
-    again (forward-only).  An incumbent with no bar on *d* (expired /
-    delisted) forces an immediate roll.
+    again (forward-only).  An incumbent with no bars at *d* NOR LATER
+    (truly expired/delisted) forces an immediate roll; a transient
+    one-day hole keeps the incumbent and the daily series simply skips
+    that date — rolling on a hole would be a PERMANENT switch to an
+    illiquid far month under the forward-only constraint, which is far
+    worse than a one-session gap.
   - **Intraday slicing**: a contract's intraday bars are assigned to
     trading days CN-style — night-session bars (period_end after 16:00,
     or before ~04:00 the next calendar morning) belong to the NEXT
