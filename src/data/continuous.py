@@ -135,7 +135,7 @@ def _load_daily_panel(
 
 
 def build_main_schedule(
-    root: Path, exchange: str, product: str, *, confirm_days: int = 3
+    root: Path, exchange: str, product: str, *, confirm_days: int = 1
 ) -> dict[date, str]:
     """Per trading date, the canonical month of the main contract."""
     key = (str(root), exchange, product, confirm_days)
@@ -298,7 +298,7 @@ def synthesize_continuous(
     product: str,
     level: str,
     *,
-    confirm_days: int = 3,
+    confirm_days: int = 1,
 ) -> pd.DataFrame:
     """Continuous main-contract series in the raw store schema.
 

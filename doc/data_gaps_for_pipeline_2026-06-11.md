@@ -19,9 +19,17 @@ paired-trading 是数据消费方；以下缺口由 data-pipeline 决定是否/�
 | CN_BOND（生产，EV +0.958R 默认池）| CFFEX: TF0 T0 TS0 | **单月合约也没有** — 全新品种 |
 | CN 大池（监控/回测）| SHFE: rb0 al0 ni0; DCE: i0 m0 j0 jm0 p0 y0; CZCE: CF0 RM0 SR0 TA0 MA0; CFFEX: IF0 IH0 IC0 IM0 | TA/MA/p 连单月合约都缺 |
 
-**未验证疑点：minishare 端 `cu0` 类主连代码是否可订阅未实测**（旧库可以，
-API 同源，预期可行但需 pipeline 确认）。若不可行，备选是 TqSdk
-`KQ.m@SHFE.cu`（quant-cli 已有 tqsdk fetcher）或 pipeline 侧做持仓量拼接。
+**进展（2026-06-11）：策略侧已自行实现主连合成**（`src/data/continuous.py`，
+OI 优先/volume 兜底 + 滚月规则，从单月合约只读派生），CN_METAL 已恢复运行。
+因此 P0 降级为 P1，需求收窄为下面两项：
+
+1. **2021-2022 年到期的合约月份缺失**（如 cu2107-cu2205）—— 合成序列
+   起点被压缩：cu0 只能从 2022-07、ag0/au0 从 2023-03 开始（vs baseline
+   的 5.5 年窗口）。补这些历史合约月份即可自动延长合成序列。
+2. **历史合约 OI 全为 0**（旧 fetcher 未映射 open_interest；新同步的
+   26xx/27xx 合约有值）。当前合成走 volume 兜底，重同步历史后自动转纯 OI。
+
+（原备选 minishare `cu0` 直订 / TqSdk KQ.m 不再必需，pipeline 可自行取舍。）
 
 ## P1 — 阻塞单个 lane / 功能
 
