@@ -183,7 +183,13 @@ def test_ine_symbol_maps_to_exchange_prefixed_file(tmp_path):
 
 def test_missing_file_raises_value_error_with_path(tmp_path):
     (tmp_path / "daily").mkdir()
-    with pytest.raises(ValueError, match="SHFE.cu0"):
+    with pytest.raises(ValueError, match="SHFE.cu2509"):
+        BarStore(tmp_path).load_barframe("cu2509", "XSHF", "D", as_of=AS_OF)
+
+
+def test_continuous_symbol_without_contracts_raises(tmp_path):
+    (tmp_path / "daily").mkdir()
+    with pytest.raises(ValueError, match="No contract files"):
         BarStore(tmp_path).load_barframe("cu0", "XSHF", "D", as_of=AS_OF)
 
 

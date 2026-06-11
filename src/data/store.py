@@ -49,6 +49,7 @@ Writing/fetching is no longer this module's job — run ``quant sync`` in
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, time, timezone
 from pathlib import Path
 
@@ -184,12 +185,25 @@ class BarStore:
             raise ValueError("as_of must be tz-aware (UTC)")
 
         path = self._root / folder / f"{fname}.parquet"
-        if not path.exists():
+        if path.exists():
+            df_raw = pd.read_parquet(path)
+        elif (
+            exchange in _MIC_TO_EXCHANGE
+            and re.fullmatch(r"[A-Za-z]{1,2}0", symbol)
+        ):
+            # No provider continuous file — synthesize the main-contract
+            # series from individual contract months (data/continuous.py).
+            from data import continuous
+
+            df_raw = continuous.synthesize_continuous(
+                self._root, _MIC_TO_EXCHANGE[exchange], symbol[:-1], level
+            )
+        else:
             raise ValueError(
                 f"No data found for {symbol}/{exchange}/{level}: {path}"
             )
 
-        df = self._build_bar_df(pd.read_parquet(path), symbol, exchange, level)
+        df = self._build_bar_df(df_raw, symbol, exchange, level)
 
         if start is not None:
             df = df[df["timestamp"] >= pd.Timestamp(start)]
