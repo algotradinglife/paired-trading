@@ -3,6 +3,21 @@
 Snapshot at 2026-06-09.  Read this first to know where the project
 stands; consult linked docs / commits for the details.
 
+> **WSL migration (2026-06-11)** — code is live on the new box against the
+> redesigned quant-cli data layer. `src/data/store.py` rewritten (flat
+> Parquet store, Beijing-naive tz handling, US period-end shift + legacy-
+> session filter — `pa_us_60min` IWM baseline cell reproduces bit-exact:
+> n=15 EV+0.633R). Dependency: `quant-cli` (non-editable) replaces
+> `quant-data`; legacy fetch tooling (quant_data importers) is dead until
+> ported — 4 test modules importorskip'd. Suite: 529 passed / 6 skipped /
+> 3 known data-dependent failures (CN options format). **US pool on this
+> box = SPY/QQQ/IWM only; SPY 1h has a 2021-2024 hole; CN pools blocked on
+> main-continuous backfill (data-pipeline's job)** — see
+> `doc/data_gaps_for_pipeline_2026-06-11.md`,
+> `doc/repro/us_backtest_post_migration_2026-06-11.md`,
+> `doc/repro/score_today_us_quality_2026-06-11.md`. Drift-gate cron
+> intentionally NOT installed until CN backfill + full re-baseline.
+
 > **Phase A (2026-06-10)** — Xiao right-side chain machinery landed:
 > `engine/features/trendline.py` + `TBreakDetector` (alert-only,
 > policy_weight=0) + `engine/divergence/alert_chain.py` (pre-gate
