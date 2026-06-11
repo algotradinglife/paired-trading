@@ -1302,6 +1302,17 @@ def main() -> int:
                     enrich_with_iv_au(acalls, asig_date, aclose, _AU_OPTIONS_DATA_DIR)
                     arec["options_calls"] = acalls
                 _annotate_pa_sweet_spots(arec, pool_rules)
+                if not _dir_feeds_loaded:
+                    _w_bars = _load_bars_weekly(sym, args)
+                    _bars_15_cache = _load_bars_15(sym, args)
+                    _dir_feeds_loaded = True
+                _attach_direction_verdict(
+                    arec, bars, h_bars, asig.bar_idx,
+                    macd_df=macd_df,
+                    ambush_pattern="h2_bottom",
+                    weekly_bars=_w_bars,
+                    bars_15=_bars_15_cache,
+                )
                 arec["position_size"] = _position_size(arec)
                 scored.append(arec)
 

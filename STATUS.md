@@ -260,8 +260,8 @@ principle: every signal report must lead with multi-TF + trend
 structure + context bull/bear before discussing the signal.
 
 **8-source default path** (all daily-anchored lanes — `pa_h2`,
-`pa_us_dif_pos`, `pa_cn_bond`, and currently `pa_h2_climax` /
-`context_a` / `vflush` / `bpull` not yet wired):
+`pa_us_dif_pos`, `pa_cn_bond`, and `context_a` since 2026-06-11;
+`pa_h2_climax` / `vflush` / `bpull` not yet wired):
 
 ```
 weekly_trend     PAStructureDetector on weekly + W DIF        (backdrop)
