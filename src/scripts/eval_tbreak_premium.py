@@ -153,7 +153,8 @@ def _yymm_to_expiry_floor(month: str) -> pd.Timestamp:
     return pd.Timestamp(year=2000 + yy, month=mm, day=1)
 
 
-def _rank_otm_strikes(strikes: list[int], cp: str, underlying_px: float) -> dict[int, int]:
+def _rank_otm_strikes(strikes: list[float], cp: str,
+                      underlying_px: float) -> dict[float, int]:
     """给定一组 strike，返回 {strike: otm_rank}（1=最浅虚），最多 OTM_MAX_RANK 档。
 
     put：strike < 现价（降序，最近现价者 rank1）；call：strike > 现价（升序）。
@@ -245,12 +246,10 @@ def pick_contract_for_event(sym: str, cp: str, break_date: str, underlying_px: f
     from engine.options.expiry_select import select_expiry_month
 
     if sym.isupper():
-        # US ticker：选约须用 OCC 文件名里的精确到期日（OptionStore US seam，
-        # t_e7fb18c9 交付后在 SPY 冒烟步骤接入）。CN select_expiry_month 月规则
-        # 对 US 是错误近似（codex P2），seam 交付前 fail loud 不出错误结果。
-        raise NotImplementedError(
-            f"US 期权合约选择未接入（{sym}）：待 OptionStore US OCC seam"
-            "（t_e7fb18c9）交付后用精确到期日选约；CN 月规则不适用 US")
+        # US ticker：OCC 合约带精确到期日（t_e7fb18c9 seam），同月可有多个
+        # weekly 到期，CN 月规则不适用 → 走精确到期路径。
+        return _pick_us_contract_for_event(sym, cp, break_date, underlying_px,
+                                           daily_dir)
 
     bd = pd.Timestamp(break_date).normalize()
     bdd = bd.date()
@@ -296,6 +295,61 @@ def pick_contract_for_event(sym: str, cp: str, break_date: str, underlying_px: f
                 return {
                     "month": month, "strike": int(c.strike),
                     "otm_rank": rank_of[int(c.strike)],
+                    "path": c.path, "df": df, "entry_idx": entry_idx,
+                }
+    return None
+
+
+def _pick_us_contract_for_event(sym: str, cp: str, break_date: str,
+                                underlying_px: float,
+                                daily_dir: Path = DAILY_DIR) -> dict | None:
+    """US OCC 选约：与 CN 同语义的生产规则，但用合约自带的精确到期日。
+
+    到期：距 break_date >= 14d 的最近到期（select_expiry_exact；US 同月有
+    多个 weekly 到期，月粒度不适用）。规则到期内无 OTM strike / 无可入场
+    数据时顺延更远到期。strike：到期内最浅虚 OTM（rank1 优先，缺则 rank2）。
+    上市约束与 CN 一致：覆盖起点须在 break_date 后 <= MAX_ENTRY_GAP_DAYS。
+    """
+    from engine.options.expiry_select import select_expiry_exact
+
+    bd = pd.Timestamp(break_date).normalize()
+    bdd = bd.date()
+    store = _store_for(daily_dir)
+    cov = store.coverage(sym)
+    cands = [
+        c for c in store.catalog(sym)
+        if c.opt_type == cp and c.expiry is not None and c.contract_sym in cov
+        and (cov[c.contract_sym][0] - bdd).days <= MAX_ENTRY_GAP_DAYS
+    ]
+    if not cands:
+        return None
+
+    expiries = sorted({c.expiry for c in cands})
+    chosen = select_expiry_exact(bdd, expiries)
+    if chosen is None:
+        return None
+    ordered = [chosen] + [e for e in expiries if e > chosen]
+
+    for exp in ordered:
+        in_exp = [c for c in cands if c.expiry == exp]
+        rank_of = _rank_otm_strikes(
+            [float(c.strike) for c in in_exp], cp, underlying_px)
+        ranked = sorted(
+            (c for c in in_exp if float(c.strike) in rank_of),
+            key=lambda c: rank_of[float(c.strike)],
+        )
+        for c in ranked:
+            raw = store.load_contract_daily(c.contract_sym)
+            if raw is None or raw.empty:
+                continue
+            df = raw.copy()
+            df["date"] = pd.to_datetime(df["date"])
+            entry_idx = _contract_entry_idx(df, bd)
+            if entry_idx is not None:
+                return {
+                    "month": c.underlying_month, "expiry": str(exp),
+                    "strike": float(c.strike),
+                    "otm_rank": rank_of[float(c.strike)],
                     "path": c.path, "df": df, "entry_idx": entry_idx,
                 }
     return None
@@ -353,12 +407,8 @@ def simulate_event(sym: str, side: str, break_date: str, underlying_px: float,
         }
 
     if picked is None:
-        try:
-            picked = pick_contract_for_event(
-                sym, cp, break_date, underlying_px, daily_dir)
-        except NotImplementedError:
-            # US 选约待 seam（t_e7fb18c9）交付：报告级优雅 skip，不中断整批评估
-            return _skip("skipped_us_pending_seam")
+        picked = pick_contract_for_event(
+            sym, cp, break_date, underlying_px, daily_dir)
     if picked is None:
         return _skip("skipped_no_option")
 
@@ -370,6 +420,7 @@ def simulate_event(sym: str, side: str, break_date: str, underlying_px: float,
         "symbol": sym, "side": side, "break_date": break_date,
         "break_close": underlying_px, "evaluated": True,
         "contract": picked["path"].stem, "month": picked["month"],
+        "expiry": picked.get("expiry"),  # US OCC 精确到期；CN 为 None
         "strike": picked["strike"], "otm_rank": picked["otm_rank"],
         "entry_date": str(df["date"].iloc[i0].date()),
         **sim,
@@ -497,13 +548,8 @@ def build_report(events: list[dict], daily_dir: Path = DAILY_DIR,
     picks: list[dict | None] = []
     for e in events:
         cp = "P" if e["side"] == "put" else "C"
-        try:
-            picks.append(pick_contract_for_event(
-                e["symbol"], cp, e["break_date"], e["break_close"], daily_dir))
-        except NotImplementedError:
-            # US 选约待 seam 交付：留 None，simulate_event 内重判并标记
-            # skipped_us_pending_seam（guard 在 pick 顶部，重判零成本）
-            picks.append(None)
+        picks.append(pick_contract_for_event(
+            e["symbol"], cp, e["break_date"], e["break_close"], daily_dir))
 
     def run_all(stop_frac: float, hold_days: int) -> list[dict]:
         return [simulate_event(e["symbol"], e["side"], e["break_date"],
@@ -515,8 +561,6 @@ def build_report(events: list[dict], daily_dir: Path = DAILY_DIR,
     details = run_all(STOP_FRAC, HOLD_DAYS)
     evaluated = [d for d in details if d["evaluated"]]
     skipped = [d for d in details if not d["evaluated"]]
-    skipped_us_pending = [d for d in skipped
-                          if d["exit_reason"] == "skipped_us_pending_seam"]
     mults = [d["multiple"] for d in evaluated]
 
     by_side = {s: _group_stats([d for d in evaluated if d["side"] == s])
@@ -572,8 +616,7 @@ def build_report(events: list[dict], daily_dir: Path = DAILY_DIR,
         },
         "n_events_total": len(details),
         "n_evaluated": len(evaluated),
-        "n_skipped_no_option": len(skipped) - len(skipped_us_pending),
-        "n_skipped_us_pending_seam": len(skipped_us_pending),
+        "n_skipped_no_option": len(skipped),
         "premium_multiple_ev": round(float(np.mean(mults)), 6) if mults else None,
         "ci95": bootstrap_ci(mults),
         "by_side": by_side,
@@ -622,8 +665,7 @@ def main() -> None:
     print(f"wrote {args.out}  "
           f"(n_total={report['n_events_total']} "
           f"n_eval={report['n_evaluated']} "
-          f"n_skip={report['n_skipped_no_option']} "
-          f"n_us_pending={report['n_skipped_us_pending_seam']})")
+          f"n_skip={report['n_skipped_no_option']})")
 
 
 if __name__ == "__main__":

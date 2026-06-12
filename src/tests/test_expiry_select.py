@@ -61,3 +61,19 @@ def test_explicit_expiries_override_approximation():
 
 def test_no_candidate_returns_none():
     assert select_expiry_month(date(2026, 1, 5), ["2408"], "ag") is None
+
+
+# --- select_expiry_exact（US OCC 精确到期，t_aa79fb13）---------------------
+def test_exact_nearest_at_least_14d():
+    from engine.options.expiry_select import select_expiry_exact
+    exps = [date(2025, 1, 10), date(2025, 1, 31), date(2025, 2, 21)]
+    # 2025-01-02 距 01-10 仅 8d → 滚到 01-31（同月 weekly，月粒度区分不了）
+    assert select_expiry_exact(date(2025, 1, 2), exps) == date(2025, 1, 31)
+    # 距 01-10 恰 14d → 选 01-10
+    assert select_expiry_exact(date(2024, 12, 27), exps) == date(2025, 1, 10)
+
+
+def test_exact_no_candidate_returns_none():
+    from engine.options.expiry_select import select_expiry_exact
+    assert select_expiry_exact(date(2025, 3, 1), [date(2025, 3, 7)]) is None
+    assert select_expiry_exact(date(2025, 3, 1), []) is None

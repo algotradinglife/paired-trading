@@ -262,31 +262,55 @@ def test_events_from_scan_cn_pool_key_mapping():
                     "break_date": "2024-08-01", "break_close": 7000.0}]
 
 
-def test_us_premium_path_pending_fails_loud(tmp_path):
-    # seam（t_e7fb18c9）交付前 US 事件不得流入 CN 月规则选约（codex P2）
-    from scripts.eval_tbreak_premium import pick_contract_for_event
+# --- US OCC 选约（t_e7fb18c9 seam 已交付：精确到期路径）--------------------
+def _write_us_contract(d: Path, und: str, yymmdd: str, cp: str,
+                       strike: float, rows: list[dict]) -> None:
+    name = f"O:{und}{yymmdd}{cp}{int(round(strike * 1000)):08d}.AMEX.parquet"
+    pd.DataFrame(rows).to_parquet(d / name)
+
+
+def test_pick_us_occ_put_exact_expiry(tmp_path):
+    # GLD put：break 2024-12-20 现价 240.5 → OTM rank1 = strike 240（<现价最近）
     d = tmp_path / "daily"
     d.mkdir()
-    with pytest.raises(NotImplementedError, match="t_e7fb18c9"):
-        pick_contract_for_event("GLD", "P", "2025-01-06", 240.5, daily_dir=d)
+    rows = _chain_rows("2024-11-01", 60)
+    _write_us_contract(d, "GLD", "250117", "P", 240.0, rows)
+    _write_us_contract(d, "GLD", "250117", "P", 238.0, rows)
+    out = simulate_event("GLD", "put", "2024-12-20", 240.5, daily_dir=d)
+    assert out["evaluated"] is True
+    assert out["strike"] == 240.0
+    assert out["expiry"] == "2025-01-17"
 
 
-def test_us_event_graceful_skip_in_report(tmp_path):
-    # US 事件在 seam 交付前进 build_report 应被标记 skip，而非中断整批（codex P2）
+def test_pick_us_weekly_rolls_to_14d_expiry_same_month(tmp_path):
+    # 同月两个 weekly 到期（CN 月粒度无法区分）：break 2025-01-02 距 01-10 仅
+    # 8d (<14) → 必须滚到 01-31，即便 01-10 合约有数据可入场。
+    d = tmp_path / "daily"
+    d.mkdir()
+    rows = _chain_rows("2024-12-02", 60)
+    _write_us_contract(d, "GLD", "250110", "P", 240.0, rows)
+    _write_us_contract(d, "GLD", "250131", "P", 240.0, rows)
+    out = simulate_event("GLD", "put", "2025-01-02", 240.5, daily_dir=d)
+    assert out["evaluated"] is True
+    assert out["expiry"] == "2025-01-31"
+
+
+def test_us_event_in_build_report_with_cn(tmp_path):
+    # CN + US 混合事件单报告：两 lane 各自正确选约
     d = tmp_path / "daily"
     d.mkdir()
     pd.DataFrame(_chain_rows("2024-11-08", 40)).to_parquet(
         d / "SHFE.ag2501C7600.parquet")
+    _write_us_contract(d, "GLD", "250117", "P", 240.0,
+                       _chain_rows("2024-11-01", 60))
     events = [
         {"symbol": "ag", "side": "call", "break_date": "2024-11-07",
          "break_close": 7050.0},
-        {"symbol": "GLD", "side": "put", "break_date": "2024-11-07",
+        {"symbol": "GLD", "side": "put", "break_date": "2024-12-20",
          "break_close": 240.5},
     ]
     rep = build_report(events, daily_dir=d, is_cutoff_date=_date(2025, 6, 30))
-    assert rep["n_evaluated"] == 1
-    assert rep["n_skipped_us_pending_seam"] == 1
+    assert rep["n_evaluated"] == 2
     assert rep["n_skipped_no_option"] == 0
     us_row = next(e for e in rep["events"] if e["symbol"] == "GLD")
-    assert us_row["evaluated"] is False
-    assert us_row["exit_reason"] == "skipped_us_pending_seam"
+    assert us_row["expiry"] == "2025-01-17" and us_row["strike"] == 240.0
