@@ -1,8 +1,10 @@
 ---
 name: strategy-repo-boundary
 description: paired-trading 是策略 repo，数据回填/修复是 data-pipeline (quant-cli) 的职责 — 发现数据问题只记录上报，不自己跑 sync/探针
-metadata:
+metadata: 
+  node_type: memory
   type: feedback
+  originSessionId: 8bba5ddd-394a-4e07-9a5b-369b1c57edcd
 ---
 
 paired-trading 不负责数据回填或数据修复。数据层（覆盖缺口、主连可用性、
@@ -23,3 +25,10 @@ data-pipeline 侧）。
 **派生**序列（如 OI 主连拼接）属于策略 repo 职责，可以做 —— 禁的是
 操作数据管线（sync/写入），不是读侧计算。CN 主连即按此路线在策略侧
 实现，与 data-pipeline 的回填独立推进。
+
+边界加硬（2026-06-13，Hermes/CLAUDE.md 硬规则）：researcher 角色下
+**连"评估数据可得性"也不归我**——不读 `quant_data/` 下任何代码、
+不看 .env/API 凭证、不直接探 Polygon/Minishare/Tushare API。数据需求
+唯一路径：kanban 建 `@data-engineer` 卡，写清品种/周期/时间范围/优先级，
+可得性评估和执行都由 data-engineer 做，我只消费交付结果。当天我先
+读了 polygon.py 并直接探了 API 被叫停，引以为戒。

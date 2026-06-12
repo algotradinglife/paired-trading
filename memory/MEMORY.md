@@ -22,7 +22,7 @@
 
 ## Collaboration preferences (feedback)
 
-- [Strategy repo boundary](feedback_strategy_repo_boundary.md) — 数据回填/修复归 data-pipeline（quant-cli）；发现数据问题只记录上报，绝不自己跑 quant sync
+- [Strategy repo boundary](feedback_strategy_repo_boundary.md) — 数据事务全归 data-engineer（kanban 建卡是唯一路径）；不读 quant_data/ 代码、不看 .env、不探数据源 API、不跑 quant sync
 
 - [Decisions: give your opinion, not a quiz](feedback_options_style.md) — 判断题直接给带理由的推荐+等 go-ahead，别甩 AskUserQuestion 菜单；列选项必带推荐+尽量并行；提问先用大白话+实例
 - [VCS: use jj not git](project_vcs_jj.md) — 仓库统一用 jj（colocated），日常 commit/push 禁用 git 写命令
