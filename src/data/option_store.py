@@ -3,15 +3,22 @@ quant-cli Parquet store (the options counterpart of data/store.py).
 
 Layout: one file per option contract under ``{root}/daily/``, standard
 8-column schema, naive Beijing datetimes (date markers at daily level).
-Three filename dialects (see strategy-data-access-guide.md §4):
+Four filename dialects (see strategy-data-access-guide.md §4):
 
     SHFE/INE : ``SHFE.ag2607C19900``
     DCE      : ``DCE.i2607-C-740``
     CZCE     : ``CZCE.CF509C13000``  (3-digit month -> 2020s decade)
+    US OCC   : ``O:SPY240621C00495000.AMEX``  (strike in 1/1000 dollars)
 
-Contracts are exposed under the normalized lowercase symbol
+CN contracts are exposed under the normalized lowercase symbol
 ``{prod}{yymm}{c|p}{strike}`` (e.g. ``ag2607c19900``) — the same
 convention ``cn_{ag,au}_selector`` emits in score_today records.
+US contracts use ``{und}{yymmdd}{c|p}{strike}`` (e.g. ``spy240621c495``)
+with the product being the uppercase underlying ticker (``SPY``).
+
+US contracts may have a ``*.greeks.parquet`` sibling (iv/delta/gamma/
+theta/vega/rho/underlying_close, computed pipeline-side); read it via
+``load_contract_greeks``. Greeks siblings are never contracts themselves.
 
 Intraday option bars / bid-ask are NOT in the store yet (recorded in
 doc/data_gaps_for_pipeline_2026-06-11.md); this seam is daily-only
@@ -39,6 +46,10 @@ _PRODUCT_TO_EXCHANGE: dict[str, str] = {
 _SHFE_INE_RE = re.compile(r"(?:SHFE|INE)\.([a-z]+)(\d{4})([CP])(\d+)")
 _DCE_RE = re.compile(r"DCE\.([a-z]+)(\d{4})-([CP])-(\d+)")
 _CZCE_RE = re.compile(r"CZCE\.([A-Z]+)(\d{3,4})([CP])(\d+)")
+# US OCC: O:{UND}{YYMMDD}{C|P}{strike*1000:08d}.{exchange}
+_US_OCC_RE = re.compile(
+    r"O:([A-Z]+)(\d{6})([CP])(\d{8})\.(?:AMEX|NYSE|NASDAQ|ARCA)"
+)
 
 
 def _canonical_yymm(digits: str) -> str:
@@ -48,12 +59,13 @@ def _canonical_yymm(digits: str) -> str:
 
 @dataclass(frozen=True)
 class OptionContract:
-    contract_sym: str       # normalized, e.g. "ag2607c19900"
-    product: str            # store-case product code ("ag", "CF")
+    contract_sym: str       # normalized, e.g. "ag2607c19900" / "spy240621c495"
+    product: str            # store-case product code ("ag", "CF", "SPY")
     underlying_month: str   # YYMM, e.g. "2607"
     opt_type: str           # "C" | "P"
     strike: float
     path: Path
+    expiry: date | None = None   # exact expiry (US OCC only; CN unknown)
 
 
 _STORE_CACHE: dict[str, "OptionStore"] = {}
@@ -103,6 +115,24 @@ class OptionStore:
     @staticmethod
     def _parse(path: Path) -> OptionContract | None:
         stem = path.stem
+        if stem.endswith(".greeks"):
+            return None
+        m = _US_OCC_RE.fullmatch(stem)
+        if m:
+            und, yymmdd, cp, strike_milli = m.groups()
+            strike = int(strike_milli) / 1000.0
+            expiry = date(
+                2000 + int(yymmdd[:2]), int(yymmdd[2:4]), int(yymmdd[4:6])
+            )
+            return OptionContract(
+                contract_sym=f"{und.lower()}{yymmdd}{cp.lower()}{strike:g}",
+                product=und,
+                underlying_month=yymmdd[:4],
+                opt_type=cp,
+                strike=strike,
+                path=path,
+                expiry=expiry,
+            )
         for rx in (_SHFE_INE_RE, _DCE_RE, _CZCE_RE):
             m = rx.fullmatch(stem)
             if m:
@@ -140,6 +170,27 @@ class OptionStore:
         if c is None:
             return None
         df = pd.read_parquet(c.path)
+        if df.empty:
+            return None
+        df = df.copy()
+        df["date"] = pd.to_datetime(df["datetime"]).dt.date
+        return (
+            df.sort_values("date")
+            .drop_duplicates(subset=["date"], keep="last")
+            .reset_index(drop=True)
+        )
+
+    def load_contract_greeks(self, contract_sym: str) -> pd.DataFrame | None:
+        """Greeks sibling history (iv/delta/gamma/theta/vega/rho/
+        underlying_close) with a ``date`` column; None when the contract
+        is unknown or has no ``*.greeks.parquet`` file."""
+        c = self._lookup(contract_sym)
+        if c is None:
+            return None
+        gp = c.path.with_name(f"{c.path.stem}.greeks.parquet")
+        if not gp.exists():
+            return None
+        df = pd.read_parquet(gp)
         if df.empty:
             return None
         df = df.copy()
