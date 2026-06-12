@@ -4,11 +4,42 @@
   "full_stack_lane": "pa_us_60min",
   "pool": "us_equity",
   "instrument_class": "us_equity",
-  "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
-  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy", "dia", "xlk", "qqq", "xlre", "spy"],
+  "symbols_included": [
+    "spy",
+    "qqq",
+    "iwm",
+    "dia",
+    "gld",
+    "gdx",
+    "xlf",
+    "xlk",
+    "nvda",
+    "xlb",
+    "xle",
+    "xlre",
+    "xlu"
+  ],
+  "symbols_excluded": [
+    "tlt",
+    "tlh",
+    "iei",
+    "ief",
+    "shy",
+    "dia",
+    "xlk",
+    "qqq",
+    "xlre",
+    "spy"
+  ],
   "symbols_excluded_reason": "US_LONG_BOND_SUPPRESS frozenset (pa_detector.py:231) — short-circuited at score_today.py:1314 before pa_us_60min scan runs.",
   "symbols_excluded_2026-06-09_addition": {
-    "added": ["dia", "xlk", "qqq", "xlre", "spy"],
+    "added": [
+      "dia",
+      "xlk",
+      "qqq",
+      "xlre",
+      "spy"
+    ],
     "doc": "doc/repro/lane_market_evaluation_2026-06-09.md",
     "evidence": "P0/P1c: DIA n=10 EV-0.40R win 20%; XLK n=14 EV-0.14R win 29%; QQQ n=11 EV-0.14R win 27%; XLRE n=4 EV-0.75R win 0%; SPY n=25 EV-0.04R win 32%. Broad-market and large-cap-tech 60min reversals don't trigger the expected V-shape recoil.",
     "implementation": "src/scripts/score_today.py::_PA_US_60MIN_SUPPRESS"
@@ -28,9 +59,21 @@
     "source": "src/scripts/score_today.py:1235-1248,1254 (BULL vs TR/TR_FORMING phase)",
     "BEAR": "skipped (continue)",
     "UNCLEAR": "skipped (continue)",
-    "BULL": {"phase_weight": 0.65, "score": 3, "note": "BULL ride per pa_baseline_2026-06-08.md"},
-    "TR": {"phase_weight": 0.30, "score": 2, "note": "Un-gated TR-phase subset not walk-forward validated; lowered from 0.40 → 0.30 per audit memo doc/repro/score_audit_2026-06-08.md §S2"},
-    "TR_FORMING": {"phase_weight": 0.30, "score": 2, "note": "Same as TR"}
+    "BULL": {
+      "phase_weight": 0.65,
+      "score": 3,
+      "note": "BULL ride per pa_baseline_2026-06-08.md"
+    },
+    "TR": {
+      "phase_weight": 0.3,
+      "score": 2,
+      "note": "Un-gated TR-phase subset not walk-forward validated; lowered from 0.40 → 0.30 per audit memo doc/repro/score_audit_2026-06-08.md §S2"
+    },
+    "TR_FORMING": {
+      "phase_weight": 0.3,
+      "score": 2,
+      "note": "Same as TR"
+    }
   },
   "legs1_bonus": {
     "note": "legs=1 (ABC two-leg pullback completing) bonus is applied via PABottomDetector.policy_weight at score_today.py:1337 — base+0.10. Final weight ceiling 0.90 when BULL+legs=1, 0.40 when TR+legs=1 (TR phase override may not stack with legs=1; requires_verification).",
@@ -45,25 +88,57 @@
     "note": "Validated 2026-06-09. Robust across framings: alternate K=3 (cutoffs 2023-12-31 / 2024-12-31 / 2025-06-30) and the default K=2 both give all-OOS-folds-positive on uptrend+h=opp — 8/8 OOS folds positive across the 3 framings, none negative. Thin per-fold n shifts with the cut but no OOS fold is ever negative."
   },
   "fold_date_ranges": {
-    "is": ["start", "2022-12-31"],
-    "f1": ["2023-01-01", "2023-12-31"],
-    "f2": ["2024-01-01", "2024-12-31"],
-    "f3": ["2025-01-01", "end"]
+    "is": [
+      "start",
+      "2022-12-31"
+    ],
+    "f1": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "f2": [
+      "2024-01-01",
+      "2024-12-31"
+    ],
+    "f3": [
+      "2025-01-01",
+      "end"
+    ]
   },
   "samples": {
-    "is": {"n": 18, "ev_r": -0.111, "win_pct": null, "note": "2022 bear backdrop; uptrend+h=opp underperforms in risk_off — the deployed US regime gate suppresses these periods in production."},
-    "f1": {"n": 11, "ev_r": 0.545, "win_pct": null},
-    "f2": {"n": 4,  "ev_r": 0.250, "win_pct": null, "note": "thin n; see walk_forward.note for robustness across alternate framings"},
-    "f3": {"n": 25, "ev_r": 0.519, "win_pct": null}
+    "is": {
+      "n": 18,
+      "ev_r": -0.111,
+      "win_pct": null,
+      "note": "2022 bear backdrop; uptrend+h=opp underperforms in risk_off — the deployed US regime gate suppresses these periods in production."
+    },
+    "f1": {
+      "n": 11,
+      "ev_r": 0.545,
+      "win_pct": null
+    },
+    "f2": {
+      "n": 4,
+      "ev_r": 0.25,
+      "win_pct": null,
+      "note": "thin n; see walk_forward.note for robustness across alternate framings"
+    },
+    "f3": {
+      "n": 25,
+      "ev_r": 0.519,
+      "win_pct": null
+    }
   },
   "samples_aggregate": {
-    "n": 58, "ev_r": 0.310, "win_pct": 48.0,
+    "n": 58,
+    "ev_r": 0.31,
+    "win_pct": 48.0,
     "note": "uptrend + h=opposing 60min cell (the BULL-ride production path); 3/3 OOS folds positive."
   },
   "samples_full_stack_5y": {
-    "framework": "PA structural stop (live production form, swing_low-based)",
-    "n": 146, "ev_r": 0.086, "win_pct": 36.3,
-    "note": "From doc/repro/full_stack_backtest_2026-06-08.md — pa_us_60min lane. Low win% (36.3%) by design — 60min H2 catches 3-5d reversals, TP1 hit rate low, big winners +1.5R pull mean positive. This is the ONLY end-to-end evidence currently backing the lane's production status."
+    "n": 97,
+    "ev_r": 0.356,
+    "win_pct": 50.5
   },
   "production_binding": [
     "src/scripts/score_today.py:1235-1254",
@@ -75,8 +150,8 @@
   "policy_weight_assigned_breakdown": {
     "BULL": 0.65,
     "BULL_legs1": "0.65 base + 0.10 legs1 bonus — but score_today reads PABottomDetector.policy_weight result, which is 0.80 / 0.90 for uptrend+h=opp+legs=1. Phase routing OVERRIDES the PABottomDetector weight: score_today.py:1254 sets confidence = _us_phase_w regardless of the legs=1 bonus from PABottomDetector. requires_verification — there may be a logical disconnect between the legs=1 bonus path (which is alive at pa_h2_us_equity daily lane) and the pa_us_60min path (which uses phase-weight only).",
-    "TR": 0.30,
-    "TR_FORMING": 0.30,
+    "TR": 0.3,
+    "TR_FORMING": 0.3,
     "BEAR_or_UNCLEAR": 0.0
   },
   "policy_weight_recommended": 0.65,
@@ -96,5 +171,21 @@
     "doc/repro/pa_baseline_2026-06-08.md"
   ],
   "notes": "K=3 walk-forward validated 2026-06-09 (PENDING_VALIDATION -> PASS). uptrend+h=opp 60min cell: aggregate +0.310R / n=58 / hit 48%, 3/3 OOS folds positive, robust across 3 cutoff framings. Full_stack 5.5y +0.086R / win 36.3% (drift gate: within tolerance). OPEN ITEMS: (1) TR/TR_FORMING 0.30 sub-cell still un-validated (NEXT_SESSION followup #4); (2) legs=1 bonus vs phase-weight override interaction at score_today.py:1254,1337 — see policy_weight_assigned_breakdown.BULL_legs1, still needs a code-logic check.",
-  "requires_verification": false
+  "requires_verification": false,
+  "reanchor_history": [
+    {
+      "date": "2026-06-12",
+      "previous_samples_full_stack_5y": {
+        "framework": "PA structural stop (live production form, swing_low-based)",
+        "n": 146,
+        "ev_r": 0.086,
+        "win_pct": 36.3,
+        "note": "From doc/repro/full_stack_backtest_2026-06-08.md — pa_us_60min lane. Low win% (36.3%) by design — 60min H2 catches 3-5d reversals, TP1 hit rate low, big winners +1.5R pull mean positive. This is the ONLY end-to-end evidence currently backing the lane's production status."
+      },
+      "previous_data_snapshot_hash": null,
+      "reason": "population mix: 11 non-core tickers carry hourly only from 2024-06 (recent-era signals bias the aggregate up). Core-3 cells reproduce the legacy feed bit-exact (IWM n=15 ev+0.633; QQQ n=11 ev-0.136). EXPECT ONE MORE DRIFT when non-core hourly history backfills (doc/data_gaps_post_sync_2026-06-12.md, non-required item).",
+      "context": "post-WSL-migration re-validation on the completed-backfill snapshot; doc/repro/revalidation_2026-06-12.md. CN baselines deliberately NOT re-anchored — they pass within tolerance against their original 5.5y anchors."
+    }
+  ],
+  "data_snapshot_hash": "sha256:c204d2e24a9cf5fd7f37950ffe5e7e40cdd05c94a1bcd930ea152037fde8cae2"
 }

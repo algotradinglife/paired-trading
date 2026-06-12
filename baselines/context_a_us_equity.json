@@ -4,10 +4,37 @@
   "full_stack_lane": "context_a",
   "pool": "us_equity",
   "instrument_class": "us_equity",
-  "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
-  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy", "dia", "spy", "xlu"],
+  "symbols_included": [
+    "spy",
+    "qqq",
+    "iwm",
+    "dia",
+    "gld",
+    "gdx",
+    "xlf",
+    "xlk",
+    "nvda",
+    "xlb",
+    "xle",
+    "xlre",
+    "xlu"
+  ],
+  "symbols_excluded": [
+    "tlt",
+    "tlh",
+    "iei",
+    "ief",
+    "shy",
+    "dia",
+    "spy",
+    "xlu"
+  ],
   "symbols_excluded_2026-06-09_addition": {
-    "added": ["dia", "spy", "xlu"],
+    "added": [
+      "dia",
+      "spy",
+      "xlu"
+    ],
     "doc": "doc/repro/lane_market_evaluation_2026-06-09.md",
     "evidence": "DIA n=13 EV-0.090R; SPY n=9 EV-0.199R; XLU n=11 EV-0.258R. Broad-market/defensive ETFs don't fit H2 reversal timing.",
     "implementation": "src/engine/divergence/context_a_detector.py::_CONTEXT_A_EXCLUDED_US"
@@ -27,19 +54,36 @@
     "note": "Cutoffs not pinned in detector docstring; need to recover from backtest_context_a_ev.py to fully harden. requires_verification."
   },
   "samples": {
-    "is": {"n": 46, "ev_r": -0.304, "win_pct": null},
-    "f1": {"n": 33, "ev_r":  0.106, "win_pct": null},
-    "f2": {"n": 42, "ev_r":  0.179, "win_pct": null},
-    "f3": {"n": 32, "ev_r":  0.574, "win_pct": null}
+    "is": {
+      "n": 46,
+      "ev_r": -0.304,
+      "win_pct": null
+    },
+    "f1": {
+      "n": 33,
+      "ev_r": 0.106,
+      "win_pct": null
+    },
+    "f2": {
+      "n": 42,
+      "ev_r": 0.179,
+      "win_pct": null
+    },
+    "f3": {
+      "n": 32,
+      "ev_r": 0.574,
+      "win_pct": null
+    }
   },
   "samples_aggregate": {
-    "n": 153, "ev_r": 0.100,
+    "n": 153,
+    "ev_r": 0.1,
     "note": "Docstring headline aggregate; IS is negative due to incomplete 60m coverage pre-2022 (per docstring)."
   },
   "samples_full_stack_5y": {
-    "framework": "PA structural stop (live production form)",
-    "n": 178, "ev_r": 0.162, "win_pct": 57.9,
-    "note": "Re-baselined 2026-06-09 to current full_stack (post max_hold 20->30 + US broad-market suppression deploy). Prior 2026-06-08: n=289 ev_r=0.105 win=55.4. n dropped and EV/win rose as suppression removed losing broad-market trades — expected improvement, not regression."
+    "n": 116,
+    "ev_r": 0.153,
+    "win_pct": 54.3
   },
   "production_binding": [
     "src/engine/divergence/context_a_detector.py:7",
@@ -47,8 +91,8 @@
   ],
   "verdict": "CONDITIONAL PASS",
   "verdict_reason": "3/3 OOS folds positive and improving (F1+0.106 → F2+0.179 → F3+0.574). IS negative due to pre-2022 incomplete 60m coverage. Full-stack 5.5y replay confirms direction (+0.105R EV / win 55%, n=289). policy_weight=0.60 for h=opposing only.",
-  "policy_weight_assigned": 0.60,
-  "policy_weight_recommended": 0.60,
+  "policy_weight_assigned": 0.6,
+  "policy_weight_recommended": 0.6,
   "valid_until": "2026-10-06",
   "commit_hash": "3796cfa2",
   "data_snapshot": "2026-06-09",
@@ -60,5 +104,21 @@
     "doc/repro/full_stack_backtest_2026-06-08.md"
   ],
   "notes": "Imported from docstring 2026-06-09; walk-forward cutoffs not yet pinned in detector source — re-validate with explicit --cutoff1/2/3 once script flags confirmed. Sample sizes from docstring: IS n=46 / F1 n=33 / F2 n=42 / F3 n=32 (sum=153 matches docstring aggregate).",
-  "requires_verification": true
+  "requires_verification": true,
+  "reanchor_history": [
+    {
+      "date": "2026-06-12",
+      "previous_samples_full_stack_5y": {
+        "framework": "PA structural stop (live production form)",
+        "n": 178,
+        "ev_r": 0.162,
+        "win_pct": 57.9,
+        "note": "Re-baselined 2026-06-09 to current full_stack (post max_hold 20->30 + US broad-market suppression deploy). Prior 2026-06-08: n=289 ev_r=0.105 win=55.4. n dropped and EV/win rose as suppression removed losing broad-market trades — expected improvement, not regression."
+      },
+      "previous_data_snapshot_hash": null,
+      "reason": "h=opp gate needs 60min bars; 8 pool tickers have hourly only from 2024-06, so their pre-2024 signals are not generated. EXPECT ONE MORE DRIFT when non-core hourly history backfills.",
+      "context": "post-WSL-migration re-validation on the completed-backfill snapshot; doc/repro/revalidation_2026-06-12.md. CN baselines deliberately NOT re-anchored — they pass within tolerance against their original 5.5y anchors."
+    }
+  ],
+  "data_snapshot_hash": "sha256:c204d2e24a9cf5fd7f37950ffe5e7e40cdd05c94a1bcd930ea152037fde8cae2"
 }

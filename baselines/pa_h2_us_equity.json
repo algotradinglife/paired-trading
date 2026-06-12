@@ -4,11 +4,36 @@
   "full_stack_lane": "pa_us_dif_pos",
   "pool": "us_equity",
   "instrument_class": "us_equity",
-  "symbols_included": ["spy", "qqq", "iwm", "dia", "gld", "gdx", "xlf", "xlk", "nvda", "xlb", "xle", "xlre", "xlu"],
-  "symbols_excluded": ["tlt", "tlh", "iei", "ief", "shy", "dia", "spy"],
+  "symbols_included": [
+    "spy",
+    "qqq",
+    "iwm",
+    "dia",
+    "gld",
+    "gdx",
+    "xlf",
+    "xlk",
+    "nvda",
+    "xlb",
+    "xle",
+    "xlre",
+    "xlu"
+  ],
+  "symbols_excluded": [
+    "tlt",
+    "tlh",
+    "iei",
+    "ief",
+    "shy",
+    "dia",
+    "spy"
+  ],
   "symbols_excluded_reason": "US_LONG_BOND_SUPPRESS frozenset in pa_detector.py:231 — PA H2 fails across hike/yield-peak/cut regimes (tlt n=27 EV=-0.519R, 4/4 folds negative per backtest_pa_us_k3).",
   "symbols_excluded_2026-06-09_addition": {
-    "added": ["dia", "spy"],
+    "added": [
+      "dia",
+      "spy"
+    ],
     "doc": "doc/repro/lane_market_evaluation_2026-06-09.md",
     "evidence": "P1c: DIA n=8 EV-0.026R; SPY n=9 EV-0.088R. Broad-market H2 reversals on daily are slow-moving and frequently max_hold-clip below TP1. Same structural reasoning as context_a US and pa_us_60min exclusions.",
     "implementation": "src/scripts/score_today.py::_PA_US_DIF_POS_SUPPRESS — applied to the pa_us_dif_pos lane (US daily PA H2 in score_today; this baseline JSON represents that lane)"
@@ -32,29 +57,66 @@
     "note": "Cutoffs described qualitatively in docstring lines 245-251 (K=2: IS<=2022 / K=3: IS<=2021 / OOS1=2022-2023H1 / OOS2=2023H2-2024 / OOS3>2025). Not pinned as explicit dates. requires_verification."
   },
   "samples": {
-    "is": {"n": 39, "ev_r": -0.095, "win_pct": null},
-    "f1": {"n": 23, "ev_r":  0.348, "win_pct": null},
-    "f2": {"n": 16, "ev_r":  0.682, "win_pct": null},
-    "f3": {"n": 19, "ev_r":  0.097, "win_pct": null}
+    "is": {
+      "n": 39,
+      "ev_r": -0.095,
+      "win_pct": null
+    },
+    "f1": {
+      "n": 23,
+      "ev_r": 0.348,
+      "win_pct": null
+    },
+    "f2": {
+      "n": 16,
+      "ev_r": 0.682,
+      "win_pct": null
+    },
+    "f3": {
+      "n": 19,
+      "ev_r": 0.097,
+      "win_pct": null
+    }
   },
   "samples_k3_uptrend_hopp_legs1_subcell": {
     "note": "K=3 legs=1 sub-cell, monotone increasing — monitoring-grade per docstring; n too small for production gating but +0.10 weight bonus applied in routing.",
-    "is": {"n": null, "ev_r": null},
-    "f1": {"n": 5,  "ev_r": 0.500},
-    "f2": {"n": 3,  "ev_r": 0.667},
-    "f3": {"n": 10, "ev_r": 0.750}
+    "is": {
+      "n": null,
+      "ev_r": null
+    },
+    "f1": {
+      "n": 5,
+      "ev_r": 0.5
+    },
+    "f2": {
+      "n": 3,
+      "ev_r": 0.667
+    },
+    "f3": {
+      "n": 10,
+      "ev_r": 0.75
+    }
   },
   "samples_k3_phase_tr_forming_2026-06-10": {
     "note": "PA-structural-phase weighting of the LIVE pa_us_dif_pos lane (score_today.py:1362: BULL=0.65 / TR,TR_FORMING=0.30) — distinct axis from policy_weight()'s trend_structure routing below. K=3 via backtest_pa_us_k3.py with PAStructureDetector phase tags + production gate (DIF>0 & h=opp & phase not in {BEAR,UNCLEAR} & structural_stop<close), suppressed symbols (tlt/dia/spy) removed. ATR x 1.5 WF framework. Full memo: doc/repro/pa_us_dif_pos_tr_k3_2026-06-10.md.",
     "method": "K=3 OOS folds (IS<=2022 / F1=2023 / F2=2024 / F3=2025+)",
     "verdict": "KEEP 0.30 — validated-marginal / monitoring-grade (was un-validated placeholder)",
     "TR_FORMING_w0.30": {
-      "n": 36, "ev_r": 0.069, "hit_pct": 36.0,
-      "folds": {"is": -0.222, "f1": -0.125, "f2": 0.562, "f3": 0.033},
+      "n": 36,
+      "ev_r": 0.069,
+      "hit_pct": 36.0,
+      "folds": {
+        "is": -0.222,
+        "f1": -0.125,
+        "f2": 0.562,
+        "f3": 0.033
+      },
       "note": "Whole subset is TR_FORMING (pure TR n=0). 2/3 OOS folds positive (F1<0), IS<0 — below the 3/3-OOS bar that promoted pa_us_60min. Positive but marginal at the production 1.5xATR stop. 86% of production-gated daily signals fire here post B1-1 gate-drop."
     },
     "BULL_w0.65": {
-      "n": 6, "ev_r": 1.083, "hit_pct": 83.0,
+      "n": 6,
+      "ev_r": 1.083,
+      "hit_pct": 83.0,
       "note": "Thin; confirms direction, too small to raise from 0.65."
     },
     "robustness": "TR_FORMING never negative across 4 variants (1.5/2.0 xATR x mq 0.3/0.1: +0.069/+0.049/+0.410/+0.199R) but only clearly positive (4/4 folds) at the wider 2.0xATR stop — forming-range whipsaw signature. Stop-width-by-phase noted as backlog, not implemented.",
@@ -64,21 +126,37 @@
     "note": "K=2 (IS<=2022) baseline from docstring lines 245-247; pre-gap-fix.",
     "method": "K=2 OOS folds",
     "uptrend_hopp": {
-      "f1": {"n": 12, "ev_r": 0.625},
-      "f2": {"n": 24, "ev_r": 0.708}
+      "f1": {
+        "n": 12,
+        "ev_r": 0.625
+      },
+      "f2": {
+        "n": 24,
+        "ev_r": 0.708
+      }
     },
     "uptrend_hopp_legs1": {
-      "f1": {"n": 5,  "ev_r": 1.000},
-      "f2": {"n": 10, "ev_r": 0.750}
+      "f1": {
+        "n": 5,
+        "ev_r": 1.0
+      },
+      "f2": {
+        "n": 10,
+        "ev_r": 0.75
+      }
     },
     "downtrend": {
-      "f1": {"n": null, "ev_r": -0.177, "note": "REJECT — suppressed to 0.0"}
+      "f1": {
+        "n": null,
+        "ev_r": -0.177,
+        "note": "REJECT — suppressed to 0.0"
+      }
     }
   },
   "samples_full_stack_5y": {
-    "framework": "PA structural stop (live production form)",
-    "n": 66, "ev_r": 0.137, "win_pct": 59.1,
-    "note": "Re-baselined 2026-06-09 to current full_stack pa_us_dif_pos lane (this baseline's actual full_stack_lane). Prior value (n=146 ev_r=0.086 win=36.3) was mistakenly the pa_us_60min row. Current numbers reflect post max_hold 20->30 + US broad-market suppression deploy — EV/win up as suppression removed losing broad-market trades."
+    "n": 47,
+    "ev_r": 0.144,
+    "win_pct": 57.5
   },
   "production_binding": [
     "src/engine/divergence/pa_detector.py:243-258",
@@ -86,15 +164,15 @@
   ],
   "verdict": "PASS",
   "verdict_reason": "K=3 corrected: 3/3 OOS folds positive (F1+0.348, F2+0.682, F3+0.097). F3 marginal but positive. legs=1 sub-cell 4/4 folds positive (incl IS) and monotone increasing. K=2 prior result PASS. Downtrend variant REJECT (F1=-0.177R) and is suppressed to 0.0 in routing (separate cell — see policy_weight_assigned_breakdown). policy_weight=0.80 for uptrend+h=opp, +0.10 bonus for legs=1.",
-  "policy_weight_assigned": 0.80,
+  "policy_weight_assigned": 0.8,
   "policy_weight_assigned_breakdown": {
-    "uptrend_hopp": 0.80,
-    "uptrend_hopp_legs1": 0.90,
-    "uptrend_no_hopp": 0.40,
+    "uptrend_hopp": 0.8,
+    "uptrend_hopp_legs1": 0.9,
+    "uptrend_no_hopp": 0.4,
     "downtrend": 0.0,
     "ranging_or_unknown": 0.0
   },
-  "policy_weight_recommended": 0.80,
+  "policy_weight_recommended": 0.8,
   "valid_until": "2026-10-20",
   "commit_hash": "3796cfa2",
   "data_snapshot": "2026-06-09",
@@ -109,5 +187,21 @@
     "doc/repro/pa_tlt_diagnostic_2026-06-08.md"
   ],
   "notes": "Docstring carries BOTH K=2 (2026-06-02 baseline) and K=3 corrected (gap-fix) numbers for slightly different cell definitions. K=3 corrected is more rigorous and is what's promoted here as the primary samples; K=2 archived under samples_prior_2026-06-02 for traceability. legs=1 bonus rule applied at policy_weight()::pa_detector.py:343 (base+0.10 when leg_count_down==1). DOCSTRING INCONSISTENCY: line 263 mentions 'cn_structural 2026-06-08' n=46 EV=+0.524R — this is the cn_metal_futures cell, not us_equity; mentioned here only because it sits in the same docstring block. requires_verification: cutoff dates are described in prose (IS<=2021 / OOS2=2023H2-2024 / OOS3>2025) but not pinned as ISO dates in either docstring or any pin file checked.",
-  "requires_verification": true
+  "requires_verification": true,
+  "reanchor_history": [
+    {
+      "date": "2026-06-12",
+      "previous_samples_full_stack_5y": {
+        "framework": "PA structural stop (live production form)",
+        "n": 66,
+        "ev_r": 0.137,
+        "win_pct": 59.1,
+        "note": "Re-baselined 2026-06-09 to current full_stack pa_us_dif_pos lane (this baseline's actual full_stack_lane). Prior value (n=146 ev_r=0.086 win=36.3) was mistakenly the pa_us_60min row. Current numbers reflect post max_hold 20->30 + US broad-market suppression deploy — EV/win up as suppression removed losing broad-market trades."
+      },
+      "previous_data_snapshot_hash": null,
+      "reason": "same hourly-availability gate as context_a_us (pa_us_dif_pos lane).",
+      "context": "post-WSL-migration re-validation on the completed-backfill snapshot; doc/repro/revalidation_2026-06-12.md. CN baselines deliberately NOT re-anchored — they pass within tolerance against their original 5.5y anchors."
+    }
+  ],
+  "data_snapshot_hash": "sha256:c204d2e24a9cf5fd7f37950ffe5e7e40cdd05c94a1bcd930ea152037fde8cae2"
 }

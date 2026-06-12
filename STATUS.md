@@ -3,6 +3,14 @@
 Snapshot at 2026-06-09.  Read this first to know where the project
 stands; consult linked docs / commits for the details.
 
+> **Re-validation complete (2026-06-12)** — backfill done (0 required gaps);
+> dashboard **12 OK / 1 STALE**. CN cells reproduce their ORIGINAL 5.5y
+> anchors within tolerance with zero re-anchoring (continuous synthesis +
+> seam validated end-to-end). 3 US baselines re-anchored (hourly-availability
+> / population-mix attribution, one more expected drift when non-core hourly
+> backfills). data_snapshot_hash live (stable across same-day runs).
+> See `doc/repro/revalidation_2026-06-12.md`.
+
 > **WSL migration (2026-06-11)** — code is live on the new box against the
 > redesigned quant-cli data layer. `src/data/store.py` rewritten (flat
 > Parquet store, Beijing-naive tz handling, US period-end shift + legacy-
