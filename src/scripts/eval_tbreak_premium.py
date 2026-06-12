@@ -188,10 +188,11 @@ def _contract_entry_idx(df: pd.DataFrame, bd: pd.Timestamp) -> int | None:
 
 
 def _store_for(daily_dir: Path):
-    """OptionStore root（兼容传入 .../daily 或其父目录）。"""
-    from data.option_store import OptionStore
+    """OptionStore root（兼容传入 .../daily 或其父目录）；进程级缓存
+    （codex P2：每事件新建 store 会让 coverage 对同品种反复全量扫盘）。"""
+    from data.option_store import get_store
     p = Path(daily_dir)
-    return OptionStore(p.parent if p.name == "daily" else p)
+    return get_store(p.parent if p.name == "daily" else p)
 
 
 def measured_tick(sym: str, daily_dir: Path = DAILY_DIR) -> float:
