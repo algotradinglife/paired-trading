@@ -15,33 +15,33 @@
     "market_n": 21,
     "model_n": 6,
     "modeled_fraction": 0.222,
-    "snapped_n": 17
+    "snapped_n": 0
   },
   "samples": {
     "is": {
       "n": 8,
-      "ev_mult": 1.715,
+      "ev_mult": 1.521,
       "win_pct": 62.5
     },
     "oos": {
       "n": 19,
-      "ev_mult": 1.376,
-      "win_pct": 57.9
+      "ev_mult": 1.369,
+      "win_pct": 63.2
     },
     "by_year": {
       "2024": {
         "n": 8,
-        "ev_mult": 1.715,
+        "ev_mult": 1.521,
         "win_pct": 62.5
       },
       "2025": {
         "n": 15,
-        "ev_mult": 1.685,
-        "win_pct": 73.3
+        "ev_mult": 1.675,
+        "win_pct": 80.0
       },
       "2026": {
         "n": 4,
-        "ev_mult": 0.22,
+        "ev_mult": 0.222,
         "win_pct": 0.0
       }
     }
@@ -72,7 +72,7 @@
   },
   "verdict": "PROMOTE",
   "reliability": "MARKET_BACKED",
-  "verdict_reason": "IS net_ev_mult=1.715 (n=8), OOS net_ev_mult=1.376 (n=19); modeled_fraction=0.222 -> reliability=MARKET_BACKED. Costs: commission=10bps + slippage=10bps = 20bps r/t. Entry: signal-day close offset 1 bar(s). Verdict on net metrics.",
+  "verdict_reason": "IS net_ev_mult=1.521 (n=8), OOS net_ev_mult=1.369 (n=19); modeled_fraction=0.222 -> reliability=MARKET_BACKED. Costs: commission=10bps + slippage=10bps = 20bps r/t. Entry: signal-day close offset 1 bar(s). Verdict on net metrics.",
   "data_snapshot": "2026-06-12",
   "pool": "cn_options_au",
   "policy_weight_assigned": 0.0,
@@ -148,28 +148,28 @@
   "gross_samples": {
     "is_gross": {
       "n": 8,
-      "ev_mult": 1.719,
+      "ev_mult": 1.524,
       "win_pct": 62.5
     },
     "oos_gross": {
       "n": 19,
-      "ev_mult": 1.379,
-      "win_pct": 57.9
+      "ev_mult": 1.372,
+      "win_pct": 63.2
     },
     "by_year_gross": {
       "2024": {
         "n": 8,
-        "ev_mult": 1.719,
+        "ev_mult": 1.524,
         "win_pct": 62.5
       },
       "2025": {
         "n": 15,
-        "ev_mult": 1.688,
-        "win_pct": 73.3
+        "ev_mult": 1.678,
+        "win_pct": 80.0
       },
       "2026": {
         "n": 4,
-        "ev_mult": 0.22,
+        "ev_mult": 0.222,
         "win_pct": 0.0
       }
     }
@@ -178,5 +178,50 @@
     "since": "2024-07-01",
     "is_cutoff_year": 2024,
     "note": "market-covered era only; full-window runs stay MODEL_DOMINATED (option history starts 2024-07). THIN FOLDS: IS n=9 (ag) / n=8 (au) — treat verdicts as provisional until more market history accrues."
-  }
+  },
+  "reanchor_history": [
+    {
+      "date": "2026-06-12b",
+      "previous": {
+        "verdict": "PROMOTE",
+        "samples": {
+          "is": {
+            "n": 8,
+            "ev_mult": 1.715,
+            "win_pct": 62.5
+          },
+          "oos": {
+            "n": 19,
+            "ev_mult": 1.376,
+            "win_pct": 57.9
+          },
+          "by_year": {
+            "2024": {
+              "n": 8,
+              "ev_mult": 1.715,
+              "win_pct": 62.5
+            },
+            "2025": {
+              "n": 15,
+              "ev_mult": 1.685,
+              "win_pct": 73.3
+            },
+            "2026": {
+              "n": 4,
+              "ev_mult": 0.22,
+              "win_pct": 0.0
+            }
+          }
+        },
+        "pricing": {
+          "market_n": 21,
+          "model_n": 6,
+          "modeled_fraction": 0.222,
+          "snapped_n": 17
+        }
+      },
+      "reason": "production expiry rule applied (user-locked: >=14d to option expiry -> nearest listed month, else next) + listed-strike alignment in the LIVE selectors; snapped_n=0 — the harness now measures production contract selection directly."
+    }
+  ],
+  "contract_rule": ">=14d to option expiry -> nearest listed month, else next; strikes snapped to listed chain (engine/options/expiry_select.py)"
 }

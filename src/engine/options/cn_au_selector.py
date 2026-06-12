@@ -89,14 +89,17 @@ def select_otm_calls_au(
     signal_date: date,
     n_strikes: int = 3,
     mm_target_pct: float | None = None,
+    *,
+    quant_root: Path | None = None,
 ) -> list[dict]:
     """Return up to n_strikes OTM call options for au, sorted by OTM distance.
 
-    Expiry selection: first contract with 25-60 DTE from signal_date.
-    The floor is 25 (not 20 as for ag) to avoid near-expiry front-month
-    contracts which have poor liquidity in au. If no contract lands in
-    that window, the nearest future contract with DTE >= 25 is used as
-    a fallback.
+    Expiry selection (user-locked production rule, 2026-06-12): nearest
+    LISTED option month when its OPTION expiry is >= 14 days from
+    signal_date, otherwise the next listed month (au lists bimonthly —
+    the next listed month is typically +2 calendar months). Strikes
+    snap to the listed chain; calendar months + theoretical strikes
+    when no au chain is synced.
 
     Each returned dict contains:
       strike          (int)   strike price in yuan/gram
@@ -114,57 +117,70 @@ def select_otm_calls_au(
         List of dicts sorted by otm_pct ascending (nearest OTM first).
         Empty list if no suitable expiry found.
     """
-    chosen_expiry: Optional[date] = None
-    chosen_ym: Optional[tuple[int, int]] = None
-    fallback_expiry: Optional[date] = None
-    fallback_ym: Optional[tuple[int, int]] = None
+    from data.bar_loader import DEFAULT_QUANT_ROOT
+    from data.option_store import get_store
+    from engine.options.expiry_select import (
+        approx_option_expiry, select_expiry_month, snap_strikes_to_listed,
+    )
 
-    for year, month in _candidate_expiry_months(signal_date):
-        expiry = _expiry_date_for_month_au(year, month)
-        dte = (expiry - signal_date).days
-        if dte < _AU_MIN_DTE:
-            continue
-        if fallback_expiry is None:
-            fallback_expiry = expiry
-            fallback_ym = (year, month)
-        if dte <= 60:
-            chosen_expiry = expiry
-            chosen_ym = (year, month)
-            break
+    store = get_store(quant_root if quant_root is not None else DEFAULT_QUANT_ROOT)
+    # Only contracts already LISTED at signal_date count — the catalog is
+    # as-of-now, and engaging future-listed chains on historical replays
+    # would yield untradable (or empty) selections.
+    cov = store.coverage("au")
+    chain = [
+        c for c in store.catalog("au")
+        if c.opt_type == "C"
+        and c.contract_sym in cov
+        and cov[c.contract_sym][0] <= signal_date
+    ]
+    listed_months = sorted({c.underlying_month for c in chain})
 
-    if chosen_expiry is None:
-        chosen_expiry = fallback_expiry
-        chosen_ym = fallback_ym
+    expiry_code = select_expiry_month(signal_date, listed_months, "au")
+    listed_strikes: list[float] = []
+    if expiry_code is not None:
+        listed_strikes = sorted(
+            {c.strike for c in chain if c.underlying_month == expiry_code})
+    else:
+        cand = [_yymm(y, m) for y, m in _candidate_expiry_months(signal_date)]
+        expiry_code = select_expiry_month(signal_date, cand, "au")
+        if expiry_code is None:
+            return []
 
-    if chosen_expiry is None or chosen_ym is None:
-        return []
-
+    chosen_expiry = approx_option_expiry(
+        2000 + int(expiry_code[:2]), int(expiry_code[2:]))
     dte = (chosen_expiry - signal_date).days
-    expiry_code = _yymm(chosen_ym[0], chosen_ym[1])
+
+    targets = [underlying_price * (1.0 + off) for off in _OTM_OFFSETS[:n_strikes]]
+    strikes: list = []
+    if listed_strikes:
+        strikes = [int(s) if float(s).is_integer() else s
+                   for s in snap_strikes_to_listed(
+                       listed_strikes, targets=targets, spot=underlying_price)]
+    if not strikes:
+        # No synced chain, or the ATM±N snapshot tops out below spot
+        # after a rally — the real exchange lists higher strikes, so
+        # keep the rule's month and emit theoretical strikes.
+        seen: set[int] = set()
+        for raw in targets:
+            strike = _round_to_step(raw)
+            if strike <= underlying_price:
+                strike += _AU_STRIKE_STEP
+            while strike in seen:
+                strike += _AU_STRIKE_STEP
+            seen.add(strike)
+            strikes.append(strike)
 
     results = []
-    seen_strikes: set[int] = set()
-    for rank_idx, offset in enumerate(_OTM_OFFSETS[:n_strikes], start=1):
-        raw_strike = underlying_price * (1.0 + offset)
-        strike = _round_to_step(raw_strike)
-        # Ensure strictly above underlying (round up by one step if needed)
-        if strike <= underlying_price:
-            strike += _AU_STRIKE_STEP
-        # Ensure no duplicate strike across ranks (increment until unique)
-        while strike in seen_strikes:
-            strike += _AU_STRIKE_STEP
-        seen_strikes.add(strike)
-
+    for rank_idx, strike in enumerate(strikes, start=1):
         actual_otm_pct = (strike / underlying_price - 1.0) * 100.0
-        contract_sym = f"au{expiry_code}c{strike}"
-
         results.append({
             "rank": rank_idx,
             "strike": strike,
             "otm_pct": round(actual_otm_pct, 2),
             "expiry_month": expiry_code,
             "expiry_date": chosen_expiry.isoformat(),
-            "contract_sym": contract_sym,
+            "contract_sym": f"au{expiry_code}c{strike}",
             "days_to_expiry": dte,
             "mm_target_pct": None,
             "is_mm_strike": False,

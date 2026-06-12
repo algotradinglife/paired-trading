@@ -76,6 +76,7 @@ class OptionStore:
     def __init__(self, data_root: Path | str) -> None:
         self._root = Path(data_root)
         self._catalog_cache: dict[str, list[OptionContract]] = {}
+        self._coverage_cache: dict[str, dict[str, tuple[date, date]]] = {}
         self._sym_index: dict[str, OptionContract] | None = None
 
     # ------------------------------------------------------------------
@@ -148,6 +149,20 @@ class OptionStore:
             .drop_duplicates(subset=["date"], keep="last")
             .reset_index(drop=True)
         )
+
+    def coverage(self, product: str) -> dict[str, tuple[date, date]]:
+        """contract_sym → (first bar date, last bar date), cached per product."""
+        cached = self._coverage_cache.get(product)
+        if cached is not None:
+            return cached
+        cov: dict[str, tuple[date, date]] = {}
+        for c in self.catalog(product):
+            df = self.load_contract_daily(c.contract_sym)
+            if df is None or df.empty:
+                continue
+            cov[c.contract_sym] = (df["date"].iloc[0], df["date"].iloc[-1])
+        self._coverage_cache[product] = cov
+        return cov
 
     def load_chain(self, product: str, on: date) -> pd.DataFrame:
         """All contracts of ``product`` with a bar on ``on``.
