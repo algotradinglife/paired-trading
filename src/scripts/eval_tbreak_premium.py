@@ -55,6 +55,8 @@ import numpy as np
 import pandas as pd
 
 SRC_DIR = Path(__file__).resolve().parents[1]
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 DAILY_DIR = SRC_DIR / "data" / "quant" / "daily"
 SCAN_SCRIPT = SRC_DIR / "scripts" / "scan_tbreak_chain.py"
 
@@ -62,19 +64,29 @@ SCAN_SCRIPT = SRC_DIR / "scripts" / "scan_tbreak_chain.py"
 STOP_FRAC = 0.5        # 止损 = 入场权利金 * 0.5（腰斩出局）
 HOLD_DAYS = 10         # 时间止损：第 10 个交易日收盘出场
 SLIP_TICKS = 2         # 入出各 2 tick 不利滑点
-MIN_DTE_DAYS = 30      # 到期月须距 break_date >= 30 自然日（用数据覆盖延伸近似）
 MAX_ENTRY_GAP_DAYS = 7  # 入场日须在 break_date 后 <= 7 自然日内（确保是真·次一交易日、
                         # 合约在破位时已上市；否则远月合约数据从晚期才开始会造成数百天错配）
 OTM_MAX_RANK = 2       # 浅虚最多取到第 2 档
 BOOTSTRAP_N = 10000
 BOOTSTRAP_SEED = 42
 
-# Tick size（实测，见 docstring）
-TICK_SIZE: dict[str, float] = {"ag": 0.5, "au": 0.02, "cu": 2.0, "rb": 0.5}
+# v1（2026-06-12）：选月走生产规则（期权到期 >=14d 选最近挂牌月，否则次月，
+# engine/options/expiry_select.py；死链用链终止日做精确到期）。MIN_DTE_DAYS
+# 的覆盖近似被该规则取代。敏感性网格（用户要求）：
+GRID_STOP_FRACS = (0.4, 0.5, 0.6)
+GRID_HOLD_DAYS = (5, 10, 15)
+IS_CUTOFF_DATE_DEFAULT = "2025-06-30"   # IS <= 该日 < OOS
 
-# scan POOL key（kq_m_shfe_<sym>）-> 短代码
+# Tick size（实测，见 docstring）；未列品种运行时从期权价格序列实测
+TICK_SIZE: dict[str, float] = {"ag": 0.5, "au": 0.02, "cu": 2.0, "rb": 0.5}
+_MEASURED_TICK_CACHE: dict[tuple[str, str], float] = {}
+
+# scan POOL key -> 短代码（put 主场工业品 + 贵金属对照组）
 POOL_KEY = {"ag": "kq_m_shfe_ag", "au": "kq_m_shfe_au",
-            "cu": "kq_m_shfe_cu", "rb": "kq_m_shfe_rb"}
+            "cu": "kq_m_shfe_cu", "rb": "kq_m_shfe_rb",
+            "al": "kq_m_shfe_al", "ni": "kq_m_shfe_ni",
+            "i": "kq_m_dce_i", "m": "kq_m_dce_m"}
+DEFAULT_SYMBOLS = "cu,rb,i,m,al,ni,ag,au"
 
 # 文件名：SHFE.<sym><YYMM><C|P><strike>.parquet
 _OPT_RE = re.compile(r"^SHFE\.(?P<sym>[a-z]{2})(?P<month>\d{4})(?P<cp>[CP])(?P<strike>\d+)\.parquet$")
@@ -162,8 +174,8 @@ def _load_contract(path: Path) -> pd.DataFrame:
     return df
 
 
-def _contract_entry_idx(df: pd.DataFrame, bd: pd.Timestamp, min_cover: pd.Timestamp) -> int | None:
-    """合约若在 break_date 后紧贴(<=MAX_ENTRY_GAP)上市且覆盖足够，返回入场行号，否则 None。"""
+def _contract_entry_idx(df: pd.DataFrame, bd: pd.Timestamp) -> int | None:
+    """合约若在 break_date 后紧贴(<=MAX_ENTRY_GAP)可入场，返回入场行号，否则 None。"""
     if df.empty:
         return None
     after = df.index[df["date"] > bd]
@@ -172,49 +184,142 @@ def _contract_entry_idx(df: pd.DataFrame, bd: pd.Timestamp, min_cover: pd.Timest
     entry_idx = int(after[0])
     if (df["date"].iloc[entry_idx] - bd).days > MAX_ENTRY_GAP_DAYS:
         return None        # 远月合约数据从晚期才开始 → 破位时未上市，排除
-    if df["date"].iloc[-1] < min_cover:
-        return None        # 覆盖不足 30 自然日（近似 DTE 太短）
     return entry_idx
+
+
+def _store_for(daily_dir: Path):
+    """OptionStore root（兼容传入 .../daily 或其父目录）。"""
+    from data.option_store import OptionStore
+    p = Path(daily_dir)
+    return OptionStore(p.parent if p.name == "daily" else p)
+
+
+def measured_tick(sym: str, daily_dir: Path = DAILY_DIR) -> float:
+    """品种 tick：常量表优先，缺者从期权收盘价序列实测最小非零增量。"""
+    if sym in TICK_SIZE:
+        return TICK_SIZE[sym]
+    key = (str(daily_dir), sym)
+    if key in _MEASURED_TICK_CACHE:
+        return _MEASURED_TICK_CACHE[key]
+    store = _store_for(daily_dir)
+    diffs: list[float] = []
+    for c in store.catalog(sym)[:12]:
+        df = store.load_contract_daily(c.contract_sym)
+        if df is None or len(df) < 2:
+            continue
+        d = df["close"].diff().abs()
+        diffs.extend(float(x) for x in d if x and x > 0)
+    tick = min(diffs) if diffs else 1.0
+    _MEASURED_TICK_CACHE[key] = tick
+    return tick
 
 
 def pick_contract_for_event(sym: str, cp: str, break_date: str, underlying_px: float,
                             daily_dir: Path = DAILY_DIR) -> dict | None:
-    """为单事件选合约：取数据覆盖 >= MIN_DTE_DAYS 且破位时已上市的**最近**月，
-    在该月内 strike 网格里选最浅虚 OTM（rank1 优先，缺则 rank2）。
+    """为单事件选合约（v1：生产选月规则 + OptionStore 全交易所方言）。
 
-    按月内 strike 重排 OTM（而非全 strike 宇宙），避免选到只在远月才上市的 OTM strike。
-    返回 {contract..., df, entry_idx} 或 None（无可用合约 = skipped_no_option）。
+    月份：期权到期 >= 14d 选最近挂牌月，否则次月（select_expiry_month；
+    死链以链终止日做精确到期，活链用近似）。规则月内无 OTM strike /
+    无可入场数据时，顺延到更远的挂牌月（store 行权价快照工件，非真实缺挂牌）。
+    strike：月内最浅虚 OTM（rank1 优先，缺则 rank2）。
+    返回 {month, strike, otm_rank, contract, df, entry_idx} 或 None。
     """
-    bd = pd.Timestamp(break_date).normalize()
-    min_cover = bd + pd.Timedelta(days=MIN_DTE_DAYS)
-    contracts = list_option_contracts(sym, cp, daily_dir)
+    from engine.options.expiry_select import select_expiry_month
 
-    # 按月分组，月份近者优先
-    months = sorted({c["month"] for c in contracts}, key=_yymm_to_expiry_floor)
-    for month in months:
-        if _yymm_to_expiry_floor(month) < bd:
-            continue  # 交割月早于破位日，跳过（不可能是有效持仓月）
-        in_month = [c for c in contracts if c["month"] == month]
-        rank_of = _rank_otm_strikes([c["strike"] for c in in_month], cp, underlying_px)
-        # 月内按 otm_rank 升序（rank1 最浅虚优先）
+    bd = pd.Timestamp(break_date).normalize()
+    bdd = bd.date()
+    store = _store_for(daily_dir)
+    cov = store.coverage(sym)
+    cands = [
+        c for c in store.catalog(sym)
+        if c.opt_type == cp and c.contract_sym in cov
+        and (cov[c.contract_sym][0] - bdd).days <= MAX_ENTRY_GAP_DAYS
+    ]
+    if not cands:
+        return None
+
+    months = sorted({c.underlying_month for c in cands})
+    product_latest = max(rng[1] for rng in cov.values())
+    exact_expiries = {}
+    for m in months:
+        end = max(cov[c.contract_sym][1] for c in cands if c.underlying_month == m)
+        if end < product_latest:
+            exact_expiries[m] = end   # 死链终止日 = 真实期权到期
+
+    chosen = select_expiry_month(bdd, months, sym, expiries=exact_expiries)
+    if chosen is None:
+        return None
+    ordered = [chosen] + [m for m in months if m > chosen]
+
+    for month in ordered:
+        in_month = [c for c in cands if c.underlying_month == month]
+        rank_of = _rank_otm_strikes(
+            [int(c.strike) for c in in_month], cp, underlying_px)
         ranked = sorted(
-            (dict(c, otm_rank=rank_of[c["strike"]]) for c in in_month if c["strike"] in rank_of),
-            key=lambda c: c["otm_rank"],
+            (c for c in in_month if int(c.strike) in rank_of),
+            key=lambda c: rank_of[int(c.strike)],
         )
         for c in ranked:
-            df = _load_contract(c["path"])
-            entry_idx = _contract_entry_idx(df, bd, min_cover)
+            raw = store.load_contract_daily(c.contract_sym)
+            if raw is None or raw.empty:
+                continue
+            df = raw.copy()
+            df["date"] = pd.to_datetime(df["date"])
+            entry_idx = _contract_entry_idx(df, bd)
             if entry_idx is not None:
-                return dict(c, df=df, entry_idx=entry_idx)
+                return {
+                    "month": month, "strike": int(c.strike),
+                    "otm_rank": rank_of[int(c.strike)],
+                    "path": c.path, "df": df, "entry_idx": entry_idx,
+                }
     return None
 
 
+def simulate_path(df: pd.DataFrame, entry_idx: int, tick: float,
+                  stop_frac: float = STOP_FRAC,
+                  hold_days: int = HOLD_DAYS) -> dict:
+    """持有期模拟（纯函数）：入场次日开盘+滑点，止损/时间/断档出场。"""
+    entry_open = float(df["open"].iloc[entry_idx])
+    entry_fill = entry_open + SLIP_TICKS * tick          # 买入更贵
+    stop_price = entry_fill * stop_frac
+
+    hold = df.iloc[entry_idx:entry_idx + hold_days].reset_index(drop=True)
+    exit_reason = None
+    exit_raw = None
+    for j in range(len(hold)):
+        if float(hold["low"].iloc[j]) <= stop_price:
+            exit_raw = stop_price                         # 当日以止损价成交（保守）
+            exit_reason = "stop"
+            break
+    if exit_reason is None:
+        if len(hold) >= hold_days:
+            exit_raw = float(hold["close"].iloc[hold_days - 1])
+            exit_reason = "time"
+        else:
+            exit_raw = float(hold["close"].iloc[-1])      # 数据断档：最后可用收盘
+            exit_reason = "data_gap"
+
+    exit_fill = max(exit_raw - SLIP_TICKS * tick, 0.0)    # 卖出更便宜，不为负
+    multiple = exit_fill / entry_fill if entry_fill > 0 else 0.0
+    return {
+        "entry": round(entry_fill, 4), "stop_price": round(stop_price, 4),
+        "exit": round(exit_fill, 4), "exit_reason": exit_reason,
+        "multiple": round(multiple, 6),
+    }
+
+
 def simulate_event(sym: str, side: str, break_date: str, underlying_px: float,
-                   daily_dir: Path = DAILY_DIR) -> dict:
-    """模拟单事件。返回明细 dict；evaluated=False 表示 skipped_no_option。"""
+                   daily_dir: Path = DAILY_DIR, *,
+                   stop_frac: float = STOP_FRAC, hold_days: int = HOLD_DAYS,
+                   picked: dict | None = None) -> dict:
+    """模拟单事件。返回明细 dict；evaluated=False 表示 skipped_no_option。
+
+    ``picked`` 可传入已选好的合约（build_report 网格复用，避免重复选取/读盘）。
+    """
     cp = "P" if side == "put" else "C"
-    tick = TICK_SIZE[sym]
-    picked = pick_contract_for_event(sym, cp, break_date, underlying_px, daily_dir)
+    tick = measured_tick(sym, daily_dir)
+    if picked is None:
+        picked = pick_contract_for_event(sym, cp, break_date, underlying_px, daily_dir)
     if picked is None:
         return {
             "symbol": sym, "side": side, "break_date": break_date,
@@ -225,40 +330,14 @@ def simulate_event(sym: str, side: str, break_date: str, underlying_px: float,
 
     df = picked["df"]
     i0 = picked["entry_idx"]
-    entry_open = float(df["open"].iloc[i0])
-    entry_fill = entry_open + SLIP_TICKS * tick          # 买入更贵
-    stop_price = entry_fill * STOP_FRAC
-
-    hold = df.iloc[i0:i0 + HOLD_DAYS].reset_index(drop=True)
-    exit_reason = None
-    exit_raw = None
-    for j in range(len(hold)):
-        low = float(hold["low"].iloc[j])
-        if low <= stop_price:
-            exit_raw = stop_price                         # 当日以止损价成交（保守）
-            exit_reason = "stop"
-            break
-    if exit_reason is None:
-        if len(hold) >= HOLD_DAYS:
-            exit_raw = float(hold["close"].iloc[HOLD_DAYS - 1])
-            exit_reason = "time"
-        else:
-            exit_raw = float(hold["close"].iloc[-1])      # 数据断档：最后可用收盘
-            exit_reason = "data_gap"
-
-    exit_fill = max(exit_raw - SLIP_TICKS * tick, 0.0)    # 卖出更便宜，不为负
-    multiple = exit_fill / entry_fill if entry_fill > 0 else 0.0
-    contract_name = picked["path"].stem  # e.g. SHFE.ag2408C7000
-
+    sim = simulate_path(df, i0, tick, stop_frac=stop_frac, hold_days=hold_days)
     return {
         "symbol": sym, "side": side, "break_date": break_date,
         "break_close": underlying_px, "evaluated": True,
-        "contract": contract_name, "month": picked["month"],
+        "contract": picked["path"].stem, "month": picked["month"],
         "strike": picked["strike"], "otm_rank": picked["otm_rank"],
         "entry_date": str(df["date"].iloc[i0].date()),
-        "entry": round(entry_fill, 4), "stop_price": round(stop_price, 4),
-        "exit": round(exit_fill, 4), "exit_reason": exit_reason,
-        "multiple": round(multiple, 6),
+        **sim,
     }
 
 
@@ -320,9 +399,27 @@ def _group_stats(rows: list[dict]) -> dict:
     }
 
 
-def build_report(events: list[dict], daily_dir: Path = DAILY_DIR) -> dict:
-    details = [simulate_event(e["symbol"], e["side"], e["break_date"],
-                              e["break_close"], daily_dir) for e in events]
+def build_report(events: list[dict], daily_dir: Path = DAILY_DIR,
+                 is_cutoff_date=None) -> dict:
+    from datetime import date as _date
+    if is_cutoff_date is None:
+        is_cutoff_date = _date.fromisoformat(IS_CUTOFF_DATE_DEFAULT)
+
+    # 每事件选一次合约（缓存 df），头条参数 + 网格共用
+    picks: list[dict | None] = []
+    for e in events:
+        cp = "P" if e["side"] == "put" else "C"
+        picks.append(pick_contract_for_event(
+            e["symbol"], cp, e["break_date"], e["break_close"], daily_dir))
+
+    def run_all(stop_frac: float, hold_days: int) -> list[dict]:
+        return [simulate_event(e["symbol"], e["side"], e["break_date"],
+                               e["break_close"], daily_dir,
+                               stop_frac=stop_frac, hold_days=hold_days,
+                               picked=p)
+                for e, p in zip(events, picks)]
+
+    details = run_all(STOP_FRAC, HOLD_DAYS)
     evaluated = [d for d in details if d["evaluated"]]
     skipped = [d for d in details if not d["evaluated"]]
     mults = [d["multiple"] for d in evaluated]
@@ -333,12 +430,46 @@ def build_report(events: list[dict], daily_dir: Path = DAILY_DIR) -> dict:
     by_symbol = {s: _group_stats([d for d in evaluated if d["symbol"] == s])
                  for s in syms}
 
+    # IS/OOS 折（按 break_date 切）
+    def _fold(rows: list[dict], is_fold: bool) -> list[dict]:
+        return [d for d in rows
+                if (_date.fromisoformat(d["break_date"]) <= is_cutoff_date) == is_fold]
+
+    folds = {
+        "is": _group_stats(_fold(evaluated, True)),
+        "oos": _group_stats(_fold(evaluated, False)),
+        "is_by_side": {s: _group_stats([d for d in _fold(evaluated, True)
+                                        if d["side"] == s])
+                       for s in ("put", "call")},
+        "oos_by_side": {s: _group_stats([d for d in _fold(evaluated, False)
+                                         if d["side"] == s])
+                        for s in ("put", "call")},
+    }
+
+    # stop_frac × hold_days 敏感性网格（复用 picks，不重复读盘）
+    grid: dict[str, dict] = {}
+    for sf in GRID_STOP_FRACS:
+        for hd in GRID_HOLD_DAYS:
+            rows = [d for d in run_all(sf, hd) if d["evaluated"]]
+            ms = [d["multiple"] for d in rows]
+            puts = [d["multiple"] for d in rows if d["side"] == "put"]
+            calls = [d["multiple"] for d in rows if d["side"] == "call"]
+            grid[f"stop{sf}_hold{hd}"] = {
+                "n": len(ms),
+                "ev": round(float(np.mean(ms)), 6) if ms else None,
+                "put_ev": round(float(np.mean(puts)), 6) if puts else None,
+                "call_ev": round(float(np.mean(calls)), 6) if calls else None,
+            }
+
     return {
         "params": {
             "stop_frac": STOP_FRAC, "hold_days": HOLD_DAYS,
-            "slip_ticks": SLIP_TICKS, "min_dte_days": MIN_DTE_DAYS,
+            "slip_ticks": SLIP_TICKS,
             "max_entry_gap_days": MAX_ENTRY_GAP_DAYS,
             "otm_max_rank": OTM_MAX_RANK, "tick_size": TICK_SIZE,
+            "month_rule": ">=14d to option expiry -> nearest listed month, "
+                          "else next (engine/options/expiry_select.py)",
+            "is_cutoff_date": str(is_cutoff_date),
             "bootstrap_n": BOOTSTRAP_N, "bootstrap_seed": BOOTSTRAP_SEED,
             "entry": "next-trading-day open + slip", "exit": "stop@low | time@close | data_gap",
             "multiple": "exit_fill / entry_fill",
@@ -350,6 +481,8 @@ def build_report(events: list[dict], daily_dir: Path = DAILY_DIR) -> dict:
         "ci95": bootstrap_ci(mults),
         "by_side": by_side,
         "by_symbol": by_symbol,
+        "folds": folds,
+        "sensitivity_grid": grid,
         "events": details,
     }
 
@@ -357,15 +490,18 @@ def build_report(events: list[dict], daily_dir: Path = DAILY_DIR) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--symbols", default="ag,au,cu,rb",
-                    help="逗号分隔短代码（ag,au,cu,rb）")
+    from datetime import date as _date
+    ap.add_argument("--symbols", default=DEFAULT_SYMBOLS,
+                    help=f"逗号分隔短代码（默认 {DEFAULT_SYMBOLS}：工业品 put 主场 + 贵金属对照）")
     ap.add_argument("--since", default="2024-07-01")
+    ap.add_argument("--is-cutoff-date", type=_date.fromisoformat,
+                    default=_date.fromisoformat(IS_CUTOFF_DATE_DEFAULT))
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
     symbols = [s.strip() for s in args.symbols.split(",") if s.strip()]
     events = fetch_events(symbols, args.since)
-    report = build_report(events)
+    report = build_report(events, is_cutoff_date=args.is_cutoff_date)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2))

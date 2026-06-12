@@ -138,3 +138,61 @@ def test_simulate_event_skipped_when_no_otm_in_live_month(tmp_path):
     out = simulate_event("ag", "put", "2024-12-20", 7465.0, daily_dir=d)
     assert out["evaluated"] is False
     assert out["exit_reason"] == "skipped_no_option"
+
+
+# --- v1 升级：≥14d 选月规则 / 多交易所 / folds / 网格 ----------------------
+from datetime import date as _date  # noqa: E402
+
+from scripts.eval_tbreak_premium import build_report  # noqa: E402
+
+
+def _chain_rows(start: str, periods: int, open_=100.0, low=90.0, close=105.0):
+    return [{"datetime": dt, "open": open_, "high": 110.0, "low": low,
+             "close": close, "volume": 1.0, "turnover": 0.0, "open_interest": 0.0}
+            for dt in pd.bdate_range(start, periods=periods)]
+
+
+def test_pick_respects_14d_rule_rolls_dead_near_month(tmp_path):
+    # ag2412 链已死（终止 2024-11-18，早于库内最新日期）；破位 2024-11-07
+    # 距其真实到期仅 11 天 (<14) → 必须滚到 2501，即便 2412 仍有数据可入场。
+    d = tmp_path / "daily"
+    d.mkdir()
+    dead = _chain_rows("2024-10-01", 35)            # ~2024-11-18 终止
+    live = _chain_rows("2024-11-01", 40)            # 延伸到 12 月下旬（库内最新）
+    pd.DataFrame(dead).to_parquet(d / "SHFE.ag2412C7600.parquet")
+    pd.DataFrame(live).to_parquet(d / "SHFE.ag2501C7600.parquet")
+    out = simulate_event("ag", "call", "2024-11-07", 7050.0, daily_dir=d)
+    assert out["evaluated"] is True
+    assert out["month"] == "2501"
+
+
+def test_pick_handles_dce_dialect_put(tmp_path):
+    d = tmp_path / "daily"
+    d.mkdir()
+    pd.DataFrame(_chain_rows("2024-11-08", 40)).to_parquet(
+        d / "DCE.i2502-P-740.parquet")
+    out = simulate_event("i", "put", "2024-11-07", 760.0, daily_dir=d)
+    assert out["evaluated"] is True
+    assert out["strike"] == 740 and out["month"] == "2502"
+
+
+def test_build_report_has_folds_and_grid(tmp_path):
+    d = tmp_path / "daily"
+    d.mkdir()
+    pd.DataFrame(_chain_rows("2024-11-08", 40)).to_parquet(
+        d / "SHFE.ag2501C7600.parquet")
+    pd.DataFrame(_chain_rows("2025-09-02", 40)).to_parquet(
+        d / "SHFE.ag2511C7600.parquet")
+    events = [
+        {"symbol": "ag", "side": "call", "break_date": "2024-11-07",
+         "break_close": 7050.0},
+        {"symbol": "ag", "side": "call", "break_date": "2025-09-01",
+         "break_close": 7050.0},
+    ]
+    rep = build_report(events, daily_dir=d, is_cutoff_date=_date(2025, 6, 30))
+    assert rep["folds"]["is"]["n"] == 1 and rep["folds"]["oos"]["n"] == 1
+    grid = rep["sensitivity_grid"]
+    assert "stop0.5_hold10" in grid
+    assert len(grid) >= 9
+    for cell in grid.values():
+        assert set(cell) >= {"n", "ev", "put_ev", "call_ev"}
