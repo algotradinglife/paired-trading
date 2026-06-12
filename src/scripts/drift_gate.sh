@@ -18,10 +18,15 @@ mkdir -p "$LOG_DIR"
 TS="$(date +%Y-%m-%d_%H%M)"
 LOG="$LOG_DIR/drift_$TS.log"
 
-# cron runs with a minimal env (no profile). Mirror the project's data env so
-# paths resolve the same as an interactive run; keep any value already exported.
-export DERIVED_ROOT="${DERIVED_ROOT:-/Volumes/Data Drive/derived}"
-export MARKET_DATA="${MARKET_DATA:-/Volumes/Data Drive/data}"
+# cron runs with a minimal env (no profile). Source the repo .env when present
+# (the per-machine source of truth since the WSL migration), then fall back to
+# this machine's defaults; keep any value already exported.
+if [ -f "$REPO/.env" ]; then
+  # shellcheck disable=SC1091
+  . "$REPO/.env"
+fi
+export DERIVED_ROOT="${DERIVED_ROOT:-$HOME/data/paired-trading/derived}"
+export MARKET_DATA="${MARKET_DATA:-/mnt/c/Users/hhusl/quant_data}"
 
 cd "$SRC" || { echo "drift_gate: cannot cd $SRC" >&2; exit 2; }
 if [ ! -x .venv/bin/python ]; then
@@ -40,7 +45,13 @@ status=$?
 #    collapse or data outage that would otherwise pass silently.
 if grep -qF '[DRFT]' "$LOG" || grep -q 'FULL_STACK_UNAVAILABLE' "$LOG"; then
   echo "$(date '+%F %T')  DRIFT/UNAVAILABLE — see $LOG" >>"$LOG_DIR/ALERTS.log"
-  /usr/bin/osascript -e 'display notification "Baseline drift gate fired — see logs/drift-gate/ALERTS.log" with title "paired-trading drift gate"' 2>/dev/null || true
+  # Desktop notification is best-effort per platform; ALERTS.log is the
+  # reliable signal (macOS: osascript; WSL/Linux: notify-send if present).
+  if command -v osascript >/dev/null 2>&1; then
+    osascript -e 'display notification "Baseline drift gate fired — see logs/drift-gate/ALERTS.log" with title "paired-trading drift gate"' 2>/dev/null || true
+  elif command -v notify-send >/dev/null 2>&1; then
+    notify-send "paired-trading drift gate" "fired — see logs/drift-gate/ALERTS.log" 2>/dev/null || true
+  fi
 fi
 
 # retain only the 12 most-recent run logs (portable: no GNU-only `xargs -r`,
