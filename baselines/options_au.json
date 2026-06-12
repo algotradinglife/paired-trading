@@ -3,7 +3,7 @@
   "lane": "options_au",
   "underlying": "kq_m_shfe_au",
   "emission_binding": "score_today.py:940-1303; cn_au_selector.select_otm_calls",
-  "entry": "signal-day close, Rank-1 OTM call (cn_metal bottom, score>=3)",
+  "entry": "next-bar close (offset=1), Rank-1 OTM call (directional bottom, score>=3)",
   "exit": {
     "take1": 2.0,
     "take2": 4.0,
@@ -12,51 +12,37 @@
     "max_hold_days": 30
   },
   "pricing": {
-    "market_n": 18,
-    "model_n": 67,
-    "modeled_fraction": 0.788
+    "market_n": 21,
+    "model_n": 6,
+    "modeled_fraction": 0.222,
+    "snapped_n": 17
   },
   "samples": {
     "is": {
-      "n": 37,
-      "ev_mult": 1.097,
-      "win_pct": 40.5
+      "n": 8,
+      "ev_mult": 1.715,
+      "win_pct": 62.5
     },
     "oos": {
-      "n": 48,
-      "ev_mult": 2.137,
-      "win_pct": 72.9
+      "n": 19,
+      "ev_mult": 1.376,
+      "win_pct": 57.9
     },
     "by_year": {
-      "2021": {
-        "n": 8,
-        "ev_mult": 0.375,
-        "win_pct": 12.5
-      },
-      "2022": {
-        "n": 13,
-        "ev_mult": 1.183,
-        "win_pct": 38.5
-      },
-      "2023": {
-        "n": 16,
-        "ev_mult": 1.389,
-        "win_pct": 56.2
-      },
       "2024": {
-        "n": 26,
-        "ev_mult": 2.353,
-        "win_pct": 80.8
+        "n": 8,
+        "ev_mult": 1.715,
+        "win_pct": 62.5
       },
       "2025": {
-        "n": 18,
-        "ev_mult": 2.062,
-        "win_pct": 66.7
+        "n": 15,
+        "ev_mult": 1.685,
+        "win_pct": 73.3
       },
       "2026": {
         "n": 4,
-        "ev_mult": 1.071,
-        "win_pct": 50.0
+        "ev_mult": 0.22,
+        "win_pct": 0.0
       }
     }
   },
@@ -85,13 +71,112 @@
     }
   },
   "verdict": "PROMOTE",
-  "reliability": "MODEL_DOMINATED",
-  "verdict_reason": "IS ev_mult=1.097 (n=37), OOS ev_mult=2.137 (n=48); modeled_fraction=0.788 -> reliability=MODEL_DOMINATED. When MODEL_DOMINATED the verdict reflects the IV assumption, not market edge (IV-sensitive); treat as monitoring-grade.",
-  "data_snapshot": "2026-06-10",
+  "reliability": "MARKET_BACKED",
+  "verdict_reason": "IS net_ev_mult=1.715 (n=8), OOS net_ev_mult=1.376 (n=19); modeled_fraction=0.222 -> reliability=MARKET_BACKED. Costs: commission=10bps + slippage=10bps = 20bps r/t. Entry: signal-day close offset 1 bar(s). Verdict on net metrics.",
+  "data_snapshot": "2026-06-12",
   "pool": "cn_options_au",
   "policy_weight_assigned": 0.0,
   "valid_until": "2026-12-10",
   "commit_hash": "b5f59a5",
-  "last_verified": "2026-06-10",
-  "notes_schema": "attribution baseline (premium-mult space, not an emit-lane policy weight); fields above added 2026-06-12 to satisfy validator schema — policy_weight_assigned=0.0 because no emit lane consumes this baseline"
+  "last_verified": "2026-06-12",
+  "notes_schema": "attribution baseline (premium-mult space, not an emit-lane policy weight); fields above added 2026-06-12 to satisfy validator schema — policy_weight_assigned=0.0 because no emit lane consumes this baseline",
+  "history": [
+    {
+      "date": "2026-06-12",
+      "label": "slice-1 (2026-06-10) superseded",
+      "previous": {
+        "verdict": "PROMOTE",
+        "reliability": "MODEL_DOMINATED",
+        "samples": {
+          "is": {
+            "n": 37,
+            "ev_mult": 1.097,
+            "win_pct": 40.5
+          },
+          "oos": {
+            "n": 48,
+            "ev_mult": 2.137,
+            "win_pct": 72.9
+          },
+          "by_year": {
+            "2021": {
+              "n": 8,
+              "ev_mult": 0.375,
+              "win_pct": 12.5
+            },
+            "2022": {
+              "n": 13,
+              "ev_mult": 1.183,
+              "win_pct": 38.5
+            },
+            "2023": {
+              "n": 16,
+              "ev_mult": 1.389,
+              "win_pct": 56.2
+            },
+            "2024": {
+              "n": 26,
+              "ev_mult": 2.353,
+              "win_pct": 80.8
+            },
+            "2025": {
+              "n": 18,
+              "ev_mult": 2.062,
+              "win_pct": 66.7
+            },
+            "2026": {
+              "n": 4,
+              "ev_mult": 1.071,
+              "win_pct": 50.0
+            }
+          }
+        },
+        "pricing": {
+          "market_n": 18,
+          "model_n": 67,
+          "modeled_fraction": 0.788
+        },
+        "entry": "signal-day close, Rank-1 OTM call (cn_metal bottom, score>=3)",
+        "cost_model": null,
+        "verdict_reason": "IS ev_mult=1.097 (n=37), OOS ev_mult=2.137 (n=48); modeled_fraction=0.788 -> reliability=MODEL_DOMINATED. When MODEL_DOMINATED the verdict reflects the IV assumption, not market edge (IV-sensitive); treat as monitoring-grade."
+      },
+      "reason": "P0 fix: market-era re-run (--since 2024-07-01, --is-cutoff-year 2024) on the backfilled option store with listed-contract snap (coverage-aware month/strike, option expiry proxied by chain last bar). Entry/cost semantics also changed vs slice-1 (next-bar entry, 20bps r/t, gross-space sim) — values not directly comparable."
+    }
+  ],
+  "cost_model": "commission=10bps + slippage=10bps = 20bps r/t",
+  "entry_offset": 1,
+  "gross_samples": {
+    "is_gross": {
+      "n": 8,
+      "ev_mult": 1.719,
+      "win_pct": 62.5
+    },
+    "oos_gross": {
+      "n": 19,
+      "ev_mult": 1.379,
+      "win_pct": 57.9
+    },
+    "by_year_gross": {
+      "2024": {
+        "n": 8,
+        "ev_mult": 1.719,
+        "win_pct": 62.5
+      },
+      "2025": {
+        "n": 15,
+        "ev_mult": 1.688,
+        "win_pct": 73.3
+      },
+      "2026": {
+        "n": 4,
+        "ev_mult": 0.22,
+        "win_pct": 0.0
+      }
+    }
+  },
+  "window": {
+    "since": "2024-07-01",
+    "is_cutoff_year": 2024,
+    "note": "market-covered era only; full-window runs stay MODEL_DOMINATED (option history starts 2024-07). THIN FOLDS: IS n=9 (ag) / n=8 (au) — treat verdicts as provisional until more market history accrues."
+  }
 }

@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -118,6 +119,73 @@ def _expiry_from_calls(call: dict, underlying: str):
     return fn(year, month)
 
 
+def _expiry_for_month(month_yymm: str, underlying: str):
+    year, month = 2000 + int(month_yymm[:2]), int(month_yymm[2:])
+    fn = _expiry_date_for_month if underlying == "ag" else _expiry_date_for_month_au
+    return fn(year, month)
+
+
+def _snap_to_listed(
+    store, underlying: str, contract_sym: str, strike: float, spot: float,
+    sig_date, *, dte_window: tuple[int, int] = (20, 75), min_cover: int = 5,
+):
+    """Snap a theoretical selector contract to a LISTED, DATA-COVERED one.
+
+    The selectors pick expiry by DTE arithmetic and strikes by rounded
+    %OTM — blind to SHFE listings (au options list only every other
+    month; OPTIONS EXPIRE ~A MONTH EARLIER than their futures; strikes
+    only as listed). Attribution must measure tradable contracts:
+    prefer the nearest listed month inside the DTE window whose chain
+    has >= min_cover bars from the signal date, then the nearest listed
+    OTM strike. The month's OPTION expiry is proxied by its chain's
+    LAST BAR DATE (the option's actual last trading day in data) —
+    the futures-month expiry functions are ~a month late for options.
+
+    Returns {contract_sym, strike, expiry_month, snapped} or None when
+    nothing covered is in window — callers keep the theoretical
+    contract then (pre-2024 history is absent from the store, which
+    does not mean it was unlisted).
+    """
+    def covered(sym: str) -> bool:
+        df = store.load_contract_daily(sym)
+        return df is not None and len(df[df["date"] >= sig_date]) >= min_cover
+
+    if covered(contract_sym):
+        m = contract_sym.rstrip("0123456789")  # "ag2408c"
+        return {"contract_sym": contract_sym, "strike": strike,
+                "expiry_month": m[len(underlying):-1], "snapped": False}
+
+    calls = [c for c in store.catalog(underlying) if c.opt_type == "C"]
+    lo, hi = dte_window
+    by_month: dict[str, list] = {}
+    for c in calls:
+        by_month.setdefault(c.underlying_month, []).append(c)
+
+    def month_option_dte(cs: list) -> int | None:
+        last = None
+        for c in cs:
+            df = store.load_contract_daily(c.contract_sym)
+            if df is None or df.empty:
+                continue
+            d = df["date"].iloc[-1]
+            if last is None or d > last:
+                last = d
+        return None if last is None else (last - sig_date).days
+
+    in_window = sorted(
+        (dte, month, cs)
+        for month, cs in by_month.items()
+        if (dte := month_option_dte(cs)) is not None and lo <= dte <= hi
+    )
+    for _, month, cs in in_window:   # nearest covered option expiry wins
+        otm = [c for c in cs if c.strike > spot and covered(c.contract_sym)]
+        if otm:
+            best = min(otm, key=lambda c: abs(c.strike - strike))
+            return {"contract_sym": best.contract_sym, "strike": best.strike,
+                    "expiry_month": month, "snapped": True}
+    return None
+
+
 def _cell(rows: list[dict], key: str = "mult") -> dict:
     """:param key: 'mult' for gross, 'net_mult' for net."""
     if not rows:
@@ -202,7 +270,18 @@ def _aggregate(underlying: str, trades: list[dict],
     }
 
 
-def run(underlying: str) -> dict:
+def _filter_emissions(emitted: list, since) -> list:
+    """Restrict emissions to the market-covered era (sig_date >= since).
+
+    The option store's history starts 2024-07; a full-window run is
+    structurally MODEL_DOMINATED because 2021-2023 trades can never
+    resolve to market data."""
+    if since is None:
+        return emitted
+    return [e for e in emitted if e.sig_date >= since]
+
+
+def run(underlying: str, *, since=None) -> dict:
     ul_sym = UL_SYMBOL[underlying]
     bars = bar_loader.load_bars_quant_or_json(ul_sym, "_daily", BARS_DIR)
     h = bar_loader.load_bars_quant_or_json(ul_sym, "_60", BARS_DIR)
@@ -212,15 +291,35 @@ def run(underlying: str) -> dict:
                + replay_pa_h2(bars, h, underlying, ul_sym)
                + replay_context_a(bars, h, underlying, ul_sym)
                + replay_divergence(bars, h, underlying))
+    emitted = _filter_emissions(emitted, since)
+
+    from data.bar_loader import DEFAULT_QUANT_ROOT
+    from data.option_store import get_store
+    opt_store = get_store(DEFAULT_QUANT_ROOT)
 
     trades: list[dict] = []
-    market_n = model_n = 0
+    market_n = model_n = snapped_n = 0
     for e in emitted:
         if not e.calls:
             continue
         rank1 = sorted(e.calls, key=lambda x: x["otm_pct"])[0]
-        expiry = _expiry_from_calls(rank1, underlying)
-        opt, src = premium_path(rank1["contract_sym"], strike=float(rank1["strike"]),
+        # Snap the theoretical selector contract to a LISTED one so the
+        # market path measures tradable contracts (None -> keep the
+        # theoretical contract; model fallback prices it as before).
+        spot = float(rank1["strike"]) / (1.0 + rank1["otm_pct"] / 100.0)
+        snap = _snap_to_listed(
+            opt_store, underlying, rank1["contract_sym"],
+            float(rank1["strike"]), spot, e.sig_date,
+        )
+        if snap is not None:
+            sym, strike = snap["contract_sym"], float(snap["strike"])
+            expiry = _expiry_for_month(snap["expiry_month"], underlying)
+            if snap["snapped"]:
+                snapped_n += 1
+        else:
+            sym, strike = rank1["contract_sym"], float(rank1["strike"])
+            expiry = _expiry_from_calls(rank1, underlying)
+        opt, src = premium_path(sym, strike=strike,
                                 expiry=expiry, entry_date=e.sig_date, data_dir=odir,
                                 underlying=bars, iv=iv, max_hold=EXIT["max_hold"])
         if opt is None or opt.empty:
@@ -254,14 +353,17 @@ def run(underlying: str) -> dict:
             "source": src,
         })
 
-    return {
+    out = {
         "gross": _aggregate(underlying, trades, market_n, model_n, gross=True),
         "net": _aggregate(underlying, trades, market_n, model_n, gross=False),
     }
+    for v in out.values():
+        v["pricing"]["snapped_n"] = snapped_n
+    return out
 
 
 def main() -> None:
-    global ENTRY_OFFSET, ROUND_TRIP_COST_BPS
+    global ENTRY_OFFSET, ROUND_TRIP_COST_BPS, IS_CUTOFF_YEAR
     ap = argparse.ArgumentParser()
     ap.add_argument("--underlying", choices=["ag", "au"], required=True)
     ap.add_argument("--out-json", type=Path, default=None)
@@ -269,13 +371,19 @@ def main() -> None:
                     help="Bars to skip after signal date for entry (0=signal close, 1=next close)")
     ap.add_argument("--cost-bps", type=int, default=ROUND_TRIP_COST_BPS,
                     help="Round-trip cost in bps (default 20 = 10 commission + 10 slippage)")
+    ap.add_argument("--since", type=date.fromisoformat, default=None,
+                    help="Only signals on/after this date (market-era sub-window, "
+                         "e.g. 2024-07-01 = start of option-store history)")
+    ap.add_argument("--is-cutoff-year", type=int, default=IS_CUTOFF_YEAR,
+                    help="IS <= this year, OOS after (re-split folds inside --since windows)")
     args = ap.parse_args()
 
     # Override globals from CLI args
     ENTRY_OFFSET = args.entry_offset
     ROUND_TRIP_COST_BPS = args.cost_bps
+    IS_CUTOFF_YEAR = args.is_cutoff_year
 
-    baseline = run(args.underlying)
+    baseline = run(args.underlying, since=args.since)
     print(json.dumps(baseline, indent=2, default=str))
     if args.out_json:
         args.out_json.write_text(json.dumps(baseline, indent=2, default=str))
