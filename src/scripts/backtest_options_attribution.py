@@ -147,8 +147,16 @@ def _snap_to_listed(
     does not mean it was unlisted).
     """
     def covered(sym: str) -> bool:
+        # Tradable AT the signal: listed on/before sig_date (codex P1 —
+        # a chain that lists later would silently shift the entry weeks
+        # forward) AND enough forward bars for the exit sim.
         df = store.load_contract_daily(sym)
-        return df is not None and len(df[df["date"] >= sig_date]) >= min_cover
+        return (
+            df is not None
+            and not df.empty
+            and df["date"].iloc[0] <= sig_date
+            and len(df[df["date"] >= sig_date]) >= min_cover
+        )
 
     if covered(contract_sym):
         m = contract_sym.rstrip("0123456789")  # "ag2408c"
@@ -162,10 +170,13 @@ def _snap_to_listed(
         by_month.setdefault(c.underlying_month, []).append(c)
 
     def month_option_dte(cs: list) -> int | None:
+        # Expiry proxy from contracts already LISTED at the signal —
+        # late-listed strikes can carry a longer tail and must not
+        # shift the month's window position.
         last = None
         for c in cs:
             df = store.load_contract_daily(c.contract_sym)
-            if df is None or df.empty:
+            if df is None or df.empty or df["date"].iloc[0] > sig_date:
                 continue
             d = df["date"].iloc[-1]
             if last is None or d > last:

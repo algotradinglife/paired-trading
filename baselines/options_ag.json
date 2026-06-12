@@ -12,10 +12,10 @@
     "max_hold_days": 30
   },
   "pricing": {
-    "market_n": 21,
-    "model_n": 8,
-    "modeled_fraction": 0.276,
-    "snapped_n": 12
+    "market_n": 20,
+    "model_n": 9,
+    "modeled_fraction": 0.31,
+    "snapped_n": 11
   },
   "samples": {
     "is": {
@@ -25,8 +25,8 @@
     },
     "oos": {
       "n": 20,
-      "ev_mult": 1.218,
-      "win_pct": 20.0
+      "ev_mult": 1.324,
+      "win_pct": 25.0
     },
     "by_year": {
       "2024": {
@@ -36,8 +36,8 @@
       },
       "2025": {
         "n": 16,
-        "ev_mult": 1.153,
-        "win_pct": 18.8
+        "ev_mult": 1.286,
+        "win_pct": 25.0
       },
       "2026": {
         "n": 4,
@@ -72,7 +72,7 @@
   },
   "verdict": "REGIME_ONLY",
   "reliability": "MARKET_BACKED",
-  "verdict_reason": "IS net_ev_mult=0.864 (n=9), OOS net_ev_mult=1.218 (n=20); modeled_fraction=0.276 -> reliability=MARKET_BACKED. Costs: commission=10bps + slippage=10bps = 20bps r/t. Entry: signal-day close offset 1 bar(s). Verdict on net metrics.",
+  "verdict_reason": "IS net_ev_mult=0.864 (n=9), OOS net_ev_mult=1.324 (n=20); modeled_fraction=0.31 -> reliability=MARKET_BACKED. Costs: commission=10bps + slippage=10bps = 20bps r/t. Entry: signal-day close offset 1 bar(s). Verdict on net metrics.",
   "data_snapshot": "2026-06-12",
   "pool": "cn_options_ag",
   "policy_weight_assigned": 0.0,
@@ -153,8 +153,8 @@
     },
     "oos_gross": {
       "n": 20,
-      "ev_mult": 1.22,
-      "win_pct": 20.0
+      "ev_mult": 1.327,
+      "win_pct": 25.0
     },
     "by_year_gross": {
       "2024": {
@@ -164,8 +164,8 @@
       },
       "2025": {
         "n": 16,
-        "ev_mult": 1.155,
-        "win_pct": 18.8
+        "ev_mult": 1.289,
+        "win_pct": 25.0
       },
       "2026": {
         "n": 4,

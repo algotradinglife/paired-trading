@@ -84,6 +84,19 @@ def test_unlisted_strike_snaps_to_nearest_otm(tmp_path):
     assert got["snapped"] is True
 
 
+def test_contract_listed_after_signal_not_covered(tmp_path):
+    # codex P1: a chain whose FIRST bar is after the signal was not
+    # tradable at the signal — plenty of later bars must not qualify it
+    # (entry would silently shift weeks forward)
+    _write(tmp_path, "SHFE.ag2412C8200",
+           _bars_from(datetime(2024, 12, 11), n=40))     # lists AFTER SIG
+    _write(tmp_path, "SHFE.ag2412C8300", _bars_from(LIVE))  # tradable at SIG
+    store = OptionStore(tmp_path)
+    got = _snap_to_listed(store, "ag", "ag2412c8200", 8200, 8050.0, SIG)
+    assert got is not None
+    assert got["contract_sym"] == "ag2412c8300"   # not the late-listed 8200
+
+
 def test_nothing_covered_returns_none(tmp_path):
     _write(tmp_path, "SHFE.ag2408C8200", _bars_from(datetime(2024, 7, 1)))
     store = OptionStore(tmp_path)
