@@ -189,6 +189,83 @@ def _runtime_status(b: dict, *, full_stack_map, emitted_data_hash=None) -> tuple
     return "OK", detail
 
 
+def _compare_options_baseline(b: dict, run_net: dict | None) -> tuple[str, list]:
+    """Compare an options-attribution baseline vs a fresh harness run (net doc).
+
+    Tolerances: ev_mult ±0.10 or a 1.0-threshold flip -> DRIFT;
+    n ±25% -> DRIFT; modeled_fraction back above 0.5 -> DRIFT
+    (re-model-dominated), +0.15 creep -> WARN. Fail-open when the run
+    is unavailable (None) — a harness outage is not drift.
+    """
+    if run_net is None:
+        return "OK", ["OPTIONS_RUN_UNAVAILABLE (fail-open)"]
+
+    statuses: list[str] = []
+    details: list[str] = []
+
+    for fold in ("is", "oos"):
+        base = (b.get("samples") or {}).get(fold) or {}
+        now = (run_net.get("samples") or {}).get(fold) or {}
+        b_ev, n_ev = base.get("ev_mult"), now.get("ev_mult")
+        if b_ev is not None and n_ev is not None:
+            flipped = (b_ev > 1.0) != (n_ev > 1.0)
+            if abs(n_ev - b_ev) > 0.10 or flipped:
+                statuses.append("DRIFT")
+                details.append(
+                    f"{fold}: ev_mult {b_ev:+.3f}->{n_ev:+.3f}"
+                    + (" (1.0 flip)" if flipped else ""))
+        b_n, n_n = base.get("n"), now.get("n")
+        if b_n and n_n is not None and abs(n_n - b_n) / b_n > 0.25:
+            statuses.append("DRIFT")
+            details.append(f"{fold}: n {b_n}->{n_n} (>25%)")
+
+    b_frac = (b.get("pricing") or {}).get("modeled_fraction")
+    n_frac = (run_net.get("pricing") or {}).get("modeled_fraction")
+    if b_frac is not None and n_frac is not None:
+        if n_frac > 0.5:
+            statuses.append("DRIFT")
+            details.append(f"modeled_fraction {b_frac}->{n_frac} (re-model-dominated)")
+        elif n_frac - b_frac > 0.15:
+            statuses.append("WARN")
+            details.append(f"modeled_fraction {b_frac}->{n_frac} (creep)")
+
+    if not details:
+        details = ["options attribution: within tolerance"]
+    return _worst(statuses), details
+
+
+_options_run_cache: dict = {}
+
+
+def _run_options_once(underlying: str, since: str, cutoff: int,
+                      timeout: int = 900):
+    """Run backtest_options_attribution once per (underlying, window);
+    return the net doc or None (fail-open)."""
+    import shlex
+    import subprocess
+    import tempfile
+
+    key = (underlying, since, cutoff)
+    if key in _options_run_cache:
+        return _options_run_cache[key]
+    tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+    tmp.close()
+    cmd = (f".venv/bin/python scripts/backtest_options_attribution.py "
+           f"--underlying {underlying} --since {since} "
+           f"--is-cutoff-year {cutoff} --out-json {tmp.name}")
+    result = None
+    try:
+        proc = subprocess.run(
+            shlex.split(cmd), cwd=str(REPO_ROOT / "src"),
+            capture_output=True, text=True, timeout=timeout, check=False)
+        if proc.returncode == 0:
+            result = json.loads(pathlib.Path(tmp.name).read_text()).get("net")
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
+        result = None
+    _options_run_cache[key] = result
+    return result
+
+
 def _run_full_stack_once(timeout: int = 600):
     """Run backtest_full_stack.py --out-json once; return (lanes_map, data_hash) or (None, None)."""
     import shlex
@@ -438,9 +515,18 @@ def main() -> int:
             continue
         row = _audit(b, f)
         if args.full and row["status"] != "BROKEN":
-            rstatus, rdetail = _runtime_status(
-                b, full_stack_map=_full_stack_cache["lanes"],
-                emitted_data_hash=_full_stack_cache["hash"])
+            lane_name = str(b.get("lane", ""))
+            if lane_name.startswith("options_") and b.get("window"):
+                net = _run_options_once(
+                    lane_name.split("_", 1)[1],
+                    b["window"]["since"], b["window"]["is_cutoff_year"])
+                ost, odet = _compare_options_baseline(b, net)
+                rstatus = "DRIFT_DETECTED" if ost == "DRIFT" else ost
+                rdetail = "; ".join(odet)
+            else:
+                rstatus, rdetail = _runtime_status(
+                    b, full_stack_map=_full_stack_cache["lanes"],
+                    emitted_data_hash=_full_stack_cache["hash"])
             row["repro_status"] = rstatus
             row["repro_msg"] = rdetail
             # Propagate runtime drift to the row status (so --strict catches it),

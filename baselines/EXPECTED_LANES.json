@@ -81,21 +81,20 @@
       "score_today_line": "src/scripts/score_today.py:_us_lane_suppressed_by_regime (called in context_a + pa_us_60min blocks)",
       "kind": "meta_gate",
       "note": "Not a signal lane — meta-gate that suppresses pa_us_60min + context_a US during risk_off regimes."
-    }
-  ],
-  "pending": [
+    },
     {
       "lane": "options_ag",
       "pool": "cn_options_ag",
       "baseline_file": "options_ag.json",
-      "note": "options-attribution baseline (slice-1); deliberately not wired into --full primary checks — re-run waits on option history backfill to 2024-07 (doc/data_gaps_post_sync_2026-06-12.md #3)"
+      "note": "options-attribution baseline (MARKET_BACKED since 2026-06-12); validated by --full via backtest_options_attribution with the baseline-recorded window"
     },
     {
       "lane": "options_au",
       "pool": "cn_options_au",
       "baseline_file": "options_au.json",
-      "note": "options-attribution baseline (slice-1); deliberately not wired into --full primary checks — re-run waits on option history backfill to 2024-07 (doc/data_gaps_post_sync_2026-06-12.md #3)"
+      "note": "options-attribution baseline (MARKET_BACKED since 2026-06-12); validated by --full via backtest_options_attribution with the baseline-recorded window"
     }
   ],
+  "pending": [],
   "notes": "Anything in `expected` but missing from the filesystem → BROKEN. Anything in the filesystem not in `expected` or `pending` → WARN (orphan). 2026-06-09: promoted 6 lanes (context_a × {us_equity, cn_metal_futures}, pa_h2 × {us_equity, cn_metal_futures, cn_futures}, pa_us_60min × us_equity) from pending → expected. All 6 carry `requires_verification: true` — the JSON values are imported from detector docstrings and full-stack doc, not from a freshly-pinned K=3 walk-forward run. pa_us_60min uses verdict 'PENDING_VALIDATION' which is not in the current VERDICTS set in validate_baselines.py; this will surface as a 'unknown verdict' WARN until either (a) a real K=3 baseline is computed and a valid verdict assigned, or (b) the VERDICTS set is extended."
 }
