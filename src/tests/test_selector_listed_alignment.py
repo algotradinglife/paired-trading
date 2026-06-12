@@ -106,6 +106,34 @@ def test_listed_strikes_below_spot_fall_back_to_theoretical(tmp_path):
     assert all(c["strike"] > 9000 and c["strike"] % 100 == 0 for c in calls)
 
 
+def test_dead_chain_exact_expiry_overrides_approximation(tmp_path):
+    # codex P2: ag2412's REAL last trading day (chain end, 2024-11-18) is
+    # earlier than the no-holiday approximation (~2024-11-22). A signal
+    # on 2024-11-05 has 13d to the REAL expiry -> must roll to 2501.
+    # The 2412 chain is DEAD (ends before the store's latest date), so
+    # its chain end is trusted as the exact expiry; the live 2501 chain
+    # keeps the approximation.
+    d = tmp_path / "daily"
+    d.mkdir(parents=True)
+    dead = [_bar(datetime(2024, 11, d_)) for d_ in (14, 15, 18)]
+    live = [_bar(datetime(2024, 11, d_)) for d_ in (1, 4, 5)] + \
+           [_bar(datetime(2024, 12, d_)) for d_ in (2, 3, 4)]
+    pd.DataFrame([_bar(datetime(2024, 10, 1))] + dead).to_parquet(
+        d / "SHFE.ag2412C8100.parquet", index=False)
+    pd.DataFrame(live).to_parquet(d / "SHFE.ag2501C8200.parquet", index=False)
+    calls = select_otm_calls(8050.0, date(2024, 11, 5), quant_root=tmp_path)
+    assert calls and all(c["expiry_month"] == "2501" for c in calls)
+
+
+def test_au_theoretical_fallback_respects_bimonthly_cycle(tmp_path):
+    # codex P2: with no synced au chain, the fallback must not emit
+    # odd (unlisted) months — au options list on even delivery months,
+    # so rolling past 2412 lands on 2502, not 2501.
+    (tmp_path / "daily").mkdir()
+    calls = select_otm_calls_au(628.0, date(2024, 11, 15), quant_root=tmp_path)
+    assert calls and all(c["expiry_month"] == "2502" for c in calls)
+
+
 def test_au_rule_applies_with_bimonthly_chain(tmp_path):
     for n in ("SHFE.au2412C632", "SHFE.au2412C640",
               "SHFE.au2502C648", "SHFE.au2502C656"):

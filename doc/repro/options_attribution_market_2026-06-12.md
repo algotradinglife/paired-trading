@@ -61,3 +61,21 @@ baseline：`baselines/options_{ag,au}.json`（slice-1 值保存在 history）。
 3. ag REGIME_ONLY 的含义评估：是否把 ag call 建议降级为 monitoring
    （现 score_today 仍对 ag 信号给期权建议）—— 用户决策项。
 4. put 侧归因 harness（put 链数据已就位）— Phase C 主线。
+
+## 更新（2026-06-12b）：生产合约规则落地后的最终数字
+
+用户锁定规则「期权到期日 ≥2 周选本月，否则选次月」+ 挂牌行权价对齐
+已实装进生产 selector（`engine/options/expiry_select.py`，死链用链终止日
+做精确到期、活链用近似；au 理论回退遵守双月挂牌周期）。归因经 emission
+replay 自动继承生产规则，**snapped_n=0**（harness 直接测量生产行为）：
+
+| | frac | verdict | IS net | OOS net |
+|---|---|---|---|---|
+| ag | 0.241 | **PROMOTE** | 1.384 (n=9) | 1.281 (n=20) |
+| au | 0.222 | **PROMOTE** | 1.521 (n=8) | 1.369 (n=19) |
+
+ag 此前的 REGIME_ONLY（IS 0.864）是 (20,75) 窗口近似选出的远月合约；
+生产规则选更近月（权利金更便宜、gamma 更快），IS 折转正 —— **合约选择
+规则本身是 edge 的组成部分**。薄折警告维持（IS n=8/9，暂定）。
+
+live 验证：score_today 期权建议现带 store 实价 price/IV（`[store]` 源标记）。

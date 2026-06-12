@@ -134,7 +134,18 @@ def select_otm_calls(
     ]
     listed_months = sorted({c.underlying_month for c in chain})
 
-    expiry_code = select_expiry_month(signal_date, listed_months, "ag")
+    # Exact option expiry from chain ends — trusted only for DEAD chains
+    # (ended before the store's latest sync date); a live month's last
+    # bar is just the latest sync, not its expiry (codex P2 refinement).
+    product_latest = max((rng[1] for rng in cov.values()), default=None)
+    exact_expiries: dict[str, date] = {}
+    for m in listed_months:
+        end = max(cov[c.contract_sym][1] for c in chain if c.underlying_month == m)
+        if product_latest is not None and end < product_latest:
+            exact_expiries[m] = end
+
+    expiry_code = select_expiry_month(
+        signal_date, listed_months, "ag", expiries=exact_expiries)
     listed_strikes: list[float] = []
     if expiry_code is not None:
         listed_strikes = sorted(
@@ -145,7 +156,7 @@ def select_otm_calls(
         if expiry_code is None:
             return []
 
-    chosen_expiry = approx_option_expiry(
+    chosen_expiry = exact_expiries.get(expiry_code) or approx_option_expiry(
         2000 + int(expiry_code[:2]), int(expiry_code[2:]))
     dte = (chosen_expiry - signal_date).days
 
