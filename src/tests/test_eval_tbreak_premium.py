@@ -196,3 +196,97 @@ def test_build_report_has_folds_and_grid(tmp_path):
     assert len(grid) >= 9
     for cell in grid.values():
         assert set(cell) >= {"n", "ev", "put_ev", "call_ev"}
+
+
+# --- US lane：符号分流 / broad-market 排除（t_aa79fb13）-------------------
+from scripts.eval_tbreak_premium import (  # noqa: E402
+    US_EXCLUDED_BROAD_DEFENSIVE,
+    check_us_exclusions,
+    events_from_scan,
+    fetch_events,
+    split_symbols_by_lane,
+)
+
+
+def test_split_symbols_by_lane_mixed():
+    cn, us = split_symbols_by_lane(["ag", "GLD", "cu", "GDX", "IWM"])
+    assert cn == ["ag", "cu"]
+    assert us == ["GLD", "GDX", "IWM"]
+
+
+def test_split_symbols_by_lane_unknown_raises():
+    # 小写但不在 POOL_KEY → 未知；混大小写也未知
+    with pytest.raises(ValueError, match="未知符号"):
+        split_symbols_by_lane(["zz"])
+    with pytest.raises(ValueError, match="未知符号"):
+        split_symbols_by_lane(["Gld"])
+    # 大写但不在 scan US 池 → 未知（codex P2：防止合法零事件假象）
+    with pytest.raises(ValueError, match="未知符号"):
+        split_symbols_by_lane(["AAPL"])
+
+
+def test_us_broad_defensive_excluded_by_default():
+    assert {"SPY", "DIA", "XLU", "XLP", "XLV"} <= set(US_EXCLUDED_BROAD_DEFENSIVE)
+    with pytest.raises(ValueError, match="SPY"):
+        check_us_exclusions(["GLD", "SPY"], allow_excluded=False)
+    # fetch_events 在跑 scan 之前就应拒绝（无 subprocess 即抛错）
+    with pytest.raises(ValueError, match="--allow-excluded-us"):
+        fetch_events(["SPY"], "2024-07-01")
+
+
+def test_us_exclusion_optin_and_clean_symbols_pass():
+    check_us_exclusions(["GLD", "GDX", "IWM", "NVDA"], allow_excluded=False)
+    check_us_exclusions(["SPY"], allow_excluded=True)  # 冒烟显式放行
+
+
+def test_events_from_scan_us_pool_keys_are_tickers():
+    data = {"US": {"GLD": [
+        {"candidate": "put_candidate", "break_date": "2025-01-06",
+         "break_close": 240.5},
+        {"candidate": "call_candidate", "break_date": "2025-03-03",
+         "break_close": 265.0},
+    ]}}
+    got = events_from_scan(data, "US", {"GLD": "GLD"})
+    assert [e["side"] for e in got] == ["put", "call"]
+    assert got[0] == {"symbol": "GLD", "side": "put",
+                      "break_date": "2025-01-06", "break_close": 240.5}
+
+
+def test_events_from_scan_cn_pool_key_mapping():
+    data = {"CN_COMMODITY": {"kq_m_shfe_ag": [
+        {"candidate": "put_candidate", "break_date": "2024-08-01",
+         "break_close": 7000.0},
+    ]}}
+    got = events_from_scan(data, "CN_COMMODITY", {"ag": "kq_m_shfe_ag"})
+    assert got == [{"symbol": "ag", "side": "put",
+                    "break_date": "2024-08-01", "break_close": 7000.0}]
+
+
+def test_us_premium_path_pending_fails_loud(tmp_path):
+    # seam（t_e7fb18c9）交付前 US 事件不得流入 CN 月规则选约（codex P2）
+    from scripts.eval_tbreak_premium import pick_contract_for_event
+    d = tmp_path / "daily"
+    d.mkdir()
+    with pytest.raises(NotImplementedError, match="t_e7fb18c9"):
+        pick_contract_for_event("GLD", "P", "2025-01-06", 240.5, daily_dir=d)
+
+
+def test_us_event_graceful_skip_in_report(tmp_path):
+    # US 事件在 seam 交付前进 build_report 应被标记 skip，而非中断整批（codex P2）
+    d = tmp_path / "daily"
+    d.mkdir()
+    pd.DataFrame(_chain_rows("2024-11-08", 40)).to_parquet(
+        d / "SHFE.ag2501C7600.parquet")
+    events = [
+        {"symbol": "ag", "side": "call", "break_date": "2024-11-07",
+         "break_close": 7050.0},
+        {"symbol": "GLD", "side": "put", "break_date": "2024-11-07",
+         "break_close": 240.5},
+    ]
+    rep = build_report(events, daily_dir=d, is_cutoff_date=_date(2025, 6, 30))
+    assert rep["n_evaluated"] == 1
+    assert rep["n_skipped_us_pending_seam"] == 1
+    assert rep["n_skipped_no_option"] == 0
+    us_row = next(e for e in rep["events"] if e["symbol"] == "GLD")
+    assert us_row["evaluated"] is False
+    assert us_row["exit_reason"] == "skipped_us_pending_seam"
