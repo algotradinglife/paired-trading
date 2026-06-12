@@ -173,6 +173,31 @@ def test_load_option_daily_prefers_longer_source(tmp_path):
     assert list(df["close"]) == [255, 260, 265]   # JSON (3 rows) beats stub (1)
 
 
+def test_load_option_daily_rejects_late_listed_source(tmp_path):
+    # codex P2: a contract whose data STARTS after the signal was not
+    # tradable then — its bars must not be served as market data (the
+    # entry would silently shift to the listing date)
+    from engine.options.option_price_loader import load_option_daily
+    _write(tmp_path, "SHFE.ag2607C19900", [
+        _bar(datetime(2026, 5, 20), 250), _bar(datetime(2026, 5, 21), 255),
+        _bar(datetime(2026, 5, 22), 260), _bar(datetime(2026, 5, 25), 250),
+        _bar(datetime(2026, 5, 26), 255),
+    ])
+    df = load_option_daily(
+        "ag2607c19900", date(2026, 5, 4), tmp_path / "no_json",
+        max_hold=30, quant_root=tmp_path,
+        require_listed_by=date(2026, 5, 4),
+    )
+    assert df is None
+    # listed before the signal -> served normally
+    df2 = load_option_daily(
+        "ag2607c19900", date(2026, 5, 21), tmp_path / "no_json",
+        max_hold=30, quant_root=tmp_path,
+        require_listed_by=date(2026, 5, 21),
+    )
+    assert df2 is not None and list(df2["close"])[:2] == [255, 260]
+
+
 def test_load_option_daily_parquet_first(tmp_path):
     from engine.options.option_price_loader import load_option_daily
     _write(tmp_path, "SHFE.ag2607C19900", [

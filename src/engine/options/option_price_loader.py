@@ -20,7 +20,8 @@ _RISK_FREE = 0.02
 
 def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
                       max_hold: int, *,
-                      quant_root: Path | None = None) -> pd.DataFrame | None:
+                      quant_root: Path | None = None,
+                      require_listed_by: date | None = None) -> pd.DataFrame | None:
     """Real OPTION daily-OHLC frame from entry_date forward (<= max_hold+5 rows).
 
     Reads both the quant-cli OptionStore parquet (``quant_root`` defaults
@@ -30,6 +31,11 @@ def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
     a mid-backfill parquet stub must not shadow a complete JSON path
     (and vice versa). Returns None when no source covers entry_date.
     Index reset; row 0 is the first bar with date >= entry_date.
+
+    ``require_listed_by``: when set, a source whose FIRST bar is after
+    this date is rejected — the contract was not tradable at the signal,
+    and serving its late bars as market data would silently shift the
+    entry to the listing date (codex P2).
     """
     sym = contract_sym.lower()
 
@@ -38,7 +44,9 @@ def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
     store = get_store(quant_root if quant_root is not None else DEFAULT_QUANT_ROOT)
     pq_frame: pd.DataFrame | None = None
     pq = store.load_contract_daily(sym)
-    if pq is not None:
+    if pq is not None and not pq.empty and (
+        require_listed_by is None or pq["date"].iloc[0] <= require_listed_by
+    ):
         pq = pq[pq["date"] >= entry_date].reset_index(drop=True)
         if not pq.empty:
             pq_frame = pq.head(max_hold + 5)[
@@ -58,7 +66,12 @@ def load_option_daily(contract_sym: str, entry_date: date, data_dir: Path,
             continue
         df = pd.DataFrame(bars)
         df["date"] = pd.to_datetime(df["time"], unit="s", utc=True).dt.date
-        df = df[df["date"] >= entry_date].sort_values("date").reset_index(drop=True)
+        df = df.sort_values("date").reset_index(drop=True)
+        if require_listed_by is not None and (
+            df.empty or df["date"].iloc[0] > require_listed_by
+        ):
+            continue
+        df = df[df["date"] >= entry_date].reset_index(drop=True)
         if not df.empty:
             json_frame = df.head(max_hold + 5)[
                 ["open", "high", "low", "close"]
@@ -102,10 +115,14 @@ def model_option_daily(strike: float, expiry: date, entry_date: date,
 
 def premium_path(contract_sym: str, *, strike: float, expiry: date,
                  entry_date: date, data_dir: Path, underlying: pd.DataFrame,
-                 iv: float, max_hold: int, min_cover: int = 5):
+                 iv: float, max_hold: int, min_cover: int = 5,
+                 require_listed_by: date | None = None):
     """Return (option_daily_ohlc, source). Market if the real contract has
-    >= min_cover rows from entry_date, else Black-76 model."""
-    real = load_option_daily(contract_sym, entry_date, data_dir, max_hold)
+    >= min_cover rows from entry_date, else Black-76 model.
+    ``require_listed_by`` forwards to load_option_daily (late-listed
+    contracts must not be served as market data)."""
+    real = load_option_daily(contract_sym, entry_date, data_dir, max_hold,
+                             require_listed_by=require_listed_by)
     if real is not None and len(real) >= min_cover:
         return real, "market"
     model = model_option_daily(strike, expiry, entry_date, underlying, iv, max_hold)

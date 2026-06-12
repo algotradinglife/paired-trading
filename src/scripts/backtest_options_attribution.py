@@ -332,7 +332,8 @@ def run(underlying: str, *, since=None) -> dict:
             expiry = _expiry_from_calls(rank1, underlying)
         opt, src = premium_path(sym, strike=strike,
                                 expiry=expiry, entry_date=e.sig_date, data_dir=odir,
-                                underlying=bars, iv=iv, max_hold=EXIT["max_hold"])
+                                underlying=bars, iv=iv, max_hold=EXIT["max_hold"],
+                                require_listed_by=e.sig_date)
         if opt is None or opt.empty:
             continue
 
