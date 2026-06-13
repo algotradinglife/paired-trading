@@ -11,12 +11,15 @@ t_ecb98b40 发现 range_vs_avg（信号棒过度延伸/棒长惩罚）是 bottom
 
 输出：
 1. 阈值扫描（full sample）：一组 cutoff 的 gated lane（保留 range_vs_avg<=cutoff）vs
-   full lane EV + 保留率，画 EV(threshold) 曲线判单调性/最佳切点。
-2. a-priori gate（Brooks cutoff=1.5）：gated vs dropped EV + gated vs full lane 提升，
-   pooled + by-pool + bootstrap95（kept−dropped gap）。
-3. walk-forward：按 date 时间序 K 折（默认 3，等数量 chronological）+ IS/OOS（按切分日），
-   固定 cutoff=1.5 下每折 gated vs full EV，验 OOS 稳定（剔除过度延伸是否每折都不亏）。
-4. Bonferroni 注记：阈值扫描含 len(GRID) 次比较，gap 的单点 p 需按 GRID 数校正。
+   full lane EV + 保留率 + n_dropped，画 EV(threshold) 曲线看趋势（注：尾部 cutoff
+   n_dropped 极小、EV 噪声大，趋势"紧切点占优"成立但非严格单调）。
+2. gate split（a-priori Brooks cutoff=1.5 + 经验最强 cutoff=1.0）：gated vs dropped EV +
+   gated vs full lane 提升，pooled + by-pool + bootstrap95（kept−dropped gap）。
+3. 固定 cutoff 时间序折分 + IS/OOS（fixed_cutoff_folds）：固定各 cutoff 下每折/IS/OOS
+   gated vs full EV，看 OOS 稳定性。**这不是嵌套 walk-forward**（cutoff 非在 train 上选）。
+4. 嵌套 train-select-test（nested_walk_forward）：IS 上扫 GRID 选 lane_improvement 最大的
+   cutoff，再用该 cutoff 在 OOS 上评估——回答"只用历史调阈值能否在未来仍有提升"。
+5. Bonferroni 注记：阈值扫描含 len(GRID) 次比较，gap 的单点 p 需按 GRID 数校正。
 
 Usage:
   uv run python scripts/analyze_range_gate.py --pools CN_BOND CN_METAL US_EQUITY \
@@ -104,8 +107,50 @@ def gate_split(rows: list[dict], cutoff: float) -> dict:
     }
 
 
+def nested_walk_forward(rows: list[dict]) -> dict:
+    """嵌套 train-select-test：IS 上扫 GRID 选 lane_improvement 最大的 cutoff，
+    用该 cutoff 在 OOS 上评估（cutoff 只用历史选，不看 OOS——无前视调参）。"""
+    from datetime import date as _date
+    valid = [r for r in rows if np.isfinite(r["range_vs_avg"])]
+    cut = _date.fromisoformat(IS_CUTOFF_DATE)
+    is_rows = [r for r in valid if _date.fromisoformat(r["date"]) <= cut]
+    oos_rows = [r for r in valid if _date.fromisoformat(r["date"]) > cut]
+    if not is_rows or not oos_rows:
+        return {"applicable": False, "reason": "IS or OOS empty"}
+    is_full = _ev(is_rows)
+    # 在 IS 上选 lane_improvement 最大的 cutoff
+    best_c, best_imp = None, None
+    is_by_cutoff = {}
+    for c in GRID:
+        kept = [r for r in is_rows if r["range_vs_avg"] <= c]
+        imp = (_ev(kept) - is_full) if kept and is_full is not None else None
+        is_by_cutoff[c] = imp
+        if imp is not None and (best_imp is None or imp > best_imp):
+            best_c, best_imp = c, imp
+    if best_c is None:   # IS 内任何 cutoff 都无 kept 行（极端稀疏）——无法选阈
+        return {"applicable": False, "reason": "no kept rows in IS for any cutoff"}
+    # 用 IS 选出的 cutoff 在 OOS 上评估
+    oos_full = _ev(oos_rows)
+    oos_kept = [r for r in oos_rows if r["range_vs_avg"] <= best_c]
+    oos_imp = (_ev(oos_kept) - oos_full) if oos_kept and oos_full is not None else None
+    return {
+        "applicable": True, "is_cutoff_date": IS_CUTOFF_DATE,
+        "is_selected_cutoff": best_c, "is_selected_improvement": round(best_imp, 6),
+        "is_improvement_by_cutoff": {str(c): (round(v, 6) if v is not None else None)
+                                     for c, v in is_by_cutoff.items()},
+        "oos_n": len(oos_rows), "oos_full_ev": oos_full,
+        "oos_kept_n": len(oos_kept), "oos_gated_ev": _ev(oos_kept),
+        "oos_improvement_at_selected_cutoff": (round(oos_imp, 6)
+                                               if oos_imp is not None else None),
+        "oos_kept_vs_dropped_bootstrap": _bootstrap_gap(
+            [r["realized_r"] for r in oos_kept],
+            [r["realized_r"] for r in oos_rows if r["range_vs_avg"] > best_c]),
+    }
+
+
 def walk_forward(rows: list[dict], cutoff: float, k: int) -> dict:
-    """时间序 K 折 + IS/OOS：每折 gated vs full EV（剔除过度延伸是否 OOS 稳定）。"""
+    """固定 cutoff 的时间序 K 折 + IS/OOS sensitivity（非嵌套 walk-forward——
+    cutoff 不在 train 上选；见 nested_walk_forward）。每折 gated vs full EV。"""
     from datetime import date as _date
     valid = sorted((r for r in rows if np.isfinite(r["range_vs_avg"])),
                    key=lambda r: r["date"])
@@ -151,8 +196,9 @@ def build_report(rows: list[dict], pools: list[str]) -> dict:
         "threshold_sweep": threshold_sweep(rows),
         "gate_at_cutoff": gate_split(rows, GATE_CUTOFF),
         "gate_at_empirical_cutoff": gate_split(rows, EMPIRICAL_CUTOFF),
-        "walk_forward": walk_forward(rows, GATE_CUTOFF, K_FOLDS),
-        "walk_forward_by_cutoff": {
+        "nested_walk_forward": nested_walk_forward(rows),
+        "fixed_cutoff_folds": walk_forward(rows, GATE_CUTOFF, K_FOLDS),
+        "fixed_cutoff_folds_by_cutoff": {
             f"cutoff_{c}": walk_forward(rows, c, K_FOLDS) for c in WF_CUTOFFS},
         "by_pool_gate": by_pool_gate,
         "events": rows,

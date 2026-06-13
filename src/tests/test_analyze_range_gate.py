@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.analyze_range_gate import (  # noqa: E402
     GATE_CUTOFF,
     gate_split,
+    nested_walk_forward,
     threshold_sweep,
     walk_forward,
 )
@@ -60,3 +61,22 @@ def test_walk_forward_is_oos_split_by_cutoff_date():
     wf = walk_forward(rows, GATE_CUTOFF, k=2)
     assert wf["is_oos"]["is"]["n"] == 3    # <= 2025-06-30
     assert wf["is_oos"]["oos"]["n"] == 2   # > 2025-06-30
+
+
+def test_nested_walk_forward_selects_cutoff_on_is_only():
+    # IS（<=2025-06-30）：低 rva 行盈利、高 rva 行亏损 → IS 选紧 cutoff；
+    # OOS（>2025-06-30）：同结构 → 选出的 cutoff 在 OOS 也应有正提升（无前视）
+    is_rows = ([_row(0.8, 1.0, date="2025-01-01")] * 5
+               + [_row(2.5, -1.0, date="2025-02-01")] * 5)
+    oos_rows = ([_row(0.8, 1.0, date="2025-12-01")] * 4
+                + [_row(2.5, -1.0, date="2025-12-15")] * 4)
+    nw = nested_walk_forward(is_rows + oos_rows)
+    assert nw["applicable"] is True
+    assert nw["is_selected_cutoff"] <= 1.5          # 紧 cutoff 才能剔掉亏损的高 rva 行
+    assert nw["oos_improvement_at_selected_cutoff"] > 0   # 选出的 cutoff OOS 仍提升
+
+
+def test_nested_walk_forward_not_applicable_when_oos_empty():
+    rows = [_row(0.8, 1.0, date="2025-01-01")] * 3   # 全在 IS
+    nw = nested_walk_forward(rows)
+    assert nw["applicable"] is False

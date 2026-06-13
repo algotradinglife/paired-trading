@@ -23,6 +23,12 @@ metadata:
    **range_vs_avg（过度延伸/棒长 ≤1.5× 规则）正交（corr≤0.19）且显著**——modest-length 棒
    EV +0.316 vs over-extended −0.111，gap +0.43R，CI[+0.160,+0.687] 整段>0，过 policy gate 稳健。
    池间一致（US +0.60/CN_METAL +0.17/CN_BOND tiny-n）。**值得纳入 confidence/gate 的是"棒长"维度。**
+   **后续验证（t_6c3f043a，doc/range-gate-validation-2026-06-13）**：阈值扫描**紧切点 1.0 主导但
+   非严格单调**（1.75<2.0、尾部噪声），强 edge 在 **cutoff 1.0（≈中位数，非 Brooks 1.5×）**——
+   full-sample gate@1.0 kept +0.392 vs dropped −0.092，gap +0.484R CI[+0.217,+0.745] P=0.9998（显著）。
+   时间外：固定 1.0 各折 IS+0.386/OOS+0.091/F3+0.323 全正，嵌套 train-select-test（IS 选 1.0）
+   OOS improve +0.091 **方向一致为正但 OOS 子样本(n=57)的 gap CI 跨 0(P=0.75)、不单独显著**。
+   代价：cutoff 1.0 砍 ~60% 信号。**productionize 建议：1.0~1.25 作 de-weight 而非硬砍**（待 Hermes）。
 
 3. **状态 gate（t_aeb3cc75，doc/state-gate-bottom-opp-2026-06-13）**：**null + 状态失衡**。
    粗态分类器 88% 落兜底 normal_channel，best-vs-rest gap +0.129R CI 跨 0；spike 在

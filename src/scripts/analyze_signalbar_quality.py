@@ -42,7 +42,6 @@ from data import bar_loader
 from engine.divergence.downstream_policies import apply_policy
 from engine.divergence.multi_tf_context import (
     enrich_with_higher_tf,
-    enrich_with_lower_tf,
 )
 from scripts.backtest_rr_pool import (
     DATA_DIR,
@@ -125,9 +124,10 @@ def run_symbol(stem: str, instrument_class: str,
     we = min(sixty["timestamp"].iloc[-1], fifteen["timestamp"].iloc[-1])
     inw = [s for s in sigs
            if ws <= daily["timestamp"].iloc[s.candidate_bar_idx] <= we]
-    en = enrich_with_lower_tf(
-        enrich_with_higher_tf(inw, daily, sixty, higher_tf_level_id="1h"),
-        daily, fifteen, lower_tf_level_id="15m")
+    # 只需 higher_relation 判 bottom×opposing；lower_relation 全程未用，故略去
+    # enrich_with_lower_tf（15min 全序列逐信号 level_state 重算，是运行时主导成本、
+    # 全量 3 池 >600s 超时主因，reviewer t_5e088d7c）。15min 仅作窗口边界，输出不变。
+    en = enrich_with_higher_tf(inw, daily, sixty, higher_tf_level_id="1h")
     rows: list[dict] = []
     for sig in en:
         if sig.direction != "bottom":
