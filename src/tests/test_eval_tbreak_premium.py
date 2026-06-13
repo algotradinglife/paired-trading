@@ -314,3 +314,44 @@ def test_us_event_in_build_report_with_cn(tmp_path):
     assert rep["n_skipped_no_option"] == 0
     us_row = next(e for e in rep["events"] if e["symbol"] == "GLD")
     assert us_row["expiry"] == "2025-01-17" and us_row["strike"] == 240.0
+    # us_lane 标注由 build_report 本层产出（reviewer t_547c2252）
+    lane = rep["params"]["us_lane"]
+    assert lane["symbols"] == ["GLD"]
+    assert lane["allow_excluded_us"] is False
+
+
+def test_build_report_rejects_excluded_us_direct_call(tmp_path):
+    # 直接传预构 events 调 build_report 也不能绕过排除（reviewer t_547c2252）
+    d = tmp_path / "daily"
+    d.mkdir()
+    events = [{"symbol": "SPY", "side": "put", "break_date": "2024-07-24",
+               "break_close": 541.23}]
+    with pytest.raises(ValueError, match="SPY"):
+        build_report(events, daily_dir=d, is_cutoff_date=_date(2025, 6, 30))
+
+
+def test_build_report_smoke_optin_labels_us_lane(tmp_path):
+    # 显式 opt-in 时可评估，且 params.us_lane 如实标注 allow_excluded_us
+    d = tmp_path / "daily"
+    d.mkdir()
+    _write_us_contract(d, "SPY", "240816", "P", 540.0,
+                       _chain_rows("2024-06-03", 60))
+    events = [{"symbol": "SPY", "side": "put", "break_date": "2024-07-24",
+               "break_close": 541.23}]
+    rep = build_report(events, daily_dir=d, is_cutoff_date=_date(2025, 6, 30),
+                       allow_excluded_us=True)
+    assert rep["n_evaluated"] == 1
+    lane = rep["params"]["us_lane"]
+    assert lane["allow_excluded_us"] is True
+    assert lane["symbols"] == ["SPY"]
+
+
+def test_build_report_keeps_us_lane_audit_on_zero_events(tmp_path):
+    # CLI 请求 US ticker 但扫出零事件：lane 配置审计信息不得丢（codex P2）
+    d = tmp_path / "daily"
+    d.mkdir()
+    rep = build_report([], daily_dir=d, is_cutoff_date=_date(2025, 6, 30),
+                       us_symbols=["GLD"])
+    lane = rep["params"]["us_lane"]
+    assert lane["symbols"] == ["GLD"]
+    assert lane["allow_excluded_us"] is False

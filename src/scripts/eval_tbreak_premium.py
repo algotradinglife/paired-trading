@@ -539,10 +539,23 @@ def _group_stats(rows: list[dict]) -> dict:
 
 
 def build_report(events: list[dict], daily_dir: Path = DAILY_DIR,
-                 is_cutoff_date=None, extra_params: dict | None = None) -> dict:
+                 is_cutoff_date=None, *, allow_excluded_us: bool = False,
+                 us_symbols: list[str] | None = None) -> dict:
+    """构建评估报告。
+
+    排除策略在本层强制（reviewer t_547c2252）：直接传预构 events 调本函数
+    同样过 check_us_exclusions，绕不开 broad-market/defensive 排除；
+    冒烟须显式 allow_excluded_us=True，且 params.us_lane 永远如实标注。
+    ``us_symbols``：调用方请求的 US ticker（main 传入）；与事件内符号取并集，
+    保证零事件时报告仍留 lane 配置审计信息（codex P2）。
+    """
     from datetime import date as _date
     if is_cutoff_date is None:
         is_cutoff_date = _date.fromisoformat(IS_CUTOFF_DATE_DEFAULT)
+
+    us_syms = sorted({e["symbol"] for e in events if e["symbol"].isupper()}
+                     | set(us_symbols or []))
+    check_us_exclusions(us_syms, allow_excluded_us)
 
     # 每事件选一次合约（缓存 df），头条参数 + 网格共用
     picks: list[dict | None] = []
@@ -612,7 +625,12 @@ def build_report(events: list[dict], daily_dir: Path = DAILY_DIR,
             "bootstrap_n": BOOTSTRAP_N, "bootstrap_seed": BOOTSTRAP_SEED,
             "entry": "next-trading-day open + slip", "exit": "stop@low | time@close | data_gap",
             "multiple": "exit_fill / entry_fill",
-            **(extra_params or {}),
+            **({"us_lane": {
+                "instrument_class": "us_equity",
+                "excluded_broad_defensive": sorted(US_EXCLUDED_BROAD_DEFENSIVE),
+                "allow_excluded_us": allow_excluded_us,
+                "symbols": us_syms,
+            }} if us_syms else {}),
         },
         "n_events_total": len(details),
         "n_evaluated": len(evaluated),
@@ -646,18 +664,9 @@ def main() -> None:
     events = fetch_events(symbols, args.since,
                           allow_excluded_us=args.allow_excluded_us)
     _, us_syms = split_symbols_by_lane(symbols)
-    extra = None
-    if us_syms:
-        extra = {
-            "us_lane": {
-                "instrument_class": "us_equity",
-                "excluded_broad_defensive": sorted(US_EXCLUDED_BROAD_DEFENSIVE),
-                "allow_excluded_us": args.allow_excluded_us,
-                "symbols": us_syms,
-            },
-        }
     report = build_report(events, is_cutoff_date=args.is_cutoff_date,
-                          extra_params=extra)
+                          allow_excluded_us=args.allow_excluded_us,
+                          us_symbols=us_syms)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2))
