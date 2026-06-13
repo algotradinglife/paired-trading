@@ -49,3 +49,54 @@ def test_lane_report_has_gate_and_nested_keys():
 def test_lane_report_empty():
     lr = lane_report([])
     assert lr["n"] == 0 and lr["full_lane_ev"] is None
+
+
+def test_run_symbol_all_lanes_single_enrich_and_lane_bucketing(monkeypatch):
+    # 验：每 symbol 只 detect+enrich 一次；按 direction×higher_relation 分桶；
+    # simulate_trade 按各信号自身方向调用（monkeypatch 伪造管道，无需真数据）。
+    import pandas as pd
+    import scripts.analyze_overext_lanes as mod
+
+    _ts = pd.to_datetime(
+        ["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-04"], utc=True)
+
+    class _Sig:
+        def __init__(self, idx, direction, h_rel):
+            self.candidate_bar_idx = idx
+            self.direction = direction
+            self.multi_tf_context = {"higher_relation": h_rel}
+            self.timestamp = _ts[idx]
+
+    df = pd.DataFrame({"timestamp": _ts})
+    calls = {"detect": 0, "enrich": 0, "sim_dirs": []}
+
+    def fake_load_sym(sym, level, qr):
+        return df
+    def fake_atr(d, period=14):
+        return pd.Series([1.0] * len(d))
+    def fake_detect(d, instrument_class="x"):
+        calls["detect"] += 1
+        return [_Sig(0, "bottom", "opposing"), _Sig(1, "top", "supporting"),
+                _Sig(2, "bottom", "neutral"), _Sig(3, "bottom", "leading")]  # leading 不在 6 lane
+    def fake_enrich(sigs, daily, sixty, higher_tf_level_id="1h"):
+        calls["enrich"] += 1
+        return sigs
+    def fake_feat(daily, idx):
+        return {"range_vs_avg": 1.0}
+    def fake_sim(daily, idx, direction, stop, atr):
+        calls["sim_dirs"].append(direction)
+        return ("tp1_tp2", 1.5, None, 1)
+
+    monkeypatch.setattr(mod, "_load_sym", fake_load_sym)
+    monkeypatch.setattr(mod, "compute_atr", fake_atr)
+    monkeypatch.setattr(mod, "detect_signals", fake_detect)
+    monkeypatch.setattr(mod, "enrich_with_higher_tf", fake_enrich)
+    monkeypatch.setattr(mod, "signal_bar_features", fake_feat)
+    monkeypatch.setattr(mod, "simulate_trade", fake_sim)
+
+    rows = mod.run_symbol_all_lanes("FOO", "cn_metal_futures", quant_root=None)
+    assert calls["detect"] == 1 and calls["enrich"] == 1   # 各一次
+    lanes = sorted(r["lane"] for r in rows)
+    assert lanes == ["bottomxneutral", "bottomxopposing", "topxsupporting"]  # leading 丢
+    # simulate 按各信号方向调用
+    assert sorted(calls["sim_dirs"]) == ["bottom", "bottom", "top"]
