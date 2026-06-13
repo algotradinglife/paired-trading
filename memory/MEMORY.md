@@ -8,6 +8,7 @@
 - [Regime gate not portable](feedback_regime_gate_not_portable.md) — SPY/SMA200 gate 不能套 bottom-reversal lane；跨市场 portable signal 极少
 - [Retired & historical findings](project_retired_and_historical.md) — DIF 检测器家族 + PA TOP/put（3 机制全 REJECT，不做 PA put lane）+ 旧 policy/data/scope：已废除勿重探（含原因）
 - [Put side: Xiao direction reopened](project_put_side_xiao_direction.md) — 肖偏重 put；put 须在权利金空间验证（非标的 R 空间，PA top 镜像否决仍成立）；数据补完在新服务器，代码将迁移 WSL
+- [US premium lane harness ready](project_us_premium_lane.md) — OCC 精确到期选约 + broad/defensive 排除已就绪；SPY 冒烟仅管道验证；信号验证等 GLD/GDX（t_6eae7583）
 
 ## Methodology & philosophy
 
