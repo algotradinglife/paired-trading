@@ -18,8 +18,10 @@ spike / tight_channel / normal_channel / range——纯由 OHLC 派生特征确�
 **机械评估器：只输出统计，不打 PASS/FAIL，不解读裁决。**
 
 复用已验证管道（不 fork backtest_rr_pool 逻辑）：
-  detect_signals → enrich_with_higher_tf/lower_tf → simulate_trade（ATR×1.5 止损
+  detect_signals → enrich_with_higher_tf → simulate_trade（ATR×1.5 止损
   + 1R/2R 缩仓 + MAX_HOLD），EV = mean(realized_r)。
+  （只需 higher_relation 判 bottom×opposing，故略去运行时主导成本 enrich_with_lower_tf；
+  见 run_symbol_state_gate，reviewer t_fa85d3d2 运行时修复。）
 限定在 **bottom × higher_relation=opposing** 信号群（已验证强信号 lane）。
 对每个信号 bar 算粗态，再按态分组 realized_r 的 EV + 胜率，pooled 与
 by-pool（CN_BOND / CN_METAL / US_EQUITY）分开报（regime not portable：
@@ -48,10 +50,7 @@ import pandas as pd
 
 from data import bar_loader
 from engine.divergence.downstream_policies import apply_policy
-from engine.divergence.multi_tf_context import (
-    enrich_with_higher_tf,
-    enrich_with_lower_tf,
-)
+from engine.divergence.multi_tf_context import enrich_with_higher_tf
 from engine.features.swing_context import detect_swing_points
 from scripts.backtest_rr_pool import (
     DATA_DIR,
@@ -274,8 +273,11 @@ def run_symbol_state_gate(
     win_end = min(sixty["timestamp"].iloc[-1], fifteen["timestamp"].iloc[-1])
     in_window = [s for s in sigs
                  if win_start <= daily["timestamp"].iloc[s.candidate_bar_idx] <= win_end]
+    # 仅需 higher_relation 判 bottom×opposing；lower_relation 全程未用，故略去
+    # enrich_with_lower_tf（其在 15min 全序列上逐信号重算 level_state，是运行时
+    # 主导成本，CN_METAL 因此 >600s 超时——reviewer t_fa85d3d2）。15min 仍载入仅
+    # 为窗口边界，确保群体（n）与原口径逐一致。
     enriched = enrich_with_higher_tf(in_window, daily, sixty, higher_tf_level_id="1h")
-    enriched = enrich_with_lower_tf(enriched, daily, fifteen, lower_tf_level_id="15m")
 
     rows: list[dict] = []
     for sig in enriched:
@@ -447,12 +449,16 @@ def main() -> None:
     for pool in args.pools:
         icls = POOL_INSTRUMENT_CLASS[pool]
         for stem in POOLS[pool]:
+            # 逐 symbol 进度日志（stderr）——reviewer t_fa85d3d2：避免长跑无输出
+            print(f"  scanning {pool}/{stem} ...", file=sys.stderr, flush=True)
             rows = run_symbol_state_gate(
                 stem, icls, apply_policy_gate=args.apply_policy,
                 quant_root=args.quant_root)
             for r in rows:
                 r["_pool"] = pool
             all_rows.extend(rows)
+            print(f"    {pool}/{stem}: {len(rows)} bottom×opp events",
+                  file=sys.stderr, flush=True)
 
     report = build_report(all_rows, apply_policy_gate=args.apply_policy,
                           pools=args.pools)

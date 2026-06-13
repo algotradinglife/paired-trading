@@ -33,6 +33,15 @@ win_rate=frac(realized_r>0)。口径：原始 bottom×opposing 群（未过 down
 4. **normal_channel** — 其余（兜底）
 
 复现：`cd src && uv run python scripts/analyze_state_gate.py --pools CN_BOND CN_METAL US_EQUITY --out data/review/state_gate_bottom_opp.json`
+- **无 uv 环境回退**：`uv` 不在 PATH 时直接用 `python3`（脚本自带 sys.path 注入）：
+  `cd src && python3 scripts/analyze_state_gate.py --pools CN_BOND CN_METAL US_EQUITY --out data/review/state_gate_bottom_opp.json`
+- **进度可见**：逐 symbol 进度打到 stderr（`scanning <pool>/<sym>`），不再长跑无输出。
+- **分池复现（有界审查窗）**：结果对 seed=42 确定性，可逐池单跑再并集——
+  `--pools CN_BOND`、`--pools US_EQUITY`、`--pools CN_METAL` 三次输出 events 并集与一次性
+  3 池跑逐一致；CN_METAL 历史最深、单独耗时最长，可单独跑以避免与他池串行等待。
+- **运行时**：已移除未用的 enrich_with_lower_tf（原 15min 全序列逐信号重算 level_state
+  是主导成本、CN_METAL 因此 >600s 超时，reviewer t_fa85d3d2）；群体 n 不变（lower_relation
+  全程未用），仅运行时下降。
 工件：`src/data/review/state_gate_bottom_opp.json`（派生，gitignore 不提交，命令重生）。
 
 ## 头条（pooled，n=315）
