@@ -249,3 +249,26 @@ def test_barframe_metadata(tmp_path):
     assert bf.exchange == "XSHF"
     assert bf.last_completed_ts == datetime(2025, 3, 3, tzinfo=timezone.utc)
     assert bf.payload_hash
+
+
+def test_us_daily_pre_2006_calendar_lower_bound_not_dropped(tmp_path):
+    # exchange_calendars XNYS 下界 2006-06-13；早于此的 US daily 交易日不应被丢
+    # （raw parquet 延伸到 1999）。1999-03-03 是周三 EST → 16:00 ET == 21:00 UTC。
+    _write(tmp_path, "daily", "SPY.AMEX", [
+        _bar(datetime(1999, 3, 3)),    # 周三, 远早于日历下界
+        _bar(datetime(1999, 3, 6)),    # 周六 → 丢
+        _bar(datetime(2025, 3, 3)),    # 日历内对照
+    ])
+    bf = BarStore(tmp_path).load_barframe("SPY", "XNYS", "D", as_of=AS_OF)
+    ts = list(bf.df["timestamp"])
+    assert pd.Timestamp("1999-03-03 21:00", tz="UTC") in ts   # 保留
+    assert pd.Timestamp("2025-03-03 21:00", tz="UTC") in ts
+    assert pd.Timestamp("1999-03-06 21:00", tz="UTC") not in ts  # 周六丢
+    assert len(ts) == 2
+
+
+def test_us_daily_pre_2006_summer_edt_close(tmp_path):
+    # 2000-06-14 周三 EDT → 16:00 ET == 20:00 UTC（与 2006-06-13 边界一致）
+    _write(tmp_path, "daily", "SPY.AMEX", [_bar(datetime(2000, 6, 14))])
+    bf = BarStore(tmp_path).load_barframe("SPY", "XNYS", "D", as_of=AS_OF)
+    assert list(bf.df["timestamp"]) == [pd.Timestamp("2000-06-14 20:00", tz="UTC")]
