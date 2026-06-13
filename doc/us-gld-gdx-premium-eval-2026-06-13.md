@@ -3,8 +3,14 @@
 卡片 t_c672ce18（US put 主线）。**本文件只列机械统计，不打 PASS/FAIL，不解读裁决。**
 裁决在另一 session / 交 Hermes。
 
-来源：`scripts/eval_tbreak_premium.py --symbols GLD,GDX --since 2024-07-01`
-输出：`data/review/us_gld_gdx_premium_eval.json`
+复现命令（在 `src/` 下运行）：
+```
+cd src && uv run python scripts/eval_tbreak_premium.py \
+    --symbols GLD,GDX --since 2024-07-01 \
+    --out data/review/us_gld_gdx_premium_eval.json
+```
+输出工件：`src/data/review/us_gld_gdx_premium_eval.json`（派生产物，`src/data/review/`
+按 repo 约定 gitignore——不提交，由上面命令确定性重生；本文件已内嵌全部数字）。
 
 ## 参数（写死，见报告 params）
 
