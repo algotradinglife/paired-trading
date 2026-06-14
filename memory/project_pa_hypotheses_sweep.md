@@ -42,12 +42,16 @@ metadata:
    bottom×opposing，apply_policy 门）上验过，但生产 bottom×opposing 走各自 policy_weight 的专用
    detector（context_a/pa_us_60min/pa_cn_bond/pa_h2，非 apply_policy）；score_today 主环未做 HTF
    富化故 apply_policy 的 bottom×opp 规则不触发→接 apply_policy 等于休眠。
-   **P3a 端口验证（commit 0426ff0c，doc/context-a-deweight-portcheck-2026-06-14）**：在 context_a
-   活跃 lane 上 **de-weight 不移植**——n=181 等权 EV +0.201 vs 加权 +0.192，gap −0.009
-   CI[−0.124,+0.106] P=0.44；且两轴**轻微反向**（context_a 最大棒 EV 最高 +0.284、二测 +0.373>首测
-   +0.185）。=>接 context_a.policy_weight 不被数据支持。**de-weight edge 特定于通用背离群，暂不接
-   生产**（留研究结论）；除非扩验 pa_us_60min/pa_cn_bond/pa_h2（鉴于 context_a 干净非移植+反向，
-   预期低）。reviewer 卡 t_5f320e96。另：US daily pre-2006 日历丢弃已修（t_45d3ed8b，延至 1999）。
+   **P3a 端口验证（commit 603822b9，doc/context-a-deweight-portcheck-2026-06-14）**：在 context_a
+   **活跃发射 lane** 上 **de-weight 不移植**。reviewer t_5f320e96 退回 v1（n=181 漏了生产
+   suppression）→ 修复 t_b186d176：population 经 `ContextADetector.policy_weight()>0`（h=opposing
+   + symbol suppression DIA/SPY/XLU,kq_m_ine_sc）＋ score_today US P2 SPY risk-off regime 门（codex
+   抓的第二道门）→ n=181→150→**140**。**结果 n=140**：等权 +0.310 vs 加权 +0.335，gap +0.023
+   CI[−0.113,+0.157] **P=0.64 无显著**；两组件 gate 均不移植（过度延伸 EV 不随棒长降、大棒~+0.36；
+   二测 ord2 +0.457 ≥ 首测 ord1 +0.372）。=>接 context_a.policy_weight 不被数据支持。**de-weight edge
+   特定于研究用通用背离群，暂不接生产**（留研究结论）；扩验 pa_us_60min/pa_cn_bond/pa_h2 预期低。
+   教训：端口验证须按**活跃发射口径**（policy_weight + 所有下游门 regime/suppression），非裸 detector
+   扫描。re-review 卡 t_d1018bd6。另：US daily pre-2006 日历丢弃已修（t_45d3ed8b，延至 1999）。
 
 3. **状态 gate（t_aeb3cc75，doc/state-gate-bottom-opp-2026-06-13）**：**null + 状态失衡**。
    粗态分类器 88% 落兜底 normal_channel，best-vs-rest gap +0.129R CI 跨 0；spike 在
