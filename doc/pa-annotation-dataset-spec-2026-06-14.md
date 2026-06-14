@@ -78,6 +78,29 @@ split                  # 按时间的 fold + train/val/test
 dedup_key              # (product, day) 跨月去重
 ```
 
+## 5b. 真实worked example（确定性半段，researcher 已跑通、可复现）
+下面是 rb2607 第一个候选经**确定性**候选闸门 + 出场仿真产出的一条真实记录。
+`features_det`/`candidate_source`/`outcome`/`dedup_key` 全部是确定性自动产出（**无需人/LLM**）；
+`decision`/`decision_trace` 是待复刻体批量填的部分。这就是 P0 产出、P1 待补的形状：
+```json
+{
+  "id": "rb2607-5min-20260401T131000",
+  "instrument": "rb", "contract": "rb2607", "interval": "5min",
+  "ts_utc": "2026-04-01T13:10:00",
+  "features_det": {"entry": 3137.0, "stop": 3134.0, "target": 3151.0, "payoff": 4.667},
+  "candidate_source": "spec001_proxy.detect_signals",
+  "decision": "<<TODO: 复刻批标 — order/direction/win_rate_est/...>>",
+  "decision_trace": "<<TODO: 复刻 decision_trace（逐节点）>>",
+  "label_source": "pending_replica",
+  "outcome": {"triggered": true, "resolved": true, "exit_kind": "stop",
+              "gross_r": -1.0, "entry_ts": "2026-04-01T13:15:00", "exit_ts": "2026-04-01T13:35:00"},
+  "dedup_key": ["rb", "2026-04-01"], "split": "<<按时间 fold 分配>>"
+}
+```
+复现（researcher 侧验证过，今天可跑）：候选闸门在 rb2607 上点 **53 个候选**；`--validate` 出场仿真
+对 rb2607 的标杆单复现 **+2.0R**。完整工件 `src/data/review/spec001_proxy_ev.json`（ag/au/cu/rb
+全量候选 + 自动结果标，1.5MB，gitignore）已存在，可当 P0 的实物参照。
+
 ## 6. researcher 可直接复用的参考实现（commit fd1f32eb / 18ae0282，paired-trading/src）
 - `scripts/backtest_spec001_proxy.py::detect_signals` — 确定性候选闸门（ATR 相对、无前视、可调阈值）。
 - `scripts/eval_spec001_ev.py::simulate_order` — 确定性出场仿真 → `realized_R/exit_kind`，
