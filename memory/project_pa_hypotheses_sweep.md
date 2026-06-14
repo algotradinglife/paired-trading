@@ -38,9 +38,16 @@ metadata:
    （硬 AND 只留 n=35），OOS weighted−equal +0.119。**P3 productionize（t_50cb7876，自编排无外部 gate）
    **进行中**：已落 engine 模块 `overext_deweight.py`（纯 w_a×w_b 因子，限 bottom×opp/neutral）
    + `overext_features.py`（range_vs_avg/test_ordinal 生产镜像，与验证脚本数值 parity，单测覆盖）。
-   接入点定为 **apply_policy 尾部乘法因子**（backtest_rr_pool 验证管道与 score_today 共用单点；
-   features 由有 bars 的 consumer 传入），需重生多条 baseline——高 blast radius，接生产前确认范围。
-   另：US daily pre-2006 日历丢弃已修（t_45d3ed8b，延至 1999）。
+   **关键发现：验证群在生产里无落点**——de-weight 在研究群（detect_all_divergences 通用背离
+   bottom×opposing，apply_policy 门）上验过，但生产 bottom×opposing 走各自 policy_weight 的专用
+   detector（context_a/pa_us_60min/pa_cn_bond/pa_h2，非 apply_policy）；score_today 主环未做 HTF
+   富化故 apply_policy 的 bottom×opp 规则不触发→接 apply_policy 等于休眠。
+   **P3a 端口验证（commit 0426ff0c，doc/context-a-deweight-portcheck-2026-06-14）**：在 context_a
+   活跃 lane 上 **de-weight 不移植**——n=181 等权 EV +0.201 vs 加权 +0.192，gap −0.009
+   CI[−0.124,+0.106] P=0.44；且两轴**轻微反向**（context_a 最大棒 EV 最高 +0.284、二测 +0.373>首测
+   +0.185）。=>接 context_a.policy_weight 不被数据支持。**de-weight edge 特定于通用背离群，暂不接
+   生产**（留研究结论）；除非扩验 pa_us_60min/pa_cn_bond/pa_h2（鉴于 context_a 干净非移植+反向，
+   预期低）。reviewer 卡 t_5f320e96。另：US daily pre-2006 日历丢弃已修（t_45d3ed8b，延至 1999）。
 
 3. **状态 gate（t_aeb3cc75，doc/state-gate-bottom-opp-2026-06-13）**：**null + 状态失衡**。
    粗态分类器 88% 落兜底 normal_channel，best-vs-rest gap +0.129R CI 跨 0；spike 在
