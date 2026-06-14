@@ -30,6 +30,13 @@ rb2607 单实例 +2.0R（买stop 3379 于 2025-07-24 13:35 触发、14:45 触 34
    无 +2R；唯有按复刻 decision 的 `invalidation_condition`「跌破3352或强势空头信号棒」（自由文本、
    不可机械判定）才有效。=> 约定须 philosopher 敲定（或 replay 直接附实际出场结果）。
 
+**Option A（用户授权，并行规模化 EV，commit fd1f32eb，doc/spec-001-proxy-ev-2026-06-14）**：
+自建 SPEC-001 规则**确定性 proxy** `backtest_spec001_proxy.py`，跨 SHFE 5min（ag/au/cu/rb；
+cn_data SHFE-only）跑 n=4713 多单。**raw 毛 EV +0.449R（CI[+0.304,+0.635]）、胜率 21.6%**，
+但**异常值驱动不稳健**：top1% 交易占 63.6% 毛利、截 +5R 仅 +0.049R（≈毛持平、扣成本负）；
+且比复刻 **100× 更宽松**（rb2607 proxy 187 信号 vs 复刻 1 单）。**结论：机械子集非稳健边缘；
+复刻的选择性（win_rate_est+PA 上下文）才是 alpha——proxy 不能替代忠实 EV**。贵金属(au/ag)>螺纹(rb)。
+
 **时区**：复刻节点 `end` 与 cn_data `ts_open` 均 UTC epoch（核对过）。
 **纪律**：philosopher 侧 fidelity 优先于 EV——即便某态 EV 负，只要复刻忠实即达标；researcher
 不得"优化"掉复刻的选择性/把复刻改得比交易员聪明；需更多语料回 @philosopher 建卡。
