@@ -85,3 +85,22 @@ def test_split_and_dedup_discipline():
         by.setdefault(r["split"], []).append(r["ts_utc"][:10])
     if "train" in by and "test" in by:
         assert max(by["train"]) <= min(by["test"]), "train/test 时间重叠"
+
+
+def test_merge_keeps_deterministic_outcome_and_attaches_decision():
+    """P1 合并：outcome 必须取 P0 脊柱（确定性），decision/trace 取复刻语料（§字段归属）。"""
+    import json
+    base_fp = SRC / "data/review/pa_dataset_rb.jsonl"
+    merged_fp = SRC / "data/review/pa_dataset_rb.labeled.jsonl"
+    if not (base_fp.exists() and merged_fp.exists()):
+        pytest.skip("数据集或合并产物未生成")
+    base = {json.loads(ln)["id"]: json.loads(ln) for ln in open(base_fp)}
+    merged = [json.loads(ln) for ln in open(merged_fp)]
+    assert len(merged) == len(base), "合并不应增删脊柱记录"
+    for r in merged:
+        # outcome 永远等于 P0 脊柱（决策侧不得覆盖确定性 outcome）
+        assert r["outcome"] == base[r["id"]]["outcome"], f"{r['id']} outcome 被污染"
+        if r["label_source"] == "replica_claude":
+            assert r["decision"] is not None and r["decision_trace"], "已标记录须有 decision+trace"
+        else:
+            assert r["label_source"] == "pending_replica"
