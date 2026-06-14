@@ -30,6 +30,18 @@ metadata:
    OOS improve +0.091 **方向一致为正但 OOS 子样本(n=57)的 gap CI 跨 0(P=0.75)、不单独显著**。
    代价：cutoff 1.0 砍 ~60% 信号。**productionize 建议：1.0~1.25 作 de-weight 而非硬砍**（待 Hermes）。
 
+   **epic 推进（t_d6dccbab）**：P1a 跨 lane（t_bd5f8b71）证过度延伸惩罚是 **bottom 侧现象非通用**
+   （bottom×opp+0.519/P=1.0、bottom×neutral+0.765/P=0.998 显著且 OOS 正；top 侧反向）；
+   P1b（t_c8aad725）二次入场首测>二测 **OOS 显著**（+0.78R P=0.997）；P2 综合（t_6fe02de5）证两 gate
+   **互补正交**（A∧B EV +0.665，边际各 +0.29R）；P2.5（t_d257eb33）标定**连续 de-weight**
+   `w=w_a(range_vs_avg)×w_b(ordinal)`——连续加权 weighted-EV +0.275(eff_n 157) 4× 等权且保半信号量
+   （硬 AND 只留 n=35），OOS weighted−equal +0.119。**P3 productionize（t_50cb7876，自编排无外部 gate）
+   **进行中**：已落 engine 模块 `overext_deweight.py`（纯 w_a×w_b 因子，限 bottom×opp/neutral）
+   + `overext_features.py`（range_vs_avg/test_ordinal 生产镜像，与验证脚本数值 parity，单测覆盖）。
+   接入点定为 **apply_policy 尾部乘法因子**（backtest_rr_pool 验证管道与 score_today 共用单点；
+   features 由有 bars 的 consumer 传入），需重生多条 baseline——高 blast radius，接生产前确认范围。
+   另：US daily pre-2006 日历丢弃已修（t_45d3ed8b，延至 1999）。
+
 3. **状态 gate（t_aeb3cc75，doc/state-gate-bottom-opp-2026-06-13）**：**null + 状态失衡**。
    粗态分类器 88% 落兜底 normal_channel，best-vs-rest gap +0.129R CI 跨 0；spike 在
    CN_METAL +0.28 vs US −0.23 符号相反（不可移植）。当前阈值无可用分离，需重调阈值才能复看。
