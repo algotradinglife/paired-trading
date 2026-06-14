@@ -12,10 +12,9 @@ tiny-risk inflated R (the +277R artifact from the proxy) and report capped/robus
 SPEC-001 = breakout buy-stop LONG (order_type 突破单, direction 做多). Limit-long (限价单)
 is a different entry type → reported separately, not in the headline SPEC-001 number.
 
-Usage:
-  cd src && python3 scripts/eval_spec001_corpus.py \
-      --corpus ~/workspace/quant/strats/trade-philosopher/runs/_replica/pa_dataset_rb_claude.jsonl \
-      --out data/review/spec001_faithful_ev.json
+Usage (corpus path auto-resolves from the philosopher sibling repo; no ~ — works under
+Hermes/Kanban worker profiles where HOME differs. Override with --corpus / --philosopher-src):
+  cd src && python3 scripts/eval_spec001_corpus.py --out data/review/spec001_faithful_ev.json
 """
 from __future__ import annotations
 
@@ -163,7 +162,8 @@ def _summary(rows: list[dict], spec, limit_long, other, cost_r: float) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--corpus", type=Path, required=True)
+    ap.add_argument("--corpus", type=Path, default=None,
+                    help="replica labels jsonl (default: derived from --philosopher-src sibling)")
     ap.add_argument("--philosopher-src", type=Path, default=_DEFAULT_TP_SRC)
     ap.add_argument("--cost-r", type=float, default=0.0)
     ap.add_argument("--fwd-days", type=int, default=25)
@@ -172,7 +172,10 @@ def main() -> None:
     ap.add_argument("--out", type=Path)
     args = ap.parse_args()
 
-    rep = evaluate(args.corpus, args.philosopher_src, cost_r=args.cost_r, fwd_days=args.fwd_days,
+    # Corpus default FOLLOWS --philosopher-src (not the import-time sibling), so an explicit
+    # override resolves the matching corpus (codex P2 on t_ac8a2d94).
+    corpus = args.corpus or (args.philosopher_src.parent / "runs/_replica/pa_dataset_rb_claude.jsonl")
+    rep = evaluate(corpus, args.philosopher_src, cost_r=args.cost_r, fwd_days=args.fwd_days,
                    max_wait_bars=args.max_wait_bars, max_hold_bars=args.max_hold_bars)
     txt = json.dumps(rep, ensure_ascii=False, indent=2)
     if args.out:
