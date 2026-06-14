@@ -37,6 +37,15 @@ cn_data SHFE-only）跑 n=4713 多单。**raw 毛 EV +0.449R（CI[+0.304,+0.635]
 且比复刻 **100× 更宽松**（rb2607 proxy 187 信号 vs 复刻 1 单）。**结论：机械子集非稳健边缘；
 复刻的选择性（win_rate_est+PA 上下文）才是 alpha——proxy 不能替代忠实 EV**。贵金属(au/ag)>螺纹(rb)。
 
+**忠实 EV 已交付（2026-06-14，commit da976590，doc/spec-001-faithful-ev-2026-06-14）**：philosopher
+交付忠实复刻语料 pa_dataset_rb_claude.jsonl（120 条/43 突破做多），researcher 用 eval_spec001_corpus.py
+按'触目标即止盈'重算（不采信内嵌 outcome）。**n=43：win 67.4%、gross +0.773R、95%CI[+0.380,+1.165]
+P>0=1.0、净 +0.573R@0.2R、max +3.5R 无肥尾**。对比确定性 proxy（20% win、截@5R −0.044 异常驱动）→
+**选择性=alpha：复刻交易者方程判断（43/1152 候选）把扣成本归零的肥尾彩票转成稳健显著正 EV**。
+卡 t_0da3b750 已完成；reviewer 卡 t_6c572f92。3 caveat：内嵌 outcome 被换月跳变虚增（21/43，用 exit-at-target）；
+复刻实下 payoff<2 单（30/43，跑完整交易者方程而非写定 §5 硬门≥2→已反馈 philosopher 改 §5）；9 单符号翻转(前向数据口径)。
+可扩 ag/au/cu 放大样本。
+
 **时区**：复刻节点 `end` 与 cn_data `ts_open` 均 UTC epoch（核对过）。
 **纪律**：philosopher 侧 fidelity 优先于 EV——即便某态 EV 负，只要复刻忠实即达标；researcher
 不得"优化"掉复刻的选择性/把复刻改得比交易员聪明；需更多语料回 @philosopher 建卡。

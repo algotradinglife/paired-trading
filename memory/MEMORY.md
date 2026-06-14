@@ -10,7 +10,8 @@
 - [Put side: Xiao direction reopened](project_put_side_xiao_direction.md) — 肖偏重 put；put 须在权利金空间验证（非标的 R 空间，PA top 镜像否决仍成立）；数据补完在新服务器，代码将迁移 WSL
 - [US premium lane harness ready](project_us_premium_lane.md) — OCC 精确到期选约 + broad/defensive 排除已就绪；SPY 冒烟仅管道验证；信号验证等 GLD/GDX（t_6eae7583）
 - [PA hypotheses sweep 2026-06-13](project_pa_hypotheses_sweep.md) — Brooks 4 假设在 bottom×opp 验证：range_vs_avg 棒长惩罚正交显著（唯一正向）；二次入场反 Brooks 且显著；状态gate/ioi 偏 null；epic 已结，de-weight 不移植生产→PARK
-- [SPEC-001 EV eval (philosopher pipeline)](project_spec001_ev_eval.md) — philosopher 复刻→spec 新管道；楔形二次入场做多 EV 评估；harness 建好复现 rb2607 +2R，但 N=1 不可评估，等批量语料 + 出场约定（t_3d25c2f5）
+- [SPEC-001 EV eval (philosopher pipeline)](project_spec001_ev_eval.md) — 忠实 EV 已交付：n=43 win 67.4% +0.773R CI[+0.38,+1.17] 无肥尾 → **选择性=alpha**（vs proxy 扣成本归零）；t_0da3b750 done
+- [Team orchestrator role](feedback_team_orchestrator_role.md) — 我是 quant-team 灵魂/lead：loop 轮询全员、推 blocked/todo、调动 data-engineer/philosopher、空板时让 philosopher 出改进方案定新目标；blocked 仅留给真需人工干预
 
 ## Methodology & philosophy
 
