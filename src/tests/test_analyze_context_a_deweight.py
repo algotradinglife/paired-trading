@@ -6,13 +6,39 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.analyze_context_a_deweight import _factor, build_report  # noqa: E402
+import pandas as pd  # noqa: E402
+
+from scripts.analyze_context_a_deweight import (  # noqa: E402
+    _factor,
+    _live_lane_weight,
+    build_report,
+)
 
 
 def _row(rva: float, ordinal: int, r: float, pool: str = "US", period: str = "IS") -> dict:
     return {"pool": pool, "symbol": "x", "bar_idx": 100, "date": "2024-07-01",
             "period": period, "realized_r": r, "range_vs_avg": rva,
             "ordinal": ordinal, "win": int(r > 0)}
+
+
+def _rec(h_rel: str = "opposing"):
+    return {"bar_idx": 100, "timestamp": pd.Timestamp("2024-07-01", tz="UTC"),
+            "h_rel": h_rel}
+
+
+def test_live_lane_weight_applies_production_suppression():
+    # t_b186d176 fix: population must match the live ContextADetector policy lane.
+    # US broad-market suppressions → weight 0 (excluded from population)
+    assert _live_lane_weight(_rec(), "us_equity", "SPY") == 0.0
+    assert _live_lane_weight(_rec(), "us_equity", "DIA") == 0.0
+    assert _live_lane_weight(_rec(), "us_equity", "XLU") == 0.0
+    # CN_METAL crude suppression → weight 0
+    assert _live_lane_weight(_rec(), "cn_metal_futures", "kq_m_ine_sc") == 0.0
+    # non-suppressed symbols pass (weight > 0)
+    assert _live_lane_weight(_rec(), "us_equity", "QQQ") > 0.0
+    assert _live_lane_weight(_rec(), "cn_metal_futures", "kq_m_shfe_au") > 0.0
+    # non-opposing always excluded regardless of symbol
+    assert _live_lane_weight(_rec("supporting"), "us_equity", "QQQ") == 0.0
 
 
 def test_factor_bottom_opposing_only():

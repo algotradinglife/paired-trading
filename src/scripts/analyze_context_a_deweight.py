@@ -10,7 +10,14 @@ live lane we must check the edge TRANSFERS here.
 This reuses the context_a backtest convention verbatim (scan_context_a / simulate_trade
 from backtest_context_a_ev: stop=1.5×ATR, 1R:1R:1.5R, max_hold=40, min_gap=10) and the
 production de-weight modules (engine.divergence.overext_features /.overext_deweight) so
-the numbers reflect exactly what P3b would ship. Restricted to h=opposing (the live gate).
+the numbers reflect exactly what P3b would ship.
+
+**Population = the LIVE emission lane**: each candidate is routed through the actual
+ContextADetector.policy_weight() (weight>0 → h=opposing gate + symbol suppression
+US: DIA/SPY/XLU, CN_METAL: kq_m_ine_sc), AND the US P2 regime gate that score_today
+applies on top (skip US context_a on SPY risk-off dates; fail-open if SPY missing).
+Fix t_b186d176 (reviewer t_5f320e96): the prior run omitted symbol suppressions
+(n=181→150); codex P2 added the US regime gate → final live-lane n reported at runtime.
 
 **Mechanical statistics only — no PASS/FAIL verdict.** Reports the w_a/w_b EV shapes on
 this population, three weighting schemes (equal / hard-AND / production continuous
@@ -18,7 +25,7 @@ factor), the continuous-vs-equal bootstrap gap, and the lane's K=3 periods (IS/F
 
 Usage:
   python3 scripts/analyze_context_a_deweight.py --out data/review/context_a_deweight.json
-  (data/raw JSON bars; US + CN_METAL context_a symbol universe)
+  (quant store via bar_loader; US + CN_METAL context_a symbol universe)
 """
 from __future__ import annotations
 
@@ -33,7 +40,9 @@ import numpy as np
 
 from data import bar_loader
 from engine.divergence import overext_features as of
+from engine.divergence.context_a_detector import ContextADetector, ContextASignal
 from engine.divergence.overext_deweight import W_MIN, deweight_factor, w_a, w_b
+from engine.regime.us_regime_gate import compute_regime_signal, is_risk_off
 from scripts.backtest_context_a_ev import (
     CUTOFF_IS,
     CUTOFF_OOS1,
@@ -54,10 +63,33 @@ def _factor(row: dict) -> float:
     return deweight_factor("bottom", "opposing", row["range_vs_avg"], row["ordinal"])
 
 
+def _live_lane_weight(rec: dict, icls: str, sym: str) -> float:
+    """Production ContextADetector.policy_weight for this candidate — encodes BOTH
+    the h=opposing gate AND symbol-level suppression (DIA/SPY/XLU, kq_m_ine_sc).
+    Routing through the actual policy fn makes the population EXACTLY the live lane
+    (reviewer t_5f320e96 / fix t_b186d176: prior n=181 omitted suppressions → live n=150)."""
+    sig = ContextASignal(bar_idx=rec["bar_idx"], timestamp=rec["timestamp"],
+                         features={}, higher_tf_relation=rec["h_rel"])
+    return ContextADetector.policy_weight(sig, instrument_class=icls, symbol=sym)
+
+
+def _load_us_regime(quant_root: Path):
+    """SPY regime signal for the US context_a P2 gate; None → fail-open (no
+    suppression), matching score_today._get_us_regime_signal."""
+    spy = _load_sym("spy", "D", quant_root)
+    if spy is None or len(spy) < 200:
+        print("  [regime] SPY unavailable/insufficient — US regime gate FAIL-OPEN",
+              file=sys.stderr)
+        return None
+    return compute_regime_signal(spy)
+
+
 def collect_rows(quant_root: Path) -> list[dict]:
-    """context_a × h=opposing events with realized_r + range_vs_avg + ordinal + date."""
+    """LIVE context_a policy-lane events (policy_weight>0 + US regime gate: h=opposing
+    + symbol suppression + SPY risk-off) with realized_r + range_vs_avg + ordinal + date."""
     rows: list[dict] = []
-    for pool, (symbols, _icls) in POOLS.items():
+    us_regime = _load_us_regime(quant_root)
+    for pool, (symbols, icls) in POOLS.items():
         for sym in symbols:
             bars = _load_sym(sym, "D", quant_root)
             if bars is None or bars.empty:
@@ -69,7 +101,11 @@ def collect_rows(quant_root: Path) -> list[dict]:
             ctx = of.prepare_context(bars)  # de-weight's own ATR + swing lows
             kept = 0
             for rec in recs:
-                if rec["h_rel"] != "opposing":
+                if _live_lane_weight(rec, icls, sym) <= 0.0:
+                    continue  # not in live policy lane (non-opposing or suppressed symbol)
+                # US P2 regime gate: score_today skips US context_a on SPY risk-off dates.
+                if (icls == "us_equity" and us_regime is not None
+                        and is_risk_off(us_regime, rec["timestamp"])):
                     continue
                 idx = rec["bar_idx"]
                 rva = of.range_vs_avg(bars, idx)
@@ -86,7 +122,7 @@ def collect_rows(quant_root: Path) -> list[dict]:
                     "win": int(rec["r"] > 0),
                 })
                 kept += 1
-            print(f"  {pool}/{sym}: {kept} opposing events", file=sys.stderr)
+            print(f"  {pool}/{sym}: {kept} live-lane events", file=sys.stderr)
     return rows
 
 
@@ -181,7 +217,9 @@ def build_report(rows: list[dict]) -> dict:
 
     return {
         "params": {
-            "population": "context_a (DIF>0 pullback) × higher_tf_relation=opposing",
+            "population": "LIVE context_a emission lane (policy_weight>0: h=opposing + "
+                          "symbol suppression DIA/SPY/XLU, kq_m_ine_sc; + US P2 SPY "
+                          "risk-off regime gate)",
             "lane_convention": "scan_context_a/simulate_trade (stop=1.5×ATR, "
                                "1R:1R:1.5R, max_hold=40, min_gap=10)",
             "de_weight": "engine.divergence.overext_deweight.deweight_factor "
