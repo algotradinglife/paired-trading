@@ -47,11 +47,19 @@ from scripts.backtest_context_a_ev import (
     CUTOFF_IS,
     CUTOFF_OOS1,
     CUTOFF_OOS2,
-    POOLS,
     compute_atr,
     scan_context_a,
 )
 from scripts.backtest_rr_pool import _load_sym
+from scripts.score_today import POOLS as _SCORE_TODAY_POOLS
+
+# Canonical LIVE-lane universe: source US + CN_METAL from score_today.POOLS (the actual
+# emission entry point), NOT backtest_context_a_ev.POOLS — the latter omits XLB/XLE/XLRE/
+# XLU (reviewer t_d1018bd6 / fix t_1f35573f). {pool: (symbols, instrument_class)}.
+POOLS: dict[str, tuple[list[str], str]] = {
+    "US": (_SCORE_TODAY_POOLS["US"], "us_equity"),
+    "CN_METAL": (_SCORE_TODAY_POOLS["CN_METAL"], "cn_metal_futures"),
+}
 
 BOOTSTRAP_N = 10000
 BOOTSTRAP_SEED = 42

@@ -21,6 +21,24 @@ def _row(rva: float, ordinal: int, r: float, pool: str = "US", period: str = "IS
             "ordinal": ordinal, "win": int(r > 0)}
 
 
+def test_universe_sourced_from_score_today_live_pools():
+    # t_1f35573f: analysis universe must equal the live score_today emission universe,
+    # not backtest_context_a_ev.POOLS (which omitted XLB/XLE/XLRE/XLU).
+    from engine.divergence.context_a_detector import _CONTEXT_A_EXCLUDED_US
+    from scripts.analyze_context_a_deweight import POOLS
+    from scripts.score_today import POOLS as ST_POOLS
+
+    us_syms, us_icls = POOLS["US"]
+    assert us_icls == "us_equity"
+    assert list(us_syms) == list(ST_POOLS["US"])          # exact live universe
+    assert {"XLB", "XLE", "XLRE", "XLU"} <= set(us_syms)   # the previously-missing ones
+    # every non-suppressed live US context_a symbol is covered by the analysis universe
+    non_suppressed = [s for s in ST_POOLS["US"] if s.upper() not in _CONTEXT_A_EXCLUDED_US]
+    assert set(non_suppressed) <= set(us_syms)
+    # CN_METAL likewise mirrors the live pool
+    assert list(POOLS["CN_METAL"][0]) == list(ST_POOLS["CN_METAL"])
+
+
 def _rec(h_rel: str = "opposing"):
     return {"bar_idx": 100, "timestamp": pd.Timestamp("2024-07-01", tz="UTC"),
             "h_rel": h_rel}
