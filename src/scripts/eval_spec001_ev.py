@@ -14,9 +14,13 @@ philosopher cn_data 5min interface), and reports gross/net R, win-rate, and dist
   - Entry: stop order. Long → triggers on first forward bar with high >= entry; short →
     low <= entry. (Validated: rb2607 long triggers 2025-07-24 13:35, matching the spec.)
   - Pre-entry: pending order lives until triggered, max_wait_bars elapses, or data ends.
-    NO pre-entry invalidation by the stop level — rb2607 traded 3362 (< stop 3365) before
-    entry yet remained valid per the replica's invalidation (<3352). Spec doc §6's loose
-    "<3366" would wrongly void it. (This is the #1 convention to confirm with philosopher.)
+    NO pre-entry invalidation is modelled — this harness is EXIT-ENGINE-ONLY. NB for rb2607
+    the pre-entry low hit 3334 (2025-07-23 14:25), BELOW the stop (3365) AND below the
+    replica's own invalidation (3352), so under ANY pre-entry-invalidation rule that order
+    would have been VOIDED. So --validate proves the exit engine reproduces the documented
+    entry→target path, NOT that the pending order stayed faithfully valid. Whether to model
+    pre-entry invalidation is an OPEN convention (flagged to philosopher); the current EV
+    assumes none — possibly optimistic. (reviewer card t_9ef7dc76.)
   - Post-entry: intrabar stop/target; if both hit in one bar, STOP first (conservative).
   - Timeout: mark-to-close after max_hold_bars.
   - R = (exit - entry)/(entry - stop) for long; mirrored for short. Net subtracts cost_R.
@@ -36,9 +40,29 @@ import statistics
 import sys
 from pathlib import Path
 
-# Bridge to the philosopher cn_data 5min interface (the sanctioned data entry point for
-# this card). Override with --philosopher-src if the sibling repo lives elsewhere.
-_DEFAULT_TP_SRC = Path.home() / "workspace/quant/strats/trade-philosopher/src"
+# Bridge to the philosopher cn_data 5min interface (the sanctioned data entry point).
+# Path.home() is NOT robust: under Hermes/Kanban worker profiles HOME resolves to e.g.
+# /home/drwho1985/.hermes/profiles/reviewer/home, so a ~-based default fails and tests
+# silently skip (reviewer cards t_a0af6bc4 / t_9ef7dc76). Resolve, in order: env TP_PA_SRC
+# → repo-relative sibling (normal checkout) → real absolute path (detached worktrees /
+# profile workers where HOME differs) → ~ legacy. Override with --philosopher-src.
+def _resolve_tp_src() -> Path:
+    import os
+    cands = []
+    env = os.environ.get("TP_PA_SRC")
+    if env:
+        cands.append(Path(env))
+    strats = Path(__file__).resolve().parents[3]          # <...>/strats
+    cands.append(strats / "trade-philosopher" / "src")
+    cands.append(Path("/home/drwho1985/workspace/quant/strats/trade-philosopher/src"))
+    cands.append(Path.home() / "workspace/quant/strats/trade-philosopher/src")
+    for c in cands:
+        if (c / "tp" / "pa" / "cn_data.py").exists():
+            return c
+    return cands[-3]   # repo-relative best guess for a sensible error message
+
+
+_DEFAULT_TP_SRC = _resolve_tp_src()
 
 
 def _load_cn_window(tp_src: Path):

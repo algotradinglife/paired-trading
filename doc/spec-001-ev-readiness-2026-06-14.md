@@ -36,11 +36,14 @@ ts_open 10:05 UTC）。早期一版 −1R 是本地时区误用，非真实失�
 
 逐K仿真暴露出几处**对结果决定性、但复刻输出未确定性记录**的约定：
 
-1. **入场前失效（最关键）**：rb2607 在入场前（07-23 10:45）收过 **3362**，已低于 spec §6
-   文字所述 "<3366" 失效线、也低于止损 3365——若按 3366/3365 判失效则该 setup 应作废、
-   **无此笔 +2R**。唯有按复刻 decision 里的 `invalidation_condition`「跌破 **3352** 或强势
-   空头信号棒」才保持有效。即 spec §6 文字 "<3366" 与复刻实际失效线 3352 不一致，且
-   `invalidation_condition` 是自由文本（含"强势空头信号棒"这类模糊项），**无法机械判定**。
+1. **入场前失效（最关键）**：rb2607 入场前（买 stop 3379 于 07-24 13:35 触发前），价格最低
+   下探到 **3334**（07-23 14:25）——**既低于止损 3365、也低于复刻 `invalidation_condition`
+   的 3352**。即按**任何**入场前失效判据（3366/3365/3352）该 setup 都应作废、**不会有这笔 +2R**。
+   〔更正（reviewer t_9ef7dc76）：本文件早先称"唯有按 3352 才保持有效"是**错的**——3334<3352。〕
+   故本 harness 的 `--validate`/`simulate_order` 是**纯出场引擎**：**完全不建模入场前失效**
+   （挂单一直挂到触发）。+2R 只证明出场引擎复现了 documented 的"入场→止盈"路径，**不**证明
+   挂单在复刻失效条件下仍然有效。`invalidation_condition` 是自由文本（含"强势空头信号棒"模糊项），
+   **无法机械判定**——是否建模入场前失效是**待定约定**。
 2. **挂单有效期**：买 stop 触发前可挂多久？（本例隔日 13:35 才触发，需有效期约定）。
 3. **同根 stop/target 优先级**：本 harness 取 stop-first（保守），需确认。
 4. **超时/管理出场**：§11 管理规则随样本追加，目前仅 target/stop/timeout。
@@ -70,4 +73,5 @@ researcher 据此跑 harness。
 harness 出场约定为**显式假设、待 philosopher 批准**（见 §3），当前仅在 rb2607 单实例上
 对齐 spec。数据走 philosopher `tp.pa.cn_data`（5min，SHFE parquet）。
 脚本 `src/scripts/eval_spec001_ev.py` + 8 单测；复现：
-`cd src && python3 scripts/eval_spec001_ev.py --validate`。
+`cd src && python3 scripts/eval_spec001_ev.py --validate`（philosopher 源由 `_resolve_tp_src()` 自动解析，
+HOME 异常的 Hermes worker 下亦可，无需手动指定；非标准布局可 `--philosopher-src <path>` 或设 `TP_PA_SRC`）。

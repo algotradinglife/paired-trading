@@ -3,6 +3,9 @@
 卡片 t_0da3b750。philosopher 交付忠实复刻语料后的**真实 SPEC-001 EV**（不再是 proxy）。
 语料：`trade-philosopher/runs/_replica/pa_dataset_rb_claude.jsonl`（120 条，label_source=replica_claude）。
 **机械统计，不打 PASS/FAIL。** 复现：`cd src && python3 scripts/eval_spec001_corpus.py --corpus <jsonl> --out data/review/spec001_faithful_ev.json`。
+philosopher 源路径由 `_resolve_tp_src()` 自动解析（env `TP_PA_SRC` → 仓库同级 sibling → 绝对路径
+`/home/drwho1985/workspace/quant/strats/trade-philosopher/src`）；HOME 异常的 Hermes/Kanban worker 下
+无需手动指定（reviewer t_a0af6bc4）；非标准布局可加 `--philosopher-src <path>` 覆盖。
 
 ## 口径
 SPEC-001 = 突破买 stop 做多（order_type=突破单, direction=做多）= **43 单**（另 5 限价做多/5 做空/67 不下单，不计入）。
@@ -36,7 +39,7 @@ SPEC-001 = 突破买 stop 做多（order_type=突破单, direction=做多）= **
 **这定量证明：SPEC-001 的 alpha 在复刻体的选择性/克制，不在机械形态本身。** 与 P1 pilot 早期信号
 一致（n=3 复刻全否决、3 笔确定性 outcome 均 −1R → 否决正确）。
 
-## 三个必须记录的 caveat
+## 四个必须记录的 caveat
 1. **语料内嵌 outcome 被高估**（已证 philosopher 的换月跳变警告）：43 单里我重跑与内嵌不一致 30 单——
    其中 **21 单内嵌"target"R 大于 payoff**（让赢家跑过目标/换月跳空虚增 R）。researcher 口径**触目标即
    止盈**（gross_r==payoff，29/29 核验一致），是忠实 SPEC-001 出场。→ **EV 用本文 researcher 口径，
@@ -46,6 +49,11 @@ SPEC-001 = 突破买 stop 做多（order_type=突破单, direction=做多）= **
    win 46%、mean +0.63、median −1（小样本）。→ **写定 spec §5 的硬门 ≠ 复刻真实行为**（给 philosopher 的反馈）。
 3. **9 单与内嵌符号相反**（target↔stop）：源于前向数据口径差异（我用单合约到期序列、philosopher 可能用
    换月拼接连续合约），临近到期对近价 setup 敏感。单合约口径更保守/干净。
+4. **不建模入场前失效（exit-engine-only）——可能偏乐观**（reviewer t_9ef7dc76）：simulate_order 让挂单
+   一直挂到触发，**不**在触发前按失效条件作废。rb2607 实例入场前最低探到 3334（< 止损 3365、< 复刻失效
+   线 3352）——按任何入场前失效判据该单都应作废。故本 EV 假设「无入场前失效」，若复刻真实意图是触发前
+   按 `invalidation_condition` 作废，则部分"触发"单应被剔除、EV 会变化。**是否建模入场前失效是待 philosopher
+   钉死的约定**；当前 n=43 EV 在「无入场前失效」假设下成立。
 
 ## 局限
 n=43 偏小、仅 rb、仅多单；CI 虽排除 0 但宽（[+0.38,+1.17]）。philosopher 可扩 ag/au/cu 放大样本

@@ -11,12 +11,15 @@ import pytest
 
 SRC = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SRC))
-TP_SRC = Path.home() / "workspace/quant/strats/trade-philosopher/src"
+# Robust sibling-repo resolution (NOT Path.home() — fails under Hermes worker profiles
+# where HOME differs, silently skipping these tests; reviewer card t_a0af6bc4).
+from scripts.eval_spec001_ev import _DEFAULT_TP_SRC as TP_SRC  # noqa: E402
 if TP_SRC.exists():
     sys.path.insert(0, str(TP_SRC))
 
 pytestmark = pytest.mark.skipif(
-    not TP_SRC.exists(), reason="trade-philosopher loader 不可用（跨仓数据依赖）"
+    not (TP_SRC / "tp" / "pa" / "cn_data.py").exists(),
+    reason="trade-philosopher loader 不可用（跨仓数据依赖）"
 )
 
 
