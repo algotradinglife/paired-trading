@@ -91,5 +91,6 @@ universe 取自 `score_today.POOLS`（US 14 含 XLB/XLE/XLRE/XLU + CN_METAL 4）
 nuance，不影响"无显著增益"的结论方向。regime 门 fail-open（SPY 缺失时不剔），本次 SPY 可用。
 脚本 `scripts/analyze_context_a_deweight.py`；工件 `src/data/review/context_a_deweight.json`
 （gitignore，命令重生）。复现：
-`python3 scripts/analyze_context_a_deweight.py --out data/review/context_a_deweight.json`。
+`cd src && python3 scripts/analyze_context_a_deweight.py --out data/review/context_a_deweight.json`
+（须从 `src/` 运行——脚本按 `parents[1]` 注入 sys.path，`--out` 也相对 `src/`）。
 相关：[[deweight-curve-2026-06-13]]、[[combined-gate-design-2026-06-13]]、[[pa-hypotheses-sweep-2026-06-13]]。

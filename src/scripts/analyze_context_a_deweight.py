@@ -24,7 +24,7 @@ this population, three weighting schemes (equal / hard-AND / production continuo
 factor), the continuous-vs-equal bootstrap gap, and the lane's K=3 periods (IS/F1/F2/F3).
 
 Usage:
-  python3 scripts/analyze_context_a_deweight.py --out data/review/context_a_deweight.json
+  cd src && python3 scripts/analyze_context_a_deweight.py --out data/review/context_a_deweight.json
   (quant store via bar_loader; US + CN_METAL context_a symbol universe)
 """
 from __future__ import annotations
