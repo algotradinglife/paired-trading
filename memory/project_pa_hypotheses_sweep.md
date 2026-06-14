@@ -35,8 +35,8 @@ metadata:
    P1b（t_c8aad725）二次入场首测>二测 **OOS 显著**（+0.78R P=0.997）；P2 综合（t_6fe02de5）证两 gate
    **互补正交**（A∧B EV +0.665，边际各 +0.29R）；P2.5（t_d257eb33）标定**连续 de-weight**
    `w=w_a(range_vs_avg)×w_b(ordinal)`——连续加权 weighted-EV +0.275(eff_n 157) 4× 等权且保半信号量
-   （硬 AND 只留 n=35），OOS weighted−equal +0.119。**P3 productionize（t_50cb7876，自编排无外部 gate）
-   **进行中**：已落 engine 模块 `overext_deweight.py`（纯 w_a×w_b 因子，限 bottom×opp/neutral）
+   （硬 AND 只留 n=35），OOS weighted−equal +0.119。**epic t_d6dccbab 已结（2026-06-14）；P3
+   productionize（t_50cb7876）= PARK（不接生产）。**已落 engine 模块 `overext_deweight.py`（纯 w_a×w_b 因子，限 bottom×opp/neutral）
    + `overext_features.py`（range_vs_avg/test_ordinal 生产镜像，与验证脚本数值 parity，单测覆盖）。
    **关键发现：验证群在生产里无落点**——de-weight 在研究群（detect_all_divergences 通用背离
    bottom×opposing，apply_policy 门）上验过，但生产 bottom×opposing 走各自 policy_weight 的专用
