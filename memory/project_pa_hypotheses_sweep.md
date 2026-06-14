@@ -42,16 +42,18 @@ metadata:
    bottom×opposing，apply_policy 门）上验过，但生产 bottom×opposing 走各自 policy_weight 的专用
    detector（context_a/pa_us_60min/pa_cn_bond/pa_h2，非 apply_policy）；score_today 主环未做 HTF
    富化故 apply_policy 的 bottom×opp 规则不触发→接 apply_policy 等于休眠。
-   **P3a 端口验证（commit 603822b9，doc/context-a-deweight-portcheck-2026-06-14）**：在 context_a
-   **活跃发射 lane** 上 **de-weight 不移植**。reviewer t_5f320e96 退回 v1（n=181 漏了生产
-   suppression）→ 修复 t_b186d176：population 经 `ContextADetector.policy_weight()>0`（h=opposing
-   + symbol suppression DIA/SPY/XLU,kq_m_ine_sc）＋ score_today US P2 SPY risk-off regime 门（codex
-   抓的第二道门）→ n=181→150→**140**。**结果 n=140**：等权 +0.310 vs 加权 +0.335，gap +0.023
-   CI[−0.113,+0.157] **P=0.64 无显著**；两组件 gate 均不移植（过度延伸 EV 不随棒长降、大棒~+0.36；
-   二测 ord2 +0.457 ≥ 首测 ord1 +0.372）。=>接 context_a.policy_weight 不被数据支持。**de-weight edge
-   特定于研究用通用背离群，暂不接生产**（留研究结论）；扩验 pa_us_60min/pa_cn_bond/pa_h2 预期低。
-   教训：端口验证须按**活跃发射口径**（policy_weight + 所有下游门 regime/suppression），非裸 detector
-   扫描。re-review 卡 t_d1018bd6。另：US daily pre-2006 日历丢弃已修（t_45d3ed8b，延至 1999）。
+   **P3a 端口验证（commit d79db92f，doc/context-a-deweight-portcheck-2026-06-14）**：在 context_a
+   **活跃发射 lane** 上 **de-weight 无显著净增益**。经 3 轮 reviewer 退回逐步逼近真实 live 口径：
+   v1 n=181（裸 detector 扫描）→ t_b186d176 加 symbol suppression(DIA/SPY/XLU,kq_m_ine_sc) n=150
+   → 加 codex 抓的 US P2 SPY risk-off regime 门 n=140 → t_1f35573f 把 universe 由
+   backtest_context_a_ev.POOLS(10) 改源自 **score_today.POOLS['US'](14，补 XLB/XLE/XLRE/XLU)** →
+   **n=169**。**结果 n=169**：等权 +0.322 vs 加权 +0.349，gap +0.027 CI[−0.098,+0.148] **P=0.67
+   无显著**；过度延伸轴不移植（EV 不随棒长降），二次入场轴弱研究方向梯度（首测 0.373>二测 0.326>
+   三测 0.282）但太浅、组合 de-weight 不显著。=>接 context_a.policy_weight 不被数据支持。**de-weight
+   强 edge 特定于研究用通用背离群，暂不接生产**（留研究结论）；扩验其余 lane 预期低。
+   **教训：端口验证须严格按活跃发射口径——policy_weight + 全部下游门（regime/suppression）+
+   score_today 的真实 symbol universe**（reviewer 三连退就因这三层逐一被漏）。re-review 卡 t_d1018bd6。
+   另：US daily pre-2006 日历丢弃已修（t_45d3ed8b，延至 1999）。
 
 3. **状态 gate（t_aeb3cc75，doc/state-gate-bottom-opp-2026-06-13）**：**null + 状态失衡**。
    粗态分类器 88% 落兜底 normal_channel，best-vs-rest gap +0.129R CI 跨 0；spike 在
