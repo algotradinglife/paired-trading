@@ -11,17 +11,25 @@ outcome 一律用 P0 确定性 simulate_order 口径。
 可重入：philosopher 因配额分批续跑，语料是增量的——已 label 的 id JOIN 进来填 decision；
 未 label 的保持 decision=null / label_source=pending_replica。重跑安全（幂等）。
 
-用法：
+用法（copy-paste-safe，--labels 默认按仓库同级 sibling 解析，无需写 ~/ 路径）：
   cd src && python3 scripts/merge_pa_labels.py \
       --base data/review/pa_dataset_rb.jsonl \
-      --labels ~/workspace/quant/strats/trade-philosopher/runs/_replica/pa_dataset_rb_claude.jsonl \
       --out data/review/pa_dataset_rb.labeled.jsonl
+  # 自定义语料：--labels <abs path>，或设 env TP_PA_SRC 指向 trade-philosopher/src
 """
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scripts.eval_spec001_ev import _resolve_tp_src  # noqa: E402
+
+# 语料默认路径：复用 _resolve_tp_src()（env TP_PA_SRC / 仓库同级 sibling / 绝对 / ~ 兜底，
+# 取首个存在者），从 trade-philosopher/ 下派生——避免跨 Hermes profile 时 ~/ 失效（t_50950a33）。
+_DEFAULT_LABELS = _resolve_tp_src().parent / "runs/_replica/pa_dataset_rb_claude.jsonl"
 
 # 仅从复刻语料取这些 decision 侧字段，其余一律用 P0 脊柱（含 outcome）
 REPLICA_FIELDS = ("decision", "decision_trace", "diagnosis_summary")
@@ -36,8 +44,9 @@ def main() -> None:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--base", type=Path, required=True,
                     help="P0 确定性数据集 pa_dataset_{product}.jsonl")
-    ap.add_argument("--labels", type=Path, required=True,
-                    help="philosopher 复刻语料 jsonl（含 id + decision/decision_trace）")
+    ap.add_argument("--labels", type=Path, default=_DEFAULT_LABELS,
+                    help="philosopher 复刻语料 jsonl（含 id + decision/decision_trace）；"
+                         f"默认按 sibling 解析 = {_DEFAULT_LABELS}")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--label-source", default="replica_claude")
     args = ap.parse_args()
