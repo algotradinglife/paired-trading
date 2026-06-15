@@ -107,3 +107,31 @@ def test_merge_keeps_deterministic_outcome_and_attaches_decision():
             assert r["decision"] is not None and r["decision_trace"], "已标记录须有 decision+trace"
         else:
             assert r["label_source"] == "pending_replica"
+
+
+def test_p2_adjudication_queue_integrity():
+    """P2 队列：id ⊆ labeled、分歧类型与确定性 outcome 自洽（§7.6）。"""
+    import json
+    lab_fp = SRC / "data/review/pa_dataset_rb.labeled.jsonl"
+    q_fp = SRC / "data/review/pa_adjudication_queue_rb.jsonl"
+    if not (lab_fp.exists() and q_fp.exists()):
+        pytest.skip("队列或合并产物未生成")
+    lab = {json.loads(ln)["id"]: json.loads(ln) for ln in open(lab_fp)}
+    queue = [json.loads(ln) for ln in open(q_fp)]
+    for q in queue:
+        assert q["id"] in lab, "队列 id 必须来自 labeled"
+        dt_, basis, oc = q["divergence_type"], q["outcome_basis"], q.get("outcome") or {}
+        if dt_ == "declined_but_would_target":
+            # 复刻没下单：用 proxy 候选反事实（合理，保留）
+            assert q["replica_order"] is False and basis == "proxy_candidate"
+            assert oc.get("exit_kind") == "target"
+        elif dt_ == "decided_order_but_stopped":
+            # 复刻下单：必须用复刻订单自身 simulate_order outcome（codex P1 修复，非 proxy）
+            assert q["replica_order"] is True and basis == "replica_order"
+            assert oc.get("exit_kind") == "stop"
+        elif dt_ == "ordered_unsupported_replica_sim":
+            # 限价单等 simulate_order 不支持，显式标记
+            assert q["replica_order"] is True and basis == "unsupported_order_type"
+        else:
+            assert False, f"未知 divergence_type {dt_}"
+        assert q["adjudication"] is None  # 真人裁决前为空
