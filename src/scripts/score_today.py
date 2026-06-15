@@ -667,6 +667,52 @@ def _position_size(r: dict) -> str:
     return base
 
 
+# --- Signal-bar quality gate (ADVISORY / shadow — does NOT affect position_size) ----
+# Surfaced so we can gather forward/OOS evidence on the signal-bar quality finding
+# (doc/signal-bar-quality-hardening-2026-06-15, reviewer t_6be91653 approved). In-sample
+# pooled rb+cu+au (n=88), only the DOUBLE-STRONG conjunction (strong body AND close at
+# the directional extreme) carried EV (+1.28R vs +0.40R); a SINGLE strong signal was
+# NOT better than neither — so this is a BINARY flag, not a monotone full/half/light
+# tier, and it is deliberately NOT wired into sizing pending out-of-sample validation.
+# Thresholds are provisional (Brooks strong-bar); the study used per-corpus median splits
+# (body_frac≈0.8, close_pos≈1.0) which can't be reproduced live without a cohort.
+SIGNAL_BAR_BODY_FRAC_MIN = 0.5     # body >= half the range (strong/trend bar)
+SIGNAL_BAR_CLOSE_EXTREME = 0.66    # close within the extreme third (oriented by direction)
+
+
+def _signal_bar_quality(o: float, h: float, low: float, c: float, direction: str) -> dict:
+    """Advisory candidate-bar geometry + binary double-strong flag.
+
+    direction 'top' (short-like) → strong close near the LOW; otherwise (bottom/long-like)
+    → strong close near the HIGH. Range-zero bars → flag False. ADVISORY ONLY.
+    """
+    rng = h - low
+    if rng <= 0:
+        return {"body_frac": None, "close_pos": None, "double_strong": False}
+    body_frac = abs(c - o) / rng
+    close_pos = (c - low) / rng
+    body_strong = body_frac >= SIGNAL_BAR_BODY_FRAC_MIN
+    if direction == "top":
+        close_strong = close_pos <= (1.0 - SIGNAL_BAR_CLOSE_EXTREME)
+    else:
+        close_strong = close_pos >= SIGNAL_BAR_CLOSE_EXTREME
+    return {"body_frac": round(body_frac, 3), "close_pos": round(close_pos, 3),
+            "double_strong": bool(body_strong and close_strong)}
+
+
+def _attach_signal_bar_quality(rec: dict, bars, bar_idx: int) -> None:
+    """Attach advisory signal_bar_quality to a scored record from its candidate bar.
+    Direction taken from rec['direction'] (bottom/long-like default). ADVISORY ONLY —
+    never reads/writes position_size. Best-effort: on any bar access error, sets None."""
+    try:
+        cand = bars.iloc[bar_idx]
+        rec["signal_bar_quality"] = _signal_bar_quality(
+            float(cand["open"]), float(cand["high"]), float(cand["low"]),
+            float(cand["close"]), rec.get("direction"))
+    except (KeyError, IndexError, ValueError, TypeError):
+        rec["signal_bar_quality"] = {"body_frac": None, "close_pos": None, "double_strong": False}
+
+
 def match_rule(rule: SweetSpotRule, sig_dir: str, sig_subtype: str,
                ctx: dict[str, object], rec: dict[str, object] | None = None,
                sig_level: str | None = None) -> bool:
@@ -924,6 +970,7 @@ def main() -> int:
                 enrich_with_iv_au(calls, sig_date, entry_close, _AU_OPTIONS_DATA_DIR)
                 rec["options_calls"] = calls
             rec["position_size"] = _position_size(rec)
+            _attach_signal_bar_quality(rec, bars, sig.candidate_bar_idx)
             scored.append(rec)
 
         # BPull scan — cn_metal_futures only. BASELINE_REF: baselines/bpull_cn_metal_futures.json
@@ -983,6 +1030,7 @@ def main() -> int:
                     brec["options_calls"] = bcalls
                 _annotate_pa_sweet_spots(brec, pool_rules)
                 brec["position_size"] = _position_size(brec)
+                _attach_signal_bar_quality(brec, bars, bsig.bar_idx)
                 scored.append(brec)
 
         # PA H2 scan — cn_metal_futures only, with isolation annotation + PA structure filter.
@@ -1112,6 +1160,7 @@ def main() -> int:
                     bars_15=_bars_15_cache,
                 )
                 pa_rec["position_size"] = _position_size(pa_rec)
+                _attach_signal_bar_quality(pa_rec, bars, pa_sig.bar_idx)
                 scored.append(pa_rec)
 
         # PA H2 scan — cn_bond only (CFFEX treasury futures tf/t/ts).
@@ -1181,6 +1230,7 @@ def main() -> int:
                     bars_15=_bars_15_cache,
                 )
                 _b_rec["position_size"] = _position_size(_b_rec)
+                _attach_signal_bar_quality(_b_rec, bars, _b_sig.bar_idx)
                 scored.append(_b_rec)
 
         # VFlush scan — cn_metal_futures only. BASELINE_REF: baselines/vflush_cn_metal_cu_sc.json
@@ -1232,6 +1282,7 @@ def main() -> int:
                 # ag+au excluded by policy_weight gate above; only cu/sc reach here
                 _annotate_pa_sweet_spots(vrec, pool_rules)
                 vrec["position_size"] = _position_size(vrec)
+                _attach_signal_bar_quality(vrec, bars, vsig.bar_idx)
                 scored.append(vrec)
 
         # Context A scan — US (us_equity) + CN_METAL (cn_metal_futures).
@@ -1314,6 +1365,7 @@ def main() -> int:
                     bars_15=_bars_15_cache,
                 )
                 arec["position_size"] = _position_size(arec)
+                _attach_signal_bar_quality(arec, bars, asig.bar_idx)
                 scored.append(arec)
 
         # US PA — DIF>0 h=opposing + structural stop.
@@ -1417,6 +1469,7 @@ def main() -> int:
                     bars_15=_bars_15_cache,
                 )
                 _us_rec["position_size"] = _position_size(_us_rec)
+                _attach_signal_bar_quality(_us_rec, bars, _us_sig.bar_idx)
                 scored.append(_us_rec)
 
         # PA H2 scan — us_equity 60min "fast lane".  Sibling of the daily
@@ -1562,6 +1615,8 @@ def main() -> int:
                         signal_tf_bar_idx=int(_s60.bar_idx),
                     )
                     _rec60["position_size"] = _position_size(_rec60)
+                    # 60min lane: signal bar geometry from the 60min series, not daily
+                    _attach_signal_bar_quality(_rec60, _bars_60, int(_s60.bar_idx))
                     scored.append(_rec60)
 
         # CN_AGRI_POS PA H2 climax scan — m/p/ta/ma/sr only.
@@ -1617,6 +1672,7 @@ def main() -> int:
                 }
                 _annotate_pa_sweet_spots(_agri_rec, pool_rules)
                 _agri_rec["position_size"] = _position_size(_agri_rec)
+                _attach_signal_bar_quality(_agri_rec, bars, _agri_sig.bar_idx)
                 scored.append(_agri_rec)
 
     if loaded_symbols == 0:

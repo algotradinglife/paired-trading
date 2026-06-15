@@ -285,3 +285,6 @@ def test_adjudicated_queue_rb_fully_resolved():
         adj = q.get("adjudication")
         if adj and adj.get("escalate_human"):
             assert adj.get("verdict") is not None
+    # 交付态：rb+cu+au verdict 全到位 → 队列全裁（0 未裁，human 0）
+    n_unadj = sum(1 for q in queue if q.get("adjudication") is None)
+    assert n_unadj == 0, f"全裁队列应 0 未裁，实际 {n_unadj}"
