@@ -70,15 +70,17 @@ def _cycle(r: dict) -> str | None:
 
 def evaluate(corpus_path, tp_src: Path, *, cost_r: float,
              fwd_days: int, max_wait_bars: int, max_hold_bars: int,
-             cycle: str | None = None) -> dict:
+             cycle: str | list[str] | None = None) -> dict:
     load_cn_window = _load_cn_window(tp_src)
     # corpus_path may be a single Path or a list of Paths (multi-instrument).
     paths = corpus_path if isinstance(corpus_path, (list, tuple)) else [corpus_path]
     recs = []
     for p in paths:
         recs.extend(json.loads(ln) for ln in Path(p).read_text().splitlines() if ln.strip())
-    if cycle is not None:   # SPEC-002 etc.: restrict to a diagnosis cycle (e.g. trending_tr)
-        recs = [r for r in recs if _cycle(r) == cycle]
+    cycles = None
+    if cycle is not None:   # restrict to diagnosis cycle(s): trending_tr=SPEC-002,
+        cycles = {cycle} if isinstance(cycle, str) else set(cycle)  # broad_channel+trading_range=SPEC-001
+        recs = [r for r in recs if _cycle(r) in cycles]
     spec, limit_long, other = [], [], []
     for r in recs:
         d = r.get("decision") or {}
@@ -176,8 +178,9 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--corpus", type=Path, nargs="+", default=None,
                     help="replica labels jsonl (1+ files; default: --philosopher-src sibling rb)")
-    ap.add_argument("--cycle", default=None,
-                    help="restrict to diagnosis cycle_position (e.g. trending_tr for SPEC-002)")
+    ap.add_argument("--cycle", nargs="+", default=None,
+                    help="restrict to diagnosis cycle_position(s): trending_tr=SPEC-002; "
+                         "broad_channel trading_range=SPEC-001 reversal")
     ap.add_argument("--philosopher-src", type=Path, default=_DEFAULT_TP_SRC)
     ap.add_argument("--cost-r", type=float, default=0.0)
     ap.add_argument("--fwd-days", type=int, default=25)
