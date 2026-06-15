@@ -135,3 +135,23 @@ def test_p2_adjudication_queue_integrity():
         else:
             assert False, f"未知 divergence_type {dt_}"
         assert q["adjudication"] is None  # 真人裁决前为空
+
+
+def test_p2_triage_routes_human_to_zero():
+    """P2 triage：每条有合法 adjudication_route，人工桶 ~0（t_4ed1f529②）。"""
+    import json
+    q_fp = SRC / "data/review/pa_adjudication_queue_rb.jsonl"
+    if not q_fp.exists():
+        pytest.skip("队列未生成")
+    queue = [json.loads(ln) for ln in open(q_fp)]
+    valid = {"auto_resolved", "llm_judge", "human"}
+    for q in queue:
+        assert q["adjudication_route"] in valid, f"非法 route {q['adjudication_route']}"
+        # ordered_stopped 必 auto_resolved；declined>5R 必 auto_resolved
+        if q["divergence_type"] == "decided_order_but_stopped":
+            assert q["adjudication_route"] == "auto_resolved"
+        if (q["divergence_type"] == "declined_but_would_target"
+                and (q["outcome"].get("gross_r") or 0) > 5.0):
+            assert q["adjudication_route"] == "auto_resolved"
+    n_human = sum(1 for q in queue if q["adjudication_route"] == "human")
+    assert n_human == 0, f"human 桶应为 0（triage 兜底不应触发），实际 {n_human}"

@@ -33,6 +33,24 @@ from scripts.eval_spec001_ev import (  # noqa: E402
 SPEC_ORDER_TYPE = "突破单"          # 突破/止损单：simulate_order 进场语义（做多 high>=entry / 做空 low<=entry）
 MAX_WAIT = 288
 MAX_HOLD = 288
+PROXY_ARTIFACT_R = 5.0              # proxy 候选 target=前摆动高，>5R 多为结构性肥尾人为产物——复刻回避正确
+
+
+def _route(div: str, outcome: dict | None) -> tuple[str, str]:
+    """P2 triage（researcher t_4ed1f529 ②）：把人工裁决压到 ~0。
+    返回 (adjudication_route ∈ {auto_resolved, llm_judge, human}, route_reason)。"""
+    if div == "decided_order_but_stopped":
+        # 复刻下单被扫：单笔本就含负样本，属预期方差——不入人工，由 researcher 聚合 regime 检查
+        return "auto_resolved", "expected_variance"
+    if div == "declined_but_would_target":
+        gr = (outcome or {}).get("gross_r") or 0
+        if gr > PROXY_ARTIFACT_R:
+            # proxy 候选肥尾 target（如 >5R/277R）不现实，复刻回避正确——自动判定
+            return "auto_resolved", "proxy_artifact_decline_correct"
+        return "llm_judge", "realistic_decline"          # ≤5R 现实回避：待 philosopher 评审
+    if div == "ordered_unsupported_replica_sim":
+        return "llm_judge", "unsupported_order_type"      # 限价单等：交 LLM 评审
+    return "human", "unrouted"                             # 兜底（不应出现）
 
 
 def _read(fp: Path) -> list[dict]:
@@ -121,9 +139,12 @@ def main() -> None:
             outcome = {"exit_kind": ek, "gross_r": r["outcome"].get("gross_r")}
         if div == "ordered_unsupported_replica_sim":
             n_unsupported += 1
+        route, route_reason = _route(div, outcome)
         queue.append({
             "id": r["id"], "ts_utc": r["ts_utc"], "contract": r["contract"],
             "divergence_type": div, "priority": priority,
+            "adjudication_route": route,     # auto_resolved | llm_judge | human（triage：人工→~0）
+            "route_reason": route_reason,
             "replica_order": ordered,
             "replica_order_type": r["decision"].get("order_type"),
             "replica_direction": r["decision"].get("direction"),
@@ -153,9 +174,11 @@ def main() -> None:
             "n_total": len(queue),
             "by_type": dict(Counter(q["divergence_type"] for q in queue)),
             "by_outcome_basis": dict(Counter(q["outcome_basis"] for q in queue)),
+            "by_route": dict(Counter(q["adjudication_route"] for q in queue)),
             "n_unsupported_order_type": n_unsupported,
-            "note": "ordered 分支用复刻订单自身 simulate_order outcome（codex P1 修复）；declined 用 proxy 反事实；"
-                    "限价单等 simulate_order 不支持→标 unsupported 待人工。人工只对该尾部 correction；真人步骤阻塞（无人工标注 agent）",
+            "note": "triage(t_4ed1f529②) 把人工压到~0：auto_resolved(ordered_stopped=预期方差 / declined>5R=proxy肥尾回避正确)、"
+                    "llm_judge(现实 declined≤5R + 限价单 待 philosopher 评审)、human(仅 llm_judge 低置信残余，本步=0)。"
+                    "ordered 用复刻订单自身 outcome（codex P1）；declined 用 proxy 反事实。",
         },
         "reentrant": "随复刻 label 覆盖增长，重跑队列增量扩大",
     }
