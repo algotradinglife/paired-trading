@@ -78,7 +78,13 @@ pooled rb+cu+au breakout-long（分层在 rb n=43 有 features 子集，baseline
 range_vs_avg(惩罚) +0.90 vs +0.65（Δ+0.25R，**证实棒长惩罚/swing-quality**）；bar_range Δ+0.07 可忽略。差半 CI 触 0、好半稳正。
 → **body_frac + close_pos 是可叠加在突破 setup 上的硬化 filter**（Brooks 强信号棒 + 我的 swing-quality tight|wick/棒长惩罚迁移成立）。
 caveat：分层仅 rb n=43（cu/au labels 缺 bar 几何，需 data-engineer/philosopher 补 features 才能 pooled 硬化）；中位分层粗、未多重校正。
-close_pos 方向相关（多=收高好/空=收低好，已 direction-aware）。下一步可提：(a) 补 cu/au features 做 pooled 硬化验证；(b) filter 落地 score_today。
+close_pos 方向相关（多=收高好/空=收低好，已 direction-aware）。reviewer t_ba0ba553 审核通过。
+**pooled 确认（2026-06-15，doc/signal-bar-quality-hardening-2026-06-15）**：rb-only caveat 已解除——**P3 数据集
+pa_dataset_rbcuau.labeled.jsonl 对全 3512 候选有 features_det**（不必补数据）。pooled rb+cu+au n=88：body_frac Δ+0.555、
+close_pos Δ+0.552（好半 ~+1.0R CI 排除 0 vs 差半 ~+0.45R）、range_vs_avg 棒长惩罚 Δ+0.251（pooled 证实）、
+bar_range Δ−0.11 弃（绝对幅度无 edge，质量看相对几何）。pooled 比 rb-only 略强。短边 n=13 太小不可读。
+复现：`cd src && python3 scripts/analyze_signal_bar_quality.py --corpus data/review/pa_dataset_rbcuau.labeled.jsonl`。
+下一步：(a) 组合 filter body_frac×close_pos 是否再集中 EV+样本留存；(b) filter 落地 score_today 仓位分层。
 
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单
