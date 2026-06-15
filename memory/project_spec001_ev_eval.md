@@ -71,6 +71,15 @@ philosopher 下一轮挖 **SPEC-005 失败突破 fade（假突破反向均值回
 → 团队从『setup 发现』阶段转入**consolidation/hardening**：完成数据集全裁(cu/au verdicts t_b74da0e8)、
 3 setup 显著性硬化、(方向×regime)正交矩阵→可部署 PA 信号(按 cycle/direction 路由+仓位)。已 commission philosopher 出下阶段改进方案。
 
+**信号棒质量=正交硬化 filter（researcher，2026-06-15，commit 66b1395b，consolidation 首个成果）**：
+scripts/analyze_signal_bar_quality.py（复用 canonical evaluate()，按 id join features_det，中位分层）。
+pooled rb+cu+au breakout-long（分层在 rb n=43 有 features 子集，baseline +0.773R；cu/au 45 单无 features_det）：
+**强信号棒赚正交 EV**——body_frac 好半 +1.017 vs 差半 +0.493（Δ+0.52R）；close_pos 好 +0.963 vs 差 +0.453（Δ+0.51R）；
+range_vs_avg(惩罚) +0.90 vs +0.65（Δ+0.25R，**证实棒长惩罚/swing-quality**）；bar_range Δ+0.07 可忽略。差半 CI 触 0、好半稳正。
+→ **body_frac + close_pos 是可叠加在突破 setup 上的硬化 filter**（Brooks 强信号棒 + 我的 swing-quality tight|wick/棒长惩罚迁移成立）。
+caveat：分层仅 rb n=43（cu/au labels 缺 bar 几何，需 data-engineer/philosopher 补 features 才能 pooled 硬化）；中位分层粗、未多重校正。
+close_pos 方向相关（多=收高好/空=收低好，已 direction-aware）。下一步可提：(a) 补 cu/au features 做 pooled 硬化验证；(b) filter 落地 score_today。
+
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单
    语料 N=1。胜率/期望/分布/稳健性全需规模样本。
