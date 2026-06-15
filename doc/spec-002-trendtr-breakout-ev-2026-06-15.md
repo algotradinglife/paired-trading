@@ -50,7 +50,8 @@ breakout-long 在**两个 regime 族上都显著**（反转 n=62 +0.674 P=1.0、
 如需 per-instrument 各自显著仍需补样本。
 
 ## 局限
-n=24 中等、per-cycle 子样本小（broad_channel n=11 CI 触 0）；限价进场未忠实仿真（采信 philosopher）；
+n=24 中等、per-cycle 子样本小（broad_channel `--cycle broad_channel` 单独 n=13 +0.703R CI[-0.080,+1.480]
+P=0.96 触 0）；限价进场未忠实仿真（采信 philosopher）；
 pooled 跨品种假设 edge 品种间同质；内嵌 outcome 偏高（用 researcher 触目标止盈）。
 工件 spec002_faithful_ev.json（gitignore）。相关：[[spec001-ev-eval]]、doc/spec-001-cross-instrument-ev-2026-06-15.md、
 doc/spec-001-faithful-ev-2026-06-14.md。
