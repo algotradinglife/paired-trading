@@ -98,6 +98,44 @@ def _instrument(contract: str) -> str:
     return "".join(c for c in (contract or "") if not c.isdigit()) or "?"
 
 
+COMBINED_FIELDS = ("body_frac", "close_pos")   # the two strongest single-metric filters
+
+
+def combined_filter(rows: list[dict], feats: dict[str, dict],
+                    fields: tuple[str, ...], qdir: dict[str, int]) -> dict | None:
+    """Require a trade to be on the BETTER-quality side of EVERY field in `fields`
+    (oriented by qdir). Compare EV of the passing subset vs the rest and report
+    sample RETENTION (the practical filter trade-off: higher EV but fewer trades).
+    Median is taken over the trades carrying ALL fields. None if too few usable."""
+    usable = [r for r in rows
+              if all(feats.get(r["id"], {}).get(f) is not None for f in fields)]
+    if len(usable) < 8:
+        return None
+    meds = {f: float(np.median([feats[r["id"]][f] for r in usable])) for f in fields}
+
+    def _passes(r):
+        for f in fields:
+            v = feats[r["id"]][f]
+            if qdir[f] >= 0 and v < meds[f]:        # higher-is-better: must be >= median
+                return False
+            if qdir[f] < 0 and v >= meds[f]:        # penalty: must be < median
+                return False
+        return True
+
+    good = [r["gross_r"] for r in usable if _passes(r)]
+    rest = [r["gross_r"] for r in usable if not _passes(r)]
+    if not good or not rest:
+        return None
+    return {
+        "fields": list(fields), "median_split": {f: round(meds[f], 4) for f in fields},
+        "n_usable": len(usable), "n_pass": len(good),
+        "retention": round(len(good) / len(usable), 3),
+        "pass_ev": {**_stats(good), **_bootstrap_mean(good)},
+        "fail_ev": {**_stats(rest), **_bootstrap_mean(rest)},
+        "ev_delta_pass_minus_fail": round(float(np.mean(good) - np.mean(rest)), 4),
+    }
+
+
 def analyze(corpus_paths, tp_src, *, cycle, direction) -> dict:
     rep = evaluate(corpus_paths, tp_src, cost_r=0.0, fwd_days=25,
                    max_wait_bars=288, max_hold_bars=288, cycle=cycle, direction=direction)
@@ -121,6 +159,7 @@ def analyze(corpus_paths, tp_src, *, cycle, direction) -> dict:
         s = stratify(resolved, feats, f, qdir[f])
         if s is not None:
             strat[f] = s
+    combined = combined_filter(resolved, feats, COMBINED_FIELDS, qdir)
     return {
         "population": {
             "direction": direction, "cycle": cycle,
@@ -136,6 +175,7 @@ def analyze(corpus_paths, tp_src, *, cycle, direction) -> dict:
             "baseline_ci_feature_subset": _bootstrap_mean([r["gross_r"] for r in with_feat]),
         },
         "quality_strata": strat,
+        "combined_filter": combined,
     }
 
 
@@ -174,6 +214,13 @@ def main() -> None:
               f"| delta(better-worse)={s['ev_delta_better_minus_worse']}")
     if not rep["quality_strata"]:
         print("  (no quality metric present on enough trades to stratify)")
+    cf = rep.get("combined_filter")
+    if cf:
+        p, fl = cf["pass_ev"], cf["fail_ev"]
+        print(f"  COMBINED {cf['fields']}: pass EV={p.get('mean_gross_r')} "
+              f"(n={cf['n_pass']}/{cf['n_usable']}, retention={cf['retention']}, "
+              f"win={p.get('win_rate')}, CI={p['ci95']}) vs fail EV={fl.get('mean_gross_r')} "
+              f"(n={fl.get('n')}, CI={fl['ci95']}) | delta(pass-fail)={cf['ev_delta_pass_minus_fail']}")
 
 
 if __name__ == "__main__":

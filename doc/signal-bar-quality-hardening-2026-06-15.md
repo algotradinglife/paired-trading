@@ -34,9 +34,23 @@ range_vs_avg 棒长/均值）是否分层 EV？是 → 质量 filter 可硬化 s
 - **bar_range（绝对幅度）无一致 edge**（pooled Δ−0.11）→ 弃；质量看相对几何（实体占比/收盘位置/相对棒长）非绝对幅度。
 - 短边 n=13 太小（baseline 甚至 −0.08，与 SPEC-003 labels_short n=16 +0.50 不同语料）→ 不可读，方向同但 CI 巨大。
 
+## 结果 C：组合 filter（body_frac 高 AND close_pos 高，pooled n=88）⭐⭐
+复现：`cd src && python3 scripts/analyze_signal_bar_quality.py --corpus data/review/pa_dataset_rbcuau.labeled.jsonl`
+（输出末行 COMBINED；两 filter 各取好半的交集 vs 其余，报留存率）
+
+| 子集 | n | 留存 | 毛 EV | 胜率 | 95% CI |
+|---|---|---|---|---|---|
+| **pass（双强）** | 33/88 | **37.5%** | **+1.284R** | **78.8%** | **[0.784, 1.814]** |
+| fail（其余） | 55/88 | — | +0.399R | — | [0.060, 0.736] |
+| Δ(pass−fail) | | | **+0.885R** | | |
+
+- **要求 body_frac 高 AND close_pos 高，几乎翻倍 EV**：baseline +0.731R → pass +1.284R，胜率 65%→79%，
+  CI 牢牢排除 0；保留 37.5% 突破信号。组合 Δ+0.885R **大于任一单 filter（+0.55R）→ 两质量信号可叠加**。
+- 这是**可落地的 score_today 质量闸门**：双强信号棒 = full 仓位，单强/弱 = half/light（待落地）。
+
 ## 局限 & 下一步
-- 中位分层粗、样本内、未多重校正；short 欠功率。
-- **下一步（researcher）**：(a) 组合 filter（body_frac 高 AND close_pos 高）是否进一步集中 EV + 样本留存权衡；
-  (b) filter 落地 `score_today`（强信号棒→full/half 仓位分层）；(c) 短边补样本再验。
+- 中位分层粗、样本内、未多重校正；short 欠功率；留存 37.5% 牺牲约 2/3 信号换 +0.55R/单。
+- **下一步（researcher）**：(a) ✅ 组合 filter 已验证（结果 C）；(b) filter 落地 `score_today`
+  （双强→full、单强→half、弱→light/watch 仓位分层）；(c) 短边补样本再验；(d) 三 filter（+range_vs_avg 惩罚）边际。
 工件 signal_bar_quality.json / signal_bar_quality_pooled.json（data/review gitignore）。
 相关：[[spec001-ev-eval]]、[[swing-quality-hypothesis-validated]]、[[pa-hypotheses-sweep]]。

@@ -84,7 +84,9 @@ pa_dataset_rbcuau.labeled.jsonl 对全 3512 候选有 features_det**（不必补
 close_pos Δ+0.552（好半 ~+1.0R CI 排除 0 vs 差半 ~+0.45R）、range_vs_avg 棒长惩罚 Δ+0.251（pooled 证实）、
 bar_range Δ−0.11 弃（绝对幅度无 edge，质量看相对几何）。pooled 比 rb-only 略强。短边 n=13 太小不可读。
 复现：`cd src && python3 scripts/analyze_signal_bar_quality.py --corpus data/review/pa_dataset_rbcuau.labeled.jsonl`。
-下一步：(a) 组合 filter body_frac×close_pos 是否再集中 EV+样本留存；(b) filter 落地 score_today 仓位分层。
+**组合 filter 已验证（结果 C，pooled n=88）**：body_frac 高 AND close_pos 高 → **pass +1.284R 胜率79% CI[0.78,1.81]
+留存 37.5%(33/88)** vs fail +0.399R；**Δ+0.885R 大于任一单 filter(+0.55) → 两质量信号可叠加**，baseline 0.73→1.28 近翻倍。
+= 可落地 score_today 质量闸门（双强→full / 单强→half / 弱→light）。下一步：(b) 落地 score_today 仓位分层；(c) 短边补样本；(d) 三 filter 边际。
 
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单
