@@ -65,6 +65,12 @@ reviewer t_9134a73f **审核通过**（byte-for-byte 可重生、outcome 守恒�
 = 突破止损族（SPEC-001 反转 / SPEC-002 趋势 / SPEC-003 做空），回踩/fade 类不再探。labels_pullback.jsonl 留档（philosopher）。
 philosopher 下一轮挖 **SPEC-005 失败突破 fade（假突破反向均值回归）**——注意这是『对突破失败做反向』，与『回踩进场』不同，不被 R008 排除。
 
+**R009 + setup 空间 EXHAUSTED（2026-06-15）**：SPEC-005 失败突破 fade 也**负 EV(-0.38R/27%/n11)**，不发。
+连同 R006(限价 fade)/R008(回踩 MA)→**所有均值回归/回踩/fade 进场机制全无 edge**；**PA 本域 alpha 唯一集中于
+突破止损@结构边界（SPEC-001 反转 / SPEC-002 趋势 / SPEC-003 做空）**。philosopher 宣告**setup 空间映射完成→EXHAUSTED**。
+→ 团队从『setup 发现』阶段转入**consolidation/hardening**：完成数据集全裁(cu/au verdicts t_b74da0e8)、
+3 setup 显著性硬化、(方向×regime)正交矩阵→可部署 PA 信号(按 cycle/direction 路由+仓位)。已 commission philosopher 出下阶段改进方案。
+
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单
    语料 N=1。胜率/期望/分布/稳健性全需规模样本。
