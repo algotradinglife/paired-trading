@@ -59,7 +59,8 @@ def _order_from_decision(d: dict) -> dict | None:
     target = d.get("target", d.get("take_profit_price"))
     if entry is None or stop is None or target is None:
         return None
-    return {"order_direction": LONG, "entry": float(entry),
+    # direction from the decision (做多 buy-stop / 做空 sell-stop); simulate_order handles both.
+    return {"order_direction": _decision_dir(d), "entry": float(entry),
             "stop": float(stop), "target": float(target)}
 
 
@@ -70,7 +71,7 @@ def _cycle(r: dict) -> str | None:
 
 def evaluate(corpus_path, tp_src: Path, *, cost_r: float,
              fwd_days: int, max_wait_bars: int, max_hold_bars: int,
-             cycle: str | list[str] | None = None) -> dict:
+             cycle: str | list[str] | None = None, direction: str = LONG) -> dict:
     load_cn_window = _load_cn_window(tp_src)
     # corpus_path may be a single Path or a list of Paths (multi-instrument).
     paths = corpus_path if isinstance(corpus_path, (list, tuple)) else [corpus_path]
@@ -81,16 +82,16 @@ def evaluate(corpus_path, tp_src: Path, *, cost_r: float,
     if cycle is not None:   # restrict to diagnosis cycle(s): trending_tr=SPEC-002,
         cycles = {cycle} if isinstance(cycle, str) else set(cycle)  # broad_channel+trading_range=SPEC-001
         recs = [r for r in recs if _cycle(r) in cycles]
-    spec, limit_long, other = [], [], []
+    spec, limit_long, other = [], [], []   # limit_long = same-direction non-breakout (limit) entries
     for r in recs:
         d = r.get("decision") or {}
         if not d.get("order") and d.get("order_type") in (None, "不下单"):
             continue
         ot, dirn = d.get("order_type"), _decision_dir(d)
-        if ot == SPEC_ORDER_TYPE and dirn == LONG:
+        if ot == SPEC_ORDER_TYPE and dirn == direction:        # breakout in the target direction
             spec.append(r)
-        elif dirn == LONG:
-            limit_long.append(r)
+        elif dirn == direction:
+            limit_long.append(r)                                # same-dir limit/other entry type
         else:
             other.append(r)
 
@@ -122,7 +123,7 @@ def evaluate(corpus_path, tp_src: Path, *, cost_r: float,
             row["matches_embedded"] = abs(row["gross_r"] - emb["gross_r"]) < 1e-3
         rows.append(row)
 
-    return _summary(rows, spec, limit_long, other, cost_r)
+    return _summary(rows, spec, limit_long, other, cost_r, direction)
 
 
 def _stats(grs: list[float]) -> dict:
@@ -137,7 +138,7 @@ def _stats(grs: list[float]) -> dict:
     }
 
 
-def _summary(rows: list[dict], spec, limit_long, other, cost_r: float) -> dict:
+def _summary(rows: list[dict], spec, limit_long, other, cost_r: float, direction: str = LONG) -> dict:
     resolved = [r for r in rows if r.get("triggered") and r.get("resolved")]
     grs = [r["gross_r"] for r in resolved]
     # rollover-jump / tiny-risk artifact guard (philosopher caveat)
@@ -146,16 +147,18 @@ def _summary(rows: list[dict], spec, limit_long, other, cost_r: float) -> dict:
     capped5 = round(float(np.clip(g, -1, 5).mean()), 4) if grs else None
     excl_flagged = [x for r, x in zip(resolved, grs) if abs(x) < ROLLOVER_FLAG_R]
     mism = [r for r in resolved if r.get("matches_embedded") is False]
+    entry_kind = "buy-stop long" if direction == LONG else "sell-stop short"
     return {
         "params": {
             "corpus": "philosopher replica labels (faithful, label_source=replica_*)",
-            "spec_def": "突破单 + 做多 (breakout buy-stop long)",
+            "direction": direction,
+            "spec_def": f"突破单 + {direction} (breakout {entry_kind})",
             "cost_r": cost_r, "rollover_flag_r": ROLLOVER_FLAG_R,
             "note": "re-derived via our simulate_order on replica E/S/T; cross-checked vs embedded outcome",
         },
-        "counts": {"spec_long_breakout": len(spec), "limit_long": len(limit_long),
+        "counts": {"spec_breakout": len(spec), "limit_same_dir": len(limit_long),
                    "other_orders": len(other), "resolved": len(resolved)},
-        "faithful_ev_spec_long": _stats(grs),
+        "faithful_ev_spec": _stats(grs),
         "bootstrap_gross_ev": _bootstrap_mean(grs),
         "net_ev": {f"@{c}R": round(float((g - c).mean()), 4) for c in (0.1, 0.2, 0.3)} if grs else {},
         "robustness": {
@@ -181,6 +184,8 @@ def main() -> None:
     ap.add_argument("--cycle", nargs="+", default=None,
                     help="restrict to diagnosis cycle_position(s): trending_tr=SPEC-002; "
                          "broad_channel trading_range=SPEC-001 reversal")
+    ap.add_argument("--direction", default=LONG,
+                    help="做多 (long buy-stop, default) / 做空 (short sell-stop, SPEC-003)")
     ap.add_argument("--philosopher-src", type=Path, default=_DEFAULT_TP_SRC)
     ap.add_argument("--cost-r", type=float, default=0.0)
     ap.add_argument("--fwd-days", type=int, default=25)
@@ -194,16 +199,17 @@ def main() -> None:
     corpus = args.corpus or [args.philosopher_src.parent / "runs/_replica/pa_dataset_rb_claude.jsonl"]
     rep = evaluate(corpus, args.philosopher_src, cost_r=args.cost_r, fwd_days=args.fwd_days,
                    max_wait_bars=args.max_wait_bars, max_hold_bars=args.max_hold_bars,
-                   cycle=args.cycle)
+                   cycle=args.cycle, direction=args.direction)
     txt = json.dumps(rep, ensure_ascii=False, indent=2)
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(txt)
-    s = rep["faithful_ev_spec_long"]
+    s = rep["faithful_ev_spec"]
     fid = rep["fidelity_vs_embedded"]
     rob = rep["robustness"]
     bs = rep["bootstrap_gross_ev"]
-    print(f"SPEC-001 faithful EV (n={s.get('n')}): win={s.get('win_rate')} "
+    print(f"faithful EV [{rep['params']['spec_def']}{(' cycle=' + ','.join(args.cycle)) if args.cycle else ''}] "
+          f"(n={s.get('n')}): win={s.get('win_rate')} "
           f"gross={s.get('mean_gross_r')} median={s.get('median_gross_r')} max={s.get('max_r')} "
           f"CI={bs['ci95']} P(>0)={bs['p_gt0']}")
     print(f"  robustness: capped@5R={rob['ev_capped_at_5R']} excl-flagged={rob['ev_excl_flagged(|R|>=10)']} "
