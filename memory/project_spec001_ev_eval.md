@@ -44,6 +44,17 @@ simulate_order 止损进场语义无法仿真限价→采信 philosopher)。**�
 **编排教训**：别在 philosopher 还可能投新 spec 时把轮询拉到 max-idle(3600s)——曾因此漏看 SPEC-002 ready 一段时间；
 有活跃上游时保持较紧轮询(≤300-600s)。
 
+**SPEC-003 交付（2026-06-15，t_debfccf3，doc/spec-003-resistance-breakdown-short-ev-2026-06-15，commit 2e9b15e6）**：
+阻力突破**做空**（补做多偏盲区）。eval_spec001_corpus 加 **--direction 做空**（sell-stop 进场：low≤entry 触发、
+stop 在上、target 在下；simulate_order 已支持），且 direction 贯穿过滤/下单/出场/**报告标签**（spec_def/counts
+spec_breakout,limit_same_dir/headline faithful_ev_spec/stdout——codex P2：短报告不再误标做多）。语料 labels_short.jsonl
+（rb+cu）：**n=16 win56.3% +0.501R CI[-0.185,+1.187] P=0.92**——方向性为正、与多头同量级，但**短边欠功率(n=16 CI跨0)**；
+corroborates philosopher +0.44R/52%(n=19)。长边默认未破(n=43 +0.773)。**selectivity=alpha 多/空对称**；多/空相反方向
+→结构性互斥→**独立可叠加**，形成(方向×regime)正交 setup 矩阵。短候选闸门(philosopher short_proxy)非阻塞、
+researcher 化可选。要硬化短边显著性需 ≥30-50 空头单（已回 philosopher）。
+**编排（2026-06-15）**：unblock 了 t_6cf9f9c4（PA 数据集）——其两阻塞依赖（真人裁决/philosopher 增量语料）均已解除
+（human=0 via triage+llm-judge；philosopher 交付 rb120/cu120/au90），属 stale block，转 ready 让 data-engineer 跑增量 merge+mine+triage。
+
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单
    语料 N=1。胜率/期望/分布/稳健性全需规模样本。

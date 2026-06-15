@@ -155,3 +155,133 @@ def test_p2_triage_routes_human_to_zero():
             assert q["adjudication_route"] == "auto_resolved"
     n_human = sum(1 for q in queue if q["adjudication_route"] == "human")
     assert n_human == 0, f"human 桶应为 0（triage 兜底不应触发），实际 {n_human}"
+
+
+def test_apply_adjudication_fills_auto_and_llmjudge():
+    """P2b 全裁合并（apply_pa_adjudication）：auto_resolved 自动填裁；llm_judge 按 verdict 填；
+    无 verdict 的 llm_judge 留 null（pending）；escalate_human 透传。纯数据变换（合成样例）。"""
+    from scripts.apply_pa_adjudication import apply_adjudications
+    queue = [
+        {"id": "rb-auto", "adjudication_route": "auto_resolved",
+         "route_reason": "expected_variance", "adjudication": None},
+        {"id": "rb-conf", "adjudication_route": "llm_judge",
+         "route_reason": "realistic_decline", "adjudication": None},
+        {"id": "rb-over", "adjudication_route": "llm_judge",
+         "route_reason": "realistic_decline", "adjudication": None},
+        {"id": "cu-nojudge", "adjudication_route": "llm_judge",
+         "route_reason": "realistic_decline", "adjudication": None},
+    ]
+    verdicts = [
+        {"id": "rb-conf", "verdict": "confirm_replica", "confidence": 0.85,
+         "override_action": None, "reason": "忠实", "escalate_human": False,
+         "label_source": "llm_judge"},
+        {"id": "rb-over", "verdict": "override", "confidence": 0.58,
+         "override_action": "偏多挂 buy-stop", "reason": "应小仓做多",
+         "escalate_human": True, "label_source": "llm_judge"},
+    ]
+    out, summary = apply_adjudications(queue, verdicts)
+    by_id = {r["id"]: r for r in out}
+    # auto_resolved: 确定性自动裁定，method=auto_resolved，verdict 由 route_reason 派生
+    a = by_id["rb-auto"]["adjudication"]
+    assert a is not None and a["method"] == "auto_resolved"
+    assert a["route_reason"] == "expected_variance" and a["escalate_human"] is False
+    # llm_judge confirm：透传 verdict/confidence/reason
+    c = by_id["rb-conf"]["adjudication"]
+    assert c["method"] == "llm_judge" and c["verdict"] == "confirm_replica"
+    assert c["confidence"] == 0.85 and c["escalate_human"] is False
+    # llm_judge override + escalate_human 透传
+    o = by_id["rb-over"]["adjudication"]
+    assert o["verdict"] == "override" and o["override_action"] == "偏多挂 buy-stop"
+    assert o["escalate_human"] is True
+    # 无 verdict 的 llm_judge：留 null（pending），不得伪造
+    assert by_id["cu-nojudge"]["adjudication"] is None
+    # summary 自洽
+    assert summary["n_auto_filled"] == 1
+    assert summary["n_llmjudge_filled"] == 2
+    assert summary["n_pending_llmjudge"] == 1
+    assert summary["n_human_unresolved"] == 0
+    assert summary["escalate_human_ids"] == ["rb-over"]
+
+
+def test_apply_adjudication_rejects_verdict_for_nonjudge_route():
+    """verdict 只能落在 llm_judge 路由的记录上；若误指向 auto/human/未知 id，应报告为 unmatched。"""
+    from scripts.apply_pa_adjudication import apply_adjudications
+    queue = [{"id": "rb-auto", "adjudication_route": "auto_resolved",
+              "route_reason": "expected_variance", "adjudication": None}]
+    verdicts = [{"id": "rb-auto", "verdict": "override", "confidence": 0.9,
+                 "override_action": "x", "reason": "y", "escalate_human": False,
+                 "label_source": "llm_judge"},
+                {"id": "ghost", "verdict": "confirm_replica", "confidence": 0.9,
+                 "override_action": None, "reason": "z", "escalate_human": False,
+                 "label_source": "llm_judge"}]
+    out, summary = apply_adjudications(queue, verdicts)
+    by_id = {r["id"]: r for r in out}
+    # auto_resolved 记录不得被 verdict 覆盖（route 不符）
+    assert by_id["rb-auto"]["adjudication"]["method"] == "auto_resolved"
+    assert sorted(summary["unmatched_verdict_ids"]) == ["ghost", "rb-auto"]
+    assert summary["n_llmjudge_filled"] == 0
+
+
+# ---- P3 跨品种组合数据集（rb+cu+au）on-disk 工件验收 ----
+
+def test_combined_dataset_covers_three_products():
+    """P3 组合脊柱：含 rb/cu/au，时间切分单调，(product,day) 去重唯一。"""
+    import json
+    ds = SRC / "data/review/pa_dataset_rbcuau.jsonl"
+    if not ds.exists():
+        pytest.skip("组合数据集未生成")
+    recs = [json.loads(ln) for ln in open(ds)]
+    insts = {r["instrument"] for r in recs}
+    assert {"rb", "cu", "au"} <= insts, f"缺品种 {insts}"
+    keys = [tuple(r["dedup_key"]) for r in recs]
+    assert len(keys) == len(set(keys)), "(product,day) 去重失败"
+    by = {}
+    for r in recs:
+        by.setdefault(r["split"], []).append(r["ts_utc"][:10])
+    if "train" in by and "test" in by:
+        assert max(by["train"]) <= min(by["test"]), "train/test 时间重叠"
+
+
+def test_combined_merge_conserves_outcome():
+    """P3 组合合并：outcome 必须逐条等于 P0 组合脊柱（决策侧不得污染确定性 outcome）。"""
+    import json
+    base_fp = SRC / "data/review/pa_dataset_rbcuau.jsonl"
+    merged_fp = SRC / "data/review/pa_dataset_rbcuau.labeled.jsonl"
+    if not (base_fp.exists() and merged_fp.exists()):
+        pytest.skip("组合数据集或合并产物未生成")
+    base = {json.loads(ln)["id"]: json.loads(ln) for ln in open(base_fp)}
+    merged = [json.loads(ln) for ln in open(merged_fp)]
+    assert len(merged) == len(base)
+    for r in merged:
+        assert r["outcome"] == base[r["id"]]["outcome"], f"{r['id']} outcome 被污染"
+        if r["label_source"] == "replica_claude":
+            assert r["decision"] is not None and r["decision_trace"]
+
+
+def test_adjudicated_queue_rb_fully_resolved():
+    """P2b 全裁队列：每条 auto_resolved 已填 method=auto_resolved；有 verdict 的 llm_judge 已填；
+    human 未决=0；escalate_human 记录仍带 adjudication（可选真人复核，非阻塞）。
+    cu/au llm_judge 无 verdict 可留 pending（philosopher 增量），但不得伪造。"""
+    import json
+    q_fp = SRC / "data/review/pa_adjudication_queue_rbcuau.adjudicated.jsonl"
+    if not q_fp.exists():
+        pytest.skip("全裁队列未生成")
+    queue = [json.loads(ln) for ln in open(q_fp)]
+    for q in queue:
+        route, adj = q["adjudication_route"], q.get("adjudication")
+        if route == "auto_resolved":
+            assert adj is not None and adj["method"] == "auto_resolved"
+        elif route == "llm_judge" and adj is not None:
+            assert adj["method"] == "llm_judge" and adj["verdict"] in {"confirm_replica", "override"}
+        # pending llm_judge（adj is None）仅允许出现在非 rb（philosopher 尚未对该品种 llm_judge）
+        if route == "llm_judge" and adj is None:
+            assert not q["id"].startswith("rb"), f"{q['id']} rb llm_judge 不应 pending"
+    # 真人未决必须为 0（triage 兜底 human=0；escalate_human 是可选复核而非阻塞）
+    n_human_unresolved = sum(1 for q in queue
+                             if q["adjudication_route"] == "human" and q.get("adjudication") is None)
+    assert n_human_unresolved == 0
+    # escalate_human 标记的记录必须已填 adjudication（不能既升级又留空）
+    for q in queue:
+        adj = q.get("adjudication")
+        if adj and adj.get("escalate_human"):
+            assert adj.get("verdict") is not None

@@ -168,7 +168,7 @@ def main() -> None:
         "outcome_mining": {
             "pos_target": len(pos), "neg_stop": len(neg),
             "imbalance": f"1:{round(len(neg)/len(pos),1)}" if pos else None,
-            "note": "正=会触目标/负=会被扫；训练用全 233 正 + 等量/加权负即可达均衡（§7.3）",
+            "note": f"正=会触目标/负=会被扫；训练用全 {len(pos)} 正 + 等量/加权负即可达均衡（§7.3）",
         },
         "adjudication_queue": {
             "n_total": len(queue),
