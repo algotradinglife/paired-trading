@@ -674,10 +674,17 @@ def _position_size(r: dict) -> str:
 # the directional extreme) carried EV (+1.28R vs +0.40R); a SINGLE strong signal was
 # NOT better than neither — so this is a BINARY flag, not a monotone full/half/light
 # tier, and it is deliberately NOT wired into sizing pending out-of-sample validation.
-# Thresholds are provisional (Brooks strong-bar); the study used per-corpus median splits
-# (body_frac≈0.8, close_pos≈1.0) which can't be reproduced live without a cohort.
-SIGNAL_BAR_BODY_FRAC_MIN = 0.5     # body >= half the range (strong/trend bar)
-SIGNAL_BAR_CLOSE_EXTREME = 0.66    # close within the extreme third (oriented by direction)
+# Thresholds are FROZEN at the validated in-sample median split (t_b0202a61 OOS eval,
+# doc/shadow-gate-oos-eval-2026-06-15): the earlier 0.5/0.66 floor passed 100% of breakout
+# candidates (degenerate no-op — the candidate generator already guarantees body_frac>=0.5
+# & close in the top third). The median rule body_frac>=0.8 AND close at the extreme
+# reproduces the validated double-strong cell (n=33, +1.28R vs +0.40R, 38% retention).
+# close uses 0.95 not 1.0: in-sample close_pos is bimodal (51% exactly 1.0, NOTHING in
+# [0.95,1.0)), so any cutoff in (0.95,1.0] selects the identical in-sample set, but 0.95
+# is robust to a live bar closing one tick below the high. Still in-sample-fit & ADVISORY
+# (not wired to sizing) — pending OOS before any active use.
+SIGNAL_BAR_BODY_FRAC_MIN = 0.80    # body >= 80% of range (validated median split)
+SIGNAL_BAR_CLOSE_EXTREME = 0.95    # close at the extreme (top/bottom 5%), oriented by direction
 
 
 def _signal_bar_quality(o: float, h: float, low: float, c: float, direction: str) -> dict:

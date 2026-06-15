@@ -49,3 +49,15 @@
 
 工件 `data/review/shadow_gate_oos.json`（gitignore）。
 相关：[[signal-bar-quality-hardening-2026-06-15]]、[[spec001-ev-eval]]、[[regime-gate-not-portable]]。
+
+## 更新：阈值修复已落地（修复路径 (a)）
+退化已修：`SIGNAL_BAR_BODY_FRAC_MIN` 0.5→**0.80**，`SIGNAL_BAR_CLOSE_EXTREME` 0.66→**0.95**
+（冻结样本内中位分层规则）。修复后 Q1 复跑：
+- `double_strong` 通过率 **0.375**（33/88，不再退化），EV **+1.284R** CI[0.784,1.814] vs not **+0.399R** CI[0.06,0.736]，Δ=+0.885——精确复现 doc 源研究的双强 cell（n=33 / +1.28R / 37.5% 留存）。
+
+**为何 close 用 0.95 而非 1.0**：样本内 close_pos 在顶部双峰——**51% 恰好 =1.0，[0.95,1.0) 区间为空**，9% 在 [0.90,0.95)。
+故 (0.95,1.0] 任意阈值选中**同一**样本内集合，但 0.95 对"live 收在最高价下一 tick（close_pos≈0.998）"更鲁棒。
+阈值扫描（n=88）：body 0.80 × close 0.95 给出最干净的 +1.284（body 0.70/0.75 仅 +1.10~+1.22）。
+
+**仍未解**：修复路径 (b) OOS 数据未补——此规则仍样本内拟合，闸门保持 ADVISORY/shadow（不入仓位）。
+晋升 active sizing 前须 OOS。修阈值后 shadow 字段现**有信息量**（真二分），可开始累积前向证据。
