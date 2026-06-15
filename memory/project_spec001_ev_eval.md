@@ -92,6 +92,13 @@ A&B−B_only Δ+1.063 CI[0.166,1.946]（**排除 0**，合取效应统计成立�
 **两个教训**：(1) 组合 Δ>单 Δ ≠ 加性，必须测 within-condition marginal；(2) 嵌套子集做 bootstrap-diff 无效，要 disjoint cell。
 **部署**：monotone full/half/light 分层被 2x2 证伪（单强反而差）→ 若落地用**二元质量闸门**（双强进/否则不进），且须 OOS/留出先验证。
 脚本已加 2x2+disjoint marginal bootstrap-diff CI。下一步：短边补样本、OOS 验证，暂不落地生产。
+**advisory/shadow 闸门已落地 score_today（2026-06-15，commit 057c81f4，卡 t_ffffa8fd，用户批准 advisory 非 active）**：
+philosopher 恢复并背书落地，但卡建议的 full/half/light monotone 分层被我修正分析证伪（单强<neither）→ 我落地**二元
+double-strong 合取**为 **advisory 字段**（`signal_bar_quality`={body_frac,close_pos,double_strong}），**不改 position_size**，
+供前向/OOS 取证。`_signal_bar_quality()`+`_attach_signal_bar_quality()` 接入全 9 条 active lane（divergence/bpull/pa_h2/
+cn_bond/vflush/context_a/us_dif_pos/pa_us_60min[用 60min 序列]/cn_agri）。阈值临时(Brooks strong-bar)、样本内 n=12→OOS 前不转 active。
+philosopher 下阶段转复刻 fidelity 硬化（卡A t_ad8b35ed 限价路径结构门 R010，可作 score_today entry 前置 filter）。
+注：发现 `quant_data.datafeed` 缺 YFinanceDatafeed → refresh_daily 导入失败 + 3 测试 fail（data 层，已建卡给 data-engineer，非我域）。
 
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单
