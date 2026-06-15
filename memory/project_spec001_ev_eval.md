@@ -54,6 +54,16 @@ corroborates philosopher +0.44R/52%(n=19)。长边默认未破(n=43 +0.773)。**
 researcher 化可选。要硬化短边显著性需 ≥30-50 空头单（已回 philosopher）。
 **编排（2026-06-15）**：unblock 了 t_6cf9f9c4（PA 数据集）——其两阻塞依赖（真人裁决/philosopher 增量语料）均已解除
 （human=0 via triage+llm-judge；philosopher 交付 rb120/cu120/au90），属 stale block，转 ready 让 data-engineer 跑增量 merge+mine+triage。
+**PA 数据集 P3 完结（2026-06-15）**：data-engineer 交付跨品种(rb+cu+au)版本化脊柱 pa_dataset_rbcuau（3512 候选，
+train2445/val536/test531，2021-2026）+ 裁决回填 apply_pa_adjudication.py（auto82+rb llm_judge28=110 已裁，human=0，
+cu/au 47 pending 待 philosopher verdict=卡 t_b74da0e8）。代码 commit f90dc9e0（researcher 提交+codex 审，11 tests）。
+reviewer t_9134a73f **审核通过**（byte-for-byte 可重生、outcome 守恒）。
+
+**R008（philosopher SPEC-004 负面结果，2026-06-15，科学诚实不发卡）**：顺势回踩 MA 进场在 CN 商品 5min **负 EV
+(-0.37R/28%/n14)**，复刻取选中的也亏 →**回踩/限价类进场（区间底 fade + 趋势 MA 回踩）均无 edge**，edge 集中在
+**突破止损进场**。**corroborates 我的 R006**（突破止损 +0.64~0.90R 稳健 > 限价 fade +0.12/30%）。结论：有效 setup 空间
+= 突破止损族（SPEC-001 反转 / SPEC-002 趋势 / SPEC-003 做空），回踩/fade 类不再探。labels_pullback.jsonl 留档（philosopher）。
+philosopher 下一轮挖 **SPEC-005 失败突破 fade（假突破反向均值回归）**——注意这是『对突破失败做反向』，与『回踩进场』不同，不被 R008 排除。
 
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单
