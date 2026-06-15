@@ -63,10 +63,22 @@ def _order_from_decision(d: dict) -> dict | None:
             "stop": float(stop), "target": float(target)}
 
 
-def evaluate(corpus_path: Path, tp_src: Path, *, cost_r: float,
-             fwd_days: int, max_wait_bars: int, max_hold_bars: int) -> dict:
+def _cycle(r: dict) -> str | None:
+    ds = r.get("diagnosis_summary") or {}
+    return ds.get("cycle_position") or ds.get("cycle")
+
+
+def evaluate(corpus_path, tp_src: Path, *, cost_r: float,
+             fwd_days: int, max_wait_bars: int, max_hold_bars: int,
+             cycle: str | None = None) -> dict:
     load_cn_window = _load_cn_window(tp_src)
-    recs = [json.loads(ln) for ln in corpus_path.read_text().splitlines() if ln.strip()]
+    # corpus_path may be a single Path or a list of Paths (multi-instrument).
+    paths = corpus_path if isinstance(corpus_path, (list, tuple)) else [corpus_path]
+    recs = []
+    for p in paths:
+        recs.extend(json.loads(ln) for ln in Path(p).read_text().splitlines() if ln.strip())
+    if cycle is not None:   # SPEC-002 etc.: restrict to a diagnosis cycle (e.g. trending_tr)
+        recs = [r for r in recs if _cycle(r) == cycle]
     spec, limit_long, other = [], [], []
     for r in recs:
         d = r.get("decision") or {}
@@ -162,8 +174,10 @@ def _summary(rows: list[dict], spec, limit_long, other, cost_r: float) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--corpus", type=Path, default=None,
-                    help="replica labels jsonl (default: derived from --philosopher-src sibling)")
+    ap.add_argument("--corpus", type=Path, nargs="+", default=None,
+                    help="replica labels jsonl (1+ files; default: --philosopher-src sibling rb)")
+    ap.add_argument("--cycle", default=None,
+                    help="restrict to diagnosis cycle_position (e.g. trending_tr for SPEC-002)")
     ap.add_argument("--philosopher-src", type=Path, default=_DEFAULT_TP_SRC)
     ap.add_argument("--cost-r", type=float, default=0.0)
     ap.add_argument("--fwd-days", type=int, default=25)
@@ -174,9 +188,10 @@ def main() -> None:
 
     # Corpus default FOLLOWS --philosopher-src (not the import-time sibling), so an explicit
     # override resolves the matching corpus (codex P2 on t_ac8a2d94).
-    corpus = args.corpus or (args.philosopher_src.parent / "runs/_replica/pa_dataset_rb_claude.jsonl")
+    corpus = args.corpus or [args.philosopher_src.parent / "runs/_replica/pa_dataset_rb_claude.jsonl"]
     rep = evaluate(corpus, args.philosopher_src, cost_r=args.cost_r, fwd_days=args.fwd_days,
-                   max_wait_bars=args.max_wait_bars, max_hold_bars=args.max_hold_bars)
+                   max_wait_bars=args.max_wait_bars, max_hold_bars=args.max_hold_bars,
+                   cycle=args.cycle)
     txt = json.dumps(rep, ensure_ascii=False, indent=2)
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
