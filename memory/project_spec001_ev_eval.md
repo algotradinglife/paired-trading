@@ -22,6 +22,18 @@ payoff≥2:1 AND win_rate_est≥0.5。philosopher 侧保真度已立；**researc
 rb2607 单实例 +2.0R（买stop 3379 于 2025-07-24 13:35 触发、14:45 触 3407 止盈）。10 单测，
 4 个 codex P2 修完（数据耗尽≠超时、前向窗口锚定、长单 default、ruff），ruff 通过。
 
+**2026-06-15 全线交付（团队编排）**：
+- **跨品种**（doc/spec-001-cross-instrument-ev-2026-06-15）：au pilot n=8 +0.287R CI[−0.65,+1.27] P=0.72
+  → selectivity=alpha **符号泛化(au 正)但不显著**(n 小)，弱于 rb；假设 edge 黑色/趋势>贵金属/震荡。
+  **硬化需 au→30-50+cu（~10M token）= 待用户成本决策**（researcher 推荐扩、未自烧）。
+- **入场前失效 caveat 闭环**（reviewer t_9ef7dc76）：保守下界（入场前触止损即作废）rb 43 单仅 4 作废、
+  EV +0.765R CI[+0.336,+1.189] P=1.0 仍显著 → 乐观偏差~0.008R 可忽略；**canonical EV 必落 [+0.765,+0.773]**
+  （philosopher 已实现 canonical 约定 tp.pa.backtest.pre_entry_invalidate，t_5a409d23）。selectivity=alpha 稳健。
+- **真人裁决→0 端到端**：54 分歧 triage = auto_resolved 26(肥尾假象10+方差止损16，16 stops 经 regime 检查
+  确认分散 30%≈33%) + LLM-judge 28(Claude 盲判、禁 outcome 守 fidelity，pa_adjudication_rb_llmjudge.jsonl) +
+  human 0。脚本 mine_pa_samples(triage)/eval_spec001_corpus(跨品种)。
+- 工具：eval_spec001_corpus.py per-product 通用（labels_{product}.jsonl）；_resolve_tp_src 路径解析。
+
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单
    语料 N=1。胜率/期望/分布/稳健性全需规模样本。
