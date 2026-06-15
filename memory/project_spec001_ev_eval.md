@@ -34,6 +34,16 @@ rb2607 单实例 +2.0R（买stop 3379 于 2025-07-24 13:35 触发、14:45 触 34
   human 0。脚本 mine_pa_samples(triage)/eval_spec001_corpus(跨品种)。
 - 工具：eval_spec001_corpus.py per-product 通用（labels_{product}.jsonl）；_resolve_tp_src 路径解析。
 
+**SPEC-002 交付（2026-06-15，t_55d30164，doc/spec-002-trendtr-breakout-ev-2026-06-15）**：趋势区间顺势突破做多
+（trending_tr×突破单×做多，rb+cu+au）**n=24 win67% +0.901R CI[+0.254,+1.609] P=0.998 显著**（corroborates
+philosopher +0.98）。**SPEC-001(非trending反转族,n=56,+0.644R P=1.0) 与 SPEC-002 按 cycle 互斥→独立可叠加**
+（不同 bar、扩 regime 覆盖；趋势>反转）。R006：突破止损 +0.64~0.90R 稳健 > 限价 fade(+0.12/30%，我的
+simulate_order 止损进场语义无法仿真限价→采信 philosopher)。**跨品种 selectivity=alpha 现已 pooled 显著**
+（philosopher 为 SPEC-002 产的 labels_cu/au 副产语料 → rb+cu+au 两 regime 都显著）→ **先前『~10M 扩 au+cu』
+大体已达成、不需大额**（per-instrument au n=8 仍欠功率）。eval_spec001_corpus 加 --cycle + 多 corpus（向后兼容）。
+**编排教训**：别在 philosopher 还可能投新 spec 时把轮询拉到 max-idle(3600s)——曾因此漏看 SPEC-002 ready 一段时间；
+有活跃上游时保持较紧轮询(≤300-600s)。
+
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单
    语料 N=1。胜率/期望/分布/稳健性全需规模样本。
