@@ -84,9 +84,14 @@ pa_dataset_rbcuau.labeled.jsonl 对全 3512 候选有 features_det**（不必补
 close_pos Δ+0.552（好半 ~+1.0R CI 排除 0 vs 差半 ~+0.45R）、range_vs_avg 棒长惩罚 Δ+0.251（pooled 证实）、
 bar_range Δ−0.11 弃（绝对幅度无 edge，质量看相对几何）。pooled 比 rb-only 略强。短边 n=13 太小不可读。
 复现：`cd src && python3 scripts/analyze_signal_bar_quality.py --corpus data/review/pa_dataset_rbcuau.labeled.jsonl`。
-**组合 filter 已验证（结果 C，pooled n=88）**：body_frac 高 AND close_pos 高 → **pass +1.284R 胜率79% CI[0.78,1.81]
-留存 37.5%(33/88)** vs fail +0.399R；**Δ+0.885R 大于任一单 filter(+0.55) → 两质量信号可叠加**，baseline 0.73→1.28 近翻倍。
-= 可落地 score_today 质量闸门（双强→full / 单强→half / 弱→light）。下一步：(b) 落地 score_today 仓位分层；(c) 短边补样本；(d) 三 filter 边际。
+**组合 filter 交集=研究性候选，非已证叠加（结果 C，pooled n=88；reviewer t_aa7cf0a6 纠正我过度表述）**：
+双强交集 pass +1.284R 胜率79% CI[0.78,1.81] 留存37.5% 是样本内候选。**2x2 揭穿"独立可叠加"叙事**：
+A_only +0.227/B_only +0.221 **反而低于 neither +0.534** → 只满足单信号更差，是**交互/合取（conjunction）非加性**。
+**marginal 检验要用 disjoint（codex 纠正：交集⊂单filter pass，嵌套重采样无效）**：A&B−A_only Δ+1.056 CI[0.149,1.951]、
+A&B−B_only Δ+1.063 CI[0.166,1.946]（**排除 0**，合取效应统计成立，但小 cell n=12）。reviewer 的嵌套 AB−A_pass +0.28/CI 跨 0 是被交集稀释失真。
+**两个教训**：(1) 组合 Δ>单 Δ ≠ 加性，必须测 within-condition marginal；(2) 嵌套子集做 bootstrap-diff 无效，要 disjoint cell。
+**部署**：monotone full/half/light 分层被 2x2 证伪（单强反而差）→ 若落地用**二元质量闸门**（双强进/否则不进），且须 OOS/留出先验证。
+脚本已加 2x2+disjoint marginal bootstrap-diff CI。下一步：短边补样本、OOS 验证，暂不落地生产。
 
 **关键发现（卡 BLOCKED 等 philosopher t_3d25c2f5）**：
 1. **N=1 不可评估**：现唯一 replay（rb2607）只 2 单，其中 1 单是非 SPEC 做空 → SPEC-001 多单

@@ -34,23 +34,33 @@ range_vs_avg 棒长/均值）是否分层 EV？是 → 质量 filter 可硬化 s
 - **bar_range（绝对幅度）无一致 edge**（pooled Δ−0.11）→ 弃；质量看相对几何（实体占比/收盘位置/相对棒长）非绝对幅度。
 - 短边 n=13 太小（baseline 甚至 −0.08，与 SPEC-003 labels_short n=16 +0.50 不同语料）→ 不可读，方向同但 CI 巨大。
 
-## 结果 C：组合 filter（body_frac 高 AND close_pos 高，pooled n=88）⭐⭐
+## 结果 C：组合 filter 交集（body_frac 高 AND close_pos 高，pooled n=88）—**研究性候选，非已证叠加**
 复现：`cd src && python3 scripts/analyze_signal_bar_quality.py --corpus data/review/pa_dataset_rbcuau.labeled.jsonl`
-（输出末行 COMBINED；两 filter 各取好半的交集 vs 其余，报留存率）
+（输出末段 COMBINED + 2x2 cells + marginal contrasts）
 
 | 子集 | n | 留存 | 毛 EV | 胜率 | 95% CI |
 |---|---|---|---|---|---|
-| **pass（双强）** | 33/88 | **37.5%** | **+1.284R** | **78.8%** | **[0.784, 1.814]** |
+| pass（双强交集） | 33/88 | 37.5% | +1.284R | 78.8% | [0.784, 1.814] |
 | fail（其余） | 55/88 | — | +0.399R | — | [0.060, 0.736] |
-| Δ(pass−fail) | | | **+0.885R** | | |
 
-- **要求 body_frac 高 AND close_pos 高，几乎翻倍 EV**：baseline +0.731R → pass +1.284R，胜率 65%→79%，
-  CI 牢牢排除 0；保留 37.5% 突破信号。组合 Δ+0.885R **大于任一单 filter（+0.55R）→ 两质量信号可叠加**。
-- 这是**可落地的 score_today 质量闸门**：双强信号棒 = full 仓位，单强/弱 = half/light（待落地）。
+**2x2 分区（A=body_frac 强，B=close_pos 强）**：A&B n=33 EV **+1.284**；A_only n=12 EV **+0.227**；
+B_only n=12 EV **+0.221**；neither n=31 EV **+0.534**。
+**边际对比（disjoint within-condition，统计有效——codex 纠正：交集 ⊂ 单 filter pass，嵌套重采样无效）**：
+A&B − A_only（body 强下加 close 的边际）Δ**+1.056** CI **[0.149, 1.951]**（排除 0）；
+A&B − B_only（close 强下加 body 的边际）Δ**+1.063** CI **[0.166, 1.946]**（排除 0）。
+
+- **诚实结论（reviewer t_aa7cf0a6 + codex 双纠错）**：这**不是"两信号独立可叠加"**，而是**交互/合取（conjunction）**：
+  **A_only/B_only（+0.22）EV 低于 neither（+0.53）**——只满足单个信号反而更差；唯有**双强交集**才好（+1.28R）。
+  within-condition 边际（A&B vs 单 only）+1.06R 且 **CI 排除 0**（有效 disjoint 检验；reviewer 的嵌套 AB−A_pass +0.28/CI 跨 0
+  被交集稀释而失真）→ **合取效应统计上成立**，但**建立在小 cell（A_only/B_only 各 n=12）上**。
+- **部署含义**：**monotone full/half/light 仓位分层被 2x2 证伪**（单强档反而差）；合理的候选是**二元闸门**（双强=进/否则不进），
+  非分层。但仍是**样本内、小 cell**，**落地前须 OOS/留出验证**。
+- 既往（已撤回）措辞"近翻倍""独立可叠加""full/half/light 分层"均**降级**：保留"双强交集 +1.28R 候选"+"合取效应"。
 
 ## 局限 & 下一步
-- 中位分层粗、样本内、未多重校正；short 欠功率；留存 37.5% 牺牲约 2/3 信号换 +0.55R/单。
-- **下一步（researcher）**：(a) ✅ 组合 filter 已验证（结果 C）；(b) filter 落地 `score_today`
-  （双强→full、单强→half、弱→light/watch 仓位分层）；(c) 短边补样本再验；(d) 三 filter（+range_vs_avg 惩罚）边际。
+- 中位分层粗、样本内、未多重校正；short 欠功率；合取效应建立在小 cell（n=12）；二元闸门未 OOS 验证。
+- **下一步（researcher）**：(a) 双强交集=样本内合取候选，待 OOS/留出才能称 edge；(b) **若落地 score_today，
+  用二元质量闸门（双强进场加权）而非 full/half/light 分层**（2x2 已证伪 monotone 分层）；(c) 短边补样本；
+  (d) 暂不落地生产，先补 OOS 统计证据。
 工件 signal_bar_quality.json / signal_bar_quality_pooled.json（data/review gitignore）。
 相关：[[spec001-ev-eval]]、[[swing-quality-hypothesis-validated]]、[[pa-hypotheses-sweep]]。

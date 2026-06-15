@@ -29,12 +29,28 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
 
 from scripts.eval_spec001_corpus import (
+    BOOTSTRAP_N,
+    BOOTSTRAP_SEED,
     LONG,
     _bootstrap_mean,
     _stats,
     evaluate,
 )
 from scripts.eval_spec001_ev import _DEFAULT_TP_SRC
+
+
+def _bootstrap_diff(a: list[float], b: list[float]) -> list:
+    """Bootstrap 95% CI for mean(a)-mean(b) (independent resampling, seed-pinned).
+    Used to test whether the intersection's marginal gain over a single filter is
+    distinguishable from 0. CI crossing 0 ⇒ not a demonstrated marginal lift."""
+    if len(a) < 4 or len(b) < 4:
+        return [None, None]
+    A, B = np.array(a, float), np.array(b, float)
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    da = A[rng.integers(0, len(A), (BOOTSTRAP_N, len(A)))].mean(axis=1)
+    db = B[rng.integers(0, len(B), (BOOTSTRAP_N, len(B)))].mean(axis=1)
+    d = da - db
+    return [round(float(np.percentile(d, 2.5)), 4), round(float(np.percentile(d, 97.5)), 4)]
 
 # Quality orientation per field: +1 = higher value is higher quality; -1 = lower value
 # is higher quality (penalty). body_frac (body size) and the range penalties are
@@ -104,29 +120,30 @@ COMBINED_FIELDS = ("body_frac", "close_pos")   # the two strongest single-metric
 def combined_filter(rows: list[dict], feats: dict[str, dict],
                     fields: tuple[str, ...], qdir: dict[str, int]) -> dict | None:
     """Require a trade to be on the BETTER-quality side of EVERY field in `fields`
-    (oriented by qdir). Compare EV of the passing subset vs the rest and report
-    sample RETENTION (the practical filter trade-off: higher EV but fewer trades).
-    Median is taken over the trades carrying ALL fields. None if too few usable."""
+    (oriented by qdir). Reports retention + intersection EV, AND (for exactly two
+    fields) the 2x2 partition and the MARGINAL contrast of the intersection over each
+    single filter with a bootstrap-diff CI. The marginal CI is the honest test of
+    'do the two signals add?' — a CI crossing 0 means additivity is NOT demonstrated,
+    and single-vs-neither cell EVs show whether a monotone tiering is even supported.
+    Median is taken over trades carrying ALL fields. None if too few usable."""
     usable = [r for r in rows
               if all(feats.get(r["id"], {}).get(f) is not None for f in fields)]
     if len(usable) < 8:
         return None
     meds = {f: float(np.median([feats[r["id"]][f] for r in usable])) for f in fields}
 
+    def _flag(r, f):
+        v = feats[r["id"]][f]
+        return v >= meds[f] if qdir[f] >= 0 else v < meds[f]
+
     def _passes(r):
-        for f in fields:
-            v = feats[r["id"]][f]
-            if qdir[f] >= 0 and v < meds[f]:        # higher-is-better: must be >= median
-                return False
-            if qdir[f] < 0 and v >= meds[f]:        # penalty: must be < median
-                return False
-        return True
+        return all(_flag(r, f) for f in fields)
 
     good = [r["gross_r"] for r in usable if _passes(r)]
     rest = [r["gross_r"] for r in usable if not _passes(r)]
     if not good or not rest:
         return None
-    return {
+    out = {
         "fields": list(fields), "median_split": {f: round(meds[f], 4) for f in fields},
         "n_usable": len(usable), "n_pass": len(good),
         "retention": round(len(good) / len(usable), 3),
@@ -134,6 +151,35 @@ def combined_filter(rows: list[dict], feats: dict[str, dict],
         "fail_ev": {**_stats(rest), **_bootstrap_mean(rest)},
         "ev_delta_pass_minus_fail": round(float(np.mean(good) - np.mean(rest)), 4),
     }
+    if len(fields) == 2:
+        fa, fb = fields
+        cells = {"A&B": [], "A_only": [], "B_only": [], "neither": []}
+        a_pass, b_pass = [], []
+        for r in usable:
+            g, a, b = r["gross_r"], _flag(r, fa), _flag(r, fb)
+            if a:
+                a_pass.append(g)
+            if b:
+                b_pass.append(g)
+            cells["A&B" if a and b else "A_only" if a else "B_only" if b else "neither"].append(g)
+        out["two_by_two"] = {k: _stats(v) for k, v in cells.items()}  # A=fa-strong, B=fb-strong
+        ab, a_only, b_only = cells["A&B"], cells["A_only"], cells["B_only"]
+        # DISJOINT marginal contrasts (codex: AB ⊂ A_pass → nested resample invalid).
+        # "does adding fb help GIVEN fa-strong?" = A&B vs A_only (both fa-strong, disjoint).
+        out["marginals"] = {
+            # value of adding fb GIVEN fa-strong = A&B (fa&fb) minus A_only (fa, not fb)
+            f"marginal_{fb}_given_{fa}": {
+                "comparator_cell": "A_only", "delta": round(float(np.mean(ab) - np.mean(a_only)), 4) if a_only else None,
+                "ci95_diff": _bootstrap_diff(ab, a_only)},
+            # value of adding fa GIVEN fb-strong = A&B minus B_only (fb, not fa)
+            f"marginal_{fa}_given_{fb}": {
+                "comparator_cell": "B_only", "delta": round(float(np.mean(ab) - np.mean(b_only)), 4) if b_only else None,
+                "ci95_diff": _bootstrap_diff(ab, b_only)},
+            "note": ("disjoint within-condition contrasts (A&B vs the single-only cell); additivity "
+                     "demonstrated only if a marginal CI excludes 0; single-strong cells below 'neither' "
+                     "refute a monotone tier"),
+        }
+    return out
 
 
 def analyze(corpus_paths, tp_src, *, cycle, direction) -> dict:
@@ -221,6 +267,14 @@ def main() -> None:
               f"(n={cf['n_pass']}/{cf['n_usable']}, retention={cf['retention']}, "
               f"win={p.get('win_rate')}, CI={p['ci95']}) vs fail EV={fl.get('mean_gross_r')} "
               f"(n={fl.get('n')}, CI={fl['ci95']}) | delta(pass-fail)={cf['ev_delta_pass_minus_fail']}")
+        if "two_by_two" in cf:
+            cells = cf["two_by_two"]
+            print("    2x2 cells (A=%s-strong, B=%s-strong): " % tuple(cf["fields"]) +
+                  ", ".join(f"{k} n={v.get('n')} EV={v.get('mean_gross_r')}" for k, v in cells.items()))
+            for k, m in cf["marginals"].items():
+                if isinstance(m, dict):
+                    print(f"    marginal {k}: delta={m['delta']} ci95_diff={m['ci95_diff']}"
+                          f"{'  ⚠CI crosses 0 → additivity NOT shown' if (m['ci95_diff'][0] is None or m['ci95_diff'][0] <= 0 <= m['ci95_diff'][1]) else ''}")
 
 
 if __name__ == "__main__":

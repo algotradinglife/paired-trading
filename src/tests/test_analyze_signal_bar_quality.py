@@ -33,6 +33,13 @@ def test_combined_filter_requires_all_fields_and_reports_retention():
     assert cf["n_pass"] == 2 and cf["n_usable"] == 8 and cf["retention"] == 0.25
     assert cf["pass_ev"]["mean_gross_r"] > cf["fail_ev"]["mean_gross_r"]
     assert cf["ev_delta_pass_minus_fail"] > 0
+    # 2x2 partition + marginal contrasts are reported (honest additivity test)
+    assert set(cf["two_by_two"]) == {"A&B", "A_only", "B_only", "neither"}
+    assert cf["two_by_two"]["A&B"]["n"] == 2
+    # disjoint within-condition marginal contrasts (A&B vs A_only / B_only)
+    marg = [k for k in cf["marginals"] if "given" in k]
+    assert len(marg) == 2
+    assert all("ci95_diff" in cf["marginals"][k] for k in marg)
 
 
 def test_close_pos_orientation_flips_with_trade_direction():
