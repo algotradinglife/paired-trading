@@ -1,11 +1,10 @@
 """Tests for TBreakDetector — trendline-break alert detector."""
 from __future__ import annotations
 
-import pandas as pd
 import pytest
 
-from engine.divergence.tbreak_detector import TBreakDetector, TBreakSignal
-from tests.test_trendline import make_bars, UPTREND_ROWS
+from engine.divergence.tbreak_detector import TBreakDetector
+from test_trendline import make_bars, UPTREND_ROWS
 
 
 def breakdown_rows() -> list[tuple[float, float, float]]:
