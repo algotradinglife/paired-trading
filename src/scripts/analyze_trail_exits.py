@@ -49,6 +49,20 @@ def _boot_ci(x: np.ndarray) -> list:
     return [round(float(np.percentile(m, 2.5)), 3), round(float(np.percentile(m, 97.5)), 3)]
 
 
+def _boot_paired_diff(a: np.ndarray, b: np.ndarray) -> dict:
+    """PAIRED bootstrap of mean(a-b): the four exit methods run on the SAME set in the
+    SAME order, so a[i] and b[i] are the same trade — resample TRADE INDICES (shared across
+    a and b) and average the per-trade difference. This is the honest test of 'does method a
+    beat method b'; a per-method mean-CI overlap does NOT answer it (reviewer t_c8092dc3)."""
+    if len(a) != len(b) or len(a) < 4:
+        return {"delta": None, "ci": [None, None]}
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    idx = rng.integers(0, len(a), (BOOTSTRAP_N, len(a)))
+    d = (a[idx] - b[idx]).mean(axis=1)
+    return {"delta": round(float((a - b).mean()), 4),
+            "ci": [round(float(np.percentile(d, 2.5)), 4), round(float(np.percentile(d, 97.5)), 4)]}
+
+
 def _entry_index(fwd: list[dict], entry: float, is_long: bool):
     for i, b in enumerate(fwd[:MAX_WAIT_BARS]):
         if (is_long and b["high"] >= entry) or (not is_long and b["low"] <= entry):
@@ -174,14 +188,24 @@ def evaluate(corpus_path: Path, tp_src: Path, *, fwd_days: int) -> dict:
                 "win": round(float((a > 0).mean()), 4), "ci": _boot_ci(a)} if len(a) else {"n": 0}
 
     pooled = {m: [] for m in methods}
-    for inst, md in per_inst.items():
+    for inst, md in sorted(per_inst.items()):     # sorted so pooled arrays stay trade-aligned
         for m in methods:
             pooled[m].extend(md[m])
+    parr = {m: np.array(pooled[m], float) for m in methods}
+    # PAIRED deltas (the statistic the reviewer required): each vs baseline, and structured vs
+    # mechanical. Same-set same-order ⇒ paired resampling is valid.
+    paired = {}
+    if len(parr["baseline"]) >= 4:
+        for m in ("mech_trail", "struct_trail3", "struct_trail5"):
+            paired[f"{m}_minus_baseline"] = _boot_paired_diff(parr[m], parr["baseline"])
+        for m in ("struct_trail3", "struct_trail5"):
+            paired[f"{m}_minus_mech_trail"] = _boot_paired_diff(parr[m], parr["mech_trail"])
     return {
         "params": {"max_hold_bars": MAX_HOLD_BARS, "fwd_days": fwd_days,
                    "methods": methods, "note": "four-method same-set; per-contract via sanctioned loader"},
         "n_spec_long_signals": n_signals, "n_resolved_all_four": n_triggered,
         "pooled": {m: _summ(pooled[m]) for m in methods},
+        "paired_deltas": paired,
         "by_instrument": {inst: {m: _summ(md[m]) for m in methods}
                           for inst, md in sorted(per_inst.items())},
     }
@@ -195,11 +219,19 @@ def _print(rep: dict) -> None:
         print("  (no breakout-long trades resolved under all four methods — nothing to compare)")
         return
     base = rep["pooled"]["baseline"]["ev"]
-    print(f"\n  POOLED (n={rep['pooled']['baseline']['n']}):")
+    print(f"\n  POOLED (n={rep['pooled']['baseline']['n']}) — per-method mean EV (NOT a paired test):")
     for m, s in rep["pooled"].items():
         if s.get("n"):
             dv = round(s["ev"] - base, 4)
-            print(f"    {m:<14} EV={s['ev']:+.4f} win={s['win']} CI={s['ci']} | vs baseline {dv:+.4f}")
+            print(f"    {m:<14} EV={s['ev']:+.4f} win={s['win']} CI={s['ci']} | point Δvs base {dv:+.4f}")
+    pd = rep.get("paired_deltas") or {}
+    if pd:
+        print("\n  PAIRED bootstrap Δ (same-set; the statistic that decides 'beats') — CROSSES 0 ⇒ not significant:")
+        for k, v in pd.items():
+            ci = v["ci"]
+            crosses = ci[0] is None or (ci[0] <= 0 <= ci[1])
+            flag = "  ⚠ CI crosses 0 → NOT significant" if crosses else "  (CI excludes 0)"
+            print(f"    {k:<30} Δ={v['delta']:+.4f} CI={ci}{flag}")
     for inst, md in rep["by_instrument"].items():
         b = md["baseline"].get("ev")
         cells = " ".join(f"{m.replace('struct_trail','s'):>8}={md[m]['ev']:+.3f}"
