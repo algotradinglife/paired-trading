@@ -210,3 +210,104 @@ def test_load_option_daily_parquet_first(tmp_path):
     )
     assert df is not None
     assert list(df["close"]) == [255, 260]   # from entry_date forward
+
+
+# ---------------------------------------------------------------------------
+# US OCC dialect (t_e7fb18c9): O:SPY240621C00495000.AMEX + greeks siblings
+# ---------------------------------------------------------------------------
+
+def _write_greeks(root, name, rows):
+    d = root / "daily"
+    d.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_parquet(d / f"{name}.greeks.parquet", index=False)
+
+
+def _greek_row(dt: datetime, iv: float, underlying_close: float) -> dict:
+    return {
+        "datetime": dt, "iv": iv, "delta": 0.5, "gamma": 0.01,
+        "theta": -0.2, "vega": 0.15, "rho": 0.1,
+        "underlying_close": underlying_close,
+    }
+
+
+def test_catalog_parses_us_occ_dialect(tmp_path):
+    _write(tmp_path, "O:SPY240621C00495000.AMEX", [_bar(datetime(2024, 6, 7), 41.1)])
+    _write_greeks(tmp_path, "O:SPY240621C00495000.AMEX",
+                  [_greek_row(datetime(2024, 6, 7), 0.31, 534.0)])
+    store = OptionStore(tmp_path)
+    spy = store.catalog("SPY")
+    assert len(spy) == 1                      # greeks 伴生文件不是独立合约
+    c = spy[0]
+    assert c.opt_type == "C"
+    assert c.strike == 495.0                  # 00495000 -> 495.0
+    assert c.underlying_month == "2406"
+    assert c.expiry == date(2024, 6, 21)      # OCC 文件名中的精确到期日
+
+
+def test_us_occ_fractional_strike_and_put(tmp_path):
+    _write(tmp_path, "O:GDX250620P00030500.AMEX", [_bar(datetime(2025, 5, 5), 1.2)])
+    store = OptionStore(tmp_path)
+    gdx = store.catalog("GDX")
+    assert len(gdx) == 1
+    assert gdx[0].opt_type == "P"
+    assert gdx[0].strike == 30.5
+
+
+def test_cn_contract_expiry_is_none(tmp_path):
+    _write(tmp_path, "SHFE.ag2607C19900", [_bar(datetime(2026, 5, 4), 250)])
+    store = OptionStore(tmp_path)
+    assert store.catalog("ag")[0].expiry is None
+
+
+def test_us_chain_coverage_close_on(tmp_path):
+    _write(tmp_path, "O:SPY240621C00495000.AMEX", [
+        _bar(datetime(2024, 6, 7), 41.1), _bar(datetime(2024, 6, 10), 41.07),
+    ])
+    _write(tmp_path, "O:SPY240621P00495000.AMEX", [_bar(datetime(2024, 6, 7), 2.5)])
+    _write(tmp_path, "O:SPY240719C00500000.AMEX", [_bar(datetime(2024, 6, 10), 12.0)])
+    store = OptionStore(tmp_path)
+
+    chain = store.load_chain("SPY", date(2024, 6, 7))
+    assert len(chain) == 2
+    assert set(chain["opt_type"]) == {"C", "P"}
+
+    cov = store.coverage("SPY")
+    syms = list(cov)
+    assert len(cov) == 3
+    call_sym = store.catalog("SPY")[0].contract_sym
+    assert cov[call_sym] == (date(2024, 6, 7), date(2024, 6, 10))
+
+    assert store.close_on(call_sym, date(2024, 6, 10)) == 41.07
+    assert store.close_on(call_sym, date(2024, 6, 12)) == 41.07  # lag fallback
+
+
+def test_load_contract_daily_skips_greeks_only_symbol(tmp_path):
+    # greeks 文件单独存在（无 bars 主文件）时不得出现在 catalog
+    _write_greeks(tmp_path, "O:SPY240621C00400000.AMEX",
+                  [_greek_row(datetime(2024, 6, 7), 0.3, 534.0)])
+    store = OptionStore(tmp_path)
+    assert store.catalog("SPY") == []
+
+
+def test_load_contract_greeks(tmp_path):
+    _write(tmp_path, "O:SPY240621C00495000.AMEX", [_bar(datetime(2024, 6, 7), 41.1)])
+    _write_greeks(tmp_path, "O:SPY240621C00495000.AMEX", [
+        _greek_row(datetime(2024, 6, 7), 0.31, 534.0),
+        _greek_row(datetime(2024, 6, 10), 0.29, 536.2),
+    ])
+    _write(tmp_path, "O:QQQ240621C00480000.AMEX", [_bar(datetime(2024, 6, 7), 10.0)])
+    store = OptionStore(tmp_path)
+
+    sym = store.catalog("SPY")[0].contract_sym
+    g = store.load_contract_greeks(sym)
+    assert g is not None and len(g) == 2
+    assert {"iv", "delta", "gamma", "theta", "vega", "rho",
+            "underlying_close", "date"} <= set(g.columns)
+    assert g["date"].iloc[0] == date(2024, 6, 7)
+    assert g["iv"].iloc[1] == pytest.approx(0.29)
+
+    # QQQ 无 greeks 伴生文件 -> None
+    qqq_sym = store.catalog("QQQ")[0].contract_sym
+    assert store.load_contract_greeks(qqq_sym) is None
+    # 未知合约 -> None
+    assert store.load_contract_greeks("nonexistent") is None

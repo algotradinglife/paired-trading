@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/algotradinglife/paired-trading/doc/schemas/pa_feitian_snapshot_v0.schema.json",
+  "title": "PA / Feitian Snapshot v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "source_commit",
+    "run_config",
+    "data_quality",
+    "summary",
+    "signals",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pa_feitian_snapshot_v0"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_commit": {
+      "type": "string",
+      "minLength": 7,
+      "maxLength": 40
+    },
+    "run_config": {
+      "type": "object"
+    },
+    "data_quality": {
+      "type": "object"
+    },
+    "summary": {
+      "type": "object"
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/signal"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "status": {
+      "enum": [
+        "keep",
+        "drop",
+        "advisory",
+        "data_blocked",
+        "model_dominated"
+      ]
+    },
+    "outcome": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "instrument",
+        "contract",
+        "interval",
+        "ts_utc",
+        "underlying_signal",
+        "features_det",
+        "decision",
+        "decision_trace",
+        "option_leg",
+        "iv_regime",
+        "exit_policy",
+        "underlying_r_outcome",
+        "premium_r_outcome",
+        "option_runner_outcome",
+        "proxy_outcome",
+        "status",
+        "caveats"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "instrument": {
+          "type": "string"
+        },
+        "contract": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "interval": {
+          "type": "string"
+        },
+        "ts_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "underlying_signal": {
+          "type": "object"
+        },
+        "features_det": {
+          "type": "object"
+        },
+        "decision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decision_trace": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "option_leg": {
+          "$ref": "#/$defs/option_leg"
+        },
+        "iv_regime": {
+          "$ref": "#/$defs/iv_regime"
+        },
+        "exit_policy": {
+          "$ref": "#/$defs/exit_policy"
+        },
+        "underlying_r_outcome": {
+          "$ref": "#/$defs/outcome"
+        },
+        "premium_r_outcome": {
+          "$ref": "#/$defs/outcome"
+        },
+        "option_runner_outcome": {
+          "$ref": "#/$defs/outcome"
+        },
+        "proxy_outcome": {
+          "$ref": "#/$defs/outcome"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "caveats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "option_leg": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "side",
+        "strike",
+        "dte",
+        "otm_rank",
+        "delta_estimate",
+        "selection_status"
+      ],
+      "properties": {
+        "side": {
+          "enum": [
+            "call",
+            "put",
+            "none",
+            "unknown"
+          ]
+        },
+        "strike": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "dte": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "otm_rank": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "delta_estimate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "selection_status": {
+          "$ref": "#/$defs/status"
+        }
+      }
+    },
+    "iv_regime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iv_rank",
+        "keep",
+        "reason"
+      ],
+      "properties": {
+        "iv_rank": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "keep": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "exit_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "status",
+        "reason"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "runner",
+            "fixed_tp",
+            "tick_stop",
+            "none",
+            "unknown"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

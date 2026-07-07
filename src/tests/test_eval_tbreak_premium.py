@@ -196,3 +196,162 @@ def test_build_report_has_folds_and_grid(tmp_path):
     assert len(grid) >= 9
     for cell in grid.values():
         assert set(cell) >= {"n", "ev", "put_ev", "call_ev"}
+
+
+# --- US lane：符号分流 / broad-market 排除（t_aa79fb13）-------------------
+from scripts.eval_tbreak_premium import (  # noqa: E402
+    US_EXCLUDED_BROAD_DEFENSIVE,
+    check_us_exclusions,
+    events_from_scan,
+    fetch_events,
+    split_symbols_by_lane,
+)
+
+
+def test_split_symbols_by_lane_mixed():
+    cn, us = split_symbols_by_lane(["ag", "GLD", "cu", "GDX", "IWM"])
+    assert cn == ["ag", "cu"]
+    assert us == ["GLD", "GDX", "IWM"]
+
+
+def test_split_symbols_by_lane_unknown_raises():
+    # 小写但不在 POOL_KEY → 未知；混大小写也未知
+    with pytest.raises(ValueError, match="未知符号"):
+        split_symbols_by_lane(["zz"])
+    with pytest.raises(ValueError, match="未知符号"):
+        split_symbols_by_lane(["Gld"])
+    # 大写但不在 scan US 池 → 未知（codex P2：防止合法零事件假象）
+    with pytest.raises(ValueError, match="未知符号"):
+        split_symbols_by_lane(["AAPL"])
+
+
+def test_us_broad_defensive_excluded_by_default():
+    assert {"SPY", "DIA", "XLU", "XLP", "XLV"} <= set(US_EXCLUDED_BROAD_DEFENSIVE)
+    with pytest.raises(ValueError, match="SPY"):
+        check_us_exclusions(["GLD", "SPY"], allow_excluded=False)
+    # fetch_events 在跑 scan 之前就应拒绝（无 subprocess 即抛错）
+    with pytest.raises(ValueError, match="--allow-excluded-us"):
+        fetch_events(["SPY"], "2024-07-01")
+
+
+def test_us_exclusion_optin_and_clean_symbols_pass():
+    check_us_exclusions(["GLD", "GDX", "IWM", "NVDA"], allow_excluded=False)
+    check_us_exclusions(["SPY"], allow_excluded=True)  # 冒烟显式放行
+
+
+def test_events_from_scan_us_pool_keys_are_tickers():
+    data = {"US": {"GLD": [
+        {"candidate": "put_candidate", "break_date": "2025-01-06",
+         "break_close": 240.5},
+        {"candidate": "call_candidate", "break_date": "2025-03-03",
+         "break_close": 265.0},
+    ]}}
+    got = events_from_scan(data, "US", {"GLD": "GLD"})
+    assert [e["side"] for e in got] == ["put", "call"]
+    assert got[0] == {"symbol": "GLD", "side": "put",
+                      "break_date": "2025-01-06", "break_close": 240.5}
+
+
+def test_events_from_scan_cn_pool_key_mapping():
+    data = {"CN_COMMODITY": {"kq_m_shfe_ag": [
+        {"candidate": "put_candidate", "break_date": "2024-08-01",
+         "break_close": 7000.0},
+    ]}}
+    got = events_from_scan(data, "CN_COMMODITY", {"ag": "kq_m_shfe_ag"})
+    assert got == [{"symbol": "ag", "side": "put",
+                    "break_date": "2024-08-01", "break_close": 7000.0}]
+
+
+# --- US OCC 选约（t_e7fb18c9 seam 已交付：精确到期路径）--------------------
+def _write_us_contract(d: Path, und: str, yymmdd: str, cp: str,
+                       strike: float, rows: list[dict]) -> None:
+    name = f"O:{und}{yymmdd}{cp}{int(round(strike * 1000)):08d}.AMEX.parquet"
+    pd.DataFrame(rows).to_parquet(d / name)
+
+
+def test_pick_us_occ_put_exact_expiry(tmp_path):
+    # GLD put：break 2024-12-20 现价 240.5 → OTM rank1 = strike 240（<现价最近）
+    d = tmp_path / "daily"
+    d.mkdir()
+    rows = _chain_rows("2024-11-01", 60)
+    _write_us_contract(d, "GLD", "250117", "P", 240.0, rows)
+    _write_us_contract(d, "GLD", "250117", "P", 238.0, rows)
+    out = simulate_event("GLD", "put", "2024-12-20", 240.5, daily_dir=d)
+    assert out["evaluated"] is True
+    assert out["strike"] == 240.0
+    assert out["expiry"] == "2025-01-17"
+
+
+def test_pick_us_weekly_rolls_to_14d_expiry_same_month(tmp_path):
+    # 同月两个 weekly 到期（CN 月粒度无法区分）：break 2025-01-02 距 01-10 仅
+    # 8d (<14) → 必须滚到 01-31，即便 01-10 合约有数据可入场。
+    d = tmp_path / "daily"
+    d.mkdir()
+    rows = _chain_rows("2024-12-02", 60)
+    _write_us_contract(d, "GLD", "250110", "P", 240.0, rows)
+    _write_us_contract(d, "GLD", "250131", "P", 240.0, rows)
+    out = simulate_event("GLD", "put", "2025-01-02", 240.5, daily_dir=d)
+    assert out["evaluated"] is True
+    assert out["expiry"] == "2025-01-31"
+
+
+def test_us_event_in_build_report_with_cn(tmp_path):
+    # CN + US 混合事件单报告：两 lane 各自正确选约
+    d = tmp_path / "daily"
+    d.mkdir()
+    pd.DataFrame(_chain_rows("2024-11-08", 40)).to_parquet(
+        d / "SHFE.ag2501C7600.parquet")
+    _write_us_contract(d, "GLD", "250117", "P", 240.0,
+                       _chain_rows("2024-11-01", 60))
+    events = [
+        {"symbol": "ag", "side": "call", "break_date": "2024-11-07",
+         "break_close": 7050.0},
+        {"symbol": "GLD", "side": "put", "break_date": "2024-12-20",
+         "break_close": 240.5},
+    ]
+    rep = build_report(events, daily_dir=d, is_cutoff_date=_date(2025, 6, 30))
+    assert rep["n_evaluated"] == 2
+    assert rep["n_skipped_no_option"] == 0
+    us_row = next(e for e in rep["events"] if e["symbol"] == "GLD")
+    assert us_row["expiry"] == "2025-01-17" and us_row["strike"] == 240.0
+    # us_lane 标注由 build_report 本层产出（reviewer t_547c2252）
+    lane = rep["params"]["us_lane"]
+    assert lane["symbols"] == ["GLD"]
+    assert lane["allow_excluded_us"] is False
+
+
+def test_build_report_rejects_excluded_us_direct_call(tmp_path):
+    # 直接传预构 events 调 build_report 也不能绕过排除（reviewer t_547c2252）
+    d = tmp_path / "daily"
+    d.mkdir()
+    events = [{"symbol": "SPY", "side": "put", "break_date": "2024-07-24",
+               "break_close": 541.23}]
+    with pytest.raises(ValueError, match="SPY"):
+        build_report(events, daily_dir=d, is_cutoff_date=_date(2025, 6, 30))
+
+
+def test_build_report_smoke_optin_labels_us_lane(tmp_path):
+    # 显式 opt-in 时可评估，且 params.us_lane 如实标注 allow_excluded_us
+    d = tmp_path / "daily"
+    d.mkdir()
+    _write_us_contract(d, "SPY", "240816", "P", 540.0,
+                       _chain_rows("2024-06-03", 60))
+    events = [{"symbol": "SPY", "side": "put", "break_date": "2024-07-24",
+               "break_close": 541.23}]
+    rep = build_report(events, daily_dir=d, is_cutoff_date=_date(2025, 6, 30),
+                       allow_excluded_us=True)
+    assert rep["n_evaluated"] == 1
+    lane = rep["params"]["us_lane"]
+    assert lane["allow_excluded_us"] is True
+    assert lane["symbols"] == ["SPY"]
+
+
+def test_build_report_keeps_us_lane_audit_on_zero_events(tmp_path):
+    # CLI 请求 US ticker 但扫出零事件：lane 配置审计信息不得丢（codex P2）
+    d = tmp_path / "daily"
+    d.mkdir()
+    rep = build_report([], daily_dir=d, is_cutoff_date=_date(2025, 6, 30),
+                       us_symbols=["GLD"])
+    lane = rep["params"]["us_lane"]
+    assert lane["symbols"] == ["GLD"]
+    assert lane["allow_excluded_us"] is False

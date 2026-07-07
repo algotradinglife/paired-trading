@@ -93,3 +93,24 @@ def select_expiry_month(
         if (expiry_of(m) - signal_date).days >= min_days:
             return m
     return None
+
+
+def select_expiry_exact(
+    signal_date: date,
+    expiries: list[date],
+    *,
+    min_days: int = MIN_DAYS_TO_EXPIRY,
+) -> date | None:
+    """Pick the nearest exact expiry >= ``min_days`` from the signal.
+
+    The same production rule as ``select_expiry_month`` but on exact
+    expiry dates — for US OCC chains where one month holds multiple
+    expiries (weeklies) and the contract carries its exact expiry
+    (OptionContract.expiry).
+
+    Returns None when no expiry is >= min_days away.
+    """
+    for exp in sorted(set(expiries)):
+        if (exp - signal_date).days >= min_days:
+            return exp
+    return None

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PA Feitian Read-Only Dashboard</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">PA / Feitian fixture</p>
+        <h1>Read-Only Dashboard</h1>
+      </div>
+      <div class="header-meta">
+        <span>Contract</span>
+        <strong>pa_feitian_snapshot_v0</strong>
+      </div>
+    </header>
+
+    <main id="dashboard-root" class="dashboard-root" aria-live="polite">
+      <section class="loading-panel" role="status">
+        <h2>Loading snapshot</h2>
+        <p>src/tests/fixtures/pa_feitian_snapshot_v0.json</p>
+      </section>
+    </main>
+
+    <script type="module" src="./app.mjs"></script>
+  </body>
+</html>

@@ -362,7 +362,23 @@ class BarStore:
                 )
             except _ecals.errors.DateOutOfBounds:
                 if date_obj < cal_lower:
-                    timestamps.append(None)  # historic OOB — drop
+                    # Pre-calendar-lower-bound US daily (exchange_calendars XNYS
+                    # only covers >= 2006-06-13, but raw US daily parquet extends
+                    # back to 1999). Don't silently drop valid pre-2006 trade
+                    # dates: the raw store is already trade-date-indexed (holidays
+                    # excluded upstream), so assign the standard US equity session
+                    # close (16:00 America/New_York, DST-correct → 20:00 UTC EDT /
+                    # 21:00 UTC EST), matching the post-2006 convention. Defensive
+                    # weekend drop guards against bad upstream rows. Caveat: rare
+                    # pre-2006 half-day early closes are labelled 16:00 (cosmetic
+                    # for daily bars); the calendar handles those post-2006.
+                    if date_obj.weekday() >= 5:   # Sat/Sun
+                        timestamps.append(None)
+                    else:
+                        timestamps.append(
+                            pd.Timestamp(date_obj).replace(hour=16)
+                            .tz_localize("America/New_York").tz_convert("UTC")
+                        )
                 else:
                     raise RuntimeError(
                         f"Bar date {date_obj} exceeds exchange_calendars "

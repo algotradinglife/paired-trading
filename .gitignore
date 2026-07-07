@@ -86,6 +86,7 @@ target/
 # === AI/VCS 元数据（每机器各自维护）===
 .jj/
 .claude/
+.worktrees/
 # Python build artifacts
 *.py[oc]
 wheels/

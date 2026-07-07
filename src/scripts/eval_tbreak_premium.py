@@ -4,8 +4,11 @@
 
 事件来源
 --------
-内部 subprocess 跑 scripts/scan_tbreak_chain.py --pool CN_COMMODITY 落临时 JSON，
-再按 --symbols / --since 过滤到 SHFE ag/au/cu/rb（POOL key kq_m_shfe_<sym>）。
+内部 subprocess 跑 scripts/scan_tbreak_chain.py 落临时 JSON，按 --symbols lane 分流：
+CN 短代码（ag/au/cu/rb...）→ --pool CN_COMMODITY（cn_futures 校准）；
+US ticker（GLD/GDX/IWM...）→ --pool US（us_equity 校准，scan 侧 POOL_INSTRUMENT_CLASS）。
+US broad-market/defensive（SPY/DIA/XLU/XLP/XLV）默认排除信号 lane，
+管道冒烟可用 --allow-excluded-us 放行（见 US_EXCLUDED_BROAD_DEFENSIVE）。
 每事件携带 symbol / candidate(put_candidate|call_candidate) / break_date / break_close。
 
 合约选择（每事件）
@@ -88,6 +91,20 @@ POOL_KEY = {"ag": "kq_m_shfe_ag", "au": "kq_m_shfe_au",
             "i": "kq_m_dce_i", "m": "kq_m_dce_m"}
 DEFAULT_SYMBOLS = "cu,rb,i,m,al,ni,ag,au"
 
+# --- US lane（t_aa79fb13）----------------------------------------------------
+# 大写 ticker（如 GLD/GDX/IWM）走 scan --pool US；instrument_class=us_equity
+# 校准由 scan_tbreak_chain 的 POOL_INSTRUMENT_CLASS["US"] 在信号生成端套用，
+# 本侧只做 lane 路由与排除。
+#
+# broad-market/defensive 默认排除（2026-06-09 P0+P1c lane×market 评估）：
+# DIA/SPY 广义市场、XLU 防御 sector 在 H2 反转家族全部 3 条 lane 系统性负 EV
+# （context_a×US n=33 sum −5.79R 等，见 doc/repro/lane_market_evaluation_2026-06-09.md），
+# 新 US lane 默认套用排除。XLP/XLV 为未来扩池预防性 suppress（同属防御
+# sector，直到有 n>=10 正 EV 证据前不进信号 lane）。
+# 管道冒烟（非信号验证）可用 --allow-excluded-us 显式放行。
+US_EXCLUDED_BROAD_DEFENSIVE: frozenset[str] = frozenset(
+    {"SPY", "DIA", "XLU", "XLP", "XLV"})
+
 # 文件名：SHFE.<sym><YYMM><C|P><strike>.parquet
 _OPT_RE = re.compile(r"^SHFE\.(?P<sym>[a-z]{2})(?P<month>\d{4})(?P<cp>[CP])(?P<strike>\d+)\.parquet$")
 
@@ -136,7 +153,8 @@ def _yymm_to_expiry_floor(month: str) -> pd.Timestamp:
     return pd.Timestamp(year=2000 + yy, month=mm, day=1)
 
 
-def _rank_otm_strikes(strikes: list[int], cp: str, underlying_px: float) -> dict[int, int]:
+def _rank_otm_strikes(strikes: list[float], cp: str,
+                      underlying_px: float) -> dict[float, int]:
     """给定一组 strike，返回 {strike: otm_rank}（1=最浅虚），最多 OTM_MAX_RANK 档。
 
     put：strike < 现价（降序，最近现价者 rank1）；call：strike > 现价（升序）。
@@ -227,6 +245,12 @@ def pick_contract_for_event(sym: str, cp: str, break_date: str, underlying_px: f
     """
     from engine.options.expiry_select import select_expiry_month
 
+    if sym.isupper():
+        # US ticker：OCC 合约带精确到期日（t_e7fb18c9 seam），同月可有多个
+        # weekly 到期，CN 月规则不适用 → 走精确到期路径。
+        return _pick_us_contract_for_event(sym, cp, break_date, underlying_px,
+                                           daily_dir)
+
     bd = pd.Timestamp(break_date).normalize()
     bdd = bd.date()
     store = _store_for(daily_dir)
@@ -276,6 +300,61 @@ def pick_contract_for_event(sym: str, cp: str, break_date: str, underlying_px: f
     return None
 
 
+def _pick_us_contract_for_event(sym: str, cp: str, break_date: str,
+                                underlying_px: float,
+                                daily_dir: Path = DAILY_DIR) -> dict | None:
+    """US OCC 选约：与 CN 同语义的生产规则，但用合约自带的精确到期日。
+
+    到期：距 break_date >= 14d 的最近到期（select_expiry_exact；US 同月有
+    多个 weekly 到期，月粒度不适用）。规则到期内无 OTM strike / 无可入场
+    数据时顺延更远到期。strike：到期内最浅虚 OTM（rank1 优先，缺则 rank2）。
+    上市约束与 CN 一致：覆盖起点须在 break_date 后 <= MAX_ENTRY_GAP_DAYS。
+    """
+    from engine.options.expiry_select import select_expiry_exact
+
+    bd = pd.Timestamp(break_date).normalize()
+    bdd = bd.date()
+    store = _store_for(daily_dir)
+    cov = store.coverage(sym)
+    cands = [
+        c for c in store.catalog(sym)
+        if c.opt_type == cp and c.expiry is not None and c.contract_sym in cov
+        and (cov[c.contract_sym][0] - bdd).days <= MAX_ENTRY_GAP_DAYS
+    ]
+    if not cands:
+        return None
+
+    expiries = sorted({c.expiry for c in cands})
+    chosen = select_expiry_exact(bdd, expiries)
+    if chosen is None:
+        return None
+    ordered = [chosen] + [e for e in expiries if e > chosen]
+
+    for exp in ordered:
+        in_exp = [c for c in cands if c.expiry == exp]
+        rank_of = _rank_otm_strikes(
+            [float(c.strike) for c in in_exp], cp, underlying_px)
+        ranked = sorted(
+            (c for c in in_exp if float(c.strike) in rank_of),
+            key=lambda c: rank_of[float(c.strike)],
+        )
+        for c in ranked:
+            raw = store.load_contract_daily(c.contract_sym)
+            if raw is None or raw.empty:
+                continue
+            df = raw.copy()
+            df["date"] = pd.to_datetime(df["date"])
+            entry_idx = _contract_entry_idx(df, bd)
+            if entry_idx is not None:
+                return {
+                    "month": c.underlying_month, "expiry": str(exp),
+                    "strike": float(c.strike),
+                    "otm_rank": rank_of[float(c.strike)],
+                    "path": c.path, "df": df, "entry_idx": entry_idx,
+                }
+    return None
+
+
 def simulate_path(df: pd.DataFrame, entry_idx: int, tick: float,
                   stop_frac: float = STOP_FRAC,
                   hold_days: int = HOLD_DAYS) -> dict:
@@ -318,17 +397,22 @@ def simulate_event(sym: str, side: str, break_date: str, underlying_px: float,
     ``picked`` 可传入已选好的合约（build_report 网格复用，避免重复选取/读盘）。
     """
     cp = "P" if side == "put" else "C"
-    tick = measured_tick(sym, daily_dir)
-    if picked is None:
-        picked = pick_contract_for_event(sym, cp, break_date, underlying_px, daily_dir)
-    if picked is None:
+
+    def _skip(reason: str) -> dict:
         return {
             "symbol": sym, "side": side, "break_date": break_date,
             "break_close": underlying_px, "evaluated": False,
-            "exit_reason": "skipped_no_option", "contract": None,
+            "exit_reason": reason, "contract": None,
             "strike": None, "entry": None, "exit": None, "multiple": None,
         }
 
+    if picked is None:
+        picked = pick_contract_for_event(
+            sym, cp, break_date, underlying_px, daily_dir)
+    if picked is None:
+        return _skip("skipped_no_option")
+
+    tick = measured_tick(sym, daily_dir)
     df = picked["df"]
     i0 = picked["entry_idx"]
     sim = simulate_path(df, i0, tick, stop_frac=stop_frac, hold_days=hold_days)
@@ -336,6 +420,7 @@ def simulate_event(sym: str, side: str, break_date: str, underlying_px: float,
         "symbol": sym, "side": side, "break_date": break_date,
         "break_close": underlying_px, "evaluated": True,
         "contract": picked["path"].stem, "month": picked["month"],
+        "expiry": picked.get("expiry"),  # US OCC 精确到期；CN 为 None
         "strike": picked["strike"], "otm_rank": picked["otm_rank"],
         "entry_date": str(df["date"].iloc[i0].date()),
         **sim,
@@ -345,32 +430,85 @@ def simulate_event(sym: str, side: str, break_date: str, underlying_px: float,
 # ---------------------------------------------------------------------------
 # 事件获取
 # ---------------------------------------------------------------------------
-def fetch_events(symbols: list[str], since: str) -> list[dict]:
-    """subprocess 跑 scan_tbreak_chain，取 SHFE ag/au/cu/rb 事件。"""
+def split_symbols_by_lane(symbols: list[str]) -> tuple[list[str], list[str]]:
+    """符号分流：CN 短代码（POOL_KEY 内）与 US ticker（scan US 池内）。
+
+    不在任一池的符号直接报错（codex P2：scan 扫不到的 ticker 若放行，
+    会产出"合法零事件"假象）。
+
+    >>> split_symbols_by_lane(["ag", "GLD", "cu"])
+    (['ag', 'cu'], ['GLD'])
+    """
+    from scripts.scan_tbreak_chain import POOLS as _SCAN_POOLS
+    us_universe = set(_SCAN_POOLS["US"])
+    cn = [s for s in symbols if s in POOL_KEY]
+    us = [s for s in symbols if s in us_universe]
+    unknown = [s for s in symbols if s not in POOL_KEY and s not in us_universe]
+    if unknown:
+        raise ValueError(
+            f"未知符号 {unknown}：CN 短代码须在 POOL_KEY（{sorted(POOL_KEY)}），"
+            f"US ticker 须在 scan US 池（{sorted(us_universe)}）")
+    return cn, us
+
+
+def check_us_exclusions(us_symbols: list[str], allow_excluded: bool) -> None:
+    """US lane broad-market/defensive 默认排除（见 US_EXCLUDED_BROAD_DEFENSIVE）。"""
+    hit = sorted(set(us_symbols) & US_EXCLUDED_BROAD_DEFENSIVE)
+    if hit and not allow_excluded:
+        raise ValueError(
+            f"US broad-market/defensive 标的默认排除信号 lane: {hit}"
+            "（2026-06-09 lane×market 评估，H2 反转家族系统性负 EV）。"
+            "管道冒烟（非信号验证）可用 --allow-excluded-us 显式放行")
+
+
+def _run_scan(pool: str, since: str) -> dict:
+    """subprocess 跑 scan_tbreak_chain --pool <pool>，返回解析后的 JSON。"""
     with tempfile.NamedTemporaryFile("r", suffix=".json", delete=False) as tf:
         tmp = Path(tf.name)
     try:
         subprocess.run(
-            [sys.executable, str(SCAN_SCRIPT), "--pool", "CN_COMMODITY",
+            [sys.executable, str(SCAN_SCRIPT), "--pool", pool,
              "--since", since, "-o", str(tmp)],
             cwd=str(SRC_DIR), check=True, capture_output=True, text=True,
         )
-        data = json.loads(tmp.read_text())
+        return json.loads(tmp.read_text())
     finally:
         tmp.unlink(missing_ok=True)
-    cn = data.get("CN_COMMODITY", {})
+
+
+def events_from_scan(data: dict, pool: str, sym_to_key: dict[str, str]) -> list[dict]:
+    """从 scan JSON 提取事件（纯函数）。sym_to_key: 输出符号 -> scan 内 key。"""
+    pool_data = data.get(pool, {})
     events: list[dict] = []
-    for sym in symbols:
-        key = POOL_KEY.get(sym)
-        if key is None:
-            continue
-        for ev in cn.get(key, []):
+    for sym, key in sym_to_key.items():
+        for ev in pool_data.get(key, []):
             side = "put" if ev["candidate"] == "put_candidate" else "call"
             events.append({
                 "symbol": sym, "side": side,
                 "break_date": ev["break_date"],
                 "break_close": ev["break_close"],
             })
+    return events
+
+
+def fetch_events(symbols: list[str], since: str, *,
+                 allow_excluded_us: bool = False) -> list[dict]:
+    """按 lane 跑 scan_tbreak_chain 取事件。
+
+    CN 短代码 → --pool CN_COMMODITY（cn_futures 校准）；
+    US ticker → --pool US（us_equity 校准，scan 侧 POOL_INSTRUMENT_CLASS）。
+    US broad-market/defensive 标的默认拒绝（check_us_exclusions）。
+    """
+    cn_syms, us_syms = split_symbols_by_lane(symbols)
+    check_us_exclusions(us_syms, allow_excluded_us)
+    events: list[dict] = []
+    if cn_syms:
+        data = _run_scan("CN_COMMODITY", since)
+        events += events_from_scan(data, "CN_COMMODITY",
+                                   {s: POOL_KEY[s] for s in cn_syms})
+    if us_syms:
+        data = _run_scan("US", since)
+        events += events_from_scan(data, "US", {s: s for s in us_syms})
     events.sort(key=lambda e: (e["symbol"], e["break_date"]))
     return events
 
@@ -401,10 +539,23 @@ def _group_stats(rows: list[dict]) -> dict:
 
 
 def build_report(events: list[dict], daily_dir: Path = DAILY_DIR,
-                 is_cutoff_date=None) -> dict:
+                 is_cutoff_date=None, *, allow_excluded_us: bool = False,
+                 us_symbols: list[str] | None = None) -> dict:
+    """构建评估报告。
+
+    排除策略在本层强制（reviewer t_547c2252）：直接传预构 events 调本函数
+    同样过 check_us_exclusions，绕不开 broad-market/defensive 排除；
+    冒烟须显式 allow_excluded_us=True，且 params.us_lane 永远如实标注。
+    ``us_symbols``：调用方请求的 US ticker（main 传入）；与事件内符号取并集，
+    保证零事件时报告仍留 lane 配置审计信息（codex P2）。
+    """
     from datetime import date as _date
     if is_cutoff_date is None:
         is_cutoff_date = _date.fromisoformat(IS_CUTOFF_DATE_DEFAULT)
+
+    us_syms = sorted({e["symbol"] for e in events if e["symbol"].isupper()}
+                     | set(us_symbols or []))
+    check_us_exclusions(us_syms, allow_excluded_us)
 
     # 每事件选一次合约（缓存 df），头条参数 + 网格共用
     picks: list[dict | None] = []
@@ -474,6 +625,12 @@ def build_report(events: list[dict], daily_dir: Path = DAILY_DIR,
             "bootstrap_n": BOOTSTRAP_N, "bootstrap_seed": BOOTSTRAP_SEED,
             "entry": "next-trading-day open + slip", "exit": "stop@low | time@close | data_gap",
             "multiple": "exit_fill / entry_fill",
+            **({"us_lane": {
+                "instrument_class": "us_equity",
+                "excluded_broad_defensive": sorted(US_EXCLUDED_BROAD_DEFENSIVE),
+                "allow_excluded_us": allow_excluded_us,
+                "symbols": us_syms,
+            }} if us_syms else {}),
         },
         "n_events_total": len(details),
         "n_evaluated": len(evaluated),
@@ -497,12 +654,19 @@ def main() -> None:
     ap.add_argument("--since", default="2024-07-01")
     ap.add_argument("--is-cutoff-date", type=_date.fromisoformat,
                     default=_date.fromisoformat(IS_CUTOFF_DATE_DEFAULT))
+    ap.add_argument("--allow-excluded-us", action="store_true",
+                    help="放行 broad-market/defensive 排除名单内的 US 标的"
+                         "（仅管道冒烟用，产出不作信号验证）")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
     symbols = [s.strip() for s in args.symbols.split(",") if s.strip()]
-    events = fetch_events(symbols, args.since)
-    report = build_report(events, is_cutoff_date=args.is_cutoff_date)
+    events = fetch_events(symbols, args.since,
+                          allow_excluded_us=args.allow_excluded_us)
+    _, us_syms = split_symbols_by_lane(symbols)
+    report = build_report(events, is_cutoff_date=args.is_cutoff_date,
+                          allow_excluded_us=args.allow_excluded_us,
+                          us_symbols=us_syms)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2))

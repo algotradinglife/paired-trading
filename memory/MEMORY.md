@@ -8,6 +8,11 @@
 - [Regime gate not portable](feedback_regime_gate_not_portable.md) — SPY/SMA200 gate 不能套 bottom-reversal lane；跨市场 portable signal 极少
 - [Retired & historical findings](project_retired_and_historical.md) — DIF 检测器家族 + PA TOP/put（3 机制全 REJECT，不做 PA put lane）+ 旧 policy/data/scope：已废除勿重探（含原因）
 - [Put side: Xiao direction reopened](project_put_side_xiao_direction.md) — 肖偏重 put；put 须在权利金空间验证（非标的 R 空间，PA top 镜像否决仍成立）；数据补完在新服务器，代码将迁移 WSL
+- [US premium lane harness ready](project_us_premium_lane.md) — OCC 精确到期选约 + broad/defensive 排除已就绪；SPY 冒烟仅管道验证；信号验证等 GLD/GDX（t_6eae7583）
+- [PA hypotheses sweep 2026-06-13](project_pa_hypotheses_sweep.md) — Brooks 4 假设在 bottom×opp 验证：range_vs_avg 棒长惩罚正交显著（唯一正向）；二次入场反 Brooks 且显著；状态gate/ioi 偏 null；epic 已结，de-weight 不移植生产→PARK
+- [SPEC-001 EV eval (philosopher pipeline)](project_spec001_ev_eval.md) — 忠实 EV 已交付：n=43 win 67.4% +0.773R CI[+0.38,+1.17] 无肥尾 → **选择性=alpha**（vs proxy 扣成本归零）；t_0da3b750 done
+- [Shadow signal-bar gate degenerate](project_shadow_gate_degenerate.md) — 发布阈值 0.5/0.66 落在分布地板→100%通过=no-op；晋升前须重设 cohort-relative 阈值 + 取 OOS 数据
+- [Team orchestrator role](feedback_team_orchestrator_role.md) — 我是 quant-team 灵魂/lead：loop 轮询全员、推 blocked/todo、调动 data-engineer/philosopher、空板时让 philosopher 出改进方案定新目标；blocked 仅留给真需人工干预
 
 ## Methodology & philosophy
 
@@ -22,7 +27,7 @@
 
 ## Collaboration preferences (feedback)
 
-- [Strategy repo boundary](feedback_strategy_repo_boundary.md) — 数据回填/修复归 data-pipeline（quant-cli）；发现数据问题只记录上报，绝不自己跑 quant sync
+- [Strategy repo boundary](feedback_strategy_repo_boundary.md) — 数据事务全归 data-engineer（kanban 建卡是唯一路径）；不读 quant_data/ 代码、不看 .env、不探数据源 API、不跑 quant sync
 
 - [Decisions: give your opinion, not a quiz](feedback_options_style.md) — 判断题直接给带理由的推荐+等 go-ahead，别甩 AskUserQuestion 菜单；列选项必带推荐+尽量并行；提问先用大白话+实例
 - [VCS: use jj not git](project_vcs_jj.md) — 仓库统一用 jj（colocated），日常 commit/push 禁用 git 写命令
@@ -51,6 +56,7 @@
 - [Options entry timing (IV)](project_options_entry_timing.md) — 信号触发时 IV 16-17% vs 旧 6-7%；select_otm_calls() 集成 score_today
 - [ag options swing findings](project_ag_options_swing_findings.md) — htf=supporting+宽止损 EV 1.685x；Xiao 飞天止损实为期权 K 线几个 tick
 - [DD-line options cross-instrument](project_ddline_options_findings.md) — ag/au 有效(1.29x/1.66x)，cu/rb 全负 EV；贵金属上涨偏态是关键
+- [Pairing convexity Q2-Phase1](project_pairing_convexity_q2phase1.md) — au call-favorable✓/rb 不✓/cu 矛盾→precious-base 二分太粗；cu 负 EV 须 Phase2 期权侧(IV)解释；excursion 测凸性是错误度量
 - [CN options intraday (TqSdk)](project_cn_options_intraday_tqsdk.md) — SHFE/DCE/CZCE symbol formats + 全合约历史覆盖
 - [Position size in score_today](project_position_size_in_score_today.md) — full/half/light/watch；score 分层+PA 相位限制+15m 降级
 
