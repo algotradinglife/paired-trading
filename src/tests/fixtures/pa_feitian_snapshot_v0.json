@@ -1,0 +1,136 @@
+{
+  "schema_version": "pa_feitian_snapshot_v0",
+  "generated_at_utc": "2026-07-07T00:00:00Z",
+  "source_commit": "50b3cf92f4058f4fcaf521784600bbd5a55cf8ab",
+  "run_config": {
+    "contract": "pa_feitian_snapshot_v0",
+    "mode": "fixture",
+    "producer": "src/scripts/emit_pa_feitian_snapshot.py"
+  },
+  "data_quality": {
+    "raw_data_access": "not_required_for_fixture",
+    "premium_space_required": true,
+    "bid_ask_available": false
+  },
+  "summary": {
+    "signals_total": 2,
+    "by_status": {
+      "advisory": 1,
+      "data_blocked": 1
+    },
+    "integration_milestone": "producer_snapshot_frontend_readonly_shell"
+  },
+  "signals": [
+    {
+      "id": "paft_fixture_0001",
+      "instrument": "SHFE.au",
+      "contract": "kq_m_shfe_au",
+      "interval": "1h",
+      "ts_utc": "2026-06-30T02:00:00Z",
+      "underlying_signal": {
+        "family": "pa_feitian",
+        "pattern": "platform_breakout",
+        "direction": "call"
+      },
+      "features_det": {
+        "lookahead_free": true,
+        "cutoff_ts_utc": "2026-06-30T02:00:00Z",
+        "premium_space_signal": "pending"
+      },
+      "decision": "watch",
+      "decision_trace": "fixture: underlying alert exists; option premium contract pending",
+      "option_leg": {
+        "side": "call",
+        "strike": null,
+        "dte": null,
+        "otm_rank": null,
+        "delta_estimate": null,
+        "selection_status": "advisory"
+      },
+      "iv_regime": {
+        "iv_rank": 0.42,
+        "keep": true,
+        "reason": null
+      },
+      "exit_policy": {
+        "mode": "runner",
+        "status": "advisory",
+        "reason": "premium runner preferred; production integration pending"
+      },
+      "underlying_r_outcome": {
+        "available": true,
+        "r": 0.8
+      },
+      "premium_r_outcome": {
+        "available": false,
+        "reason": "premium_path_not_emitted"
+      },
+      "option_runner_outcome": null,
+      "proxy_outcome": {
+        "available": true,
+        "type": "underlying_proxy"
+      },
+      "status": "advisory",
+      "caveats": [
+        "fixture only",
+        "underlying-R context is not premium-space validation"
+      ]
+    },
+    {
+      "id": "paft_fixture_0002",
+      "instrument": "SHFE.ag",
+      "contract": "kq_m_shfe_ag",
+      "interval": "1h",
+      "ts_utc": "2026-06-30T03:00:00Z",
+      "underlying_signal": {
+        "family": "pa_feitian",
+        "pattern": "trendline_break",
+        "direction": "put"
+      },
+      "features_det": {
+        "lookahead_free": true,
+        "cutoff_ts_utc": "2026-06-30T03:00:00Z",
+        "premium_space_signal": "data_blocked"
+      },
+      "decision": null,
+      "decision_trace": null,
+      "option_leg": {
+        "side": "put",
+        "strike": null,
+        "dte": null,
+        "otm_rank": null,
+        "delta_estimate": null,
+        "selection_status": "data_blocked"
+      },
+      "iv_regime": {
+        "iv_rank": null,
+        "keep": false,
+        "reason": "iv_warmup(<40 prior signals)"
+      },
+      "exit_policy": {
+        "mode": "tick_stop",
+        "status": "data_blocked",
+        "reason": "tick-level premium stop requires intraday option bid/ask"
+      },
+      "underlying_r_outcome": {
+        "available": true,
+        "r": -0.2
+      },
+      "premium_r_outcome": {
+        "available": false,
+        "reason": "missing_premium_bars"
+      },
+      "option_runner_outcome": null,
+      "proxy_outcome": null,
+      "status": "data_blocked",
+      "caveats": [
+        "do not infer missing option fields",
+        "put-side premium chain requires explicit validation"
+      ]
+    }
+  ],
+  "warnings": [
+    "snapshot v0 is a contract fixture, not a production signal set",
+    "premium-space outcomes must remain separate from underlying-R context"
+  ]
+}
