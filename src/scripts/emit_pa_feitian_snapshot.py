@@ -1,8 +1,9 @@
-"""Emit a minimal PA / Feitian snapshot contract artifact.
+"""Emit a PA / Feitian snapshot contract artifact.
 
-This v0 producer is a file-backed contract stub. It deliberately does not read
-raw data stores or implement strategy scoring; those belong to follow-up
-strategy cards after the shared boundary is accepted.
+By default this writes the deterministic contract fixture. With ``--scorecard``
+it consumes an existing score_today JSON output and converts the emitted ag/au
+option suggestions into pa_feitian_snapshot_v0. This script does not scan raw
+market data itself.
 """
 
 from __future__ import annotations
@@ -15,7 +16,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from engine.pa_feitian.contract import example_snapshot, write_snapshot
+from engine.options.iv_regime import DEFAULT_MAX_RANK, DEFAULT_WARMUP
+from engine.pa_feitian.contract import (
+    example_snapshot,
+    snapshot_from_scorecard_file,
+    write_snapshot,
+)
 
 
 def _source_commit() -> str:
@@ -56,12 +62,48 @@ def main(argv: list[str] | None = None) -> int:
         default="2026-07-07T00:00:00Z",
         help="UTC timestamp to embed. Default is fixed for deterministic contract tests.",
     )
+    parser.add_argument(
+        "--scorecard",
+        type=Path,
+        default=None,
+        help="Existing score_today JSON output to convert into a real PA/Feitian snapshot.",
+    )
+    parser.add_argument(
+        "--max-signals",
+        type=int,
+        default=None,
+        help="Keep only the most recent N scorecard-backed PA/Feitian signals.",
+    )
+    parser.add_argument(
+        "--iv-warmup",
+        type=int,
+        default=DEFAULT_WARMUP,
+        help="Prior signal IV count required before causal IV rank is actionable.",
+    )
+    parser.add_argument(
+        "--iv-max-rank",
+        type=float,
+        default=DEFAULT_MAX_RANK,
+        help="Maximum causal IV rank to keep a premium runner candidate.",
+    )
     args = parser.parse_args(argv)
 
-    snapshot = example_snapshot(
-        source_commit=args.source_commit or _source_commit(),
-        generated_at_utc=_parse_generated_at(args.generated_at_utc),
-    )
+    source_commit = args.source_commit or _source_commit()
+    generated_at_utc = _parse_generated_at(args.generated_at_utc)
+    if args.scorecard is not None:
+        snapshot = snapshot_from_scorecard_file(
+            args.scorecard,
+            source_commit=source_commit,
+            generated_at_utc=generated_at_utc,
+            max_signals=args.max_signals,
+            iv_warmup=args.iv_warmup,
+            iv_max_rank=args.iv_max_rank,
+        )
+    else:
+        snapshot = example_snapshot(
+            source_commit=source_commit,
+            generated_at_utc=generated_at_utc,
+        )
     write_snapshot(snapshot, args.out)
     return 0
 
