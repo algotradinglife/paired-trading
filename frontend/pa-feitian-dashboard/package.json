@@ -1,0 +1,9 @@
+{
+  "name": "pa-feitian-dashboard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "node dev-server.mjs",
+    "smoke": "node --test test/dashboard-smoke.test.mjs"
+  }
+}
