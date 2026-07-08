@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from engine.options.iv_regime import DEFAULT_MAX_RANK, DEFAULT_WARMUP
-from engine.pa_feitian.contract import write_snapshot
+from engine.pa_feitian.contract import PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION, write_snapshot
 from engine.pa_feitian.scorecard_producer import example_snapshot, snapshot_from_scorecard_file
 
 
@@ -47,7 +47,13 @@ def main(argv: list[str] | None = None) -> int:
         "--out",
         type=Path,
         required=True,
-        help="Output JSON path for pa_feitian_snapshot_v0.",
+        help="Output JSON path for the PA/Feitian snapshot.",
+    )
+    parser.add_argument(
+        "--contract-version",
+        choices=["pa_feitian_snapshot_v0", "pa_feitian_snapshot_v1"],
+        default=PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION,
+        help="Snapshot contract to emit. v0 remains the default; v1 is the shadow trace contract.",
     )
     parser.add_argument(
         "--source-commit",
@@ -95,11 +101,13 @@ def main(argv: list[str] | None = None) -> int:
             max_signals=args.max_signals,
             iv_warmup=args.iv_warmup,
             iv_max_rank=args.iv_max_rank,
+            contract_version=args.contract_version,
         )
     else:
         snapshot = example_snapshot(
             source_commit=source_commit,
             generated_at_utc=generated_at_utc,
+            contract_version=args.contract_version,
         )
     write_snapshot(snapshot, args.out)
     return 0
