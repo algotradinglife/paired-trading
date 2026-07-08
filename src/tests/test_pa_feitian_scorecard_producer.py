@@ -10,9 +10,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from engine.pa_feitian.contract import (  # noqa: E402
     load_snapshot,
-    snapshot_from_scorecard,
     write_snapshot,
 )
+from engine.pa_feitian.scorecard_producer import snapshot_from_scorecard  # noqa: E402
 
 
 SRC_ROOT = Path(__file__).resolve().parents[1]

@@ -17,11 +17,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from engine.options.iv_regime import DEFAULT_MAX_RANK, DEFAULT_WARMUP
-from engine.pa_feitian.contract import (
-    example_snapshot,
-    snapshot_from_scorecard_file,
-    write_snapshot,
-)
+from engine.pa_feitian.contract import write_snapshot
+from engine.pa_feitian.scorecard_producer import example_snapshot, snapshot_from_scorecard_file
 
 
 def _source_commit() -> str:
