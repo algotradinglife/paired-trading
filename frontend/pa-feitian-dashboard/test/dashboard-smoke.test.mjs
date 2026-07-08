@@ -5,6 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 
 import {
+  SNAPSHOT_MODE_DEFINITIONS,
   STATUS_DEFINITIONS,
   TRACE_NODE_STATUS_DEFINITIONS,
   buildDashboardModel,
@@ -15,6 +16,7 @@ import { copySnapshotFixture } from "../scripts/copy-snapshot-fixture.mjs";
 
 const fixtureUrl = new URL("../fixtures/pa_feitian_snapshot_v1.json", import.meta.url);
 const legacyFixtureUrl = new URL("../fixtures/pa_feitian_snapshot_v0.json", import.meta.url);
+const manifestFixtureUrl = new URL("../../../src/tests/fixtures/pa_feitian_run_manifest_v1.json", import.meta.url);
 const appFiles = [
   new URL("../index.html", import.meta.url),
   new URL("../app.mjs", import.meta.url),
@@ -35,8 +37,14 @@ test("renders summary, warning, signal table, and trace nodes from the v1 fixtur
   assert.match(html, /data-testid="signal-table"/);
   assert.match(html, /data-testid="signal-drill-down"/);
   assert.match(html, /data-testid="decision-trace-v1"/);
+  assert.match(html, /data-testid="decision-trace-v1-input-refs"/);
   assert.match(html, /data-testid="decision-trace-v1-nodes"/);
+  assert.match(html, /Fixture snapshot/);
+  assert.match(html, /data-testid="run-manifest-empty"/);
+  assert.match(html, /Manifest metadata unavailable/);
   assert.match(html, /Score Today underlying signal/);
+  assert.match(html, /scorecard_record:1/);
+  assert.match(html, /sha256:/);
   assert.match(html, /iv_regime/);
   assert.match(html, /snapshot v1 is a shadow contract fixture/);
   assert.match(html, /forward premium\/underlying outcomes/);
@@ -52,6 +60,7 @@ test("surfaces defensive states, trace node states, and missing optional fields"
   assert.equal(model.statusCounts.data_blocked, 1);
   assert.equal(model.statusCounts.model_dominated, 1);
   assert.ok("model_dominated" in STATUS_DEFINITIONS);
+  assert.equal(SNAPSHOT_MODE_DEFINITIONS.fixture, "Fixture snapshot");
   assert.ok("blocked" in TRACE_NODE_STATUS_DEFINITIONS);
   assert.match(html, /model_dominated/);
   assert.match(html, /blocked/);
@@ -76,6 +85,53 @@ test("surfaces defensive states, trace node states, and missing optional fields"
     missingOptionalFields({ ...blockedSignal, decision_trace: null }).includes("Decision trace"),
     false,
   );
+});
+
+test("renders generated and review manifest provenance labels", async () => {
+  const snapshot = await loadFixture();
+  const manifest = await loadFixture(manifestFixtureUrl);
+  const generatedSnapshot = {
+    ...snapshot,
+    run_config: {
+      ...snapshot.run_config,
+      mode: "scorecard",
+      source_scorecard: "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    },
+    warnings: ["generated manifest smoke"],
+  };
+
+  const generatedModel = buildDashboardModel(generatedSnapshot, { manifest });
+  const generatedHtml = renderDashboard(generatedSnapshot, { manifest });
+
+  assert.equal(generatedModel.snapshotMode, "generated");
+  assert.equal(generatedModel.manifest.dataAccess.status, "fixture_fallback");
+  assert.match(generatedHtml, /data-testid="run-manifest-provenance"/);
+  assert.match(generatedHtml, /Generated snapshot/);
+  assert.match(generatedHtml, /Scorecard artifact/);
+  assert.match(generatedHtml, /Snapshot artifact/);
+  assert.match(generatedHtml, /src\/tests\/fixtures\/pa_feitian_scorecard_v1\.json/);
+  assert.match(generatedHtml, /fixture_fallback/);
+  assert.match(generatedHtml, /frontend\/pa-feitian-dashboard\/fixtures\/pa_feitian_snapshot_v1\.json/);
+  assert.match(generatedHtml, /Input hashes/);
+  assert.match(generatedHtml, /Output hashes/);
+
+  const reviewedManifest = {
+    ...manifest,
+    review_state: {
+      status: "approved",
+      reviewer: "chatgpt",
+      reviewed_at_utc: "2026-07-08T00:00:00Z",
+      notes: ["review gate approved"],
+    },
+  };
+  const reviewModel = buildDashboardModel(generatedSnapshot, { manifest: reviewedManifest });
+  const reviewHtml = renderDashboard(generatedSnapshot, { manifest: reviewedManifest });
+
+  assert.equal(reviewModel.snapshotMode, "review");
+  assert.match(reviewHtml, /Review snapshot/);
+  assert.match(reviewHtml, /approved/);
+  assert.match(reviewHtml, /chatgpt/);
+  assert.match(reviewHtml, /review gate approved/);
 });
 
 test("renders legacy decision_trace fallback for v0 snapshots", async () => {
@@ -121,6 +177,7 @@ test("renders an explicit empty state when the contract has no signals", async (
 
 test("copies a generated snapshot artifact into a frontend fixture target", async () => {
   const snapshot = await loadFixture();
+  const manifest = await loadFixture(manifestFixtureUrl);
   const tempRoot = await mkdtemp(join(tmpdir(), "pa-feitian-dashboard-"));
   const generatedSource = join(tempRoot, "generated-pa-feitian-snapshot.json");
   const copiedOut = join(tempRoot, "fixtures", "pa_feitian_snapshot_v1.json");
@@ -148,11 +205,13 @@ test("copies a generated snapshot artifact into a frontend fixture target", asyn
   await writeFile(generatedSource, JSON.stringify(generatedSnapshot), "utf8");
   const copyResult = await copySnapshotFixture({ source: generatedSource, out: copiedOut, quiet: true });
   const copiedSnapshot = JSON.parse(await readFile(copiedOut, "utf8"));
-  const html = renderDashboard(copiedSnapshot);
+  const html = renderDashboard(copiedSnapshot, { manifest });
 
   assert.equal(copyResult.changed, true);
   assert.equal(copiedSnapshot.run_config.mode, "scorecard");
   assert.equal(copiedSnapshot.summary.integration_milestone, "generated_snapshot_copy_smoke");
+  assert.match(html, /Generated snapshot/);
+  assert.match(html, /data-testid="run-manifest-provenance"/);
   assert.match(html, /paft_generated_0001/);
   assert.match(html, /scorecard/);
   assert.match(html, /generated snapshot copy smoke/);
