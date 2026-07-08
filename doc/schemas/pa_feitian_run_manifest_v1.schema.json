@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/algotradinglife/paired-trading/doc/schemas/pa_feitian_run_manifest_v1.schema.json",
+  "title": "PA / Feitian Run Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "source_commit",
+    "scorecard_artifact",
+    "snapshot_artifact",
+    "cli_args",
+    "run_config",
+    "data_access",
+    "input_hashes",
+    "output_hashes",
+    "frontend_copy_path",
+    "review_state"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pa_feitian_run_manifest_v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_commit": {
+      "type": "string",
+      "minLength": 7,
+      "maxLength": 40
+    },
+    "scorecard_artifact": {
+      "$ref": "#/$defs/scorecard_artifact"
+    },
+    "snapshot_artifact": {
+      "$ref": "#/$defs/snapshot_artifact"
+    },
+    "cli_args": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "run_config": {
+      "type": "object"
+    },
+    "data_access": {
+      "$ref": "#/$defs/data_access"
+    },
+    "input_hashes": {
+      "type": "object",
+      "required": [
+        "scorecard_artifact"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/hash_digest"
+      },
+      "properties": {
+        "scorecard_artifact": {
+          "$ref": "#/$defs/hash_digest"
+        }
+      }
+    },
+    "output_hashes": {
+      "type": "object",
+      "required": [
+        "snapshot_artifact"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/hash_digest"
+      },
+      "properties": {
+        "snapshot_artifact": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "frontend_copy": {
+          "$ref": "#/$defs/hash_digest"
+        }
+      }
+    },
+    "frontend_copy_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "review_state": {
+      "$ref": "#/$defs/review_state"
+    }
+  },
+  "$defs": {
+    "hash_digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "scorecard_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "path",
+        "sha256",
+        "schema_version",
+        "content_type"
+      ],
+      "properties": {
+        "kind": {
+          "const": "scorecard"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "schema_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "content_type": {
+          "const": "application/json"
+        }
+      }
+    },
+    "snapshot_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "path",
+        "sha256",
+        "schema_version",
+        "content_type"
+      ],
+      "properties": {
+        "kind": {
+          "const": "snapshot"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "schema_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "content_type": {
+          "const": "application/json"
+        }
+      }
+    },
+    "review_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reviewer",
+        "reviewed_at_utc",
+        "notes"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "pending",
+            "approved",
+            "changes_requested",
+            "rejected"
+          ]
+        },
+        "reviewer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewed_at_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "data_access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "source",
+        "notes"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "real_data_available",
+            "fixture_fallback",
+            "data_blocked",
+            "unknown"
+          ]
+        },
+        "source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

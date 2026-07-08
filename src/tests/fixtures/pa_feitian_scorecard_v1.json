@@ -1,0 +1,115 @@
+{
+  "pool": "CN_METAL",
+  "instrument_class": "cn_metal_futures",
+  "window_days": 30,
+  "active_rules": [
+    "pa-h2-cn-metal"
+  ],
+  "scored": [
+    {
+      "symbol": "kq_m_shfe_au",
+      "date": "2026-06-28",
+      "direction": "bottom",
+      "level": "pa_h2",
+      "subtype": "pa_h2",
+      "confidence": 0.75,
+      "score": 4,
+      "policy_rule": "pa-h2-cn-metal-tr-phase",
+      "policy_weight": 0.75,
+      "underlying_price": 860.0,
+      "options_calls": [
+        {
+          "rank": 1,
+          "strike": 880,
+          "otm_pct": 2.33,
+          "expiry_month": "2608",
+          "expiry_date": "2026-08-17",
+          "contract_sym": "au2608c880",
+          "days_to_expiry": 45,
+          "is_mm_strike": false,
+          "option_price": 18.5,
+          "price_source": "store",
+          "model_dominated": false,
+          "iv": 20.0
+        }
+      ],
+      "pa_phase": "TR",
+      "position_size": "half",
+      "signal_bar_quality": {
+        "body_frac": 0.82,
+        "close_pos": 0.97,
+        "double_strong": true
+      }
+    },
+    {
+      "symbol": "kq_m_shfe_au",
+      "date": "2026-06-29",
+      "direction": "bottom",
+      "level": "pa_h2",
+      "subtype": "pa_h2",
+      "confidence": 0.75,
+      "score": 4,
+      "policy_rule": "pa-h2-cn-metal-tr-phase",
+      "policy_weight": 0.75,
+      "underlying_price": 860.0,
+      "options_calls": [
+        {
+          "rank": 1,
+          "strike": 880,
+          "otm_pct": 2.33,
+          "expiry_month": "2608",
+          "expiry_date": "2026-08-17",
+          "contract_sym": "au2608c880",
+          "days_to_expiry": 45,
+          "is_mm_strike": false,
+          "option_price": 12.2,
+          "price_source": "store",
+          "model_dominated": false,
+          "iv": 10.0
+        }
+      ],
+      "pa_phase": "TR",
+      "position_size": "half",
+      "signal_bar_quality": {
+        "body_frac": 0.82,
+        "close_pos": 0.97,
+        "double_strong": true
+      }
+    },
+    {
+      "symbol": "kq_m_shfe_au",
+      "date": "2026-06-30",
+      "direction": "bottom",
+      "level": "pa_h2",
+      "subtype": "pa_h2",
+      "confidence": 0.75,
+      "score": 4,
+      "policy_rule": "pa-h2-cn-metal-tr-phase",
+      "policy_weight": 0.75,
+      "underlying_price": 860.0,
+      "options_calls": [
+        {
+          "rank": 1,
+          "strike": 880,
+          "otm_pct": 2.33,
+          "expiry_month": "2608",
+          "expiry_date": "2026-08-17",
+          "contract_sym": "au2608c880",
+          "days_to_expiry": 45,
+          "is_mm_strike": false,
+          "option_price": 10.4,
+          "price_source": "model",
+          "model_dominated": true,
+          "iv": 12.0
+        }
+      ],
+      "pa_phase": "TR",
+      "position_size": "half",
+      "signal_bar_quality": {
+        "body_frac": 0.82,
+        "close_pos": 0.97,
+        "double_strong": true
+      }
+    }
+  ]
+}
