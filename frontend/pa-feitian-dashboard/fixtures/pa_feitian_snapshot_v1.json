@@ -1,0 +1,855 @@
+{
+  "schema_version": "pa_feitian_snapshot_v1",
+  "generated_at_utc": "2026-07-07T00:00:00Z",
+  "source_commit": "cccccccccccccccccccccccccccccccccccccccc",
+  "run_config": {
+    "contract": "pa_feitian_snapshot_v1",
+    "mode": "fixture",
+    "producer": "src/scripts/emit_pa_feitian_snapshot.py",
+    "source_scorecard": null,
+    "pool": "CN_METAL",
+    "instrument_class": "cn_metal_futures",
+    "window_days": 30,
+    "active_rules": [
+      "pa-h2-cn-metal"
+    ],
+    "iv_warmup": 1,
+    "iv_max_rank": 0.66,
+    "max_signals": null
+  },
+  "data_quality": {
+    "raw_data_access": "not_used_by_pa_feitian_producer",
+    "source_output_type": "score_today_json",
+    "source_records_total": 3,
+    "source_records_with_options": 3,
+    "selected_option_price_sources": {
+      "model": 1,
+      "store": 2
+    },
+    "selected_option_missing_price": 0,
+    "selected_option_missing_iv_or_rank": 1
+  },
+  "summary": {
+    "signals_total": 3,
+    "by_status": {
+      "keep": 1,
+      "data_blocked": 1,
+      "model_dominated": 1
+    },
+    "by_instrument": {
+      "SHFE.au": 3
+    },
+    "integration_milestone": "producer_snapshot_v1_shadow_contract"
+  },
+  "signals": [
+    {
+      "id": "paft_scorecard_0001_kq_m_shfe_au_20260628000000",
+      "instrument": "SHFE.au",
+      "contract": "kq_m_shfe_au",
+      "interval": "1d",
+      "ts_utc": "2026-06-28T00:00:00Z",
+      "underlying_signal": {
+        "family": "pa_feitian",
+        "source": "score_today",
+        "symbol": "kq_m_shfe_au",
+        "direction": "bottom",
+        "level": "pa_h2",
+        "subtype": "pa_h2",
+        "confidence": 0.75,
+        "score": 4,
+        "policy_rule": "pa-h2-cn-metal-tr-phase",
+        "policy_weight": 0.75,
+        "matched_sweet_spots": [],
+        "direction_verdict": null,
+        "direction_confidence": null,
+        "direction_sources": null,
+        "direction_rationale": null
+      },
+      "features_det": {
+        "lookahead_free": true,
+        "cutoff_ts_utc": "2026-06-28T00:00:00Z",
+        "source_record_index": 1,
+        "underlying_price": 860.0,
+        "invalidation_level": null,
+        "position_size": "half",
+        "pa_isolated": null,
+        "pa_phase": "TR",
+        "pa_15m_confirmed": null,
+        "signal_bar_quality": {
+          "body_frac": 0.82,
+          "close_pos": 0.97,
+          "double_strong": true
+        },
+        "options_calls": [
+          {
+            "rank": 1,
+            "strike": 880,
+            "otm_pct": 2.33,
+            "expiry_month": "2608",
+            "expiry_date": "2026-08-17",
+            "contract_sym": "au2608c880",
+            "days_to_expiry": 45,
+            "is_mm_strike": false,
+            "option_price": 18.5,
+            "price_source": "store",
+            "model_dominated": false,
+            "iv": 20.0
+          }
+        ],
+        "selected_option_contract": "au2608c880"
+      },
+      "decision": "watch",
+      "decision_trace": "score_today:pa_h2 score=4 policy=pa-h2-cn-metal-tr-phase selected=au2608c880 status=data_blocked iv=iv_warmup(<1 prior signals)",
+      "option_leg": {
+        "side": "call",
+        "strike": 880.0,
+        "dte": 45,
+        "otm_rank": 1,
+        "delta_estimate": null,
+        "selection_status": "data_blocked"
+      },
+      "iv_regime": {
+        "iv_rank": null,
+        "keep": false,
+        "reason": "iv_warmup(<1 prior signals)"
+      },
+      "exit_policy": {
+        "mode": "runner",
+        "status": "data_blocked",
+        "reason": "runner policy retained for review; final action blocked by status"
+      },
+      "underlying_r_outcome": {
+        "available": false,
+        "reason": "live_snapshot_no_forward_underlying_outcome"
+      },
+      "premium_r_outcome": {
+        "available": false,
+        "reason": "live_snapshot_no_forward_premium_outcome",
+        "entry_price": 18.5,
+        "price_source": "store",
+        "selected_contract": "au2608c880"
+      },
+      "option_runner_outcome": null,
+      "proxy_outcome": null,
+      "status": "data_blocked",
+      "caveats": [
+        "source record is date-granular; ts_utc uses start-of-day UTC",
+        "premium entry or causal IV rank is unavailable in source scorecard"
+      ],
+      "decision_trace_v1": {
+        "trace_version": "decision_trace_v1",
+        "action": "watch",
+        "status": "data_blocked",
+        "summary": {
+          "headline": "underlying signal accepted; causal IV rank blocked",
+          "primary_blocker": "iv_rank_missing",
+          "selected_option_contract": "au2608c880",
+          "confidence": 0.75
+        },
+        "input_refs": [
+          {
+            "id": "scorecard_record:1",
+            "kind": "scorecard_record",
+            "source": "score_today_json",
+            "record_index": 1,
+            "asof_ts_utc": "2026-06-28T00:00:00Z",
+            "digest": "sha256:cd55a0fa10ef8945d5c9198a1ae0a064c6c90d11c1358246ecba3aeafecbbbd4"
+          }
+        ],
+        "nodes": [
+          {
+            "id": "underlying_signal",
+            "kind": "signal",
+            "label": "Score Today underlying signal",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "source scorecard emitted an option candidate",
+            "evidence": [
+              {
+                "key": "score",
+                "value": 4,
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "direction",
+                "value": "bottom",
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "level",
+                "value": "pa_h2",
+                "source_ref": "scorecard_record:1"
+              }
+            ]
+          },
+          {
+            "id": "policy_rule",
+            "kind": "policy",
+            "label": "PA / Feitian policy rule",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "source scorecard supplied a policy rule",
+            "evidence": [
+              {
+                "key": "policy_rule",
+                "value": "pa-h2-cn-metal-tr-phase",
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "policy_weight",
+                "value": 0.75,
+                "source_ref": "scorecard_record:1"
+              }
+            ]
+          },
+          {
+            "id": "option_selection",
+            "kind": "selection",
+            "label": "Option selection",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "selected best ranked scorecard option leg",
+            "evidence": [
+              {
+                "key": "selected_option_contract",
+                "value": "au2608c880",
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "side",
+                "value": "call",
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "strike",
+                "value": 880,
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "dte",
+                "value": 45,
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "otm_rank",
+                "value": 1,
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "delta_estimate",
+                "value": null,
+                "source_ref": "scorecard_record:1"
+              }
+            ]
+          },
+          {
+            "id": "iv_regime",
+            "kind": "gate",
+            "label": "Causal IV regime",
+            "status": "blocked",
+            "decision_effect": "block",
+            "reason": "iv_warmup(<1 prior signals)",
+            "evidence": [
+              {
+                "key": "iv",
+                "value": 20.0,
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "iv_rank",
+                "value": null,
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "iv_keep",
+                "value": false,
+                "source_ref": "scorecard_record:1"
+              }
+            ]
+          },
+          {
+            "id": "premium_entry",
+            "kind": "gate",
+            "label": "Premium entry availability",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "selected option leg has an entry price",
+            "evidence": [
+              {
+                "key": "option_price",
+                "value": 18.5,
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "price_source",
+                "value": "store",
+                "source_ref": "scorecard_record:1"
+              }
+            ]
+          },
+          {
+            "id": "exit_policy",
+            "kind": "policy",
+            "label": "Exit policy",
+            "status": "advisory",
+            "decision_effect": "annotate",
+            "reason": "runner policy retained for review; final action blocked by status",
+            "evidence": [
+              {
+                "key": "exit_mode",
+                "value": "runner",
+                "source_ref": "scorecard_record:1"
+              },
+              {
+                "key": "exit_status",
+                "value": "data_blocked",
+                "source_ref": "scorecard_record:1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
+      "instrument": "SHFE.au",
+      "contract": "kq_m_shfe_au",
+      "interval": "1d",
+      "ts_utc": "2026-06-29T00:00:00Z",
+      "underlying_signal": {
+        "family": "pa_feitian",
+        "source": "score_today",
+        "symbol": "kq_m_shfe_au",
+        "direction": "bottom",
+        "level": "pa_h2",
+        "subtype": "pa_h2",
+        "confidence": 0.75,
+        "score": 4,
+        "policy_rule": "pa-h2-cn-metal-tr-phase",
+        "policy_weight": 0.75,
+        "matched_sweet_spots": [],
+        "direction_verdict": null,
+        "direction_confidence": null,
+        "direction_sources": null,
+        "direction_rationale": null
+      },
+      "features_det": {
+        "lookahead_free": true,
+        "cutoff_ts_utc": "2026-06-29T00:00:00Z",
+        "source_record_index": 2,
+        "underlying_price": 860.0,
+        "invalidation_level": null,
+        "position_size": "half",
+        "pa_isolated": null,
+        "pa_phase": "TR",
+        "pa_15m_confirmed": null,
+        "signal_bar_quality": {
+          "body_frac": 0.82,
+          "close_pos": 0.97,
+          "double_strong": true
+        },
+        "options_calls": [
+          {
+            "rank": 1,
+            "strike": 880,
+            "otm_pct": 2.33,
+            "expiry_month": "2608",
+            "expiry_date": "2026-08-17",
+            "contract_sym": "au2608c880",
+            "days_to_expiry": 45,
+            "is_mm_strike": false,
+            "option_price": 12.2,
+            "price_source": "store",
+            "model_dominated": false,
+            "iv": 10.0
+          }
+        ],
+        "selected_option_contract": "au2608c880"
+      },
+      "decision": "take",
+      "decision_trace": "score_today:pa_h2 score=4 policy=pa-h2-cn-metal-tr-phase selected=au2608c880 status=keep",
+      "option_leg": {
+        "side": "call",
+        "strike": 880.0,
+        "dte": 45,
+        "otm_rank": 1,
+        "delta_estimate": null,
+        "selection_status": "keep"
+      },
+      "iv_regime": {
+        "iv_rank": 0.0,
+        "keep": true,
+        "reason": null
+      },
+      "exit_policy": {
+        "mode": "runner",
+        "status": "keep",
+        "reason": "premium runner candidate from score_today option emission"
+      },
+      "underlying_r_outcome": {
+        "available": false,
+        "reason": "live_snapshot_no_forward_underlying_outcome"
+      },
+      "premium_r_outcome": {
+        "available": false,
+        "reason": "live_snapshot_no_forward_premium_outcome",
+        "entry_price": 12.2,
+        "price_source": "store",
+        "selected_contract": "au2608c880"
+      },
+      "option_runner_outcome": null,
+      "proxy_outcome": null,
+      "status": "keep",
+      "caveats": [
+        "source record is date-granular; ts_utc uses start-of-day UTC"
+      ],
+      "decision_trace_v1": {
+        "trace_version": "decision_trace_v1",
+        "action": "take",
+        "status": "keep",
+        "summary": {
+          "headline": "premium runner candidate accepted",
+          "primary_blocker": null,
+          "selected_option_contract": "au2608c880",
+          "confidence": 0.75
+        },
+        "input_refs": [
+          {
+            "id": "scorecard_record:2",
+            "kind": "scorecard_record",
+            "source": "score_today_json",
+            "record_index": 2,
+            "asof_ts_utc": "2026-06-29T00:00:00Z",
+            "digest": "sha256:46381c5371ddbe46a554640294f26dba20bf72006c8fc5298142ac9facf82f53"
+          }
+        ],
+        "nodes": [
+          {
+            "id": "underlying_signal",
+            "kind": "signal",
+            "label": "Score Today underlying signal",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "source scorecard emitted an option candidate",
+            "evidence": [
+              {
+                "key": "score",
+                "value": 4,
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "direction",
+                "value": "bottom",
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "level",
+                "value": "pa_h2",
+                "source_ref": "scorecard_record:2"
+              }
+            ]
+          },
+          {
+            "id": "policy_rule",
+            "kind": "policy",
+            "label": "PA / Feitian policy rule",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "source scorecard supplied a policy rule",
+            "evidence": [
+              {
+                "key": "policy_rule",
+                "value": "pa-h2-cn-metal-tr-phase",
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "policy_weight",
+                "value": 0.75,
+                "source_ref": "scorecard_record:2"
+              }
+            ]
+          },
+          {
+            "id": "option_selection",
+            "kind": "selection",
+            "label": "Option selection",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "selected best ranked scorecard option leg",
+            "evidence": [
+              {
+                "key": "selected_option_contract",
+                "value": "au2608c880",
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "side",
+                "value": "call",
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "strike",
+                "value": 880,
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "dte",
+                "value": 45,
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "otm_rank",
+                "value": 1,
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "delta_estimate",
+                "value": null,
+                "source_ref": "scorecard_record:2"
+              }
+            ]
+          },
+          {
+            "id": "iv_regime",
+            "kind": "gate",
+            "label": "Causal IV regime",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "causal IV rank passed",
+            "evidence": [
+              {
+                "key": "iv",
+                "value": 10.0,
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "iv_rank",
+                "value": 0.0,
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "iv_keep",
+                "value": true,
+                "source_ref": "scorecard_record:2"
+              }
+            ]
+          },
+          {
+            "id": "premium_entry",
+            "kind": "gate",
+            "label": "Premium entry availability",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "selected option leg has an entry price",
+            "evidence": [
+              {
+                "key": "option_price",
+                "value": 12.2,
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "price_source",
+                "value": "store",
+                "source_ref": "scorecard_record:2"
+              }
+            ]
+          },
+          {
+            "id": "exit_policy",
+            "kind": "policy",
+            "label": "Exit policy",
+            "status": "pass",
+            "decision_effect": "annotate",
+            "reason": "premium runner candidate from score_today option emission",
+            "evidence": [
+              {
+                "key": "exit_mode",
+                "value": "runner",
+                "source_ref": "scorecard_record:2"
+              },
+              {
+                "key": "exit_status",
+                "value": "keep",
+                "source_ref": "scorecard_record:2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "paft_scorecard_0003_kq_m_shfe_au_20260630000000",
+      "instrument": "SHFE.au",
+      "contract": "kq_m_shfe_au",
+      "interval": "1d",
+      "ts_utc": "2026-06-30T00:00:00Z",
+      "underlying_signal": {
+        "family": "pa_feitian",
+        "source": "score_today",
+        "symbol": "kq_m_shfe_au",
+        "direction": "bottom",
+        "level": "pa_h2",
+        "subtype": "pa_h2",
+        "confidence": 0.75,
+        "score": 4,
+        "policy_rule": "pa-h2-cn-metal-tr-phase",
+        "policy_weight": 0.75,
+        "matched_sweet_spots": [],
+        "direction_verdict": null,
+        "direction_confidence": null,
+        "direction_sources": null,
+        "direction_rationale": null
+      },
+      "features_det": {
+        "lookahead_free": true,
+        "cutoff_ts_utc": "2026-06-30T00:00:00Z",
+        "source_record_index": 3,
+        "underlying_price": 860.0,
+        "invalidation_level": null,
+        "position_size": "half",
+        "pa_isolated": null,
+        "pa_phase": "TR",
+        "pa_15m_confirmed": null,
+        "signal_bar_quality": {
+          "body_frac": 0.82,
+          "close_pos": 0.97,
+          "double_strong": true
+        },
+        "options_calls": [
+          {
+            "rank": 1,
+            "strike": 880,
+            "otm_pct": 2.33,
+            "expiry_month": "2608",
+            "expiry_date": "2026-08-17",
+            "contract_sym": "au2608c880",
+            "days_to_expiry": 45,
+            "is_mm_strike": false,
+            "option_price": 10.4,
+            "price_source": "model",
+            "model_dominated": true,
+            "iv": 12.0
+          }
+        ],
+        "selected_option_contract": "au2608c880"
+      },
+      "decision": "watch",
+      "decision_trace": "score_today:pa_h2 score=4 policy=pa-h2-cn-metal-tr-phase selected=au2608c880 status=model_dominated",
+      "option_leg": {
+        "side": "call",
+        "strike": 880.0,
+        "dte": 45,
+        "otm_rank": 1,
+        "delta_estimate": null,
+        "selection_status": "model_dominated"
+      },
+      "iv_regime": {
+        "iv_rank": 0.5,
+        "keep": true,
+        "reason": null
+      },
+      "exit_policy": {
+        "mode": "runner",
+        "status": "model_dominated",
+        "reason": "runner policy retained for review; final action blocked by status"
+      },
+      "underlying_r_outcome": {
+        "available": false,
+        "reason": "live_snapshot_no_forward_underlying_outcome"
+      },
+      "premium_r_outcome": {
+        "available": false,
+        "reason": "live_snapshot_no_forward_premium_outcome",
+        "entry_price": 10.4,
+        "price_source": "model",
+        "selected_contract": "au2608c880"
+      },
+      "option_runner_outcome": null,
+      "proxy_outcome": null,
+      "status": "model_dominated",
+      "caveats": [
+        "source record is date-granular; ts_utc uses start-of-day UTC",
+        "selected option leg is model-dominated; do not treat as market premium validation"
+      ],
+      "decision_trace_v1": {
+        "trace_version": "decision_trace_v1",
+        "action": "watch",
+        "status": "model_dominated",
+        "summary": {
+          "headline": "underlying signal accepted; option leg model-dominated",
+          "primary_blocker": "model_dominated_premium",
+          "selected_option_contract": "au2608c880",
+          "confidence": 0.75
+        },
+        "input_refs": [
+          {
+            "id": "scorecard_record:3",
+            "kind": "scorecard_record",
+            "source": "score_today_json",
+            "record_index": 3,
+            "asof_ts_utc": "2026-06-30T00:00:00Z",
+            "digest": "sha256:28e61c10bd1108a4de7cc04d0483ea08180817c466c530482ceb4d062d2c328a"
+          }
+        ],
+        "nodes": [
+          {
+            "id": "underlying_signal",
+            "kind": "signal",
+            "label": "Score Today underlying signal",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "source scorecard emitted an option candidate",
+            "evidence": [
+              {
+                "key": "score",
+                "value": 4,
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "direction",
+                "value": "bottom",
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "level",
+                "value": "pa_h2",
+                "source_ref": "scorecard_record:3"
+              }
+            ]
+          },
+          {
+            "id": "policy_rule",
+            "kind": "policy",
+            "label": "PA / Feitian policy rule",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "source scorecard supplied a policy rule",
+            "evidence": [
+              {
+                "key": "policy_rule",
+                "value": "pa-h2-cn-metal-tr-phase",
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "policy_weight",
+                "value": 0.75,
+                "source_ref": "scorecard_record:3"
+              }
+            ]
+          },
+          {
+            "id": "option_selection",
+            "kind": "selection",
+            "label": "Option selection",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "selected best ranked scorecard option leg",
+            "evidence": [
+              {
+                "key": "selected_option_contract",
+                "value": "au2608c880",
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "side",
+                "value": "call",
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "strike",
+                "value": 880,
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "dte",
+                "value": 45,
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "otm_rank",
+                "value": 1,
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "delta_estimate",
+                "value": null,
+                "source_ref": "scorecard_record:3"
+              }
+            ]
+          },
+          {
+            "id": "iv_regime",
+            "kind": "gate",
+            "label": "Causal IV regime",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "causal IV rank passed",
+            "evidence": [
+              {
+                "key": "iv",
+                "value": 12.0,
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "iv_rank",
+                "value": 0.5,
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "iv_keep",
+                "value": true,
+                "source_ref": "scorecard_record:3"
+              }
+            ]
+          },
+          {
+            "id": "premium_entry",
+            "kind": "gate",
+            "label": "Premium entry availability",
+            "status": "advisory",
+            "decision_effect": "block",
+            "reason": "selected option price is model-dominated",
+            "evidence": [
+              {
+                "key": "option_price",
+                "value": 10.4,
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "price_source",
+                "value": "model",
+                "source_ref": "scorecard_record:3"
+              }
+            ]
+          },
+          {
+            "id": "exit_policy",
+            "kind": "policy",
+            "label": "Exit policy",
+            "status": "advisory",
+            "decision_effect": "annotate",
+            "reason": "runner policy retained for review; final action blocked by status",
+            "evidence": [
+              {
+                "key": "exit_mode",
+                "value": "runner",
+                "source_ref": "scorecard_record:3"
+              },
+              {
+                "key": "exit_status",
+                "value": "model_dominated",
+                "source_ref": "scorecard_record:3"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    "snapshot v1 is a shadow contract fixture",
+    "producer consumes score_today/emission output; it does not read raw data stores",
+    "forward premium/underlying outcomes are intentionally absent from live snapshots",
+    "1 selected option legs lack causal IV rank"
+  ]
+}

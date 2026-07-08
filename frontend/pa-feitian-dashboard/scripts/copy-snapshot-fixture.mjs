@@ -2,17 +2,21 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const CONTRACT_VERSION = "pa_feitian_snapshot_v0";
+const DEFAULT_CONTRACT_VERSION = "pa_feitian_snapshot_v1";
+const SUPPORTED_CONTRACT_VERSIONS = new Set([
+  "pa_feitian_snapshot_v1",
+  "pa_feitian_snapshot_v0",
+]);
 const dashboardRoot = resolve(fileURLToPath(new URL("../", import.meta.url)));
 const repoRoot = resolve(dashboardRoot, "../..");
-const defaultSource = resolve(repoRoot, "src/tests/fixtures/pa_feitian_snapshot_v0.json");
-const defaultOut = resolve(dashboardRoot, "fixtures/pa_feitian_snapshot_v0.json");
+const defaultSource = resolve(repoRoot, `src/tests/fixtures/${DEFAULT_CONTRACT_VERSION}.json`);
+const defaultOut = resolve(dashboardRoot, `fixtures/${DEFAULT_CONTRACT_VERSION}.json`);
 
 function usage() {
   return [
     "Usage: node scripts/copy-snapshot-fixture.mjs [snapshot.json] [--out path]",
     "",
-    "Copies a pa_feitian_snapshot_v0 JSON artifact into the dashboard fixture path.",
+    "Copies a pa_feitian_snapshot_v1 or pa_feitian_snapshot_v0 JSON artifact into the dashboard fixture path.",
     "Defaults to the shared contract fixture when no source is supplied.",
   ].join("\n");
 }
@@ -84,7 +88,7 @@ function validateSnapshot(raw, sourcePath) {
     throw new Error(`Invalid JSON in ${sourcePath}: ${error.message}`);
   }
 
-  if (!snapshot || snapshot.schema_version !== CONTRACT_VERSION) {
+  if (!snapshot || !SUPPORTED_CONTRACT_VERSIONS.has(snapshot.schema_version)) {
     throw new Error(
       `Unsupported snapshot contract in ${sourcePath}: ${snapshot?.schema_version ?? "missing"}`,
     );
