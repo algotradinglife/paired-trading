@@ -1,9 +1,18 @@
 const SNAPSHOT_URL = "./fixtures/pa_feitian_snapshot_v1.json";
+const MANIFEST_URL = "./fixtures/pa_feitian_run_manifest_v1.json";
 
 export const SUPPORTED_CONTRACT_VERSIONS = new Set([
   "pa_feitian_snapshot_v1",
   "pa_feitian_snapshot_v0",
 ]);
+
+export const SNAPSHOT_MODE_DEFINITIONS = {
+  fixture: "Fixture snapshot",
+  generated: "Generated snapshot",
+  review: "Review snapshot",
+};
+
+const REVIEW_MODE_STATUSES = new Set(["approved", "changes_requested", "rejected"]);
 
 export const STATUS_DEFINITIONS = {
   keep: "Production-eligible signal",
@@ -109,6 +118,11 @@ function traceNodeBadge(status) {
   return `<span class="trace-badge ${escapeHtml(normalized)}">${escapeHtml(status || "unknown")}</span>`;
 }
 
+function modeBadge(mode) {
+  const normalized = SNAPSHOT_MODE_DEFINITIONS[mode] ? mode : "fixture";
+  return `<span class="mode-badge ${escapeHtml(normalized)}">${escapeHtml(SNAPSHOT_MODE_DEFINITIONS[normalized])}</span>`;
+}
+
 function jsonBlock(value) {
   return `<pre>${escapeHtml(JSON.stringify(value ?? null, null, 2))}</pre>`;
 }
@@ -163,11 +177,59 @@ export function normalizeDecisionTrace(signal) {
   };
 }
 
-export function buildDashboardModel(snapshot) {
+function normalizeRenderOptions(options) {
+  if (!options) {
+    return {};
+  }
+  if (options.schema_version === "pa_feitian_run_manifest_v1") {
+    return { manifest: options };
+  }
+  return options;
+}
+
+export function normalizeRunManifest(manifest) {
+  if (!manifest || manifest.schema_version !== "pa_feitian_run_manifest_v1") {
+    return null;
+  }
+
+  return {
+    schemaVersion: manifest.schema_version,
+    generatedAt: manifest.generated_at_utc,
+    sourceCommit: manifest.source_commit,
+    scorecardArtifact: manifest.scorecard_artifact || null,
+    snapshotArtifact: manifest.snapshot_artifact || null,
+    cliArgs: Array.isArray(manifest.cli_args) ? manifest.cli_args : [],
+    runConfig: manifest.run_config || {},
+    dataAccess: manifest.data_access || {},
+    inputHashes: manifest.input_hashes || {},
+    outputHashes: manifest.output_hashes || {},
+    frontendCopyPath: manifest.frontend_copy_path ?? null,
+    reviewState: manifest.review_state || {},
+  };
+}
+
+function inferSnapshotMode(snapshot, manifest) {
+  const reviewStatus = manifest?.reviewState?.status;
+  if (reviewStatus && REVIEW_MODE_STATUSES.has(reviewStatus)) {
+    return "review";
+  }
+  if (manifest) {
+    return "generated";
+  }
+  if (snapshot.run_config?.mode === "scorecard") {
+    return "generated";
+  }
+  return "fixture";
+}
+
+export function buildDashboardModel(snapshot, options = {}) {
   if (!snapshot || !SUPPORTED_CONTRACT_VERSIONS.has(snapshot.schema_version)) {
     throw new Error(`Unsupported snapshot contract: ${snapshot?.schema_version ?? "missing"}`);
   }
 
+  const renderOptions = normalizeRenderOptions(options);
+  const manifest = normalizeRunManifest(renderOptions.manifest);
+  const snapshotMode = inferSnapshotMode(snapshot, manifest);
   const signals = Array.isArray(snapshot.signals) ? snapshot.signals : [];
   const summary = snapshot.summary || {};
   const statusCounts = countStatuses(summary, signals);
@@ -176,10 +238,13 @@ export function buildDashboardModel(snapshot) {
 
   return {
     contract: snapshot.schema_version,
+    snapshotMode,
+    snapshotModeLabel: SNAPSHOT_MODE_DEFINITIONS[snapshotMode],
     generatedAt: snapshot.generated_at_utc,
     sourceCommit: snapshot.source_commit,
     runConfig: snapshot.run_config || {},
     dataQuality: snapshot.data_quality || {},
+    manifest,
     summary,
     warnings: Array.isArray(snapshot.warnings) ? snapshot.warnings : [],
     statusCounts,
@@ -212,8 +277,8 @@ function renderMeta(model) {
         <small>${escapeHtml(model.runConfig.producer || "producer unavailable")}</small>
       </div>
       <div class="metric">
-        <span>Fixture mode</span>
-        <strong>${escapeHtml(model.runConfig.mode || "Missing")}</strong>
+        <span>Snapshot mode</span>
+        <strong>${modeBadge(model.snapshotMode)}</strong>
         <small>${escapeHtml(model.runConfig.contract || model.contract)}</small>
       </div>
     </section>
@@ -297,6 +362,116 @@ function renderDataQuality(model) {
   `;
 }
 
+function renderArtifactRef(title, artifact) {
+  if (!artifact) {
+    return `
+      <section class="artifact-block">
+        <h3>${escapeHtml(title)}</h3>
+        <p class="missing">Missing artifact metadata.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="artifact-block">
+      <h3>${escapeHtml(title)}</h3>
+      <dl class="kv compact">
+        <dt>Path</dt>
+        <dd>${labelValue(artifact.path)}</dd>
+        <dt>SHA-256</dt>
+        <dd>${labelValue(artifact.sha256)}</dd>
+        <dt>Schema</dt>
+        <dd>${labelValue(artifact.schema_version)}</dd>
+      </dl>
+    </section>
+  `;
+}
+
+function renderManifestProvenance(model) {
+  const manifest = model.manifest;
+  if (!manifest) {
+    return `
+      <section class="panel" aria-labelledby="manifest-heading" data-testid="run-manifest-empty">
+        <div class="panel-header">
+          <div>
+            <h2 id="manifest-heading">Run Manifest</h2>
+            <p>No run manifest loaded for this snapshot.</p>
+          </div>
+          ${modeBadge(model.snapshotMode)}
+        </div>
+        <div class="manifest-empty">
+          <strong>Manifest metadata unavailable</strong>
+          <span>Fixture and legacy snapshots can still be reviewed without provenance.</span>
+        </div>
+      </section>
+    `;
+  }
+
+  const review = manifest.reviewState || {};
+  const dataAccess = manifest.dataAccess || {};
+  return `
+    <section class="panel" aria-labelledby="manifest-heading" data-testid="run-manifest-provenance">
+      <div class="panel-header">
+        <div>
+          <h2 id="manifest-heading">Run Manifest</h2>
+          <p>${escapeHtml(manifest.schemaVersion)} / ${escapeHtml(formatDate(manifest.generatedAt))}</p>
+        </div>
+        ${modeBadge(model.snapshotMode)}
+      </div>
+      <div class="manifest-grid">
+        <div class="manifest-item">
+          <span>Source commit</span>
+          <strong>${labelValue(manifest.sourceCommit)}</strong>
+        </div>
+        <div class="manifest-item">
+          <span>Data access</span>
+          <strong>${labelValue(dataAccess.status)}</strong>
+          <small>${labelValue(dataAccess.source)}</small>
+        </div>
+        <div class="manifest-item">
+          <span>Frontend copy</span>
+          <strong>${labelValue(manifest.frontendCopyPath)}</strong>
+        </div>
+        <div class="manifest-item">
+          <span>Review state</span>
+          <strong>${labelValue(review.status)}</strong>
+          <small>${labelValue(review.reviewer)}</small>
+        </div>
+      </div>
+      <div class="manifest-artifacts">
+        ${renderArtifactRef("Scorecard artifact", manifest.scorecardArtifact)}
+        ${renderArtifactRef("Snapshot artifact", manifest.snapshotArtifact)}
+      </div>
+      <div class="manifest-details">
+        <details>
+          <summary>CLI args</summary>
+          ${jsonBlock(manifest.cliArgs)}
+        </details>
+        <details>
+          <summary>Run config</summary>
+          ${jsonBlock(manifest.runConfig)}
+        </details>
+        <details>
+          <summary>Input hashes</summary>
+          ${jsonBlock(manifest.inputHashes)}
+        </details>
+        <details>
+          <summary>Output hashes</summary>
+          ${jsonBlock(manifest.outputHashes)}
+        </details>
+        <details>
+          <summary>Data access notes</summary>
+          ${jsonBlock(dataAccess.notes || [])}
+        </details>
+        <details>
+          <summary>Review notes</summary>
+          ${jsonBlock(review.notes || [])}
+        </details>
+      </div>
+    </section>
+  `;
+}
+
 function renderSignalTable(model) {
   if (model.signals.length === 0) {
     return `
@@ -369,6 +544,29 @@ function renderMissingList(signal) {
   return `
     <ul class="missing-list">
       ${signal.missingOptional.map((field) => `<li>${escapeHtml(field)}</li>`).join("")}
+    </ul>
+  `;
+}
+
+function renderTraceInputRefs(inputRefs) {
+  if (!Array.isArray(inputRefs) || inputRefs.length === 0) {
+    return '<p class="muted trace-empty">No trace input references.</p>';
+  }
+
+  return `
+    <ul class="trace-input-refs" data-testid="decision-trace-v1-input-refs">
+      ${inputRefs
+        .map(
+          (input) => `
+            <li>
+              <strong>${labelValue(input.id)}</strong>
+              <span>${escapeHtml(input.kind || "unknown")} / ${escapeHtml(input.source || "unknown")}</span>
+              <code>${labelValue(input.digest)}</code>
+              <small>index ${labelValue(input.record_index)} / ${escapeHtml(formatDate(input.asof_ts_utc))}</small>
+            </li>
+          `,
+        )
+        .join("")}
     </ul>
   `;
 }
@@ -465,6 +663,7 @@ function renderDecisionTrace(trace) {
           <strong>${escapeHtml(trace.inputRefs.length)}</strong>
         </div>
       </div>
+      ${renderTraceInputRefs(trace.inputRefs)}
       <ol class="trace-node-list" data-testid="decision-trace-v1-nodes">${nodes}</ol>
     </section>
   `;
@@ -565,8 +764,8 @@ function renderSignalDrilldown(model) {
   `;
 }
 
-export function renderDashboard(snapshot) {
-  const model = buildDashboardModel(snapshot);
+export function renderDashboard(snapshot, options = {}) {
+  const model = buildDashboardModel(snapshot, options);
 
   return `
     <div class="dashboard-grid">
@@ -574,6 +773,7 @@ export function renderDashboard(snapshot) {
       ${renderStatusOverview(model)}
       ${renderWarnings(model)}
       ${renderDataQuality(model)}
+      ${renderManifestProvenance(model)}
       ${renderSignalTable(model)}
       ${renderSignalDrilldown(model)}
     </div>
@@ -587,6 +787,20 @@ export async function loadSnapshot(fetchImpl = globalThis.fetch, snapshotUrl = S
   const response = await fetchImpl(new URL(snapshotUrl, import.meta.url));
   if (!response.ok) {
     throw new Error(`Failed to load snapshot: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function loadManifest(fetchImpl = globalThis.fetch, manifestUrl = MANIFEST_URL) {
+  if (typeof fetchImpl !== "function") {
+    throw new Error("fetch is not available");
+  }
+  const response = await fetchImpl(new URL(manifestUrl, import.meta.url));
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to load manifest: HTTP ${response.status}`);
   }
   return response.json();
 }
@@ -606,7 +820,13 @@ export async function mountDashboard(root = document.getElementById("dashboard-r
   }
   try {
     const snapshot = await loadSnapshot();
-    root.innerHTML = renderDashboard(snapshot);
+    let manifest = null;
+    try {
+      manifest = await loadManifest();
+    } catch (error) {
+      console.warn?.("PA Feitian manifest unavailable", error);
+    }
+    root.innerHTML = renderDashboard(snapshot, { manifest });
   } catch (error) {
     root.innerHTML = renderError(error);
   }
