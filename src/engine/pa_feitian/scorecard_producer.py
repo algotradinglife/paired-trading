@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
@@ -16,14 +17,24 @@ from engine.options.iv_regime import (
     iv_regime_keep,
 )
 from engine.pa_feitian.contract import (
+    DECISION_TRACE_V1_VERSION,
     PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION,
+    PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
     SIGNAL_STATUSES,
+    DecisionTraceSummary,
+    DecisionTraceV1,
     ExitPolicyAnnotation,
     IvRegimeAnnotation,
     OptionLegAnnotation,
     PaFeitianSignal,
     PaFeitianSnapshot,
+    PaFeitianSignalV1,
+    PaFeitianSnapshotV1,
     SignalStatus,
+    SnapshotContractVersion,
+    TraceEvidence,
+    TraceInputRef,
+    TraceNode,
 )
 
 
@@ -62,7 +73,9 @@ def _parse_record_ts(record: Mapping[str, Any]) -> datetime:
     return parsed.astimezone(UTC)
 
 
-def _scorecard_records(scorecard: Mapping[str, Any] | Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+def _scorecard_records(
+    scorecard: Mapping[str, Any] | Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
     if isinstance(scorecard, Mapping):
         records = scorecard.get("scored", scorecard.get("signals", []))
     else:
@@ -85,7 +98,9 @@ def _instrument_from_symbol(symbol: str) -> str:
     return symbol
 
 
-def _option_side(contract_sym: str | None, direction: str | None) -> Literal["call", "put", "none", "unknown"]:
+def _option_side(
+    contract_sym: str | None, direction: str | None
+) -> Literal["call", "put", "none", "unknown"]:
     if contract_sym:
         stem = contract_sym.rstrip("0123456789").lower()
         if stem.endswith("c"):
@@ -135,6 +150,252 @@ def _decision_for_status(status: SignalStatus) -> str | None:
     return None
 
 
+def _scorecard_record_digest(record: Mapping[str, Any]) -> str:
+    payload = json.dumps(
+        record, sort_keys=True, default=str, ensure_ascii=True, separators=(",", ":")
+    )
+    return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _trace_confidence(record: Mapping[str, Any]) -> float | None:
+    confidence = _optional_float(record.get("confidence"))
+    if confidence is None or not 0 <= confidence <= 1:
+        return None
+    return confidence
+
+
+def _primary_blocker(
+    status: SignalStatus,
+    selected: Mapping[str, Any] | None,
+    iv: IvRegimeAnnotation,
+) -> str | None:
+    if status == "keep":
+        return None
+    if status == "model_dominated":
+        return "model_dominated_premium"
+    if status == "drop":
+        return "iv_regime_rich" if iv.reason else "policy_drop"
+    if status == "data_blocked":
+        if selected is None:
+            return "option_selection_missing"
+        if selected.get("option_price") is None:
+            return "premium_entry_missing"
+        if selected.get("iv") is None or iv.iv_rank is None:
+            return "iv_rank_missing"
+        return "data_unavailable"
+    if status == "advisory":
+        return "advisory_only"
+    return None
+
+
+def _trace_headline(status: SignalStatus, primary_blocker: str | None) -> str:
+    if status == "keep":
+        return "premium runner candidate accepted"
+    if status == "drop":
+        return "candidate rejected by contract policy"
+    if status == "model_dominated":
+        return "underlying signal accepted; option leg model-dominated"
+    if status == "data_blocked":
+        if primary_blocker == "premium_entry_missing":
+            return "underlying signal accepted; premium entry blocked"
+        if primary_blocker == "iv_rank_missing":
+            return "underlying signal accepted; causal IV rank blocked"
+        return "underlying signal accepted; option selection blocked"
+    return "signal retained for advisory review"
+
+
+def _trace_evidence(key: str, value: Any, source_ref: str) -> TraceEvidence:
+    return TraceEvidence(key=key, value=value, source_ref=source_ref)
+
+
+def _build_decision_trace_v1(
+    record: Mapping[str, Any],
+    *,
+    index: int,
+    ts_utc: datetime,
+    selected: Mapping[str, Any] | None,
+    iv: IvRegimeAnnotation,
+    signal: PaFeitianSignal,
+) -> DecisionTraceV1:
+    source_ref = f"scorecard_record:{index}"
+    option_contract = signal.features_det.get("selected_option_contract")
+    primary_blocker = _primary_blocker(signal.status, selected, iv)
+
+    input_refs = [
+        TraceInputRef(
+            id=source_ref,
+            kind="scorecard_record",
+            source="score_today_json",
+            record_index=index,
+            asof_ts_utc=ts_utc,
+            digest=_scorecard_record_digest(record),
+        )
+    ]
+
+    policy_rule = record.get("policy_rule")
+    policy_weight = record.get("policy_weight")
+    nodes: list[TraceNode] = [
+        TraceNode(
+            id="underlying_signal",
+            kind="signal",
+            label="Score Today underlying signal",
+            status="pass",
+            decision_effect="promote",
+            reason="source scorecard emitted an option candidate",
+            evidence=[
+                _trace_evidence("score", record.get("score"), source_ref),
+                _trace_evidence("direction", record.get("direction"), source_ref),
+                _trace_evidence("level", record.get("level"), source_ref),
+            ],
+        ),
+        TraceNode(
+            id="policy_rule",
+            kind="policy",
+            label="PA / Feitian policy rule",
+            status="pass" if policy_rule else "not_applicable",
+            decision_effect="promote" if policy_rule else "none",
+            reason=(
+                "source scorecard supplied a policy rule"
+                if policy_rule
+                else "source scorecard did not supply a policy rule"
+            ),
+            evidence=[
+                _trace_evidence("policy_rule", policy_rule, source_ref),
+                _trace_evidence("policy_weight", policy_weight, source_ref),
+            ],
+        ),
+    ]
+
+    if selected is None:
+        nodes.append(
+            TraceNode(
+                id="option_selection",
+                kind="selection",
+                label="Option selection",
+                status="blocked",
+                decision_effect="block",
+                reason="scorecard emitted no selectable option leg",
+                evidence=[_trace_evidence("selected_option_contract", None, source_ref)],
+            )
+        )
+    else:
+        nodes.append(
+            TraceNode(
+                id="option_selection",
+                kind="selection",
+                label="Option selection",
+                status="pass",
+                decision_effect="promote",
+                reason="selected best ranked scorecard option leg",
+                evidence=[
+                    _trace_evidence("selected_option_contract", option_contract, source_ref),
+                    _trace_evidence("side", signal.option_leg.side, source_ref),
+                    _trace_evidence("strike", selected.get("strike"), source_ref),
+                    _trace_evidence("dte", selected.get("days_to_expiry"), source_ref),
+                    _trace_evidence("otm_rank", selected.get("rank"), source_ref),
+                    _trace_evidence("delta_estimate", selected.get("delta_estimate"), source_ref),
+                ],
+            )
+        )
+
+    if iv.iv_rank is None:
+        iv_node_status = "blocked"
+        iv_effect = "block"
+        iv_reason = iv.reason or "causal IV rank is unavailable"
+    elif iv.keep:
+        iv_node_status = "pass"
+        iv_effect = "promote"
+        iv_reason = "causal IV rank passed"
+    else:
+        iv_node_status = "fail"
+        iv_effect = "demote"
+        iv_reason = iv.reason or "causal IV rank failed"
+
+    nodes.append(
+        TraceNode(
+            id="iv_regime",
+            kind="gate",
+            label="Causal IV regime",
+            status=iv_node_status,
+            decision_effect=iv_effect,
+            reason=iv_reason,
+            evidence=[
+                _trace_evidence("iv", selected.get("iv") if selected else None, source_ref),
+                _trace_evidence("iv_rank", iv.iv_rank, source_ref),
+                _trace_evidence("iv_keep", iv.keep, source_ref),
+            ],
+        )
+    )
+
+    if selected is None:
+        premium_status = "blocked"
+        premium_effect = "block"
+        premium_reason = "option leg is unavailable"
+    elif selected.get("model_dominated") is True or selected.get("price_source") == "model":
+        premium_status = "advisory"
+        premium_effect = "block"
+        premium_reason = "selected option price is model-dominated"
+    elif selected.get("option_price") is None:
+        premium_status = "blocked"
+        premium_effect = "block"
+        premium_reason = "selected option leg lacks option_price"
+    else:
+        premium_status = "pass"
+        premium_effect = "promote"
+        premium_reason = "selected option leg has an entry price"
+
+    nodes.append(
+        TraceNode(
+            id="premium_entry",
+            kind="gate",
+            label="Premium entry availability",
+            status=premium_status,
+            decision_effect=premium_effect,
+            reason=premium_reason,
+            evidence=[
+                _trace_evidence(
+                    "option_price", selected.get("option_price") if selected else None, source_ref
+                ),
+                _trace_evidence(
+                    "price_source", selected.get("price_source") if selected else None, source_ref
+                ),
+            ],
+        )
+    )
+
+    exit_status = "pass" if signal.exit_policy.status == "keep" else "advisory"
+    if signal.exit_policy.status == "drop":
+        exit_status = "fail"
+    nodes.append(
+        TraceNode(
+            id="exit_policy",
+            kind="policy",
+            label="Exit policy",
+            status=exit_status,
+            decision_effect="annotate",
+            reason=signal.exit_policy.reason,
+            evidence=[
+                _trace_evidence("exit_mode", signal.exit_policy.mode, source_ref),
+                _trace_evidence("exit_status", signal.exit_policy.status, source_ref),
+            ],
+        )
+    )
+
+    return DecisionTraceV1(
+        trace_version=DECISION_TRACE_V1_VERSION,
+        action=signal.decision,
+        status=signal.status,
+        summary=DecisionTraceSummary(
+            headline=_trace_headline(signal.status, primary_blocker),
+            primary_blocker=primary_blocker,
+            selected_option_contract=option_contract,
+            confidence=_trace_confidence(record),
+        ),
+        input_refs=input_refs,
+        nodes=nodes,
+    )
+
+
 def _build_signal(
     record: Mapping[str, Any],
     *,
@@ -147,7 +408,9 @@ def _build_signal(
     instrument = _instrument_from_symbol(symbol)
     direction = str(record.get("direction") or "")
     status = _status_from_leg(selected, iv)
-    option_contract = str(selected.get("contract_sym")) if selected and selected.get("contract_sym") else None
+    option_contract = (
+        str(selected.get("contract_sym")) if selected and selected.get("contract_sym") else None
+    )
     selected_price_source = selected.get("price_source") if selected else None
 
     score = record.get("score")
@@ -166,7 +429,9 @@ def _build_signal(
     if status == "data_blocked":
         caveats.append("premium entry or causal IV rank is unavailable in source scorecard")
     if status == "model_dominated":
-        caveats.append("selected option leg is model-dominated; do not treat as market premium validation")
+        caveats.append(
+            "selected option leg is model-dominated; do not treat as market premium validation"
+        )
 
     premium_outcome: dict[str, Any] = {
         "available": False,
@@ -259,7 +524,8 @@ def snapshot_from_scorecard(
     max_signals: int | None = None,
     iv_warmup: int = DEFAULT_WARMUP,
     iv_max_rank: float = DEFAULT_MAX_RANK,
-) -> PaFeitianSnapshot:
+    contract_version: SnapshotContractVersion = PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION,
+) -> PaFeitianSnapshot | PaFeitianSnapshotV1:
     """Build a PA / Feitian snapshot from an existing score_today JSON output.
 
     The producer is file-backed at this boundary: it consumes already-emitted
@@ -267,6 +533,11 @@ def snapshot_from_scorecard(
     """
     if iv_warmup < 1:
         raise ValueError("iv_warmup must be >= 1")
+    if contract_version not in (
+        PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION,
+        PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
+    ):
+        raise ValueError(f"unsupported PA/Feitian contract_version: {contract_version}")
     generated_at_utc = generated_at_utc or datetime.now(UTC)
     records = _scorecard_records(scorecard)
     candidates = [r for r in records if r.get("options_calls")]
@@ -280,7 +551,7 @@ def snapshot_from_scorecard(
     )
 
     prior_ivs: defaultdict[str, list[float]] = defaultdict(list)
-    signals: list[PaFeitianSignal] = []
+    signals: list[PaFeitianSignal | PaFeitianSignalV1] = []
     missing_iv = 0
     missing_price = 0
     price_sources: Counter[str] = Counter()
@@ -321,13 +592,30 @@ def snapshot_from_scorecard(
         else:
             price_sources[str(selected.get("price_source") or "unknown")] += 1
 
-        signal = _build_signal(
+        signal_v0 = _build_signal(
             record,
             index=index,
             ts_utc=ts_utc,
             selected=selected,
             iv=IvRegimeAnnotation.model_validate(iv_data),
         )
+        if contract_version == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION:
+            trace = _build_decision_trace_v1(
+                record,
+                index=index,
+                ts_utc=ts_utc,
+                selected=selected,
+                iv=signal_v0.iv_regime,
+                signal=signal_v0,
+            )
+            signal = PaFeitianSignalV1.model_validate(
+                {
+                    **signal_v0.model_dump(mode="python"),
+                    "decision_trace_v1": trace,
+                }
+            )
+        else:
+            signal = signal_v0
         signals.append(signal)
         if current_iv is not None:
             prior_ivs[instrument].append(current_iv)
@@ -349,11 +637,17 @@ def snapshot_from_scorecard(
         warnings.append(f"{missing_iv} selected option legs lack causal IV rank")
 
     scorecard_meta = scorecard if isinstance(scorecard, Mapping) else {}
-    return PaFeitianSnapshot(
+    snapshot_cls = (
+        PaFeitianSnapshotV1
+        if contract_version == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
+        else PaFeitianSnapshot
+    )
+    return snapshot_cls(
+        schema_version=contract_version,
         generated_at_utc=generated_at_utc,
         source_commit=source_commit,
         run_config={
-            "contract": PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION,
+            "contract": contract_version,
             "mode": "scorecard",
             "producer": "src/scripts/emit_pa_feitian_snapshot.py",
             "source_scorecard": str(source_path) if source_path is not None else None,
@@ -376,7 +670,9 @@ def snapshot_from_scorecard(
         },
         summary={
             "signals_total": len(signals),
-            "by_status": {status: by_status[status] for status in SIGNAL_STATUSES if by_status[status]},
+            "by_status": {
+                status: by_status[status] for status in SIGNAL_STATUSES if by_status[status]
+            },
             "by_instrument": dict(sorted(by_instrument.items())),
             "integration_milestone": "producer_scorecard_to_pa_feitian_snapshot",
         },
@@ -393,7 +689,8 @@ def snapshot_from_scorecard_file(
     max_signals: int | None = None,
     iv_warmup: int = DEFAULT_WARMUP,
     iv_max_rank: float = DEFAULT_MAX_RANK,
-) -> PaFeitianSnapshot:
+    contract_version: SnapshotContractVersion = PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION,
+) -> PaFeitianSnapshot | PaFeitianSnapshotV1:
     scorecard_path = Path(path)
     with scorecard_path.open(encoding="utf-8") as f:
         scorecard = json.load(f)
@@ -405,15 +702,96 @@ def snapshot_from_scorecard_file(
         max_signals=max_signals,
         iv_warmup=iv_warmup,
         iv_max_rank=iv_max_rank,
+        contract_version=contract_version,
     )
+
+
+def _fixture_v1_scorecard() -> dict[str, Any]:
+    def record(
+        date: str,
+        *,
+        iv: float,
+        option_price: float | None,
+        price_source: str,
+        model_dominated: bool = False,
+    ) -> dict[str, Any]:
+        return {
+            "symbol": "kq_m_shfe_au",
+            "date": date,
+            "direction": "bottom",
+            "level": "pa_h2",
+            "subtype": "pa_h2",
+            "confidence": 0.75,
+            "score": 4,
+            "policy_rule": "pa-h2-cn-metal-tr-phase",
+            "policy_weight": 0.75,
+            "underlying_price": 860.0,
+            "options_calls": [
+                {
+                    "rank": 1,
+                    "strike": 880,
+                    "otm_pct": 2.33,
+                    "expiry_month": "2608",
+                    "expiry_date": "2026-08-17",
+                    "contract_sym": "au2608c880",
+                    "days_to_expiry": 45,
+                    "is_mm_strike": False,
+                    "option_price": option_price,
+                    "price_source": price_source,
+                    "model_dominated": model_dominated,
+                    "iv": iv,
+                }
+            ],
+            "pa_phase": "TR",
+            "position_size": "half",
+            "signal_bar_quality": {
+                "body_frac": 0.82,
+                "close_pos": 0.97,
+                "double_strong": True,
+            },
+        }
+
+    return {
+        "pool": "CN_METAL",
+        "instrument_class": "cn_metal_futures",
+        "window_days": 30,
+        "active_rules": ["pa-h2-cn-metal"],
+        "scored": [
+            record("2026-06-28", iv=20.0, option_price=18.5, price_source="store"),
+            record("2026-06-29", iv=10.0, option_price=12.2, price_source="store"),
+            record(
+                "2026-06-30",
+                iv=12.0,
+                option_price=10.4,
+                price_source="model",
+                model_dominated=True,
+            ),
+        ],
+    }
 
 
 def example_snapshot(
     *,
     source_commit: str,
     generated_at_utc: datetime | None = None,
-) -> PaFeitianSnapshot:
+    contract_version: SnapshotContractVersion = PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION,
+) -> PaFeitianSnapshot | PaFeitianSnapshotV1:
     generated_at_utc = generated_at_utc or datetime(2026, 7, 7, tzinfo=UTC)
+    if contract_version == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION:
+        snapshot = snapshot_from_scorecard(
+            _fixture_v1_scorecard(),
+            source_commit=source_commit,
+            generated_at_utc=generated_at_utc,
+            iv_warmup=1,
+            contract_version=contract_version,
+        )
+        snapshot.run_config["mode"] = "fixture"
+        snapshot.run_config["source_scorecard"] = None
+        snapshot.summary["integration_milestone"] = "producer_snapshot_v1_shadow_contract"
+        snapshot.warnings.insert(0, "snapshot v1 is a shadow contract fixture")
+        return snapshot
+    if contract_version != PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION:
+        raise ValueError(f"unsupported PA/Feitian contract_version: {contract_version}")
     return PaFeitianSnapshot(
         generated_at_utc=generated_at_utc,
         source_commit=source_commit,

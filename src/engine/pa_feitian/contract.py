@@ -12,13 +12,33 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION = "pa_feitian_snapshot_v0"
+PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION = "pa_feitian_snapshot_v1"
+DECISION_TRACE_V1_VERSION = "decision_trace_v1"
 SIGNAL_STATUSES = ("keep", "drop", "advisory", "data_blocked", "model_dominated")
 
 SignalStatus = Literal["keep", "drop", "advisory", "data_blocked", "model_dominated"]
+DecisionAction = Literal["take", "skip", "watch"]
+TraceInputKind = Literal[
+    "scorecard_record",
+    "option_chain_row",
+    "iv_history",
+    "policy_rule",
+    "producer_config",
+]
+TraceNodeKind = Literal[
+    "signal",
+    "gate",
+    "selection",
+    "policy",
+    "outcome_annotation",
+]
+TraceNodeStatus = Literal["pass", "fail", "blocked", "advisory", "not_applicable"]
+TraceDecisionEffect = Literal["promote", "demote", "block", "annotate", "none"]
+SnapshotContractVersion = Literal["pa_feitian_snapshot_v0", "pa_feitian_snapshot_v1"]
 
 
 def _utc_datetime(value: datetime) -> datetime:
@@ -57,6 +77,64 @@ class ExitPolicyAnnotation(BaseModel):
     reason: str | None = None
 
 
+class TraceEvidence(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str
+    value: Any
+    source_ref: str | None
+
+
+class TraceInputRef(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    kind: TraceInputKind
+    source: str
+    record_index: int | None = Field(default=None, ge=0)
+    asof_ts_utc: datetime | None = None
+    digest: str | None = Field(default=None, pattern=r"^sha256:")
+
+    @field_validator("asof_ts_utc")
+    @classmethod
+    def _validate_asof_ts_utc(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        return _utc_datetime(value)
+
+
+class TraceNode(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(pattern=r"^[a-z0-9_:-]+$")
+    kind: TraceNodeKind
+    label: str
+    status: TraceNodeStatus
+    decision_effect: TraceDecisionEffect
+    reason: str | None
+    evidence: list[TraceEvidence]
+
+
+class DecisionTraceSummary(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    headline: str
+    primary_blocker: str | None
+    selected_option_contract: str | None
+    confidence: float | None = Field(ge=0, le=1)
+
+
+class DecisionTraceV1(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    trace_version: Literal["decision_trace_v1"]
+    action: DecisionAction | None
+    status: SignalStatus
+    summary: DecisionTraceSummary
+    input_refs: list[TraceInputRef]
+    nodes: list[TraceNode] = Field(min_length=1)
+
+
 class PaFeitianSignal(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -85,6 +163,20 @@ class PaFeitianSignal(BaseModel):
         return _utc_datetime(value)
 
 
+class PaFeitianSignalV1(PaFeitianSignal):
+    model_config = ConfigDict(extra="forbid")
+
+    decision_trace_v1: DecisionTraceV1
+
+    @model_validator(mode="after")
+    def _validate_trace_matches_signal(self) -> PaFeitianSignalV1:
+        if self.decision_trace_v1.status != self.status:
+            raise ValueError("decision_trace_v1.status must equal signal status")
+        if self.decision_trace_v1.action != self.decision:
+            raise ValueError("decision_trace_v1.action must equal signal decision")
+        return self
+
+
 class PaFeitianSnapshot(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -103,20 +195,38 @@ class PaFeitianSnapshot(BaseModel):
         return _utc_datetime(value)
 
 
-def validate_snapshot(data: dict[str, Any]) -> PaFeitianSnapshot:
+class PaFeitianSnapshotV1(PaFeitianSnapshot):
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal["pa_feitian_snapshot_v1"] = PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
+    signals: list[PaFeitianSignalV1] = Field(default_factory=list)
+
+
+def validate_snapshot(data: dict[str, Any]) -> PaFeitianSnapshot | PaFeitianSnapshotV1:
+    if data.get("schema_version") == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION:
+        return PaFeitianSnapshotV1.model_validate(data)
     return PaFeitianSnapshot.model_validate(data)
 
 
-def snapshot_to_jsonable(snapshot: PaFeitianSnapshot) -> dict[str, Any]:
+def validate_snapshot_v1(data: dict[str, Any]) -> PaFeitianSnapshotV1:
+    return PaFeitianSnapshotV1.model_validate(data)
+
+
+def snapshot_to_jsonable(snapshot: PaFeitianSnapshot | PaFeitianSnapshotV1) -> dict[str, Any]:
     return snapshot.model_dump(mode="json", exclude_none=False)
 
 
-def load_snapshot(path: str | Path) -> PaFeitianSnapshot:
+def load_snapshot(path: str | Path) -> PaFeitianSnapshot | PaFeitianSnapshotV1:
     with Path(path).open(encoding="utf-8") as f:
         return validate_snapshot(json.load(f))
 
 
-def write_snapshot(snapshot: PaFeitianSnapshot, path: str | Path) -> None:
+def load_snapshot_v1(path: str | Path) -> PaFeitianSnapshotV1:
+    with Path(path).open(encoding="utf-8") as f:
+        return validate_snapshot_v1(json.load(f))
+
+
+def write_snapshot(snapshot: PaFeitianSnapshot | PaFeitianSnapshotV1, path: str | Path) -> None:
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(

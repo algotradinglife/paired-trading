@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/algotradinglife/paired-trading/doc/schemas/pa_feitian_decision_trace_v1.schema.json",
+  "title": "PA / Feitian Decision Trace v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trace_version",
+    "action",
+    "status",
+    "summary",
+    "input_refs",
+    "nodes"
+  ],
+  "properties": {
+    "trace_version": {
+      "const": "decision_trace_v1"
+    },
+    "action": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "take",
+        "skip",
+        "watch",
+        null
+      ]
+    },
+    "status": {
+      "$ref": "#/$defs/signal_status"
+    },
+    "summary": {
+      "$ref": "#/$defs/summary"
+    },
+    "input_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/input_ref"
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    }
+  },
+  "$defs": {
+    "signal_status": {
+      "enum": [
+        "keep",
+        "drop",
+        "advisory",
+        "data_blocked",
+        "model_dominated"
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "headline",
+        "primary_blocker",
+        "selected_option_contract",
+        "confidence"
+      ],
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "primary_blocker": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selected_option_contract": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "input_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "scorecard_record",
+            "option_chain_row",
+            "iv_history",
+            "policy_rule",
+            "producer_config"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "record_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "asof_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "digest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:"
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "status",
+        "decision_effect",
+        "reason",
+        "evidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_:-]+$"
+        },
+        "kind": {
+          "enum": [
+            "signal",
+            "gate",
+            "selection",
+            "policy",
+            "outcome_annotation"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "blocked",
+            "advisory",
+            "not_applicable"
+          ]
+        },
+        "decision_effect": {
+          "enum": [
+            "promote",
+            "demote",
+            "block",
+            "annotate",
+            "none"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "value",
+        "source_ref"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": true,
+        "source_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

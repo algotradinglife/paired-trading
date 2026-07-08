@@ -9,7 +9,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from engine.pa_feitian.contract import (  # noqa: E402
+    PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
     load_snapshot,
+    load_snapshot_v1,
     write_snapshot,
 )
 from engine.pa_feitian.scorecard_producer import snapshot_from_scorecard  # noqa: E402
@@ -118,6 +120,33 @@ def _scorecard() -> dict:
     }
 
 
+def _scorecard_with_model_dominated() -> dict:
+    scorecard = _scorecard()
+    scorecard["scored"].append(
+        _scored_record(
+            date="2026-06-03",
+            iv=12.0,
+            calls=[
+                {
+                    "rank": 1,
+                    "strike": 880,
+                    "otm_pct": 2.33,
+                    "expiry_month": "2608",
+                    "expiry_date": "2026-08-17",
+                    "contract_sym": "au2608c880",
+                    "days_to_expiry": 43,
+                    "is_mm_strike": False,
+                    "option_price": 10.4,
+                    "price_source": "model",
+                    "model_dominated": True,
+                    "iv": 12.0,
+                }
+            ],
+        )
+    )
+    return scorecard
+
+
 def test_scorecard_snapshot_uses_real_option_emission_and_validates(tmp_path: Path):
     snapshot = snapshot_from_scorecard(
         _scorecard(),
@@ -144,6 +173,50 @@ def test_scorecard_snapshot_uses_real_option_emission_and_validates(tmp_path: Pa
     write_snapshot(snapshot, out)
     loaded = load_snapshot(out)
     assert loaded.summary["signals_total"] == 2
+
+
+def test_scorecard_snapshot_v1_adds_shadow_trace_only_when_requested(tmp_path: Path):
+    default_snapshot = snapshot_from_scorecard(
+        _scorecard_with_model_dominated(),
+        source_commit=COMMIT,
+        generated_at_utc=datetime(2026, 7, 7, tzinfo=UTC),
+        iv_warmup=1,
+    )
+    assert default_snapshot.schema_version == "pa_feitian_snapshot_v0"
+    assert not hasattr(default_snapshot.signals[-1], "decision_trace_v1")
+
+    snapshot = snapshot_from_scorecard(
+        _scorecard_with_model_dominated(),
+        source_commit=COMMIT,
+        generated_at_utc=datetime(2026, 7, 7, tzinfo=UTC),
+        iv_warmup=1,
+        contract_version=PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
+    )
+
+    assert snapshot.schema_version == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
+    assert snapshot.summary["by_status"] == {
+        "data_blocked": 1,
+        "keep": 1,
+        "model_dominated": 1,
+    }
+    assert snapshot.data_quality["raw_data_access"] == "not_used_by_pa_feitian_producer"
+
+    model_dominated = snapshot.signals[-1]
+    assert model_dominated.status == "model_dominated"
+    assert model_dominated.decision_trace_v1.summary.primary_blocker == "model_dominated_premium"
+    assert [node.id for node in model_dominated.decision_trace_v1.nodes] == [
+        "underlying_signal",
+        "policy_rule",
+        "option_selection",
+        "iv_regime",
+        "premium_entry",
+        "exit_policy",
+    ]
+
+    out = tmp_path / "snapshot-v1.json"
+    write_snapshot(snapshot, out)
+    loaded = load_snapshot_v1(out)
+    assert loaded.signals[-1].decision_trace_v1.status == "model_dominated"
 
 
 def test_producer_cli_converts_scorecard_file(tmp_path: Path):
@@ -173,3 +246,34 @@ def test_producer_cli_converts_scorecard_file(tmp_path: Path):
     assert snapshot.run_config["mode"] == "scorecard"
     assert snapshot.summary["signals_total"] == 2
     assert snapshot.signals[-1].status == "keep"
+
+
+def test_producer_cli_converts_scorecard_file_to_v1(tmp_path: Path):
+    scorecard = tmp_path / "scorecard.json"
+    scorecard.write_text(json.dumps(_scorecard_with_model_dominated()), encoding="utf-8")
+    out = tmp_path / "pa_feitian_snapshot_v1.json"
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(SRC_ROOT / "scripts" / "emit_pa_feitian_snapshot.py"),
+            "--out",
+            str(out),
+            "--scorecard",
+            str(scorecard),
+            "--source-commit",
+            COMMIT,
+            "--iv-warmup",
+            "1",
+            "--contract-version",
+            PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
+        ],
+        cwd=SRC_ROOT,
+        check=True,
+    )
+
+    snapshot = load_snapshot_v1(out)
+    assert snapshot.source_commit == COMMIT
+    assert snapshot.run_config["contract"] == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
+    assert snapshot.summary["signals_total"] == 3
+    assert snapshot.signals[-1].decision_trace_v1.action == "watch"
