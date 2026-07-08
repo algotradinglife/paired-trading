@@ -1,4 +1,4 @@
-const SNAPSHOT_URL = "../../src/tests/fixtures/pa_feitian_snapshot_v0.json";
+const SNAPSHOT_URL = "./fixtures/pa_feitian_snapshot_v0.json";
 const CONTRACT_VERSION = "pa_feitian_snapshot_v0";
 
 export const STATUS_DEFINITIONS = {

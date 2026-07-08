@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 
 import {
@@ -8,8 +10,9 @@ import {
   missingOptionalFields,
   renderDashboard,
 } from "../app.mjs";
+import { copySnapshotFixture } from "../scripts/copy-snapshot-fixture.mjs";
 
-const fixtureUrl = new URL("../../../src/tests/fixtures/pa_feitian_snapshot_v0.json", import.meta.url);
+const fixtureUrl = new URL("../fixtures/pa_feitian_snapshot_v0.json", import.meta.url);
 const appFiles = [
   new URL("../index.html", import.meta.url),
   new URL("../app.mjs", import.meta.url),
@@ -70,6 +73,45 @@ test("renders an explicit empty state when the contract has no signals", async (
   assert.doesNotMatch(html, /data-testid="signal-table"/);
 });
 
+test("copies a generated snapshot artifact into a frontend fixture target", async () => {
+  const snapshot = await loadFixture();
+  const tempRoot = await mkdtemp(join(tmpdir(), "pa-feitian-dashboard-"));
+  const generatedSource = join(tempRoot, "generated-pa-feitian-snapshot.json");
+  const copiedOut = join(tempRoot, "fixtures", "pa_feitian_snapshot_v0.json");
+  const generatedSnapshot = {
+    ...snapshot,
+    generated_at_utc: "2026-07-08T00:00:00Z",
+    run_config: { ...snapshot.run_config, mode: "scorecard" },
+    summary: {
+      ...snapshot.summary,
+      signals_total: 1,
+      by_status: { keep: 1 },
+      integration_milestone: "generated_snapshot_copy_smoke",
+    },
+    signals: [
+      {
+        ...snapshot.signals[0],
+        id: "paft_generated_0001",
+        status: "keep",
+        decision: "keep",
+      },
+    ],
+    warnings: ["generated snapshot copy smoke"],
+  };
+
+  await writeFile(generatedSource, JSON.stringify(generatedSnapshot), "utf8");
+  const copyResult = await copySnapshotFixture({ source: generatedSource, out: copiedOut, quiet: true });
+  const copiedSnapshot = JSON.parse(await readFile(copiedOut, "utf8"));
+  const html = renderDashboard(copiedSnapshot);
+
+  assert.equal(copyResult.changed, true);
+  assert.equal(copiedSnapshot.run_config.mode, "scorecard");
+  assert.equal(copiedSnapshot.summary.integration_milestone, "generated_snapshot_copy_smoke");
+  assert.match(html, /paft_generated_0001/);
+  assert.match(html, /scorecard/);
+  assert.match(html, /generated snapshot copy smoke/);
+});
+
 test("frontend files only reference the fixture contract, not raw data pipelines", async () => {
   const texts = await Promise.all(appFiles.map((file) => readFile(file, "utf8")));
   const frontendSource = texts.join("\n");
@@ -83,7 +125,8 @@ test("frontend files only reference the fixture contract, not raw data pipelines
     ["scripts", "score_today"].join("/"),
   ];
 
-  assert.match(frontendSource, /src\/tests\/fixtures\/pa_feitian_snapshot_v0\.json/);
+  assert.match(frontendSource, /fixtures\/pa_feitian_snapshot_v0\.json/);
+  assert.doesNotMatch(frontendSource, /src\/tests\/fixtures\/pa_feitian_snapshot_v0\.json/);
   for (const forbidden of forbiddenReferences) {
     assert.doesNotMatch(frontendSource, new RegExp(forbidden.replace("/", "\\/")));
   }

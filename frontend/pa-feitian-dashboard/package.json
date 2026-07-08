@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "copy:snapshot": "node scripts/copy-snapshot-fixture.mjs",
     "serve": "node dev-server.mjs",
+    "presmoke": "npm run copy:snapshot -- --quiet",
     "smoke": "node --test test/dashboard-smoke.test.mjs"
   }
 }
