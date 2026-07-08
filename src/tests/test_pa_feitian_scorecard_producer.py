@@ -14,11 +14,14 @@ from engine.pa_feitian.contract import (  # noqa: E402
     load_snapshot_v1,
     write_snapshot,
 )
+from engine.pa_feitian.manifest import load_run_manifest, sha256_file  # noqa: E402
+from engine.pa_feitian.schema_validation import validate_pa_feitian_run_manifest_schema  # noqa: E402
 from engine.pa_feitian.scorecard_producer import snapshot_from_scorecard  # noqa: E402
 
 
 SRC_ROOT = Path(__file__).resolve().parents[1]
 COMMIT = "a" * 40
+SCORECARD_V1_FIXTURE = SRC_ROOT / "tests" / "fixtures" / "pa_feitian_scorecard_v1.json"
 
 
 def _scored_record(
@@ -277,3 +280,98 @@ def test_producer_cli_converts_scorecard_file_to_v1(tmp_path: Path):
     assert snapshot.run_config["contract"] == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
     assert snapshot.summary["signals_total"] == 3
     assert snapshot.signals[-1].decision_trace_v1.action == "watch"
+
+
+def test_producer_cli_emits_v1_manifest_and_frontend_copy(tmp_path: Path):
+    scorecard = tmp_path / "scorecard.json"
+    snapshot_path = tmp_path / "pa_feitian_snapshot_v1.json"
+    manifest_path = tmp_path / "pa_feitian_run_manifest_v1.json"
+    frontend_copy = tmp_path / "dashboard" / "pa_feitian_snapshot_v1.json"
+    scorecard.write_text(json.dumps(_scorecard_with_model_dominated()), encoding="utf-8")
+
+    command = [
+        sys.executable,
+        str(SRC_ROOT / "scripts" / "emit_pa_feitian_snapshot.py"),
+        "--out",
+        str(snapshot_path),
+        "--scorecard",
+        str(scorecard),
+        "--source-commit",
+        COMMIT,
+        "--generated-at-utc",
+        "2026-07-07T00:00:00Z",
+        "--iv-warmup",
+        "1",
+        "--contract-version",
+        PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
+        "--manifest-out",
+        str(manifest_path),
+        "--frontend-copy",
+        str(frontend_copy),
+        "--data-access-status",
+        "fixture_fallback",
+        "--data-access-source",
+        "test deterministic scorecard fixture",
+        "--data-access-note",
+        "deterministic test scorecard; no live score_today run invoked",
+    ]
+
+    subprocess.run(command, cwd=SRC_ROOT, check=True)
+    first_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    subprocess.run(command, cwd=SRC_ROOT, check=True)
+    second_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    assert second_manifest == first_manifest
+    validate_pa_feitian_run_manifest_schema(second_manifest)
+
+    snapshot = load_snapshot_v1(snapshot_path)
+    manifest = load_run_manifest(manifest_path)
+    assert snapshot.schema_version == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
+    assert manifest.source_commit == COMMIT
+    assert manifest.scorecard_artifact.sha256 == sha256_file(scorecard)
+    assert manifest.snapshot_artifact.sha256 == sha256_file(snapshot_path)
+    assert manifest.output_hashes["snapshot_artifact"] == sha256_file(snapshot_path)
+    assert manifest.output_hashes["frontend_copy"] == sha256_file(frontend_copy)
+    assert manifest.frontend_copy_path == str(frontend_copy)
+    assert manifest.data_access.status == "fixture_fallback"
+    assert manifest.data_access.source == "test deterministic scorecard fixture"
+    assert manifest.run_config["contract"] == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
+    assert manifest.run_config["mode"] == "scorecard"
+
+
+def test_producer_cli_manifest_falls_back_to_committed_scorecard_fixture(tmp_path: Path):
+    snapshot_path = tmp_path / "pa_feitian_snapshot_v1.json"
+    manifest_path = tmp_path / "pa_feitian_run_manifest_v1.json"
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(SRC_ROOT / "scripts" / "emit_pa_feitian_snapshot.py"),
+            "--out",
+            str(snapshot_path),
+            "--source-commit",
+            COMMIT,
+            "--generated-at-utc",
+            "2026-07-07T00:00:00Z",
+            "--contract-version",
+            PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
+            "--manifest-out",
+            str(manifest_path),
+            "--iv-warmup",
+            "1",
+        ],
+        cwd=SRC_ROOT,
+        check=True,
+    )
+
+    snapshot = load_snapshot_v1(snapshot_path)
+    manifest = load_run_manifest(manifest_path)
+    assert snapshot.run_config["mode"] == "scorecard"
+    assert manifest.data_access.status == "fixture_fallback"
+    assert manifest.data_access.source == "src/tests/fixtures/pa_feitian_scorecard_v1.json"
+    assert manifest.scorecard_artifact.sha256 == sha256_file(SCORECARD_V1_FIXTURE)
+    assert manifest.run_config["contract"] == PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
+    assert manifest.run_config["source_scorecard"].endswith(
+        "src/tests/fixtures/pa_feitian_scorecard_v1.json"
+    )
