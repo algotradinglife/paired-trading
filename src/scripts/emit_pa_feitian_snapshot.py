@@ -22,7 +22,11 @@ from engine.options.iv_regime import DEFAULT_MAX_RANK, DEFAULT_WARMUP
 from engine.pa_feitian.contract import (
     PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION,
     PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
+    write_decision_intent,
     write_snapshot,
+)
+from engine.pa_feitian.decision_intent_adapter import (
+    build_decision_intent_sidecar_from_scorecard_file,
 )
 from engine.pa_feitian.manifest import build_run_manifest, write_run_manifest
 from engine.pa_feitian.scorecard_producer import example_snapshot, snapshot_from_scorecard_file
@@ -126,6 +130,15 @@ def main(argv: list[str] | None = None) -> int:
         help="Optional output path for pa_feitian_run_manifest_v1.",
     )
     parser.add_argument(
+        "--decision-intent-out",
+        type=Path,
+        default=None,
+        help=(
+            "Optional output path for pa_feitian_decision_intent_v1. Requires "
+            "--manifest-out and pa_feitian_snapshot_v1."
+        ),
+    )
+    parser.add_argument(
         "--frontend-copy",
         type=Path,
         default=None,
@@ -156,6 +169,13 @@ def main(argv: list[str] | None = None) -> int:
         and args.contract_version != PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
     ):
         parser.error("--manifest-out requires --contract-version pa_feitian_snapshot_v1")
+    if args.decision_intent_out is not None and args.manifest_out is None:
+        parser.error("--decision-intent-out requires --manifest-out")
+    if (
+        args.decision_intent_out is not None
+        and args.contract_version != PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
+    ):
+        parser.error("--decision-intent-out requires --contract-version pa_feitian_snapshot_v1")
 
     source_commit = args.source_commit or _source_commit()
     generated_at_utc = _parse_generated_at(args.generated_at_utc)
@@ -187,6 +207,20 @@ def main(argv: list[str] | None = None) -> int:
         args.frontend_copy.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(args.out, args.frontend_copy)
 
+    if args.decision_intent_out is not None:
+        if scorecard_path is None:
+            parser.error("--decision-intent-out requires --scorecard or manifest fixture fallback")
+        decision_intent = build_decision_intent_sidecar_from_scorecard_file(
+            snapshot,
+            scorecard_path=scorecard_path,
+            source_commit=source_commit,
+            source_manifest_path=args.manifest_out,
+            snapshot_artifact_path=args.out,
+            generated_at_utc=generated_at_utc,
+            source_manifest_generated_at_utc=generated_at_utc,
+        )
+        write_decision_intent(decision_intent, args.decision_intent_out)
+
     if args.manifest_out is not None:
         if scorecard_path is None:
             parser.error("--manifest-out requires --scorecard or the deterministic fixture fallback")
@@ -205,6 +239,7 @@ def main(argv: list[str] | None = None) -> int:
             run_config=snapshot.run_config,
             generated_at_utc=generated_at_utc,
             frontend_copy_path=args.frontend_copy,
+            decision_intent_path=args.decision_intent_out,
             data_access={
                 "status": data_access_status,
                 "source": data_access_source,
