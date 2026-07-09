@@ -5,6 +5,7 @@ export const SUPPORTED_CONTRACT_VERSIONS = new Set([
   "pa_feitian_snapshot_v1",
   "pa_feitian_snapshot_v0",
 ]);
+export const SUPPORTED_DECISION_INTENT_VERSIONS = new Set(["pa_feitian_decision_intent_v1"]);
 
 export const SNAPSHOT_MODE_DEFINITIONS = {
   fixture: "Fixture snapshot",
@@ -28,6 +29,31 @@ export const TRACE_NODE_STATUS_DEFINITIONS = {
   blocked: "Node is waiting on causal data",
   advisory: "Node annotates the decision",
   not_applicable: "Node does not apply",
+};
+
+export const DECISION_STATE_DEFINITIONS = {
+  reject: "Rejected by decision-intent readiness",
+  watch: "Watch only; readiness remains incomplete",
+  armed_watch: "Armed watch; near-ready but still blocked",
+  trade_ready: "Trade-ready sidecar state",
+  observation_runner: "Observation-only runner diagnostic",
+};
+
+const DECISION_INTENT_EMPTY_STATE = {
+  status: "not_referenced",
+  schemaVersion: null,
+  generatedAt: null,
+  sourceCommit: null,
+  provenance: {},
+  artifact: null,
+  intents: [],
+  intentsBySignalId: new Map(),
+  warnings: [],
+  stateCounts: {},
+  executionAllowedCount: 0,
+  unmatchedSignalIds: [],
+  duplicateSignalIds: [],
+  error: null,
 };
 
 const OPTIONAL_FIELDS = [
@@ -81,6 +107,16 @@ function labelValue(value) {
   return escapeHtml(value);
 }
 
+function percentageValue(value) {
+  if (isMissing(value)) {
+    return '<span class="missing">Missing</span>';
+  }
+  if (typeof value === "number") {
+    return `${escapeHtml(value)}%`;
+  }
+  return escapeHtml(value);
+}
+
 function traceValue(value) {
   if (value === undefined) {
     return '<span class="missing">Missing</span>';
@@ -116,6 +152,26 @@ function statusBadge(status) {
 function traceNodeBadge(status) {
   const normalized = TRACE_NODE_STATUS_DEFINITIONS[status] ? status : "unknown";
   return `<span class="trace-badge ${escapeHtml(normalized)}">${escapeHtml(status || "unknown")}</span>`;
+}
+
+function decisionStateBadge(state) {
+  const normalized = DECISION_STATE_DEFINITIONS[state] ? state : "unknown";
+  return `<span class="intent-badge state ${escapeHtml(normalized)}">${escapeHtml(state || "unknown")}</span>`;
+}
+
+function executionBadge(allowed) {
+  if (allowed === true) {
+    return '<span class="intent-badge execution allowed">execution_allowed: true</span>';
+  }
+  if (allowed === false) {
+    return '<span class="intent-badge execution blocked">execution_allowed: false</span>';
+  }
+  return '<span class="intent-badge execution unknown">execution_allowed: Missing</span>';
+}
+
+function readinessBadge(value) {
+  const normalized = (value || "unknown").replaceAll("_", "-");
+  return `<span class="intent-badge readiness ${escapeHtml(normalized)}">${escapeHtml(value || "unknown")}</span>`;
 }
 
 function modeBadge(mode) {
@@ -184,6 +240,9 @@ function normalizeRenderOptions(options) {
   if (options.schema_version === "pa_feitian_run_manifest_v1") {
     return { manifest: options };
   }
+  if (options.schema_version === "pa_feitian_decision_intent_v1") {
+    return { decisionIntent: options };
+  }
   return options;
 }
 
@@ -198,6 +257,7 @@ export function normalizeRunManifest(manifest) {
     sourceCommit: manifest.source_commit,
     scorecardArtifact: manifest.scorecard_artifact || null,
     snapshotArtifact: manifest.snapshot_artifact || null,
+    decisionIntentArtifact: manifest.decision_intent_artifact || null,
     cliArgs: Array.isArray(manifest.cli_args) ? manifest.cli_args : [],
     runConfig: manifest.run_config || {},
     dataAccess: manifest.data_access || {},
@@ -205,6 +265,54 @@ export function normalizeRunManifest(manifest) {
     outputHashes: manifest.output_hashes || {},
     frontendCopyPath: manifest.frontend_copy_path ?? null,
     reviewState: manifest.review_state || {},
+  };
+}
+
+export function normalizeDecisionIntentSidecar(sidecar) {
+  if (!sidecar) {
+    return null;
+  }
+  if (!SUPPORTED_DECISION_INTENT_VERSIONS.has(sidecar.schema_version)) {
+    throw new Error(`Unsupported decision intent contract: ${sidecar?.schema_version ?? "missing"}`);
+  }
+
+  const intents = Array.isArray(sidecar.intents) ? sidecar.intents : [];
+  const intentsBySignalId = new Map();
+  const stateCounts = {};
+  const duplicateSignalIds = [];
+  let executionAllowedCount = 0;
+
+  for (const intent of intents) {
+    const signalId = intent?.signal_id;
+    if (!signalId) {
+      continue;
+    }
+    if (intentsBySignalId.has(signalId)) {
+      duplicateSignalIds.push(signalId);
+    }
+    intentsBySignalId.set(signalId, intent);
+    const state = intent.decision_state || "unknown";
+    stateCounts[state] = (stateCounts[state] || 0) + 1;
+    if (intent.execution_allowed === true) {
+      executionAllowedCount += 1;
+    }
+  }
+
+  return {
+    status: "loaded",
+    schemaVersion: sidecar.schema_version,
+    generatedAt: sidecar.generated_at_utc,
+    sourceCommit: sidecar.source_commit,
+    provenance: sidecar.provenance || {},
+    artifact: null,
+    intents,
+    intentsBySignalId,
+    warnings: Array.isArray(sidecar.warnings) ? sidecar.warnings : [],
+    stateCounts,
+    executionAllowedCount,
+    unmatchedSignalIds: [],
+    duplicateSignalIds,
+    error: null,
   };
 }
 
@@ -222,6 +330,69 @@ function inferSnapshotMode(snapshot, manifest) {
   return "fixture";
 }
 
+function hasPosteriorDiagnosticFields(signal) {
+  return [
+    signal?.underlying_r_outcome,
+    signal?.premium_r_outcome,
+    signal?.option_runner_outcome,
+    signal?.proxy_outcome,
+  ].some((value) => value !== undefined && value !== null);
+}
+
+function deriveDecisionIntentWarnings(signals, decisionIntent, manifest, error) {
+  const warnings = [...(decisionIntent?.warnings || [])];
+  const artifact = manifest?.decisionIntentArtifact;
+
+  if (error) {
+    warnings.push(`Decision-intent sidecar failed to load: ${error.message || error}`);
+  } else if (!artifact) {
+    warnings.push("Manifest does not reference a decision-intent sidecar.");
+  } else if (!decisionIntent || decisionIntent.status !== "loaded") {
+    warnings.push("Manifest references a decision-intent sidecar, but no sidecar payload is loaded.");
+  }
+
+  if (decisionIntent?.duplicateSignalIds?.length) {
+    warnings.push(
+      `Duplicate decision-intent signal ids: ${decisionIntent.duplicateSignalIds.join(", ")}`,
+    );
+  }
+
+  const matchedSignalIds = new Set(signals.map((signal) => signal.id));
+  const unmatchedSignalIds =
+    decisionIntent?.intents
+      ?.map((intent) => intent.signal_id)
+      .filter((signalId) => signalId && !matchedSignalIds.has(signalId)) || [];
+  if (unmatchedSignalIds.length) {
+    warnings.push(`Decision-intent records without snapshot signals: ${unmatchedSignalIds.join(", ")}`);
+  }
+
+  const missingSignalIds = signals
+    .filter((signal) => decisionIntent?.status === "loaded" && !decisionIntent.intentsBySignalId.has(signal.id))
+    .map((signal) => signal.id);
+  if (missingSignalIds.length) {
+    warnings.push(`Snapshot signals missing decision-intent records: ${missingSignalIds.join(", ")}`);
+  }
+
+  const observationOnlySignalIds =
+    decisionIntent?.intents
+      ?.filter((intent) => intent.product_direction_tier === "observation_only")
+      .map((intent) => intent.signal_id) || [];
+  if (observationOnlySignalIds.length) {
+    warnings.push(
+      `Observation-only product-direction warning: ${observationOnlySignalIds.join(", ")} is not executable.`,
+    );
+  }
+
+  const posteriorSignals = signals.filter(hasPosteriorDiagnosticFields);
+  if (posteriorSignals.length) {
+    warnings.push(
+      "Posterior diagnostic fields are present in snapshot outcomes; decision-intent no-lookahead inputs remain the decision-time source list.",
+    );
+  }
+
+  return warnings;
+}
+
 export function buildDashboardModel(snapshot, options = {}) {
   if (!snapshot || !SUPPORTED_CONTRACT_VERSIONS.has(snapshot.schema_version)) {
     throw new Error(`Unsupported snapshot contract: ${snapshot?.schema_version ?? "missing"}`);
@@ -229,12 +400,39 @@ export function buildDashboardModel(snapshot, options = {}) {
 
   const renderOptions = normalizeRenderOptions(options);
   const manifest = normalizeRunManifest(renderOptions.manifest);
+  const decisionIntentError = renderOptions.decisionIntentError || null;
+  const normalizedDecisionIntent = normalizeDecisionIntentSidecar(renderOptions.decisionIntent);
   const snapshotMode = inferSnapshotMode(snapshot, manifest);
   const signals = Array.isArray(snapshot.signals) ? snapshot.signals : [];
   const summary = snapshot.summary || {};
   const statusCounts = countStatuses(summary, signals);
   const totalSignals = Number(summary.signals_total ?? signals.length);
   const maxStatus = Math.max(1, ...Object.values(statusCounts));
+  const decisionIntent =
+    normalizedDecisionIntent ||
+    (decisionIntentError
+      ? {
+          ...DECISION_INTENT_EMPTY_STATE,
+          status: "error",
+          artifact: manifest?.decisionIntentArtifact || null,
+          error: decisionIntentError,
+        }
+      : {
+          ...DECISION_INTENT_EMPTY_STATE,
+          status: manifest?.decisionIntentArtifact ? "referenced_missing" : "not_referenced",
+          artifact: manifest?.decisionIntentArtifact || null,
+        });
+  decisionIntent.artifact = manifest?.decisionIntentArtifact || decisionIntent.artifact || null;
+  decisionIntent.unmatchedSignalIds =
+    decisionIntent.intents
+      ?.map((intent) => intent.signal_id)
+      .filter((signalId) => signalId && !signals.some((signal) => signal.id === signalId)) || [];
+  const decisionWarnings = deriveDecisionIntentWarnings(
+    signals,
+    decisionIntent.status === "loaded" ? decisionIntent : null,
+    manifest,
+    decisionIntentError,
+  );
 
   return {
     contract: snapshot.schema_version,
@@ -250,8 +448,14 @@ export function buildDashboardModel(snapshot, options = {}) {
     statusCounts,
     totalSignals,
     maxStatus,
+    decisionIntent: {
+      ...decisionIntent,
+      warnings: decisionWarnings,
+    },
     signals: signals.map((signal) => ({
       ...signal,
+      decisionIntent:
+        decisionIntent.status === "loaded" ? decisionIntent.intentsBySignalId.get(signal.id) || null : null,
       decisionTrace: normalizeDecisionTrace(signal),
       missingOptional: missingOptionalFields(signal),
     })),
@@ -441,6 +645,7 @@ function renderManifestProvenance(model) {
       <div class="manifest-artifacts">
         ${renderArtifactRef("Scorecard artifact", manifest.scorecardArtifact)}
         ${renderArtifactRef("Snapshot artifact", manifest.snapshotArtifact)}
+        ${renderArtifactRef("Decision intent artifact", manifest.decisionIntentArtifact)}
       </div>
       <div class="manifest-details">
         <details>
@@ -472,6 +677,72 @@ function renderManifestProvenance(model) {
   `;
 }
 
+function renderReasonCodes(reasonCodes) {
+  if (!Array.isArray(reasonCodes) || reasonCodes.length === 0) {
+    return '<span class="missing">Missing</span>';
+  }
+  return `
+    <ul class="reason-code-list">
+      ${reasonCodes.map((code) => `<li>${escapeHtml(code)}</li>`).join("")}
+    </ul>
+  `;
+}
+
+function renderDecisionIntentOverview(model) {
+  const sidecar = model.decisionIntent;
+  const artifact = sidecar.artifact;
+  const stateCells = Object.entries(DECISION_STATE_DEFINITIONS)
+    .map(([state, definition]) => {
+      const count = sidecar.stateCounts[state] || 0;
+      return `
+        <div class="intent-state-cell ${escapeHtml(state)}">
+          <strong>${escapeHtml(count)}</strong>
+          ${decisionStateBadge(state)}
+          <span>${escapeHtml(definition)}</span>
+        </div>
+      `;
+    })
+    .join("");
+
+  const warningItems = sidecar.warnings.length
+    ? sidecar.warnings
+        .map((warning) => `<div class="warning-item intent-warning">${escapeHtml(warning)}</div>`)
+        .join("")
+    : '<div class="warning-item muted">No decision-intent reviewer warnings.</div>';
+
+  return `
+    <section class="panel" aria-labelledby="decision-intent-heading" data-testid="decision-intent-review">
+      <div class="panel-header">
+        <div>
+          <h2 id="decision-intent-heading">Decision Intent Reviewer</h2>
+          <p>${escapeHtml(sidecar.status)} / ${escapeHtml(sidecar.schemaVersion || "no sidecar")}</p>
+        </div>
+        ${artifact ? readinessBadge(artifact.kind) : readinessBadge("missing_sidecar")}
+      </div>
+      <div class="intent-meta-grid">
+        <div class="manifest-item">
+          <span>Generated UTC</span>
+          <strong>${labelValue(formatDate(sidecar.generatedAt))}</strong>
+        </div>
+        <div class="manifest-item">
+          <span>Source commit</span>
+          <strong>${labelValue(sidecar.sourceCommit)}</strong>
+        </div>
+        <div class="manifest-item">
+          <span>Execution allowed</span>
+          <strong>${escapeHtml(sidecar.executionAllowedCount || 0)}</strong>
+        </div>
+        <div class="manifest-item">
+          <span>Artifact path</span>
+          <strong>${labelValue(artifact?.path)}</strong>
+        </div>
+      </div>
+      <div class="intent-state-grid">${stateCells}</div>
+      <div class="warnings-list">${warningItems}</div>
+    </section>
+  `;
+}
+
 function renderSignalTable(model) {
   if (model.signals.length === 0) {
     return `
@@ -489,6 +760,7 @@ function renderSignalTable(model) {
       const premiumState = signal.features_det?.premium_space_signal || "Missing";
       const optionSide = signal.option_leg?.side || "Missing";
       const missing = signal.missingOptional.length;
+      const intent = signal.decisionIntent;
 
       return `
         <tr>
@@ -499,9 +771,13 @@ function renderSignalTable(model) {
           </td>
           <td>${escapeHtml(signal.interval)}<div class="muted">${escapeHtml(formatDate(signal.ts_utc))}</div></td>
           <td>${statusBadge(signal.status)}</td>
+          <td>
+            ${intent ? decisionStateBadge(intent.decision_state) : '<span class="missing">Missing</span>'}
+            <div class="muted">${intent ? executionBadge(intent.execution_allowed) : "No sidecar record"}</div>
+          </td>
           <td>${escapeHtml(pattern)}<div class="muted">${escapeHtml(direction)}</div></td>
           <td>${escapeHtml(optionSide)}<div class="muted">${escapeHtml(premiumState)}</div></td>
-          <td>${escapeHtml(signal.decision || "Missing")}</td>
+          <td>${intent ? renderReasonCodes(intent.reason_codes) : labelValue(signal.decision)}</td>
           <td>${missing ? `<span class="missing">${missing}</span>` : "0"}</td>
         </tr>
       `;
@@ -524,9 +800,10 @@ function renderSignalTable(model) {
               <th>Instrument</th>
               <th>Interval / Time</th>
               <th>Status</th>
+              <th>Decision State</th>
               <th>Underlying</th>
               <th>Option Leg</th>
-              <th>Decision</th>
+              <th>Reason Codes</th>
               <th>Missing Optional</th>
             </tr>
           </thead>
@@ -571,6 +848,29 @@ function renderTraceInputRefs(inputRefs) {
   `;
 }
 
+function renderIntentInputRefs(inputRefs) {
+  if (!Array.isArray(inputRefs) || inputRefs.length === 0) {
+    return '<p class="muted trace-empty">No no-lookahead input references.</p>';
+  }
+
+  return `
+    <ul class="trace-input-refs intent-input-refs" data-testid="decision-intent-no-lookahead">
+      ${inputRefs
+        .map(
+          (input) => `
+            <li>
+              <strong>${labelValue(input.id)}</strong>
+              <span>${escapeHtml(input.kind || "unknown")} / ${escapeHtml(input.source || "unknown")}</span>
+              <code>${labelValue(input.digest)}</code>
+              <small>index ${labelValue(input.record_index)} / ${escapeHtml(formatDate(input.asof_ts_utc))}</small>
+            </li>
+          `,
+        )
+        .join("")}
+    </ul>
+  `;
+}
+
 function renderTraceEvidence(evidence) {
   if (!Array.isArray(evidence) || evidence.length === 0) {
     return '<p class="muted trace-empty">No evidence entries.</p>';
@@ -590,6 +890,103 @@ function renderTraceEvidence(evidence) {
         )
         .join("")}
     </ul>
+  `;
+}
+
+function renderDecisionIntent(intent) {
+  if (!intent) {
+    return `
+      <section class="drill-section intent-section" data-testid="decision-intent-missing">
+        <h3>Decision Intent</h3>
+        <div class="intent-missing">
+          <strong>Decision-intent sidecar record missing</strong>
+          <span>Review remains available from snapshot v0/v1 fields, but readiness gates are not loaded.</span>
+        </div>
+      </section>
+    `;
+  }
+
+  const premiumStop = intent.premium_stop || {};
+  const confirmation = intent.confirmation || {};
+  const liquidity = intent.liquidity || {};
+
+  return `
+    <section class="drill-section intent-section" data-testid="decision-intent-sidecar">
+      <h3>Decision Intent</h3>
+      <div class="intent-summary">
+        <div class="trace-summary-item">
+          <span>decision_state</span>
+          ${decisionStateBadge(intent.decision_state)}
+        </div>
+        <div class="trace-summary-item">
+          <span>execution_allowed</span>
+          ${executionBadge(intent.execution_allowed)}
+        </div>
+        <div class="trace-summary-item wide">
+          <span>product_direction_tier</span>
+          ${readinessBadge(intent.product_direction_tier)}
+        </div>
+        <div class="trace-summary-item wide">
+          <span>reason_codes</span>
+          ${renderReasonCodes(intent.reason_codes)}
+        </div>
+      </div>
+      <div class="intent-gate-grid">
+        <section class="intent-gate">
+          <h4>Premium Stop</h4>
+          <dl class="kv">
+            <dt>Status</dt>
+            <dd>${readinessBadge(premiumStop.status)}</dd>
+            <dt>Source</dt>
+            <dd>${labelValue(premiumStop.source)}</dd>
+            <dt>Entry premium</dt>
+            <dd>${labelValue(premiumStop.entry_premium)}</dd>
+            <dt>Stop premium</dt>
+            <dd>${labelValue(premiumStop.stop_premium)}</dd>
+            <dt>Stop distance</dt>
+            <dd>${percentageValue(premiumStop.stop_distance_pct)}</dd>
+            <dt>Soft gate</dt>
+            <dd>${percentageValue(premiumStop.soft_gate_min_pct)} to ${percentageValue(premiumStop.soft_gate_max_pct)}</dd>
+            <dt>As-of UTC</dt>
+            <dd>${labelValue(formatDate(premiumStop.asof_ts_utc))}</dd>
+            <dt>Evidence</dt>
+            <dd>${labelValue(premiumStop.evidence_ref)}</dd>
+          </dl>
+        </section>
+        <section class="intent-gate">
+          <h4>Confirmation</h4>
+          <dl class="kv">
+            <dt>Status</dt>
+            <dd>${readinessBadge(confirmation.status)}</dd>
+            <dt>Source</dt>
+            <dd>${labelValue(confirmation.source)}</dd>
+            <dt>Confirmed UTC</dt>
+            <dd>${labelValue(formatDate(confirmation.confirmed_at_utc))}</dd>
+            <dt>Evidence</dt>
+            <dd>${labelValue(confirmation.evidence_ref)}</dd>
+          </dl>
+        </section>
+        <section class="intent-gate">
+          <h4>Liquidity</h4>
+          <dl class="kv">
+            <dt>Status</dt>
+            <dd>${readinessBadge(liquidity.status)}</dd>
+            <dt>Quote count</dt>
+            <dd>${labelValue(liquidity.quote_count)}</dd>
+            <dt>Quote age</dt>
+            <dd>${labelValue(liquidity.last_quote_age_seconds)} seconds</dd>
+            <dt>Recovery required</dt>
+            <dd>${labelValue(liquidity.recovery_required)}</dd>
+            <dt>Evidence</dt>
+            <dd>${labelValue(liquidity.evidence_ref)}</dd>
+          </dl>
+        </section>
+      </div>
+      <section class="intent-input-section">
+        <h4>No-lookahead Inputs</h4>
+        ${renderIntentInputRefs(intent.no_lookahead_inputs)}
+      </section>
+    </section>
   `;
 }
 
@@ -696,6 +1093,7 @@ function renderSignalDrilldown(model) {
                 <dd>${signal.caveats?.length ? escapeHtml(signal.caveats.join("; ")) : labelValue(null)}</dd>
               </dl>
             </section>
+            ${renderDecisionIntent(signal.decisionIntent)}
             ${renderDecisionTrace(signal.decisionTrace)}
             <section class="drill-section">
               <h3>Option Selection</h3>
@@ -774,6 +1172,7 @@ export function renderDashboard(snapshot, options = {}) {
       ${renderWarnings(model)}
       ${renderDataQuality(model)}
       ${renderManifestProvenance(model)}
+      ${renderDecisionIntentOverview(model)}
       ${renderSignalTable(model)}
       ${renderSignalDrilldown(model)}
     </div>
@@ -805,6 +1204,36 @@ export async function loadManifest(fetchImpl = globalThis.fetch, manifestUrl = M
   return response.json();
 }
 
+export function artifactPathToUrl(path) {
+  if (!path) {
+    return null;
+  }
+  if (/^(https?:)?\/\//.test(path) || path.startsWith("/") || path.startsWith("./") || path.startsWith("../")) {
+    return path;
+  }
+  return `/${path.replace(/^\/+/, "")}`;
+}
+
+export async function loadDecisionIntent(fetchImpl = globalThis.fetch, manifest = null) {
+  if (typeof fetchImpl !== "function") {
+    throw new Error("fetch is not available");
+  }
+  const normalizedManifest = normalizeRunManifest(manifest);
+  const artifactUrl = artifactPathToUrl(normalizedManifest?.decisionIntentArtifact?.path);
+  if (!artifactUrl) {
+    return null;
+  }
+
+  const response = await fetchImpl(new URL(artifactUrl, import.meta.url));
+  if (response.status === 404) {
+    throw new Error(`Failed to load decision intent: ${artifactUrl} returned HTTP 404`);
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to load decision intent: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
 export function renderError(error) {
   return `
     <section class="error-panel" role="alert">
@@ -821,12 +1250,20 @@ export async function mountDashboard(root = document.getElementById("dashboard-r
   try {
     const snapshot = await loadSnapshot();
     let manifest = null;
+    let decisionIntent = null;
+    let decisionIntentError = null;
     try {
       manifest = await loadManifest();
     } catch (error) {
       console.warn?.("PA Feitian manifest unavailable", error);
     }
-    root.innerHTML = renderDashboard(snapshot, { manifest });
+    try {
+      decisionIntent = await loadDecisionIntent(globalThis.fetch, manifest);
+    } catch (error) {
+      decisionIntentError = error;
+      console.warn?.("PA Feitian decision intent unavailable", error);
+    }
+    root.innerHTML = renderDashboard(snapshot, { manifest, decisionIntent, decisionIntentError });
   } catch (error) {
     root.innerHTML = renderError(error);
   }

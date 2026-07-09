@@ -16,6 +16,13 @@
     "schema_version": "pa_feitian_snapshot_v1",
     "content_type": "application/json"
   },
+  "decision_intent_artifact": {
+    "kind": "decision_intent",
+    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_decision_intent_v1.json",
+    "sha256": "sha256:cc36b8db215e29146c2ef77929824a403128e36d14068bcd62c766d2f1e03e2b",
+    "schema_version": "pa_feitian_decision_intent_v1",
+    "content_type": "application/json"
+  },
   "cli_args": [
     "src/scripts/emit_pa_feitian_snapshot.py",
     "--out",
@@ -52,6 +59,7 @@
   },
   "output_hashes": {
     "snapshot_artifact": "sha256:d947e328f30dcf4fb69f462a099a5ed50e2a516cfedeb06315eea64bf0d87748",
+    "decision_intent_artifact": "sha256:cc36b8db215e29146c2ef77929824a403128e36d14068bcd62c766d2f1e03e2b",
     "frontend_copy": "sha256:d947e328f30dcf4fb69f462a099a5ed50e2a516cfedeb06315eea64bf0d87748"
   },
   "frontend_copy_path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json",
