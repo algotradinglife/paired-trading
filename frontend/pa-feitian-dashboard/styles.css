@@ -416,6 +416,39 @@ tbody tr:last-child td {
   background: var(--drop-soft);
 }
 
+.data-access-badge,
+.hash-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.data-access-badge.real_data_available,
+.hash-badge.match {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.data-access-badge.fixture_fallback,
+.data-access-badge.unknown,
+.hash-badge.untracked {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.data-access-badge.data_blocked,
+.hash-badge.mismatch,
+.hash-badge.missing {
+  color: var(--blocked);
+  background: var(--blocked-soft);
+}
+
 .warnings-list,
 .quality-grid,
 .missing-list {
@@ -454,7 +487,8 @@ tbody tr:last-child td {
 .manifest-artifacts,
 .intent-meta-grid,
 .intent-state-grid,
-.intent-gate-grid {
+.intent-gate-grid,
+.review-ops-grid {
   display: grid;
   gap: 12px;
   padding: 14px;
@@ -462,6 +496,10 @@ tbody tr:last-child td {
 
 .manifest-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.review-ops-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .manifest-item {
@@ -522,6 +560,42 @@ tbody tr:last-child td {
   padding: 10px 12px;
   color: var(--muted);
   font-weight: 700;
+}
+
+.ops-table {
+  min-width: 980px;
+}
+
+.ops-table code {
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.76rem;
+  word-break: break-word;
+}
+
+.ops-provenance {
+  margin: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.ops-provenance summary {
+  cursor: pointer;
+  padding: 10px 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.ops-provenance pre {
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+.reviewer-warning {
+  border-color: #e2b758;
 }
 
 .intent-meta-grid {
@@ -955,6 +1029,7 @@ pre {
   .quality-grid,
   .manifest-grid,
   .manifest-artifacts,
+  .review-ops-grid,
   .intent-meta-grid,
   .intent-state-grid,
   .intent-summary,
