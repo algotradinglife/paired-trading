@@ -1,0 +1,420 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/algotradinglife/paired-trading/doc/schemas/pa_feitian_decision_intent_v1.schema.json",
+  "title": "PA / Feitian Decision Intent Sidecar v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "source_commit",
+    "provenance",
+    "intents",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pa_feitian_decision_intent_v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_commit": {
+      "type": "string",
+      "minLength": 7,
+      "maxLength": 40
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "intents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/intent"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "hash_digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "source_manifest_path",
+        "source_manifest_schema_version",
+        "source_manifest_generated_at_utc",
+        "snapshot_artifact_path",
+        "snapshot_artifact_sha256",
+        "snapshot_schema_version",
+        "producer",
+        "notes"
+      ],
+      "properties": {
+        "role": {
+          "const": "manifest_referenced_decision_intent_sidecar"
+        },
+        "source_manifest_path": {
+          "type": "string"
+        },
+        "source_manifest_schema_version": {
+          "const": "pa_feitian_run_manifest_v1"
+        },
+        "source_manifest_generated_at_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "snapshot_artifact_path": {
+          "type": "string"
+        },
+        "snapshot_artifact_sha256": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "snapshot_schema_version": {
+          "enum": [
+            "pa_feitian_snapshot_v0",
+            "pa_feitian_snapshot_v1"
+          ]
+        },
+        "producer": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signal_id",
+        "instrument",
+        "contract",
+        "interval",
+        "decision_ts_utc",
+        "decision_state",
+        "execution_allowed",
+        "product_direction_tier",
+        "premium_stop",
+        "confirmation",
+        "liquidity",
+        "reason_codes",
+        "no_lookahead_inputs"
+      ],
+      "properties": {
+        "signal_id": {
+          "type": "string"
+        },
+        "instrument": {
+          "type": "string"
+        },
+        "contract": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "interval": {
+          "type": "string"
+        },
+        "decision_ts_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "decision_state": {
+          "$ref": "#/$defs/decision_state"
+        },
+        "execution_allowed": {
+          "type": "boolean"
+        },
+        "product_direction_tier": {
+          "$ref": "#/$defs/product_direction_tier"
+        },
+        "premium_stop": {
+          "$ref": "#/$defs/premium_stop"
+        },
+        "confirmation": {
+          "$ref": "#/$defs/confirmation"
+        },
+        "liquidity": {
+          "$ref": "#/$defs/liquidity"
+        },
+        "reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          }
+        },
+        "no_lookahead_inputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/no_lookahead_input"
+          }
+        }
+      }
+    },
+    "decision_state": {
+      "enum": [
+        "reject",
+        "watch",
+        "armed_watch",
+        "trade_ready",
+        "observation_runner"
+      ]
+    },
+    "product_direction_tier": {
+      "enum": [
+        "aligned_trade_candidate",
+        "conditional_watch",
+        "observation_only",
+        "direction_blocked",
+        "unknown"
+      ]
+    },
+    "premium_stop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "source",
+        "entry_premium",
+        "stop_premium",
+        "stop_distance_pct",
+        "soft_gate_min_pct",
+        "soft_gate_max_pct",
+        "asof_ts_utc",
+        "evidence_ref"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "clear",
+            "unclear",
+            "blocked",
+            "not_applicable"
+          ]
+        },
+        "source": {
+          "enum": [
+            "swing_low_premium",
+            "recent_36bar_low",
+            "half_loss_fixed",
+            "manual",
+            "unavailable",
+            "not_applicable"
+          ]
+        },
+        "entry_premium": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "stop_premium": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "stop_distance_pct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "soft_gate_min_pct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "soft_gate_max_pct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "asof_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "confirmation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "source",
+        "confirmed_at_utc",
+        "evidence_ref"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "confirmed",
+            "pending",
+            "failed",
+            "not_applicable"
+          ]
+        },
+        "source": {
+          "enum": [
+            "premium_macd",
+            "premium_breakout",
+            "underlying_only",
+            "manual",
+            "unavailable",
+            "not_applicable"
+          ]
+        },
+        "confirmed_at_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "liquidity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "quote_count",
+        "last_quote_age_seconds",
+        "recovery_required",
+        "evidence_ref"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "adequate",
+            "thin",
+            "stale",
+            "thin_and_stale",
+            "unknown",
+            "not_applicable"
+          ]
+        },
+        "quote_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "last_quote_age_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "recovery_required": {
+          "type": "boolean"
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "no_lookahead_input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "source",
+        "record_index",
+        "asof_ts_utc",
+        "digest"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "scorecard_record",
+            "snapshot_signal",
+            "decision_context",
+            "event",
+            "option_match",
+            "premium_bars",
+            "underlying_bars",
+            "policy_rule",
+            "producer_config",
+            "run_manifest"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "record_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "asof_ts_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "digest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}

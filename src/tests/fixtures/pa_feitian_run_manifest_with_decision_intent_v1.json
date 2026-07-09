@@ -18,7 +18,7 @@
   },
   "decision_intent_artifact": {
     "kind": "decision_intent",
-    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_decision_intent_v1.json",
+    "path": "src/tests/fixtures/pa_feitian_decision_intent_v1.json",
     "sha256": "sha256:cc36b8db215e29146c2ef77929824a403128e36d14068bcd62c766d2f1e03e2b",
     "schema_version": "pa_feitian_decision_intent_v1",
     "content_type": "application/json"

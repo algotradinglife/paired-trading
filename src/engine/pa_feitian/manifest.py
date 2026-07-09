@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 PA_FEITIAN_RUN_MANIFEST_SCHEMA_VERSION = "pa_feitian_run_manifest_v1"
 HashDigest = str
-ArtifactKind = Literal["scorecard", "snapshot"]
+ArtifactKind = Literal["scorecard", "snapshot", "decision_intent"]
 ReviewStatus = Literal["pending", "approved", "changes_requested", "rejected"]
 DataAccessStatus = Literal["real_data_available", "fixture_fallback", "data_blocked", "unknown"]
 HASH_DIGEST_PATTERN = re.compile(r"^sha256:[a-f0-9]{64}$")
@@ -102,6 +102,7 @@ class PaFeitianRunManifest(BaseModel):
     source_commit: str = Field(min_length=7, max_length=40)
     scorecard_artifact: PaFeitianArtifactRef
     snapshot_artifact: PaFeitianArtifactRef
+    decision_intent_artifact: PaFeitianArtifactRef | None = None
     cli_args: list[str]
     run_config: dict[str, Any]
     data_access: PaFeitianDataAccess = Field(default_factory=PaFeitianDataAccess)
@@ -131,10 +132,26 @@ class PaFeitianRunManifest(BaseModel):
             raise ValueError("scorecard_artifact.kind must be scorecard")
         if self.snapshot_artifact.kind != "snapshot":
             raise ValueError("snapshot_artifact.kind must be snapshot")
+        if (
+            self.decision_intent_artifact is not None
+            and self.decision_intent_artifact.kind != "decision_intent"
+        ):
+            raise ValueError("decision_intent_artifact.kind must be decision_intent")
         if self.input_hashes.get("scorecard_artifact") != self.scorecard_artifact.sha256:
             raise ValueError("input_hashes.scorecard_artifact must match scorecard_artifact.sha256")
         if self.output_hashes.get("snapshot_artifact") != self.snapshot_artifact.sha256:
             raise ValueError("output_hashes.snapshot_artifact must match snapshot_artifact.sha256")
+        decision_intent_hash = self.output_hashes.get("decision_intent_artifact")
+        if self.decision_intent_artifact is None:
+            if decision_intent_hash is not None:
+                raise ValueError(
+                    "decision_intent_artifact is required when output_hashes includes it"
+                )
+        elif decision_intent_hash != self.decision_intent_artifact.sha256:
+            raise ValueError(
+                "output_hashes.decision_intent_artifact must match "
+                "decision_intent_artifact.sha256"
+            )
         if self.frontend_copy_path is not None and "frontend_copy" not in self.output_hashes:
             raise ValueError("output_hashes.frontend_copy is required when frontend_copy_path is set")
         return self
@@ -163,6 +180,7 @@ def build_run_manifest(
     run_config: Mapping[str, Any],
     generated_at_utc: datetime | None = None,
     frontend_copy_path: str | Path | None = None,
+    decision_intent_path: str | Path | None = None,
     review_state: PaFeitianReviewState | Mapping[str, Any] | None = None,
     data_access: PaFeitianDataAccess | Mapping[str, Any] | None = None,
     scorecard_schema_version: str = "score_today_json",
@@ -178,6 +196,14 @@ def build_run_manifest(
         schema_version=_schema_version_from_json(snapshot_path),
     )
     output_hashes = {"snapshot_artifact": snapshot_ref.sha256}
+    decision_intent_ref = None
+    if decision_intent_path is not None:
+        decision_intent_ref = artifact_ref_from_file(
+            decision_intent_path,
+            kind="decision_intent",
+            schema_version=_schema_version_from_json(decision_intent_path),
+        )
+        output_hashes["decision_intent_artifact"] = decision_intent_ref.sha256
     frontend_copy_text = None
     if frontend_copy_path is not None:
         frontend_copy_text = _path_text(frontend_copy_path)
@@ -202,6 +228,7 @@ def build_run_manifest(
         source_commit=source_commit,
         scorecard_artifact=scorecard_ref,
         snapshot_artifact=snapshot_ref,
+        decision_intent_artifact=decision_intent_ref,
         cli_args=list(cli_args),
         run_config=_jsonable_mapping(run_config),
         data_access=access,
@@ -217,7 +244,10 @@ def validate_run_manifest(data: dict[str, Any]) -> PaFeitianRunManifest:
 
 
 def run_manifest_to_jsonable(manifest: PaFeitianRunManifest) -> dict[str, Any]:
-    return manifest.model_dump(mode="json", exclude_none=False)
+    payload = manifest.model_dump(mode="json", exclude_none=False)
+    if manifest.decision_intent_artifact is None:
+        payload.pop("decision_intent_artifact", None)
+    return payload
 
 
 def load_run_manifest(path: str | Path) -> PaFeitianRunManifest:
