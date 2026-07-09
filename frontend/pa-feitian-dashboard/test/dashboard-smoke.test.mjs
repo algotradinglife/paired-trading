@@ -5,17 +5,24 @@ import { join } from "node:path";
 import test from "node:test";
 
 import {
+  DECISION_STATE_DEFINITIONS,
   SNAPSHOT_MODE_DEFINITIONS,
   STATUS_DEFINITIONS,
+  SUPPORTED_DECISION_INTENT_VERSIONS,
   TRACE_NODE_STATUS_DEFINITIONS,
+  artifactPathToUrl,
   buildDashboardModel,
+  loadDecisionIntent,
   missingOptionalFields,
+  normalizeDecisionIntentSidecar,
   renderDashboard,
 } from "../app.mjs";
 import { copySnapshotFixture } from "../scripts/copy-snapshot-fixture.mjs";
 
 const fixtureUrl = new URL("../fixtures/pa_feitian_snapshot_v1.json", import.meta.url);
 const legacyFixtureUrl = new URL("../fixtures/pa_feitian_snapshot_v0.json", import.meta.url);
+const frontendManifestFixtureUrl = new URL("../fixtures/pa_feitian_run_manifest_v1.json", import.meta.url);
+const decisionIntentFixtureUrl = new URL("../fixtures/pa_feitian_decision_intent_v1.json", import.meta.url);
 const manifestFixtureUrl = new URL("../../../src/tests/fixtures/pa_feitian_run_manifest_v1.json", import.meta.url);
 const appFiles = [
   new URL("../index.html", import.meta.url),
@@ -132,6 +139,111 @@ test("renders generated and review manifest provenance labels", async () => {
   assert.match(reviewHtml, /approved/);
   assert.match(reviewHtml, /chatgpt/);
   assert.match(reviewHtml, /review gate approved/);
+});
+
+test("renders manifest-referenced decision-intent sidecar reviewer fields", async () => {
+  const snapshot = await loadFixture();
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const decisionIntent = await loadFixture(decisionIntentFixtureUrl);
+  const normalized = normalizeDecisionIntentSidecar(decisionIntent);
+  const model = buildDashboardModel(snapshot, { manifest, decisionIntent });
+  const html = renderDashboard(snapshot, { manifest, decisionIntent });
+
+  assert.ok(SUPPORTED_DECISION_INTENT_VERSIONS.has("pa_feitian_decision_intent_v1"));
+  assert.equal(DECISION_STATE_DEFINITIONS.trade_ready, "Trade-ready sidecar state");
+  assert.equal(normalized.schemaVersion, "pa_feitian_decision_intent_v1");
+  assert.equal(model.decisionIntent.status, "loaded");
+  assert.equal(
+    model.decisionIntent.artifact.path,
+    "frontend/pa-feitian-dashboard/fixtures/pa_feitian_decision_intent_v1.json",
+  );
+  assert.equal(model.decisionIntent.stateCounts.trade_ready, 1);
+  assert.equal(model.decisionIntent.executionAllowedCount, 1);
+
+  const tradeReadySignal = model.signals.find((signal) => signal.decisionIntent?.decision_state === "trade_ready");
+  assert.ok(tradeReadySignal);
+  assert.equal(tradeReadySignal.decisionIntent.execution_allowed, true);
+  assert.equal(tradeReadySignal.decisionIntent.product_direction_tier, "aligned_trade_candidate");
+
+  assert.match(html, /data-testid="decision-intent-review"/);
+  assert.match(html, /data-testid="decision-intent-sidecar"/);
+  assert.match(html, /data-testid="decision-intent-no-lookahead"/);
+  assert.match(html, /Decision intent artifact/);
+  assert.match(html, /decision_state/);
+  assert.match(html, /execution_allowed: true/);
+  assert.match(html, /aligned_trade_candidate/);
+  assert.match(html, /TRADE_READY_PREMIUM_CONFIRMED/);
+  assert.match(html, /PREMIUM_STOP_CLEAR/);
+  assert.match(html, /LIQUIDITY_OK/);
+  assert.match(html, /Stop distance/);
+  assert.match(html, /swing_low_premium/);
+  assert.match(html, /premium_macd/);
+  assert.match(html, /adequate/);
+  assert.match(html, /scorecard_record:2/);
+  assert.match(html, /sha256:46381c5371ddbe46a554640294f26dba20bf72006c8fc5298142ac9facf82f53/);
+  assert.match(html, /Posterior diagnostic fields are present/);
+});
+
+test("loads decision-intent sidecar from the manifest artifact path", async () => {
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const decisionIntent = await loadFixture(decisionIntentFixtureUrl);
+  const artifactUrl = artifactPathToUrl(manifest.decision_intent_artifact.path);
+  const loaded = await loadDecisionIntent(async (url) => {
+    assert.equal(url.pathname, "/frontend/pa-feitian-dashboard/fixtures/pa_feitian_decision_intent_v1.json");
+    return {
+      ok: true,
+      status: 200,
+      json: async () => decisionIntent,
+    };
+  }, manifest);
+
+  assert.equal(artifactUrl, "/frontend/pa-feitian-dashboard/fixtures/pa_feitian_decision_intent_v1.json");
+  assert.equal(loaded.schema_version, "pa_feitian_decision_intent_v1");
+});
+
+test("renders decision-intent missing, observation-only, and blocked states defensively", async () => {
+  const snapshot = await loadFixture();
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const decisionIntent = await loadFixture(decisionIntentFixtureUrl);
+  const defensiveSidecar = {
+    ...decisionIntent,
+    intents: [
+      {
+        ...decisionIntent.intents[0],
+        decision_state: "observation_runner",
+        product_direction_tier: "observation_only",
+        reason_codes: [
+          ...decisionIntent.intents[0].reason_codes,
+          "OBSERVATION_ONLY_PRODUCT_DIRECTION",
+        ],
+      },
+      decisionIntent.intents[2],
+    ],
+    warnings: ["observation-only reviewer fixture"],
+  };
+  const model = buildDashboardModel(snapshot, { manifest, decisionIntent: defensiveSidecar });
+  const html = renderDashboard(snapshot, { manifest, decisionIntent: defensiveSidecar });
+
+  assert.equal(model.decisionIntent.stateCounts.observation_runner, 1);
+  assert.equal(model.decisionIntent.stateCounts.watch, 1);
+  assert.equal(model.decisionIntent.executionAllowedCount, 0);
+  assert.equal(
+    model.signals.find((signal) => signal.id === "paft_scorecard_0002_kq_m_shfe_au_20260629000000")
+      .decisionIntent,
+    null,
+  );
+  assert.match(html, /data-testid="decision-intent-missing"/);
+  assert.match(html, /Snapshot signals missing decision-intent records/);
+  assert.match(html, /Observation-only product-direction warning/);
+  assert.match(html, /observation_only/);
+  assert.match(html, /OBSERVATION_ONLY_PRODUCT_DIRECTION/);
+  assert.match(html, /LIQ_RECOVERY_REQUIRED/);
+  assert.match(html, /blocked/);
+  assert.match(html, /Recovery required/);
+
+  const missingSidecarHtml = renderDashboard(snapshot, { manifest });
+  assert.match(missingSidecarHtml, /referenced_missing/);
+  assert.match(missingSidecarHtml, /no sidecar payload is loaded/);
 });
 
 test("renders legacy decision_trace fallback for v0 snapshots", async () => {

@@ -228,7 +228,7 @@ textarea {
 
 table {
   width: 100%;
-  min-width: 820px;
+  min-width: 1040px;
   border-collapse: collapse;
   background: var(--surface);
 }
@@ -363,6 +363,59 @@ tbody tr:last-child td {
   background: var(--drop-soft);
 }
 
+.intent-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.intent-badge.trade_ready,
+.intent-badge.allowed,
+.intent-badge.clear,
+.intent-badge.confirmed,
+.intent-badge.adequate,
+.intent-badge.aligned-trade-candidate,
+.intent-badge.decision-intent {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.intent-badge.armed_watch,
+.intent-badge.watch,
+.intent-badge.observation_runner,
+.intent-badge.pending,
+.intent-badge.unclear,
+.intent-badge.thin,
+.intent-badge.conditional-watch,
+.intent-badge.observation-only {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.intent-badge.reject,
+.intent-badge.blocked,
+.intent-badge.failed,
+.intent-badge.stale,
+.intent-badge.thin-and-stale,
+.intent-badge.direction-blocked,
+.intent-badge.missing-sidecar {
+  color: var(--blocked);
+  background: var(--blocked-soft);
+}
+
+.intent-badge.not-applicable,
+.intent-badge.unavailable,
+.intent-badge.unknown {
+  color: var(--drop);
+  background: var(--drop-soft);
+}
+
 .warnings-list,
 .quality-grid,
 .missing-list {
@@ -398,7 +451,10 @@ tbody tr:last-child td {
 }
 
 .manifest-grid,
-.manifest-artifacts {
+.manifest-artifacts,
+.intent-meta-grid,
+.intent-state-grid,
+.intent-gate-grid {
   display: grid;
   gap: 12px;
   padding: 14px;
@@ -432,7 +488,7 @@ tbody tr:last-child td {
 }
 
 .manifest-artifacts {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   padding-top: 0;
 }
 
@@ -466,6 +522,58 @@ tbody tr:last-child td {
   padding: 10px 12px;
   color: var(--muted);
   font-weight: 700;
+}
+
+.intent-meta-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.intent-state-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding-top: 0;
+}
+
+.intent-state-cell {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 8px;
+  background: #fbfcfd;
+}
+
+.intent-state-cell.trade_ready {
+  border-left-color: var(--ok);
+}
+
+.intent-state-cell.armed_watch,
+.intent-state-cell.watch,
+.intent-state-cell.observation_runner {
+  border-left-color: var(--warn);
+}
+
+.intent-state-cell.reject {
+  border-left-color: var(--blocked);
+}
+
+.intent-state-cell strong,
+.intent-state-cell span {
+  display: block;
+}
+
+.intent-state-cell strong {
+  margin-bottom: 8px;
+  font-size: 1.15rem;
+}
+
+.intent-state-cell > span:last-child {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.intent-warning {
+  border-color: #efc76f;
 }
 
 .quality-item strong {
@@ -557,6 +665,17 @@ tbody tr:last-child td {
   margin-bottom: 12px;
 }
 
+.intent-section {
+  grid-column: 1 / -1;
+}
+
+.intent-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 .trace-summary-item {
   min-width: 0;
   padding: 10px 12px;
@@ -579,6 +698,66 @@ tbody tr:last-child td {
 
 .trace-summary-item strong {
   word-break: break-word;
+}
+
+.reason-code-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reason-code-list li {
+  max-width: 100%;
+  min-height: 22px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #eef3f7;
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.intent-gate-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0 0 12px;
+}
+
+.intent-gate,
+.intent-missing,
+.intent-input-section {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+}
+
+.intent-gate h4,
+.intent-input-section h4 {
+  margin: 0 0 10px;
+  font-size: 0.84rem;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.intent-missing {
+  display: grid;
+  gap: 4px;
+  border-color: var(--blocked);
+  background: var(--blocked-soft);
+}
+
+.intent-missing span {
+  color: var(--muted);
+}
+
+.intent-input-section {
+  background: var(--surface);
 }
 
 .trace-input-refs {
@@ -776,6 +955,10 @@ pre {
   .quality-grid,
   .manifest-grid,
   .manifest-artifacts,
+  .intent-meta-grid,
+  .intent-state-grid,
+  .intent-summary,
+  .intent-gate-grid,
   .manifest-details,
   .drill-grid,
   .trace-summary,
