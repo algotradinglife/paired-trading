@@ -1,0 +1,72 @@
+{
+  "schema_version": "pa_feitian_run_manifest_v1",
+  "generated_at_utc": "2026-07-07T00:00:00Z",
+  "source_commit": "cccccccccccccccccccccccccccccccccccccccc",
+  "scorecard_artifact": {
+    "kind": "scorecard",
+    "path": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    "sha256": "sha256:a848664414950e08b0e33df1066a5394df12ffabfe08aca2ad93b61a69c29bec",
+    "schema_version": "score_today_json",
+    "content_type": "application/json"
+  },
+  "snapshot_artifact": {
+    "kind": "snapshot",
+    "path": "src/tests/fixtures/pa_feitian_snapshot_v1.json",
+    "sha256": "sha256:d947e328f30dcf4fb69f462a099a5ed50e2a516cfedeb06315eea64bf0d87748",
+    "schema_version": "pa_feitian_snapshot_v1",
+    "content_type": "application/json"
+  },
+  "decision_intent_artifact": {
+    "kind": "decision_intent",
+    "path": "src/tests/fixtures/pa_feitian_decision_intent_v1.json",
+    "sha256": "sha256:cc36b8db215e29146c2ef77929824a403128e36d14068bcd62c766d2f1e03e2b",
+    "schema_version": "pa_feitian_decision_intent_v1",
+    "content_type": "application/json"
+  },
+  "cli_args": [
+    "src/scripts/emit_pa_feitian_snapshot.py",
+    "--out",
+    "src/tests/fixtures/pa_feitian_snapshot_v1.json",
+    "--scorecard",
+    "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    "--source-commit",
+    "cccccccccccccccccccccccccccccccccccccccc",
+    "--generated-at-utc",
+    "2026-07-07T00:00:00Z",
+    "--contract-version",
+    "pa_feitian_snapshot_v1",
+    "--iv-warmup",
+    "1"
+  ],
+  "run_config": {
+    "contract": "pa_feitian_snapshot_v1",
+    "mode": "scorecard",
+    "producer": "src/scripts/emit_pa_feitian_snapshot.py",
+    "source_scorecard": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    "iv_warmup": 1,
+    "iv_max_rank": 0.66,
+    "max_signals": null
+  },
+  "data_access": {
+    "status": "fixture_fallback",
+    "source": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    "notes": [
+      "deterministic fixture scorecard for shared manifest contract tests"
+    ]
+  },
+  "input_hashes": {
+    "scorecard_artifact": "sha256:a848664414950e08b0e33df1066a5394df12ffabfe08aca2ad93b61a69c29bec"
+  },
+  "output_hashes": {
+    "snapshot_artifact": "sha256:d947e328f30dcf4fb69f462a099a5ed50e2a516cfedeb06315eea64bf0d87748",
+    "decision_intent_artifact": "sha256:cc36b8db215e29146c2ef77929824a403128e36d14068bcd62c766d2f1e03e2b",
+    "frontend_copy": "sha256:d947e328f30dcf4fb69f462a099a5ed50e2a516cfedeb06315eea64bf0d87748"
+  },
+  "frontend_copy_path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json",
+  "review_state": {
+    "status": "pending",
+    "reviewer": null,
+    "reviewed_at_utc": null,
+    "notes": []
+  }
+}

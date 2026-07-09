@@ -37,6 +37,9 @@
     "snapshot_artifact": {
       "$ref": "#/$defs/snapshot_artifact"
     },
+    "decision_intent_artifact": {
+      "$ref": "#/$defs/decision_intent_artifact"
+    },
     "cli_args": {
       "type": "array",
       "items": {
@@ -73,6 +76,9 @@
       },
       "properties": {
         "snapshot_artifact": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "decision_intent_artifact": {
           "$ref": "#/$defs/hash_digest"
         },
         "frontend_copy": {
@@ -139,6 +145,37 @@
       "properties": {
         "kind": {
           "const": "snapshot"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "schema_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "content_type": {
+          "const": "application/json"
+        }
+      }
+    },
+    "decision_intent_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "path",
+        "sha256",
+        "schema_version",
+        "content_type"
+      ],
+      "properties": {
+        "kind": {
+          "const": "decision_intent"
         },
         "path": {
           "type": "string"
