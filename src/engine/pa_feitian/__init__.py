@@ -31,6 +31,12 @@ from .contract import (
     write_decision_intent,
     write_snapshot,
 )
+from .decision_intent_adapter import (
+    AU_CALL_STOP_GATE_MAX_PCT,
+    AU_CALL_STOP_GATE_MIN_PCT,
+    build_decision_intent_sidecar,
+    build_decision_intent_sidecar_from_scorecard_file,
+)
 from .manifest import (
     PA_FEITIAN_RUN_MANIFEST_SCHEMA_VERSION,
     PaFeitianArtifactRef,
@@ -56,6 +62,8 @@ __all__ = [
     "PA_FEITIAN_SNAPSHOT_SCHEMA_VERSION",
     "PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION",
     "PA_FEITIAN_RUN_MANIFEST_SCHEMA_VERSION",
+    "AU_CALL_STOP_GATE_MAX_PCT",
+    "AU_CALL_STOP_GATE_MIN_PCT",
     "SIGNAL_STATUSES",
     "ConfirmationIntent",
     "DecisionIntentProvenance",
@@ -77,6 +85,8 @@ __all__ = [
     "TraceInputRef",
     "TraceNode",
     "artifact_ref_from_file",
+    "build_decision_intent_sidecar",
+    "build_decision_intent_sidecar_from_scorecard_file",
     "build_run_manifest",
     "decision_intent_to_jsonable",
     "example_snapshot",
