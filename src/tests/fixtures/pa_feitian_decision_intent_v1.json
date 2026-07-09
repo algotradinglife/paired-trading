@@ -1,0 +1,169 @@
+{
+  "schema_version": "pa_feitian_decision_intent_v1",
+  "generated_at_utc": "2026-07-07T00:00:00Z",
+  "source_commit": "cccccccccccccccccccccccccccccccccccccccc",
+  "provenance": {
+    "role": "manifest_referenced_decision_intent_sidecar",
+    "source_manifest_path": "src/tests/fixtures/pa_feitian_run_manifest_with_decision_intent_v1.json",
+    "source_manifest_schema_version": "pa_feitian_run_manifest_v1",
+    "source_manifest_generated_at_utc": "2026-07-07T00:00:00Z",
+    "snapshot_artifact_path": "src/tests/fixtures/pa_feitian_snapshot_v1.json",
+    "snapshot_artifact_sha256": "sha256:d947e328f30dcf4fb69f462a099a5ed50e2a516cfedeb06315eea64bf0d87748",
+    "snapshot_schema_version": "pa_feitian_snapshot_v1",
+    "producer": "contract_fixture",
+    "notes": [
+      "sidecar fixture demonstrates manifest-referenced decision intent without changing snapshot v1"
+    ]
+  },
+  "intents": [
+    {
+      "signal_id": "paft_scorecard_0001_kq_m_shfe_au_20260628000000",
+      "instrument": "SHFE.au",
+      "contract": "kq_m_shfe_au",
+      "interval": "1d",
+      "decision_ts_utc": "2026-06-28T00:00:00Z",
+      "decision_state": "armed_watch",
+      "execution_allowed": false,
+      "product_direction_tier": "aligned_trade_candidate",
+      "premium_stop": {
+        "status": "unclear",
+        "source": "recent_36bar_low",
+        "entry_premium": 18.5,
+        "stop_premium": 17.9,
+        "stop_distance_pct": 3.24,
+        "soft_gate_min_pct": 4.0,
+        "soft_gate_max_pct": 12.0,
+        "asof_ts_utc": "2026-06-28T00:00:00Z",
+        "evidence_ref": "scorecard_record:1"
+      },
+      "confirmation": {
+        "status": "pending",
+        "source": "premium_macd",
+        "confirmed_at_utc": null,
+        "evidence_ref": "scorecard_record:1"
+      },
+      "liquidity": {
+        "status": "adequate",
+        "quote_count": 12,
+        "last_quote_age_seconds": 30,
+        "recovery_required": false,
+        "evidence_ref": "scorecard_record:1"
+      },
+      "reason_codes": [
+        "PREMIUM_CONFIRMATION_PENDING",
+        "STOP_DISTANCE_OUTSIDE_SOFT_GATE"
+      ],
+      "no_lookahead_inputs": [
+        {
+          "id": "scorecard_record:1",
+          "kind": "scorecard_record",
+          "source": "score_today_json",
+          "record_index": 1,
+          "asof_ts_utc": "2026-06-28T00:00:00Z",
+          "digest": "sha256:cd55a0fa10ef8945d5c9198a1ae0a064c6c90d11c1358246ecba3aeafecbbbd4"
+        }
+      ]
+    },
+    {
+      "signal_id": "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
+      "instrument": "SHFE.au",
+      "contract": "kq_m_shfe_au",
+      "interval": "1d",
+      "decision_ts_utc": "2026-06-29T00:00:00Z",
+      "decision_state": "trade_ready",
+      "execution_allowed": true,
+      "product_direction_tier": "aligned_trade_candidate",
+      "premium_stop": {
+        "status": "clear",
+        "source": "swing_low_premium",
+        "entry_premium": 12.2,
+        "stop_premium": 11.2,
+        "stop_distance_pct": 8.2,
+        "soft_gate_min_pct": 4.0,
+        "soft_gate_max_pct": 12.0,
+        "asof_ts_utc": "2026-06-29T00:00:00Z",
+        "evidence_ref": "scorecard_record:2"
+      },
+      "confirmation": {
+        "status": "confirmed",
+        "source": "premium_macd",
+        "confirmed_at_utc": "2026-06-29T00:00:00Z",
+        "evidence_ref": "scorecard_record:2"
+      },
+      "liquidity": {
+        "status": "adequate",
+        "quote_count": 18,
+        "last_quote_age_seconds": 15,
+        "recovery_required": false,
+        "evidence_ref": "scorecard_record:2"
+      },
+      "reason_codes": [
+        "TRADE_READY_PREMIUM_CONFIRMED",
+        "PREMIUM_STOP_CLEAR",
+        "LIQUIDITY_OK"
+      ],
+      "no_lookahead_inputs": [
+        {
+          "id": "scorecard_record:2",
+          "kind": "scorecard_record",
+          "source": "score_today_json",
+          "record_index": 2,
+          "asof_ts_utc": "2026-06-29T00:00:00Z",
+          "digest": "sha256:46381c5371ddbe46a554640294f26dba20bf72006c8fc5298142ac9facf82f53"
+        }
+      ]
+    },
+    {
+      "signal_id": "paft_scorecard_0003_kq_m_shfe_au_20260630000000",
+      "instrument": "SHFE.au",
+      "contract": "kq_m_shfe_au",
+      "interval": "1d",
+      "decision_ts_utc": "2026-06-30T00:00:00Z",
+      "decision_state": "watch",
+      "execution_allowed": false,
+      "product_direction_tier": "conditional_watch",
+      "premium_stop": {
+        "status": "blocked",
+        "source": "unavailable",
+        "entry_premium": 10.4,
+        "stop_premium": null,
+        "stop_distance_pct": null,
+        "soft_gate_min_pct": 4.0,
+        "soft_gate_max_pct": 12.0,
+        "asof_ts_utc": "2026-06-30T00:00:00Z",
+        "evidence_ref": "scorecard_record:3"
+      },
+      "confirmation": {
+        "status": "pending",
+        "source": "unavailable",
+        "confirmed_at_utc": null,
+        "evidence_ref": "scorecard_record:3"
+      },
+      "liquidity": {
+        "status": "unknown",
+        "quote_count": null,
+        "last_quote_age_seconds": null,
+        "recovery_required": true,
+        "evidence_ref": "scorecard_record:3"
+      },
+      "reason_codes": [
+        "MODEL_DOMINATED_PREMIUM",
+        "LIQ_RECOVERY_REQUIRED"
+      ],
+      "no_lookahead_inputs": [
+        {
+          "id": "scorecard_record:3",
+          "kind": "scorecard_record",
+          "source": "score_today_json",
+          "record_index": 3,
+          "asof_ts_utc": "2026-06-30T00:00:00Z",
+          "digest": "sha256:28e61c10bd1108a4de7cc04d0483ea08180817c466c530482ceb4d062d2c328a"
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "decision intent is a sidecar contract fixture; snapshot v0/v1 semantics remain unchanged",
+    "trade readiness here is contract coverage, not a strategy adapter implementation"
+  ]
+}

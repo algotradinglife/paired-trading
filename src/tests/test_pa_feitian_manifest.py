@@ -22,6 +22,7 @@ from engine.pa_feitian.manifest import (  # noqa: E402
 )
 from engine.pa_feitian.schema_validation import (  # noqa: E402
     JsonSchemaValidationError,
+    validate_pa_feitian_decision_intent_schema,
     validate_pa_feitian_run_manifest_schema,
     validate_pa_feitian_snapshot_v1_schema,
 )
@@ -32,7 +33,11 @@ REPO_ROOT = SRC_ROOT.parent
 FIXTURE_DIR = SRC_ROOT / "tests" / "fixtures"
 SCORECARD_FIXTURE = FIXTURE_DIR / "pa_feitian_scorecard_v1.json"
 SNAPSHOT_V1_FIXTURE = FIXTURE_DIR / "pa_feitian_snapshot_v1.json"
+DECISION_INTENT_FIXTURE = FIXTURE_DIR / "pa_feitian_decision_intent_v1.json"
 MANIFEST_FIXTURE = FIXTURE_DIR / "pa_feitian_run_manifest_v1.json"
+MANIFEST_WITH_DECISION_INTENT_FIXTURE = (
+    FIXTURE_DIR / "pa_feitian_run_manifest_with_decision_intent_v1.json"
+)
 FRONTEND_COPY_FIXTURE = REPO_ROOT / "frontend" / "pa-feitian-dashboard" / "fixtures" / (
     "pa_feitian_snapshot_v1.json"
 )
@@ -91,6 +96,86 @@ def test_run_manifest_rejects_hash_drift():
     data["input_hashes"]["scorecard_artifact"] = data["snapshot_artifact"]["sha256"]
 
     with pytest.raises(ValidationError, match="scorecard_artifact.sha256"):
+        validate_run_manifest(data)
+
+
+def test_run_manifest_can_reference_decision_intent_sidecar():
+    data = _load_json(MANIFEST_FIXTURE)
+    sidecar_hash = sha256_file(DECISION_INTENT_FIXTURE)
+    data["decision_intent_artifact"] = {
+        "kind": "decision_intent",
+        "path": "src/tests/fixtures/pa_feitian_decision_intent_v1.json",
+        "sha256": sidecar_hash,
+        "schema_version": "pa_feitian_decision_intent_v1",
+        "content_type": "application/json",
+    }
+    data["output_hashes"]["decision_intent_artifact"] = sidecar_hash
+
+    validate_pa_feitian_decision_intent_schema(_load_json(DECISION_INTENT_FIXTURE))
+    validate_pa_feitian_run_manifest_schema(data)
+    manifest = validate_run_manifest(data)
+
+    assert manifest.decision_intent_artifact is not None
+    assert manifest.decision_intent_artifact.kind == "decision_intent"
+    assert manifest.output_hashes["decision_intent_artifact"] == sidecar_hash
+
+
+def test_run_manifest_with_decision_intent_fixture_validates():
+    data = _load_json(MANIFEST_WITH_DECISION_INTENT_FIXTURE)
+    sidecar = _load_json(DECISION_INTENT_FIXTURE)
+
+    validate_pa_feitian_run_manifest_schema(data)
+    manifest = validate_run_manifest(data)
+
+    assert manifest.decision_intent_artifact is not None
+    assert manifest.decision_intent_artifact.sha256 == sha256_file(DECISION_INTENT_FIXTURE)
+    assert sidecar["provenance"]["source_manifest_path"] == (
+        "src/tests/fixtures/pa_feitian_run_manifest_with_decision_intent_v1.json"
+    )
+    assert sidecar["provenance"]["snapshot_artifact_sha256"] == manifest.snapshot_artifact.sha256
+
+
+def test_run_manifest_builder_includes_decision_intent_when_requested(monkeypatch):
+    monkeypatch.chdir(REPO_ROOT)
+    expected = _load_json(MANIFEST_FIXTURE)
+
+    manifest = build_run_manifest(
+        scorecard_path=expected["scorecard_artifact"]["path"],
+        snapshot_path=expected["snapshot_artifact"]["path"],
+        source_commit=expected["source_commit"],
+        cli_args=expected["cli_args"],
+        run_config=expected["run_config"],
+        data_access=expected["data_access"],
+        generated_at_utc=datetime(2026, 7, 7, tzinfo=UTC),
+        frontend_copy_path=expected["frontend_copy_path"],
+        decision_intent_path="src/tests/fixtures/pa_feitian_decision_intent_v1.json",
+    )
+    payload = run_manifest_to_jsonable(manifest)
+    sidecar_hash = sha256_file(DECISION_INTENT_FIXTURE)
+
+    assert payload["decision_intent_artifact"] == {
+        "kind": "decision_intent",
+        "path": "src/tests/fixtures/pa_feitian_decision_intent_v1.json",
+        "sha256": sidecar_hash,
+        "schema_version": "pa_feitian_decision_intent_v1",
+        "content_type": "application/json",
+    }
+    assert payload["output_hashes"]["decision_intent_artifact"] == sidecar_hash
+
+
+def test_run_manifest_rejects_decision_intent_hash_drift():
+    data = _load_json(MANIFEST_FIXTURE)
+    sidecar_hash = sha256_file(DECISION_INTENT_FIXTURE)
+    data["decision_intent_artifact"] = {
+        "kind": "decision_intent",
+        "path": "src/tests/fixtures/pa_feitian_decision_intent_v1.json",
+        "sha256": sidecar_hash,
+        "schema_version": "pa_feitian_decision_intent_v1",
+        "content_type": "application/json",
+    }
+    data["output_hashes"]["decision_intent_artifact"] = data["snapshot_artifact"]["sha256"]
+
+    with pytest.raises(ValidationError, match="decision_intent_artifact.sha256"):
         validate_run_manifest(data)
 
 
