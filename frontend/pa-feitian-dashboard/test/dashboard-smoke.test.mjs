@@ -6,7 +6,9 @@ import { join } from "node:path";
 import test from "node:test";
 
 import {
+  DATA_ACCESS_DEFINITIONS,
   DECISION_STATE_DEFINITIONS,
+  HASH_STATUS_DEFINITIONS,
   SNAPSHOT_MODE_DEFINITIONS,
   STATUS_DEFINITIONS,
   SUPPORTED_DECISION_INTENT_VERSIONS,
@@ -51,14 +53,14 @@ test("renders summary, warning, signal table, and trace nodes from the v1 fixtur
   assert.match(html, /data-testid="decision-trace-v1"/);
   assert.match(html, /data-testid="decision-trace-v1-input-refs"/);
   assert.match(html, /data-testid="decision-trace-v1-nodes"/);
-  assert.match(html, /Fixture snapshot/);
+  assert.match(html, /Generated snapshot/);
   assert.match(html, /data-testid="run-manifest-empty"/);
   assert.match(html, /Manifest metadata unavailable/);
   assert.match(html, /Score Today underlying signal/);
   assert.match(html, /scorecard_record:1/);
   assert.match(html, /sha256:/);
   assert.match(html, /iv_regime/);
-  assert.match(html, /snapshot v1 is a shadow contract fixture/);
+  assert.match(html, /producer consumes score_today\/emission output/);
   assert.match(html, /forward premium\/underlying outcomes/);
 });
 
@@ -117,12 +119,30 @@ test("renders generated and review manifest provenance labels", async () => {
 
   assert.equal(generatedModel.snapshotMode, "generated");
   assert.equal(generatedModel.manifest.dataAccess.status, "fixture_fallback");
+  assert.equal(DATA_ACCESS_DEFINITIONS.fixture_fallback, "Deterministic fixture fallback");
+  assert.equal(HASH_STATUS_DEFINITIONS.match, "Manifest hash link matches");
+  assert.equal(generatedModel.reviewOperations.dataAccess.status, "fixture_fallback");
+  assert.equal(
+    generatedModel.reviewOperations.artifactRows.find((row) => row.label === "Scorecard artifact").hashStatus,
+    "match",
+  );
+  assert.equal(
+    generatedModel.reviewOperations.artifactRows.find((row) => row.label === "Snapshot artifact").hashStatus,
+    "match",
+  );
+  assert.equal(generatedModel.reviewOperations.sidecarHashStatus.status, "missing");
   assert.match(generatedHtml, /data-testid="run-manifest-provenance"/);
+  assert.match(generatedHtml, /data-testid="review-operations"/);
+  assert.match(generatedHtml, /data-testid="artifact-provenance-table"/);
+  assert.match(generatedHtml, /data_access classification/);
+  assert.match(generatedHtml, /Sidecar hash status/);
   assert.match(generatedHtml, /Generated snapshot/);
   assert.match(generatedHtml, /Scorecard artifact/);
   assert.match(generatedHtml, /Snapshot artifact/);
+  assert.match(generatedHtml, /Frontend snapshot copy/);
   assert.match(generatedHtml, /src\/tests\/fixtures\/pa_feitian_scorecard_v1\.json/);
   assert.match(generatedHtml, /fixture_fallback/);
+  assert.match(generatedHtml, /Decision intent artifact hash status is missing/);
   assert.match(generatedHtml, /frontend\/pa-feitian-dashboard\/fixtures\/pa_feitian_snapshot_v1\.json/);
   assert.match(generatedHtml, /Input hashes/);
   assert.match(generatedHtml, /Output hashes/);
@@ -168,6 +188,15 @@ test("renders manifest-referenced decision-intent sidecar reviewer fields", asyn
   assert.equal(manifest.output_hashes.decision_intent_artifact, decisionIntentHash);
   assert.equal(model.decisionIntent.stateCounts.trade_ready, 1);
   assert.equal(model.decisionIntent.executionAllowedCount, 1);
+  assert.equal(model.reviewOperations.sidecarHashStatus.status, "match");
+  assert.equal(
+    model.reviewOperations.artifactRows.find((row) => row.label === "Decision intent artifact").hashStatus,
+    "match",
+  );
+  assert.equal(
+    model.reviewOperations.artifactRows.find((row) => row.label === "Decision intent frontend copy").hashStatus,
+    "match",
+  );
 
   const tradeReadySignal = model.signals.find((signal) => signal.decisionIntent?.decision_state === "trade_ready");
   assert.ok(tradeReadySignal);
@@ -177,7 +206,12 @@ test("renders manifest-referenced decision-intent sidecar reviewer fields", asyn
   assert.match(html, /data-testid="decision-intent-review"/);
   assert.match(html, /data-testid="decision-intent-sidecar"/);
   assert.match(html, /data-testid="decision-intent-no-lookahead"/);
+  assert.match(html, /data-testid="sidecar-hash-status"/);
+  assert.match(html, /data-testid="sidecar-provenance"/);
   assert.match(html, /Decision intent artifact/);
+  assert.match(html, /Decision intent frontend copy/);
+  assert.match(html, /manifest_referenced_decision_intent_sidecar/);
+  assert.match(html, /engine\.pa_feitian\.decision_intent_adapter\.v0_2/);
   assert.match(html, /decision_state/);
   assert.match(html, /execution_allowed: true/);
   assert.match(html, /aligned_trade_candidate/);
@@ -189,8 +223,30 @@ test("renders manifest-referenced decision-intent sidecar reviewer fields", asyn
   assert.match(html, /premium_macd/);
   assert.match(html, /adequate/);
   assert.match(html, /scorecard_record:2/);
-  assert.match(html, /sha256:46381c5371ddbe46a554640294f26dba20bf72006c8fc5298142ac9facf82f53/);
+  assert.match(html, /sha256:30d70f3ca92533885529ec662b92395cbbf62444da34b832d4749b3cee3a8fcc/);
   assert.match(html, /Posterior diagnostic fields are present/);
+});
+
+test("flags sidecar hash mismatches as reviewer-ready warnings", async () => {
+  const snapshot = await loadFixture();
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const decisionIntent = await loadFixture(decisionIntentFixtureUrl);
+  const tamperedManifest = {
+    ...manifest,
+    output_hashes: {
+      ...manifest.output_hashes,
+      decision_intent_artifact: `sha256:${"0".repeat(64)}`,
+      frontend_decision_intent_copy: `sha256:${"1".repeat(64)}`,
+    },
+  };
+
+  const model = buildDashboardModel(snapshot, { manifest: tamperedManifest, decisionIntent });
+  const html = renderDashboard(snapshot, { manifest: tamperedManifest, decisionIntent });
+
+  assert.equal(model.reviewOperations.sidecarHashStatus.status, "mismatch");
+  assert.match(html, /mismatch/);
+  assert.match(html, /Decision intent artifact hash status is mismatch/);
+  assert.match(html, /Decision intent frontend copy hash status is mismatch/);
 });
 
 test("loads decision-intent sidecar from the manifest artifact path", async () => {

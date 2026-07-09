@@ -4,9 +4,9 @@
   "source_commit": "cccccccccccccccccccccccccccccccccccccccc",
   "run_config": {
     "contract": "pa_feitian_snapshot_v1",
-    "mode": "fixture",
+    "mode": "scorecard",
     "producer": "src/scripts/emit_pa_feitian_snapshot.py",
-    "source_scorecard": null,
+    "source_scorecard": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
     "pool": "CN_METAL",
     "instrument_class": "cn_metal_futures",
     "window_days": 30,
@@ -39,7 +39,7 @@
     "by_instrument": {
       "SHFE.au": 3
     },
-    "integration_milestone": "producer_snapshot_v1_shadow_contract"
+    "integration_milestone": "producer_scorecard_to_pa_feitian_snapshot"
   },
   "signals": [
     {
@@ -153,7 +153,7 @@
             "source": "score_today_json",
             "record_index": 1,
             "asof_ts_utc": "2026-06-28T00:00:00Z",
-            "digest": "sha256:cd55a0fa10ef8945d5c9198a1ae0a064c6c90d11c1358246ecba3aeafecbbbd4"
+            "digest": "sha256:27dced3aa613b6b2555f45708b553f9e8be342061ef4fc75dd6681b4163592b1"
           }
         ],
         "nodes": [
@@ -420,7 +420,7 @@
             "source": "score_today_json",
             "record_index": 2,
             "asof_ts_utc": "2026-06-29T00:00:00Z",
-            "digest": "sha256:46381c5371ddbe46a554640294f26dba20bf72006c8fc5298142ac9facf82f53"
+            "digest": "sha256:30d70f3ca92533885529ec662b92395cbbf62444da34b832d4749b3cee3a8fcc"
           }
         ],
         "nodes": [
@@ -688,7 +688,7 @@
             "source": "score_today_json",
             "record_index": 3,
             "asof_ts_utc": "2026-06-30T00:00:00Z",
-            "digest": "sha256:28e61c10bd1108a4de7cc04d0483ea08180817c466c530482ceb4d062d2c328a"
+            "digest": "sha256:56ae38fb2e247d40219aae3ff6d5e00b28f0bed2f994400f582c6a007ca09c0e"
           }
         ],
         "nodes": [
@@ -847,7 +847,6 @@
     }
   ],
   "warnings": [
-    "snapshot v1 is a shadow contract fixture",
     "producer consumes score_today/emission output; it does not read raw data stores",
     "forward premium/underlying outcomes are intentionally absent from live snapshots",
     "1 selected option legs lack causal IV rank"

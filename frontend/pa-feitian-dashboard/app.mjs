@@ -39,6 +39,20 @@ export const DECISION_STATE_DEFINITIONS = {
   observation_runner: "Observation-only runner diagnostic",
 };
 
+export const DATA_ACCESS_DEFINITIONS = {
+  real_data_available: "Explicit generated scorecard artifact",
+  fixture_fallback: "Deterministic fixture fallback",
+  data_blocked: "No generated data artifact available",
+  unknown: "Data access was not classified",
+};
+
+export const HASH_STATUS_DEFINITIONS = {
+  match: "Manifest hash link matches",
+  mismatch: "Manifest hash link differs",
+  missing: "Hash metadata is missing",
+  untracked: "No manifest hash link recorded",
+};
+
 const DECISION_INTENT_EMPTY_STATE = {
   status: "not_referenced",
   schemaVersion: null,
@@ -174,6 +188,16 @@ function readinessBadge(value) {
   return `<span class="intent-badge readiness ${escapeHtml(normalized)}">${escapeHtml(value || "unknown")}</span>`;
 }
 
+function dataAccessBadge(status) {
+  const normalized = DATA_ACCESS_DEFINITIONS[status] ? status : "unknown";
+  return `<span class="data-access-badge ${escapeHtml(normalized)}">${escapeHtml(status || "unknown")}</span>`;
+}
+
+function hashStatusBadge(status) {
+  const normalized = HASH_STATUS_DEFINITIONS[status] ? status : "missing";
+  return `<span class="hash-badge ${escapeHtml(normalized)}">${escapeHtml(status || "missing")}</span>`;
+}
+
 function modeBadge(mode) {
   const normalized = SNAPSHOT_MODE_DEFINITIONS[mode] ? mode : "fixture";
   return `<span class="mode-badge ${escapeHtml(normalized)}">${escapeHtml(SNAPSHOT_MODE_DEFINITIONS[normalized])}</span>`;
@@ -265,6 +289,186 @@ export function normalizeRunManifest(manifest) {
     outputHashes: manifest.output_hashes || {},
     frontendCopyPath: manifest.frontend_copy_path ?? null,
     reviewState: manifest.review_state || {},
+  };
+}
+
+function classifyHashStatus(actualHash, expectedHash) {
+  if (!actualHash) {
+    return "missing";
+  }
+  if (!expectedHash) {
+    return "untracked";
+  }
+  return actualHash === expectedHash ? "match" : "mismatch";
+}
+
+function buildArtifactProvenanceRow(label, artifact, expectedHash, hashSource) {
+  return {
+    label,
+    kind: artifact?.kind || null,
+    path: artifact?.path || null,
+    schemaVersion: artifact?.schema_version || null,
+    actualHash: artifact?.sha256 || null,
+    expectedHash: expectedHash || null,
+    hashSource,
+    hashStatus: classifyHashStatus(artifact?.sha256, expectedHash),
+  };
+}
+
+function buildCopyProvenanceRow(label, { kind, path, actualHash, expectedHash, hashSource, schemaVersion = null }) {
+  return {
+    label,
+    kind,
+    path: path || null,
+    schemaVersion,
+    actualHash: actualHash || null,
+    expectedHash: expectedHash || null,
+    hashSource,
+    hashStatus: classifyHashStatus(actualHash, expectedHash),
+  };
+}
+
+function buildArtifactProvenanceRows(manifest) {
+  if (!manifest) {
+    return [];
+  }
+
+  const rows = [
+    buildArtifactProvenanceRow(
+      "Scorecard artifact",
+      manifest.scorecardArtifact,
+      manifest.inputHashes.scorecard_artifact,
+      "input_hashes.scorecard_artifact",
+    ),
+    buildArtifactProvenanceRow(
+      "Snapshot artifact",
+      manifest.snapshotArtifact,
+      manifest.outputHashes.snapshot_artifact,
+      "output_hashes.snapshot_artifact",
+    ),
+    buildCopyProvenanceRow("Frontend snapshot copy", {
+      kind: "snapshot_copy",
+      path: manifest.frontendCopyPath,
+      actualHash: manifest.outputHashes.frontend_copy,
+      expectedHash: manifest.snapshotArtifact?.sha256,
+      hashSource: "output_hashes.frontend_copy",
+      schemaVersion: manifest.snapshotArtifact?.schema_version,
+    }),
+    buildArtifactProvenanceRow(
+      "Decision intent artifact",
+      manifest.decisionIntentArtifact,
+      manifest.outputHashes.decision_intent_artifact,
+      "output_hashes.decision_intent_artifact",
+    ),
+  ];
+
+  if (manifest.decisionIntentArtifact || manifest.outputHashes.frontend_decision_intent_copy) {
+    rows.push(
+      buildCopyProvenanceRow("Decision intent frontend copy", {
+        kind: "decision_intent_copy",
+        path: manifest.decisionIntentArtifact?.path,
+        actualHash: manifest.outputHashes.frontend_decision_intent_copy,
+        expectedHash: manifest.decisionIntentArtifact?.sha256,
+        hashSource: "output_hashes.frontend_decision_intent_copy",
+        schemaVersion: manifest.decisionIntentArtifact?.schema_version,
+      }),
+    );
+  }
+
+  return rows;
+}
+
+function chooseSidecarHashStatus(rows) {
+  const sidecarRows = rows.filter((row) => row.kind?.includes("decision_intent"));
+  if (!sidecarRows.length) {
+    return {
+      label: "Decision intent artifact",
+      status: "missing",
+      summary: "No decision-intent sidecar artifact is referenced.",
+    };
+  }
+  const priority = ["mismatch", "missing", "untracked", "match"];
+  const selected =
+    priority.map((status) => sidecarRows.find((row) => row.hashStatus === status)).find(Boolean) ||
+    sidecarRows[0];
+  return {
+    label: selected.label,
+    status: selected.hashStatus,
+    summary: HASH_STATUS_DEFINITIONS[selected.hashStatus],
+  };
+}
+
+function uniqueStrings(values) {
+  return [...new Set(values.filter((value) => typeof value === "string" && value.trim()))];
+}
+
+function buildReviewerWarnings({ manifest, artifactRows, dataAccessStatus, decisionIntent, decisionWarnings, snapshotWarnings, signals }) {
+  const warnings = [];
+
+  if (!manifest) {
+    warnings.push("Run manifest is missing; generated artifact provenance cannot be verified.");
+  } else {
+    const reviewStatus = manifest.reviewState?.status || "unknown";
+    if (reviewStatus !== "approved") {
+      warnings.push(`Review state is ${reviewStatus}; reviewer signoff is not recorded.`);
+    }
+    if (dataAccessStatus !== "real_data_available") {
+      warnings.push(
+        `data_access classification is ${dataAccessStatus}: ${DATA_ACCESS_DEFINITIONS[dataAccessStatus]}.`,
+      );
+    }
+  }
+
+  for (const row of artifactRows) {
+    if (row.hashStatus !== "match") {
+      warnings.push(`${row.label} hash status is ${row.hashStatus}: ${HASH_STATUS_DEFINITIONS[row.hashStatus]}.`);
+    }
+  }
+
+  const dataBlockedCount = signals.filter((signal) => signal.status === "data_blocked").length;
+  if (dataBlockedCount) {
+    warnings.push(`${dataBlockedCount} signal(s) are data_blocked and need explicit option data review.`);
+  }
+
+  const modelDominatedCount = signals.filter((signal) => signal.status === "model_dominated").length;
+  if (modelDominatedCount) {
+    warnings.push(`${modelDominatedCount} signal(s) are model_dominated and should not be treated as raw edge.`);
+  }
+
+  if (decisionIntent.status !== "loaded") {
+    warnings.push(`Decision-intent sidecar status is ${decisionIntent.status}.`);
+  }
+
+  return uniqueStrings([...warnings, ...snapshotWarnings, ...decisionWarnings]);
+}
+
+function buildReviewOperationsModel({ manifest, decisionIntent, decisionWarnings, snapshotWarnings, signals }) {
+  const artifactRows = buildArtifactProvenanceRows(manifest);
+  const dataAccessStatus = DATA_ACCESS_DEFINITIONS[manifest?.dataAccess?.status]
+    ? manifest.dataAccess.status
+    : "unknown";
+  const sidecarHashStatus = chooseSidecarHashStatus(artifactRows);
+  const warnings = buildReviewerWarnings({
+    manifest,
+    artifactRows,
+    dataAccessStatus,
+    decisionIntent,
+    decisionWarnings,
+    snapshotWarnings,
+    signals,
+  });
+
+  return {
+    dataAccess: {
+      status: dataAccessStatus,
+      definition: DATA_ACCESS_DEFINITIONS[dataAccessStatus],
+      source: manifest?.dataAccess?.source || null,
+      notes: Array.isArray(manifest?.dataAccess?.notes) ? manifest.dataAccess.notes : [],
+    },
+    artifactRows,
+    sidecarHashStatus,
+    sidecarProvenance: decisionIntent.status === "loaded" ? decisionIntent.provenance || {} : {},
+    warnings,
   };
 }
 
@@ -433,6 +637,13 @@ export function buildDashboardModel(snapshot, options = {}) {
     manifest,
     decisionIntentError,
   );
+  const reviewOperations = buildReviewOperationsModel({
+    manifest,
+    decisionIntent,
+    decisionWarnings,
+    snapshotWarnings: Array.isArray(snapshot.warnings) ? snapshot.warnings : [],
+    signals,
+  });
 
   return {
     contract: snapshot.schema_version,
@@ -452,6 +663,7 @@ export function buildDashboardModel(snapshot, options = {}) {
       ...decisionIntent,
       warnings: decisionWarnings,
     },
+    reviewOperations,
     signals: signals.map((signal) => ({
       ...signal,
       decisionIntent:
@@ -673,6 +885,90 @@ function renderManifestProvenance(model) {
           ${jsonBlock(review.notes || [])}
         </details>
       </div>
+    </section>
+  `;
+}
+
+function renderReviewOperations(model) {
+  const operations = model.reviewOperations;
+  const provenanceRows = operations.artifactRows.length
+    ? operations.artifactRows
+        .map(
+          (row) => `
+            <tr>
+              <td>
+                <strong>${escapeHtml(row.label)}</strong>
+                <div class="muted">${labelValue(row.kind)}</div>
+              </td>
+              <td>${labelValue(row.path)}</td>
+              <td>${labelValue(row.schemaVersion)}</td>
+              <td><code>${labelValue(row.actualHash)}</code></td>
+              <td>
+                <code>${labelValue(row.expectedHash)}</code>
+                <div class="muted">${escapeHtml(row.hashSource || "no hash source")}</div>
+              </td>
+              <td>${hashStatusBadge(row.hashStatus)}</td>
+            </tr>
+          `,
+        )
+        .join("")
+    : `
+      <tr>
+        <td colspan="6" class="muted">No generated artifact provenance rows are available.</td>
+      </tr>
+    `;
+
+  const warningItems = operations.warnings.length
+    ? operations.warnings
+        .map((warning) => `<div class="warning-item reviewer-warning">${escapeHtml(warning)}</div>`)
+        .join("")
+    : '<div class="warning-item muted">No reviewer-ready warnings.</div>';
+
+  return `
+    <section class="panel" aria-labelledby="review-ops-heading" data-testid="review-operations">
+      <div class="panel-header">
+        <div>
+          <h2 id="review-ops-heading">Review Operations</h2>
+          <p>Generated artifact provenance, hash status, and data_access classification</p>
+        </div>
+        ${hashStatusBadge(operations.sidecarHashStatus.status)}
+      </div>
+      <div class="review-ops-grid">
+        <div class="manifest-item">
+          <span>data_access classification</span>
+          <strong>${dataAccessBadge(operations.dataAccess.status)}</strong>
+          <small>${escapeHtml(operations.dataAccess.definition)}</small>
+        </div>
+        <div class="manifest-item">
+          <span>data_access source</span>
+          <strong>${labelValue(operations.dataAccess.source)}</strong>
+        </div>
+        <div class="manifest-item" data-testid="sidecar-hash-status">
+          <span>Sidecar hash status</span>
+          <strong>${hashStatusBadge(operations.sidecarHashStatus.status)}</strong>
+          <small>${escapeHtml(operations.sidecarHashStatus.label)} / ${escapeHtml(operations.sidecarHashStatus.summary)}</small>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="ops-table" data-testid="artifact-provenance-table">
+          <thead>
+            <tr>
+              <th>Artifact</th>
+              <th>Path</th>
+              <th>Schema</th>
+              <th>Artifact SHA-256</th>
+              <th>Manifest Hash Link</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>${provenanceRows}</tbody>
+        </table>
+      </div>
+      <details class="ops-provenance" data-testid="sidecar-provenance">
+        <summary>Decision-intent sidecar provenance</summary>
+        ${jsonBlock(operations.sidecarProvenance)}
+      </details>
+      <div class="warnings-list" data-testid="reviewer-ready-warnings">${warningItems}</div>
     </section>
   `;
 }
@@ -1172,6 +1468,7 @@ export function renderDashboard(snapshot, options = {}) {
       ${renderWarnings(model)}
       ${renderDataQuality(model)}
       ${renderManifestProvenance(model)}
+      ${renderReviewOperations(model)}
       ${renderDecisionIntentOverview(model)}
       ${renderSignalTable(model)}
       ${renderSignalDrilldown(model)}

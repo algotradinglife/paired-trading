@@ -39,6 +39,21 @@
         "body_frac": 0.82,
         "close_pos": 0.97,
         "double_strong": true
+      },
+      "premium_stop": {
+        "status": "clear",
+        "source": "recent_36bar_low",
+        "stop_premium": 17.9,
+        "asof_ts_utc": "2026-06-28T00:00:00Z"
+      },
+      "premium_confirmation": {
+        "status": "pending",
+        "source": "premium_macd"
+      },
+      "liquidity": {
+        "quote_count": 12,
+        "last_quote_age_seconds": 30,
+        "recovery_required": false
       }
     },
     {
@@ -74,6 +89,22 @@
         "body_frac": 0.82,
         "close_pos": 0.97,
         "double_strong": true
+      },
+      "premium_stop": {
+        "status": "clear",
+        "source": "swing_low_premium",
+        "stop_premium": 11.2,
+        "asof_ts_utc": "2026-06-29T00:00:00Z"
+      },
+      "premium_confirmation": {
+        "status": "confirmed",
+        "source": "premium_macd",
+        "confirmed_at_utc": "2026-06-29T00:00:00Z"
+      },
+      "liquidity": {
+        "quote_count": 18,
+        "last_quote_age_seconds": 15,
+        "recovery_required": false
       }
     },
     {
@@ -109,6 +140,18 @@
         "body_frac": 0.82,
         "close_pos": 0.97,
         "double_strong": true
+      },
+      "premium_stop": {
+        "status": "blocked",
+        "source": "unavailable",
+        "asof_ts_utc": "2026-06-30T00:00:00Z"
+      },
+      "premium_confirmation": {
+        "status": "pending",
+        "source": "unavailable"
+      },
+      "liquidity": {
+        "recovery_required": true
       }
     }
   ]

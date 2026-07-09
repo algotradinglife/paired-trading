@@ -531,11 +531,13 @@ def _decision_state(
         return "trade_ready"
     if (
         product_direction_tier == "aligned_trade_candidate"
-        and signal.status == "keep"
+        and signal.status in {"keep", "data_blocked"}
         and premium_stop.status in {"clear", "unclear"}
         and liquidity.status == "adequate"
         and not liquidity.recovery_required
     ):
+        if signal.status == "data_blocked":
+            _add_reason(reason_codes, "SOURCE_STATUS_DATA_BLOCKED")
         _add_reason(reason_codes, "ARMED_WATCH_READINESS_PENDING")
         return "armed_watch"
     if signal.status == "data_blocked":

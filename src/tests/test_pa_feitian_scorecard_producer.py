@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from engine.pa_feitian.contract import (  # noqa: E402
     PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
+    load_decision_intent,
     load_snapshot,
     load_snapshot_v1,
     write_snapshot,
@@ -148,6 +149,65 @@ def _scorecard_with_model_dominated() -> dict:
         )
     )
     return scorecard
+
+
+def _decision_intent_scorecard() -> dict:
+    return {
+        "pool": "CN_METAL",
+        "instrument_class": "cn_metal_futures",
+        "window_days": 30,
+        "active_rules": ["pa-h2-cn-metal"],
+        "scored": [
+            {
+                "symbol": "kq_m_shfe_au",
+                "date": "2026-06-29",
+                "direction": "bottom",
+                "level": "pa_h2",
+                "subtype": "pa_h2",
+                "confidence": 0.75,
+                "score": 4,
+                "policy_rule": "pa-h2-cn-metal-tr-phase",
+                "policy_weight": 0.75,
+                "underlying_price": 860.0,
+                "options_calls": [
+                    {
+                        "rank": 1,
+                        "strike": 880,
+                        "otm_pct": 2.33,
+                        "expiry_month": "2608",
+                        "expiry_date": "2026-08-17",
+                        "contract_sym": "au2608c880",
+                        "days_to_expiry": 45,
+                        "is_mm_strike": False,
+                        "option_price": 12.2,
+                        "price_source": "store",
+                        "model_dominated": False,
+                        "iv": 10.0,
+                        "iv_rank": 0.1,
+                    }
+                ],
+                "premium_stop": {
+                    "status": "clear",
+                    "source": "swing_low_premium",
+                    "stop_premium": 11.2,
+                    "asof_ts_utc": "2026-06-29T00:00:00Z",
+                },
+                "premium_confirmation": {
+                    "status": "confirmed",
+                    "source": "premium_macd",
+                    "confirmed_at_utc": "2026-06-29T00:00:00Z",
+                    "macd_alert_only": False,
+                },
+                "liquidity": {
+                    "quote_count": 18,
+                    "last_quote_age_seconds": 15,
+                    "recovery_required": False,
+                },
+                "pa_phase": "TR",
+                "position_size": "half",
+            }
+        ],
+    }
 
 
 def test_scorecard_snapshot_uses_real_option_emission_and_validates(tmp_path: Path):
@@ -375,3 +435,115 @@ def test_producer_cli_manifest_falls_back_to_committed_scorecard_fixture(tmp_pat
     assert manifest.run_config["source_scorecard"].endswith(
         "src/tests/fixtures/pa_feitian_scorecard_v1.json"
     )
+
+
+def test_producer_cli_locates_score_today_artifact_for_v1_manifest_and_sidecar(
+    tmp_path: Path,
+):
+    artifact_dir = tmp_path / "score_today_artifacts"
+    artifact_dir.mkdir()
+    stale_artifact = artifact_dir / "2026-07-08_score_today.json"
+    score_today_artifact = artifact_dir / "2026-07-09_score_today.json"
+    stale_artifact.write_text(json.dumps(_scorecard()), encoding="utf-8")
+    score_today_artifact.write_text(json.dumps(_decision_intent_scorecard()), encoding="utf-8")
+    snapshot_path = tmp_path / "pa_feitian_snapshot_v1.json"
+    manifest_path = tmp_path / "pa_feitian_run_manifest_v1.json"
+    sidecar_path = tmp_path / "pa_feitian_decision_intent_v1.json"
+
+    command = [
+        sys.executable,
+        str(SRC_ROOT / "scripts" / "emit_pa_feitian_snapshot.py"),
+        "--out",
+        str(snapshot_path),
+        "--score-today-artifact-dir",
+        str(artifact_dir),
+        "--source-commit",
+        COMMIT,
+        "--generated-at-utc",
+        "2026-07-07T00:00:00Z",
+        "--iv-warmup",
+        "1",
+        "--contract-version",
+        PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
+        "--manifest-out",
+        str(manifest_path),
+        "--decision-intent-out",
+        str(sidecar_path),
+    ]
+
+    subprocess.run(command, cwd=SRC_ROOT, check=True)
+    first_snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    first_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    first_sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+
+    subprocess.run(command, cwd=SRC_ROOT, check=True)
+    second_snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    second_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    second_sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+
+    assert second_snapshot == first_snapshot
+    assert second_manifest == first_manifest
+    assert second_sidecar == first_sidecar
+
+    snapshot = load_snapshot_v1(snapshot_path)
+    manifest = load_run_manifest(manifest_path)
+    sidecar = load_decision_intent(sidecar_path)
+
+    assert snapshot.summary["signals_total"] == 1
+    assert sidecar.intents[0].decision_state == "trade_ready"
+    assert manifest.data_access.status == "real_data_available"
+    assert manifest.data_access.source == score_today_artifact.as_posix()
+    assert manifest.data_access.notes[0] == (
+        "located existing score_today JSON artifact; producer did not read raw data stores"
+    )
+    assert manifest.scorecard_artifact.sha256 == sha256_file(score_today_artifact)
+    assert manifest.snapshot_artifact.sha256 == sha256_file(snapshot_path)
+    assert manifest.decision_intent_artifact is not None
+    assert manifest.decision_intent_artifact.sha256 == sha256_file(sidecar_path)
+    assert sidecar.provenance.snapshot_artifact_sha256 == sha256_file(snapshot_path)
+
+
+def test_producer_cli_fixture_fallback_can_emit_manifest_and_sidecar(tmp_path: Path):
+    snapshot_path = tmp_path / "pa_feitian_snapshot_v1.json"
+    manifest_path = tmp_path / "pa_feitian_run_manifest_v1.json"
+    sidecar_path = tmp_path / "pa_feitian_decision_intent_v1.json"
+
+    command = [
+        sys.executable,
+        str(SRC_ROOT / "scripts" / "emit_pa_feitian_snapshot.py"),
+        "--out",
+        str(snapshot_path),
+        "--source-commit",
+        COMMIT,
+        "--generated-at-utc",
+        "2026-07-07T00:00:00Z",
+        "--contract-version",
+        PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
+        "--manifest-out",
+        str(manifest_path),
+        "--decision-intent-out",
+        str(sidecar_path),
+        "--iv-warmup",
+        "1",
+    ]
+
+    subprocess.run(command, cwd=SRC_ROOT, check=True)
+    first_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    first_sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+
+    subprocess.run(command, cwd=SRC_ROOT, check=True)
+    second_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    second_sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+
+    assert second_manifest == first_manifest
+    assert second_sidecar == first_sidecar
+
+    manifest = load_run_manifest(manifest_path)
+    sidecar = load_decision_intent(sidecar_path)
+
+    assert manifest.data_access.status == "fixture_fallback"
+    assert manifest.data_access.source == "src/tests/fixtures/pa_feitian_scorecard_v1.json"
+    assert manifest.scorecard_artifact.sha256 == sha256_file(SCORECARD_V1_FIXTURE)
+    assert manifest.decision_intent_artifact is not None
+    assert manifest.decision_intent_artifact.sha256 == sha256_file(sidecar_path)
+    assert sidecar.provenance.snapshot_artifact_sha256 == sha256_file(snapshot_path)
