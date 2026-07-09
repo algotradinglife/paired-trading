@@ -465,6 +465,10 @@ def _product_direction_tier(
     if explicit != "unknown":
         if explicit == "aligned_trade_candidate":
             _add_reason(reason_codes, "PRODUCT_DIRECTION_ALIGNED")
+        elif explicit == "conditional_watch":
+            _add_reason(reason_codes, "PRODUCT_DIRECTION_CONDITIONAL_WATCH")
+        elif explicit == "observation_only":
+            _add_reason(reason_codes, "OBSERVATION_ONLY_PRODUCT_DIRECTION")
         elif explicit == "direction_blocked":
             _add_reason(reason_codes, "PRODUCT_DIRECTION_BLOCKED")
         return explicit  # type: ignore[return-value]

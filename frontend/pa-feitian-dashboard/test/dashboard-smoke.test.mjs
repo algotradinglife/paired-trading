@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -32,6 +33,10 @@ const appFiles = [
 
 async function loadFixture(url = fixtureUrl) {
   return JSON.parse(await readFile(url, "utf8"));
+}
+
+function sha256Digest(raw) {
+  return `sha256:${createHash("sha256").update(raw).digest("hex")}`;
 }
 
 test("renders summary, warning, signal table, and trace nodes from the v1 fixture", async () => {
@@ -144,7 +149,9 @@ test("renders generated and review manifest provenance labels", async () => {
 test("renders manifest-referenced decision-intent sidecar reviewer fields", async () => {
   const snapshot = await loadFixture();
   const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const decisionIntentRaw = await readFile(decisionIntentFixtureUrl, "utf8");
   const decisionIntent = await loadFixture(decisionIntentFixtureUrl);
+  const decisionIntentHash = sha256Digest(decisionIntentRaw);
   const normalized = normalizeDecisionIntentSidecar(decisionIntent);
   const model = buildDashboardModel(snapshot, { manifest, decisionIntent });
   const html = renderDashboard(snapshot, { manifest, decisionIntent });
@@ -157,6 +164,8 @@ test("renders manifest-referenced decision-intent sidecar reviewer fields", asyn
     model.decisionIntent.artifact.path,
     "frontend/pa-feitian-dashboard/fixtures/pa_feitian_decision_intent_v1.json",
   );
+  assert.equal(manifest.decision_intent_artifact.sha256, decisionIntentHash);
+  assert.equal(manifest.output_hashes.decision_intent_artifact, decisionIntentHash);
   assert.equal(model.decisionIntent.stateCounts.trade_ready, 1);
   assert.equal(model.decisionIntent.executionAllowedCount, 1);
 
