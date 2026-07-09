@@ -38,7 +38,7 @@ import pandas as pd
 
 from data import bar_loader
 from engine.divergence.bpull_detector import BPullDetector
-from engine.divergence.context_a_detector import ContextADetector, ContextASignal
+from engine.divergence.context_a_detector import ContextADetector
 from engine.divergence.detector import detect_all_divergences
 from engine.divergence.downstream_policies import apply_policy
 from engine.divergence.pa_detector import PABottomDetector, PASignal
@@ -63,6 +63,54 @@ _AU_OPTIONS_DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "options" 
 _AG_SYMBOL_SUFFIX = "_ag"  # kq_m_shfe_ag — the only ag (silver) symbol in the metal pool
 _AU_SYMBOL_SUFFIX = "_au"  # kq_m_shfe_au — the only au (gold) symbol in the metal pool
 _OPTIONS_MIN_SCORE = 3     # Only annotate bottom signals with score >= this
+
+
+def _select_enriched_ag_calls(
+    underlying_price: float,
+    signal_date: date,
+    args: argparse.Namespace,
+    *,
+    mm_target_pct: float | None = None,
+) -> list[dict]:
+    quant_root = getattr(args, "quant_data_root", None)
+    calls = select_otm_calls(
+        underlying_price,
+        signal_date,
+        mm_target_pct=mm_target_pct,
+        quant_root=quant_root,
+    )
+    enrich_with_iv(
+        calls,
+        signal_date,
+        underlying_price,
+        getattr(args, "ag_options_data_dir", _OPTIONS_DATA_DIR),
+        quant_root=quant_root,
+    )
+    return calls
+
+
+def _select_enriched_au_calls(
+    underlying_price: float,
+    signal_date: date,
+    args: argparse.Namespace,
+    *,
+    mm_target_pct: float | None = None,
+) -> list[dict]:
+    quant_root = getattr(args, "quant_data_root", None)
+    calls = select_otm_calls_au(
+        underlying_price,
+        signal_date,
+        mm_target_pct=mm_target_pct,
+        quant_root=quant_root,
+    )
+    enrich_with_iv_au(
+        calls,
+        signal_date,
+        underlying_price,
+        getattr(args, "au_options_data_dir", _AU_OPTIONS_DATA_DIR),
+        quant_root=quant_root,
+    )
+    return calls
 
 
 def _compute_mm_pct(sig, bars: "pd.DataFrame", entry_close: float) -> float | None:
@@ -834,6 +882,10 @@ def main() -> int:
     p.add_argument("--bars-dir", type=Path, default=DEFAULT_BARS_DIR)
     p.add_argument("--quant-data-root", type=Path, default=bar_loader.DEFAULT_QUANT_ROOT, dest="quant_data_root",
                    help="quant-data Parquet root (default: data/quant/)")
+    p.add_argument("--ag-options-data-dir", type=Path, default=_OPTIONS_DATA_DIR, dest="ag_options_data_dir",
+                   help="legacy ag option JSON fallback directory (default: data/options/cn/ag/)")
+    p.add_argument("--au-options-data-dir", type=Path, default=_AU_OPTIONS_DATA_DIR, dest="au_options_data_dir",
+                   help="legacy au option JSON fallback directory (default: data/options/cn/au/)")
     p.add_argument("--window-days", type=int, default=7,
                    help="how many trailing calendar days of signals to surface (default 7)")
     p.add_argument("-o", "--output", type=Path, help="write JSON scorecard to this file")
@@ -963,8 +1015,8 @@ def main() -> int:
                 and score >= _OPTIONS_MIN_SCORE
             ):
                 mm_pct = _compute_mm_pct(sig, bars, entry_close)
-                calls = select_otm_calls(entry_close, sig_date, mm_target_pct=mm_pct)
-                enrich_with_iv(calls, sig_date, entry_close, _OPTIONS_DATA_DIR)
+                calls = _select_enriched_ag_calls(
+                    entry_close, sig_date, args, mm_target_pct=mm_pct)
                 rec["options_calls"] = calls
             elif (
                 instrument_class == "cn_metal_futures"
@@ -973,8 +1025,8 @@ def main() -> int:
                 and score >= _OPTIONS_MIN_SCORE
             ):
                 mm_pct = _compute_mm_pct(sig, bars, entry_close)
-                calls = select_otm_calls_au(entry_close, sig_date, mm_target_pct=mm_pct)
-                enrich_with_iv_au(calls, sig_date, entry_close, _AU_OPTIONS_DATA_DIR)
+                calls = _select_enriched_au_calls(
+                    entry_close, sig_date, args, mm_target_pct=mm_pct)
                 rec["options_calls"] = calls
             rec["position_size"] = _position_size(rec)
             _attach_signal_bar_quality(rec, bars, sig.candidate_bar_idx)
@@ -1028,12 +1080,10 @@ def main() -> int:
                     "options_calls": None,
                 }
                 if sym.endswith(_AG_SYMBOL_SUFFIX) and bscore >= _OPTIONS_MIN_SCORE:
-                    bcalls = select_otm_calls(bentry_close, bsig_date)
-                    enrich_with_iv(bcalls, bsig_date, bentry_close, _OPTIONS_DATA_DIR)
+                    bcalls = _select_enriched_ag_calls(bentry_close, bsig_date, args)
                     brec["options_calls"] = bcalls
                 elif sym.endswith(_AU_SYMBOL_SUFFIX) and bscore >= _OPTIONS_MIN_SCORE:
-                    bcalls = select_otm_calls_au(bentry_close, bsig_date)
-                    enrich_with_iv_au(bcalls, bsig_date, bentry_close, _AU_OPTIONS_DATA_DIR)
+                    bcalls = _select_enriched_au_calls(bentry_close, bsig_date, args)
                     brec["options_calls"] = bcalls
                 _annotate_pa_sweet_spots(brec, pool_rules)
                 brec["position_size"] = _position_size(brec)
@@ -1144,12 +1194,10 @@ def main() -> int:
                     "pa_15m_entry": pa_15m_entry,
                 }
                 if sym.endswith(_AG_SYMBOL_SUFFIX) and pa_score >= _OPTIONS_MIN_SCORE:
-                    pa_calls = select_otm_calls(pa_close, pa_date)
-                    enrich_with_iv(pa_calls, pa_date, pa_close, _OPTIONS_DATA_DIR)
+                    pa_calls = _select_enriched_ag_calls(pa_close, pa_date, args)
                     pa_rec["options_calls"] = pa_calls
                 elif sym.endswith(_AU_SYMBOL_SUFFIX) and pa_score >= _OPTIONS_MIN_SCORE:
-                    pa_calls = select_otm_calls_au(pa_close, pa_date)
-                    enrich_with_iv_au(pa_calls, pa_date, pa_close, _AU_OPTIONS_DATA_DIR)
+                    pa_calls = _select_enriched_au_calls(pa_close, pa_date, args)
                     pa_rec["options_calls"] = pa_calls
                 _annotate_pa_sweet_spots(pa_rec, pool_rules)
                 # DIR multi-TF feed for the four bottom emit blocks:
@@ -1348,16 +1396,14 @@ def main() -> int:
                     and sym.endswith(_AG_SYMBOL_SUFFIX)
                     and ascore >= _OPTIONS_MIN_SCORE
                 ):
-                    acalls = select_otm_calls(aclose, asig_date)
-                    enrich_with_iv(acalls, asig_date, aclose, _OPTIONS_DATA_DIR)
+                    acalls = _select_enriched_ag_calls(aclose, asig_date, args)
                     arec["options_calls"] = acalls
                 elif (
                     instrument_class == "cn_metal_futures"
                     and sym.endswith(_AU_SYMBOL_SUFFIX)
                     and ascore >= _OPTIONS_MIN_SCORE
                 ):
-                    acalls = select_otm_calls_au(aclose, asig_date)
-                    enrich_with_iv_au(acalls, asig_date, aclose, _AU_OPTIONS_DATA_DIR)
+                    acalls = _select_enriched_au_calls(aclose, asig_date, args)
                     arec["options_calls"] = acalls
                 _annotate_pa_sweet_spots(arec, pool_rules)
                 if not _dir_feeds_loaded:
