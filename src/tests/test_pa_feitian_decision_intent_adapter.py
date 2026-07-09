@@ -25,7 +25,10 @@ from engine.pa_feitian.schema_validation import (  # noqa: E402
     validate_pa_feitian_decision_intent_schema,
     validate_pa_feitian_run_manifest_schema,
 )
-from engine.pa_feitian.scorecard_producer import snapshot_from_scorecard  # noqa: E402
+from engine.pa_feitian.scorecard_producer import (  # noqa: E402
+    _scorecard_record_digest,
+    snapshot_from_scorecard,
+)
 
 
 SRC_ROOT = Path(__file__).resolve().parents[1]
@@ -36,6 +39,9 @@ GENERATED_AT = datetime(2026, 7, 7, tzinfo=UTC)
 def _au_call_record(
     date: str,
     *,
+    case_id: str | None = None,
+    contract_sym: str = "au2608c880",
+    strike: float = 880,
     option_price: float = 12.2,
     stop_source: str = "swing_low_premium",
     stop_premium: float | None = 11.2,
@@ -45,6 +51,7 @@ def _au_call_record(
     macd_alert_only: bool = False,
     liquidity: dict | None = None,
     direction: str = "bottom",
+    product_direction_tier: str | None = None,
     right_tail_observation: bool = False,
 ) -> dict:
     if liquidity is None:
@@ -53,7 +60,7 @@ def _au_call_record(
             "last_quote_age_seconds": 15,
             "recovery_required": False,
         }
-    return {
+    record = {
         "symbol": "kq_m_shfe_au",
         "date": date,
         "direction": direction,
@@ -67,11 +74,11 @@ def _au_call_record(
         "options_calls": [
             {
                 "rank": 1,
-                "strike": 880,
+                "strike": strike,
                 "otm_pct": 2.33,
                 "expiry_month": "2608",
                 "expiry_date": "2026-08-17",
-                "contract_sym": "au2608c880",
+                "contract_sym": contract_sym,
                 "days_to_expiry": 45,
                 "is_mm_strike": False,
                 "option_price": option_price,
@@ -100,6 +107,11 @@ def _au_call_record(
         "pa_phase": "TR",
         "position_size": "half",
     }
+    if case_id is not None:
+        record["test_case_id"] = case_id
+    if product_direction_tier is not None:
+        record["product_direction_tier"] = product_direction_tier
+    return record
 
 
 def _scorecard(records: list[dict]) -> dict:
@@ -134,34 +146,52 @@ def _sidecar_for_scorecard(scorecard: dict, tmp_path: Path):
 
 
 def test_v02_adapter_golden_cases(tmp_path: Path):
-    scorecard = _scorecard(
-        [
+    golden_cases = [
+        (
+            "au_call_stop_soft_gate",
             _au_call_record(
                 "2026-06-28",
+                case_id="au_call_stop_soft_gate",
                 option_price=18.5,
                 stop_premium=17.9,
             ),
-            _au_call_record("2026-06-29"),
+        ),
+        ("au_call_trade_ready", _au_call_record("2026-06-29", case_id="au_call_trade_ready")),
+        (
+            "half_loss_downgrade",
             _au_call_record(
                 "2026-06-30",
+                case_id="half_loss_downgrade",
                 option_price=10.0,
                 stop_source="half_loss_fixed",
                 stop_premium=None,
             ),
+        ),
+        (
+            "macd_alert_only",
             _au_call_record(
                 "2026-07-01",
+                case_id="macd_alert_only",
                 confirmation_status="pending",
                 confirmation_source="underlying_only",
                 macd_alert_only=True,
             ),
+        ),
+        (
+            "thin_stale_right_tail",
             _au_call_record(
                 "2026-07-02",
+                case_id="thin_stale_right_tail",
                 liquidity={"quote_count": 2, "last_quote_age_seconds": 360},
                 right_tail_observation=True,
             ),
-            _au_call_record("2026-07-03", direction="top"),
-        ]
-    )
+        ),
+        (
+            "direction_blocked",
+            _au_call_record("2026-07-03", case_id="direction_blocked", direction="top"),
+        ),
+    ]
+    scorecard = _scorecard([record for _, record in golden_cases])
 
     sidecar = _sidecar_for_scorecard(scorecard, tmp_path)
     assert [intent.decision_state for intent in sidecar.intents] == [
@@ -180,6 +210,26 @@ def test_v02_adapter_golden_cases(tmp_path: Path):
         False,
         False,
     ]
+    expected_traceability = {
+        "au_call_stop_soft_gate": ("armed_watch", "STOP_DISTANCE_OUTSIDE_SOFT_GATE"),
+        "au_call_trade_ready": ("trade_ready", "TRADE_READY_PREMIUM_CONFIRMED"),
+        "half_loss_downgrade": ("armed_watch", "HALF_LOSS_FIXED_DOWNGRADE"),
+        "macd_alert_only": ("armed_watch", "MACD_ALERT_ONLY"),
+        "thin_stale_right_tail": (
+            "observation_runner",
+            "THIN_STALE_RIGHT_TAIL_OBSERVATION",
+        ),
+        "direction_blocked": ("reject", "PRODUCT_DIRECTION_BLOCKED"),
+    }
+    for index, (case_id, record) in enumerate(golden_cases, start=1):
+        intent = sidecar.intents[index - 1]
+        expected_state, expected_reason = expected_traceability[case_id]
+        record_ref = intent.no_lookahead_inputs[0]
+        assert intent.decision_state == expected_state, case_id
+        assert expected_reason in intent.reason_codes, case_id
+        assert record_ref.id == f"scorecard_record:{index}", case_id
+        assert record_ref.record_index == index, case_id
+        assert record_ref.digest == _scorecard_record_digest(record), case_id
 
     soft_gate = sidecar.intents[0]
     assert soft_gate.premium_stop.status == "unclear"
@@ -227,6 +277,40 @@ def test_v02_adapter_golden_cases(tmp_path: Path):
                 input_ref["asof_ts_utc"].replace("Z", "+00:00")
             )
             assert input_ts <= decision_ts
+
+
+def test_au_put_observation_only_regression(tmp_path: Path):
+    scorecard = _scorecard(
+        [
+            _au_call_record(
+                "2026-07-04",
+                case_id="au_put_observation_only",
+                contract_sym="au2608p840",
+                strike=840,
+                direction="top",
+                product_direction_tier="observation_only",
+                liquidity={
+                    "quote_count": 2,
+                    "last_quote_age_seconds": 360,
+                    "recovery_required": True,
+                },
+                right_tail_observation=True,
+            )
+        ]
+    )
+
+    sidecar = _sidecar_for_scorecard(scorecard, tmp_path)
+    intent = sidecar.intents[0]
+
+    assert intent.product_direction_tier == "observation_only"
+    assert intent.decision_state == "observation_runner"
+    assert intent.execution_allowed is False
+    assert intent.premium_stop.status == "clear"
+    assert intent.premium_stop.soft_gate_min_pct is None
+    assert intent.premium_stop.soft_gate_max_pct is None
+    assert "OBSERVATION_ONLY_PRODUCT_DIRECTION" in intent.reason_codes
+    assert "THIN_STALE_RIGHT_TAIL_OBSERVATION" in intent.reason_codes
+    assert intent.no_lookahead_inputs[0].record_index == 1
 
 
 def test_v02_adapter_rejects_future_decision_time_inputs(tmp_path: Path):
