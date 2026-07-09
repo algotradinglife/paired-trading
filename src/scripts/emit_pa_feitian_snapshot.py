@@ -30,6 +30,10 @@ from engine.pa_feitian.decision_intent_adapter import (
 )
 from engine.pa_feitian.manifest import build_run_manifest, write_run_manifest
 from engine.pa_feitian.scorecard_producer import example_snapshot, snapshot_from_scorecard_file
+from engine.pa_feitian.score_today_intake import (
+    DEFAULT_SCORE_TODAY_ARTIFACT_GLOB,
+    resolve_score_today_artifact,
+)
 
 SRC_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = SRC_ROOT.parent
@@ -106,6 +110,30 @@ def main(argv: list[str] | None = None) -> int:
         help="Existing score_today JSON output to convert into a real PA/Feitian snapshot.",
     )
     parser.add_argument(
+        "--score-today-artifact",
+        type=Path,
+        default=None,
+        help="Alias for --scorecard when wiring an existing score_today JSON artifact.",
+    )
+    parser.add_argument(
+        "--score-today-artifact-dir",
+        type=Path,
+        action="append",
+        default=None,
+        help=(
+            "Directory containing existing score_today JSON artifacts. Only explicitly "
+            "provided artifact directories are searched; raw market stores are not scanned."
+        ),
+    )
+    parser.add_argument(
+        "--score-today-artifact-glob",
+        default=DEFAULT_SCORE_TODAY_ARTIFACT_GLOB,
+        help=(
+            "Glob used within each --score-today-artifact-dir. Defaults to *.json; "
+            "valid score_today artifacts are sorted by path and the last one is selected."
+        ),
+    )
+    parser.add_argument(
         "--max-signals",
         type=int,
         default=None,
@@ -176,14 +204,30 @@ def main(argv: list[str] | None = None) -> int:
         and args.contract_version != PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION
     ):
         parser.error("--decision-intent-out requires --contract-version pa_feitian_snapshot_v1")
+    if args.scorecard is not None and args.score_today_artifact is not None:
+        parser.error("--scorecard and --score-today-artifact are aliases; pass only one")
 
     source_commit = args.source_commit or _source_commit()
     generated_at_utc = _parse_generated_at(args.generated_at_utc)
-    scorecard_path = args.scorecard
-    used_fixture_fallback = False
-    if scorecard_path is None and args.manifest_out is not None:
-        scorecard_path = DEFAULT_SCORECARD_FIXTURE
-        used_fixture_fallback = True
+    scorecard_path = args.scorecard or args.score_today_artifact
+    artifact_dirs = args.score_today_artifact_dir or []
+    should_resolve_intake = (
+        scorecard_path is not None or bool(artifact_dirs) or args.manifest_out is not None
+    )
+    intake = None
+    if should_resolve_intake:
+        intake = resolve_score_today_artifact(
+            explicit_path=scorecard_path,
+            artifact_dirs=artifact_dirs,
+            artifact_glob=args.score_today_artifact_glob,
+            fixture_path=DEFAULT_SCORECARD_FIXTURE,
+            allow_fixture_fallback=(
+                scorecard_path is None and not artifact_dirs and args.manifest_out is not None
+            ),
+        )
+        if intake.status == "data_blocked":
+            parser.error("; ".join(intake.notes))
+        scorecard_path = intake.scorecard_path
 
     if scorecard_path is not None:
         snapshot = snapshot_from_scorecard_file(
@@ -224,13 +268,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.manifest_out is not None:
         if scorecard_path is None:
             parser.error("--manifest-out requires --scorecard or the deterministic fixture fallback")
-        data_access_status = args.data_access_status or (
-            "fixture_fallback" if used_fixture_fallback else "real_data_available"
+        default_data_access = (
+            intake.data_access()
+            if intake is not None
+            else {
+                "status": "real_data_available",
+                "source": _repo_relative(scorecard_path),
+                "notes": _default_data_access_notes(used_fixture_fallback=False),
+            }
         )
+        data_access_status = args.data_access_status or default_data_access["status"]
         data_access_source = args.data_access_source or _repo_relative(scorecard_path)
-        data_access_notes = args.data_access_notes or _default_data_access_notes(
-            used_fixture_fallback=used_fixture_fallback
-        )
+        data_access_notes = args.data_access_notes or default_data_access["notes"]
         manifest = build_run_manifest(
             scorecard_path=scorecard_path,
             snapshot_path=args.out,
