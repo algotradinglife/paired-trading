@@ -13,6 +13,12 @@ npm run smoke
 npm run serve
 ```
 
+Rebuild the full M4 review fixture set from the repo root:
+
+```bash
+python src/scripts/build_pa_feitian_review_artifacts.py
+```
+
 The default copy source is `src/tests/fixtures/pa_feitian_snapshot_v1.json`.
 Generated v1 snapshots can use the same copy path before smoke testing or
 serving. Legacy v0 snapshots are still accepted and render the legacy

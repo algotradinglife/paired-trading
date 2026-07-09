@@ -51,14 +51,14 @@ test("renders summary, warning, signal table, and trace nodes from the v1 fixtur
   assert.match(html, /data-testid="decision-trace-v1"/);
   assert.match(html, /data-testid="decision-trace-v1-input-refs"/);
   assert.match(html, /data-testid="decision-trace-v1-nodes"/);
-  assert.match(html, /Fixture snapshot/);
+  assert.match(html, /Generated snapshot/);
   assert.match(html, /data-testid="run-manifest-empty"/);
   assert.match(html, /Manifest metadata unavailable/);
   assert.match(html, /Score Today underlying signal/);
   assert.match(html, /scorecard_record:1/);
   assert.match(html, /sha256:/);
   assert.match(html, /iv_regime/);
-  assert.match(html, /snapshot v1 is a shadow contract fixture/);
+  assert.match(html, /producer consumes score_today\/emission output/);
   assert.match(html, /forward premium\/underlying outcomes/);
 });
 
@@ -189,7 +189,7 @@ test("renders manifest-referenced decision-intent sidecar reviewer fields", asyn
   assert.match(html, /premium_macd/);
   assert.match(html, /adequate/);
   assert.match(html, /scorecard_record:2/);
-  assert.match(html, /sha256:46381c5371ddbe46a554640294f26dba20bf72006c8fc5298142ac9facf82f53/);
+  assert.match(html, /sha256:30d70f3ca92533885529ec662b92395cbbf62444da34b832d4749b3cee3a8fcc/);
   assert.match(html, /Posterior diagnostic fields are present/);
 });
 
