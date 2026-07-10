@@ -15,7 +15,16 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 PA_FEITIAN_RUN_MANIFEST_SCHEMA_VERSION = "pa_feitian_run_manifest_v1"
 HashDigest = str
-ArtifactKind = Literal["scorecard", "snapshot", "decision_intent", "premium_outcome"]
+ArtifactKind = Literal[
+    "scorecard",
+    "snapshot",
+    "decision_intent",
+    "premium_outcome",
+    "evaluation_dataset",
+    "evaluation_aggregate_result",
+    "evaluation_failure_mode_report",
+    "evaluation_screening_report",
+]
 ReviewStatus = Literal["pending", "approved", "changes_requested", "rejected"]
 DataAccessStatus = Literal["real_data_available", "fixture_fallback", "data_blocked", "unknown"]
 HASH_DIGEST_PATTERN = re.compile(r"^sha256:[a-f0-9]{64}$")
@@ -104,6 +113,10 @@ class PaFeitianRunManifest(BaseModel):
     snapshot_artifact: PaFeitianArtifactRef
     decision_intent_artifact: PaFeitianArtifactRef | None = None
     premium_outcome_artifact: PaFeitianArtifactRef | None = None
+    evaluation_dataset_artifact: PaFeitianArtifactRef | None = None
+    evaluation_aggregate_result_artifact: PaFeitianArtifactRef | None = None
+    evaluation_failure_mode_report_artifact: PaFeitianArtifactRef | None = None
+    evaluation_screening_report_artifact: PaFeitianArtifactRef | None = None
     cli_args: list[str]
     run_config: dict[str, Any]
     data_access: PaFeitianDataAccess = Field(default_factory=PaFeitianDataAccess)
@@ -143,6 +156,34 @@ class PaFeitianRunManifest(BaseModel):
             and self.premium_outcome_artifact.kind != "premium_outcome"
         ):
             raise ValueError("premium_outcome_artifact.kind must be premium_outcome")
+        expected_evaluation_artifacts = {
+            "evaluation_dataset_artifact": (
+                "evaluation_dataset",
+                "pa_feitian_evaluation_dataset_v1",
+            ),
+            "evaluation_aggregate_result_artifact": (
+                "evaluation_aggregate_result",
+                "pa_feitian_evaluation_aggregate_result_v1",
+            ),
+            "evaluation_failure_mode_report_artifact": (
+                "evaluation_failure_mode_report",
+                "pa_feitian_evaluation_failure_mode_report_v1",
+            ),
+            "evaluation_screening_report_artifact": (
+                "evaluation_screening_report",
+                "pa_feitian_evaluation_screening_report_v1",
+            ),
+        }
+        for field_name, (expected_kind, expected_schema_version) in (
+            expected_evaluation_artifacts.items()
+        ):
+            artifact = getattr(self, field_name)
+            if artifact is not None and artifact.kind != expected_kind:
+                raise ValueError(f"{field_name}.kind must be {expected_kind}")
+            if artifact is not None and artifact.schema_version != expected_schema_version:
+                raise ValueError(
+                    f"{field_name}.schema_version must be {expected_schema_version}"
+                )
         if self.input_hashes.get("scorecard_artifact") != self.scorecard_artifact.sha256:
             raise ValueError("input_hashes.scorecard_artifact must match scorecard_artifact.sha256")
         if self.output_hashes.get("snapshot_artifact") != self.snapshot_artifact.sha256:
@@ -158,17 +199,16 @@ class PaFeitianRunManifest(BaseModel):
                 "output_hashes.decision_intent_artifact must match "
                 "decision_intent_artifact.sha256"
             )
-        premium_outcome_hash = self.output_hashes.get("premium_outcome_artifact")
-        if self.premium_outcome_artifact is None:
-            if premium_outcome_hash is not None:
+        for field_name in ("premium_outcome_artifact", *expected_evaluation_artifacts):
+            artifact_hash = self.output_hashes.get(field_name)
+            artifact = getattr(self, field_name)
+            if artifact is None:
+                if artifact_hash is not None:
+                    raise ValueError(f"{field_name} is required when output_hashes includes it")
+            elif artifact_hash != artifact.sha256:
                 raise ValueError(
-                    "premium_outcome_artifact is required when output_hashes includes it"
+                    f"output_hashes.{field_name} must match {field_name}.sha256"
                 )
-        elif premium_outcome_hash != self.premium_outcome_artifact.sha256:
-            raise ValueError(
-                "output_hashes.premium_outcome_artifact must match "
-                "premium_outcome_artifact.sha256"
-            )
         if self.frontend_copy_path is not None and "frontend_copy" not in self.output_hashes:
             raise ValueError("output_hashes.frontend_copy is required when frontend_copy_path is set")
         return self
@@ -199,6 +239,10 @@ def build_run_manifest(
     frontend_copy_path: str | Path | None = None,
     decision_intent_path: str | Path | None = None,
     premium_outcome_path: str | Path | None = None,
+    evaluation_dataset_path: str | Path | None = None,
+    evaluation_aggregate_result_path: str | Path | None = None,
+    evaluation_failure_mode_report_path: str | Path | None = None,
+    evaluation_screening_report_path: str | Path | None = None,
     review_state: PaFeitianReviewState | Mapping[str, Any] | None = None,
     data_access: PaFeitianDataAccess | Mapping[str, Any] | None = None,
     scorecard_schema_version: str = "score_today_json",
@@ -230,6 +274,43 @@ def build_run_manifest(
             schema_version=_schema_version_from_json(premium_outcome_path),
         )
         output_hashes["premium_outcome_artifact"] = premium_outcome_ref.sha256
+    evaluation_artifact_specs = (
+        ("evaluation_dataset_artifact", "evaluation_dataset_path", "evaluation_dataset"),
+        (
+            "evaluation_aggregate_result_artifact",
+            "evaluation_aggregate_result_path",
+            "evaluation_aggregate_result",
+        ),
+        (
+            "evaluation_failure_mode_report_artifact",
+            "evaluation_failure_mode_report_path",
+            "evaluation_failure_mode_report",
+        ),
+        (
+            "evaluation_screening_report_artifact",
+            "evaluation_screening_report_path",
+            "evaluation_screening_report",
+        ),
+    )
+    evaluation_paths = {
+        "evaluation_dataset_path": evaluation_dataset_path,
+        "evaluation_aggregate_result_path": evaluation_aggregate_result_path,
+        "evaluation_failure_mode_report_path": evaluation_failure_mode_report_path,
+        "evaluation_screening_report_path": evaluation_screening_report_path,
+    }
+    evaluation_refs: dict[str, PaFeitianArtifactRef | None] = {}
+    for artifact_field, path_name, kind in evaluation_artifact_specs:
+        artifact_path = evaluation_paths[path_name]
+        if artifact_path is None:
+            evaluation_refs[artifact_field] = None
+            continue
+        ref = artifact_ref_from_file(
+            artifact_path,
+            kind=kind,  # type: ignore[arg-type]
+            schema_version=_schema_version_from_json(artifact_path),
+        )
+        evaluation_refs[artifact_field] = ref
+        output_hashes[artifact_field] = ref.sha256
     frontend_copy_text = None
     if frontend_copy_path is not None:
         frontend_copy_text = _path_text(frontend_copy_path)
@@ -256,6 +337,16 @@ def build_run_manifest(
         snapshot_artifact=snapshot_ref,
         decision_intent_artifact=decision_intent_ref,
         premium_outcome_artifact=premium_outcome_ref,
+        evaluation_dataset_artifact=evaluation_refs["evaluation_dataset_artifact"],
+        evaluation_aggregate_result_artifact=evaluation_refs[
+            "evaluation_aggregate_result_artifact"
+        ],
+        evaluation_failure_mode_report_artifact=evaluation_refs[
+            "evaluation_failure_mode_report_artifact"
+        ],
+        evaluation_screening_report_artifact=evaluation_refs[
+            "evaluation_screening_report_artifact"
+        ],
         cli_args=list(cli_args),
         run_config=_jsonable_mapping(run_config),
         data_access=access,
@@ -276,6 +367,14 @@ def run_manifest_to_jsonable(manifest: PaFeitianRunManifest) -> dict[str, Any]:
         payload.pop("decision_intent_artifact", None)
     if manifest.premium_outcome_artifact is None:
         payload.pop("premium_outcome_artifact", None)
+    for field_name in (
+        "evaluation_dataset_artifact",
+        "evaluation_aggregate_result_artifact",
+        "evaluation_failure_mode_report_artifact",
+        "evaluation_screening_report_artifact",
+    ):
+        if getattr(manifest, field_name) is None:
+            payload.pop(field_name, None)
     return payload
 
 
