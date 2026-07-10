@@ -116,5 +116,5 @@ The verifier checks:
   `data_blocked`, and `not_evaluable`;
 - frontend fixture copy hashes, real premium-outcome render compatibility, and
   artifact-only dashboard boundary;
-- absence of obvious public token/private-key patterns in this packet.
+- absence of obvious public token/private-key patterns in this packet;
 - absence of local runtime path fragments in this packet.

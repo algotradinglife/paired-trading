@@ -261,4 +261,3 @@ claims.
 M6 begins only after M5 has established trustworthy outcome records. M6 will
 then aggregate and compare trace nodes, IV gates, option legs, and exit policies
 using EV, win rate, uncertainty, sample size, and failure modes.
-
