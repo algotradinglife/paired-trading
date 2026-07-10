@@ -26,7 +26,7 @@
   "premium_outcome_artifact": {
     "kind": "premium_outcome",
     "path": "src/tests/fixtures/pa_feitian_premium_outcome_v1.json",
-    "sha256": "sha256:7ffb59c4c37dd30ee8ae61e0e3fc6214944b48931311f9b4c56f621ed5ee1c25",
+    "sha256": "sha256:7461ea04293be20fc876ffa25cdb9d4e669e50458430f641177558de152d852d",
     "schema_version": "pa_feitian_premium_outcome_v1",
     "content_type": "application/json"
   },
@@ -61,7 +61,7 @@
   "output_hashes": {
     "snapshot_artifact": "sha256:e112b3bac01cfa8147a7c043c6897e13525bfbfbd913384db07638603353fff6",
     "decision_intent_artifact": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511",
-    "premium_outcome_artifact": "sha256:7ffb59c4c37dd30ee8ae61e0e3fc6214944b48931311f9b4c56f621ed5ee1c25",
+    "premium_outcome_artifact": "sha256:7461ea04293be20fc876ffa25cdb9d4e669e50458430f641177558de152d852d",
     "frontend_copy": "sha256:e112b3bac01cfa8147a7c043c6897e13525bfbfbd913384db07638603353fff6",
     "frontend_decision_intent_copy": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511"
   },

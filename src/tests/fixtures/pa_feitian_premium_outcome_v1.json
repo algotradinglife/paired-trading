@@ -23,10 +23,10 @@
       "decision_intent_artifact": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511"
     },
     "policy_hashes": {
-      "paft_premium_outcome_0002_daily_target_v1:policy": "sha256:5ec3121ca89c03bc202188fa6e4f6aa49ee5c70a050f6a70bf348a99efe41509",
-      "paft_premium_outcome_0002_daily_same_bar_ambiguous_v1:policy": "sha256:659cabe6dd1efb6b23c6c20e48661f31a1f71f8e5da94589aec6bd8814c51e1e",
-      "paft_premium_outcome_0001_data_blocked_v1:policy": "sha256:22117d2000d65a0fdb564fc9dcc2dca61cbf2804feb8bba1b4787ea7aa230e5d",
-      "paft_premium_outcome_0003_model_not_evaluable_v1:policy": "sha256:c77525a0d2bf46dbd8fbd3a1587bc69b03be34c5b04a2753108957d004ffa85e"
+      "paft_premium_outcome_0002_daily_target_v1:policy": "sha256:96c36a0b941ea1c32fe4fcabef0dee1c782b6edf642cb8114933b55dd7055d1b",
+      "paft_premium_outcome_0002_daily_same_bar_ambiguous_v1:policy": "sha256:1a5021eddf6d5c1249ee6f46e3999e18d04550606836cd58b9c300281e92d982",
+      "paft_premium_outcome_0001_data_blocked_v1:policy": "sha256:3be2a652a4417d96ffdc562b4938372ba542797ec0f0a1cf0475c7f96067233c",
+      "paft_premium_outcome_0003_model_not_evaluable_v1:policy": "sha256:8fcdc2a57361a53ea81c5e0804199308ceb4f120853300a40200375aec039dd4"
     },
     "output_hashes": {},
     "notes": [
@@ -61,14 +61,17 @@
         "declared_at_utc": "2026-07-07T00:00:00Z",
         "fixed_before_traversal": true,
         "traversal_started_at_utc": "2026-07-07T00:01:00Z",
-        "digest": "sha256:5ec3121ca89c03bc202188fa6e4f6aa49ee5c70a050f6a70bf348a99efe41509",
+        "digest": "sha256:96c36a0b941ea1c32fe4fcabef0dee1c782b6edf642cb8114933b55dd7055d1b",
         "provenance_hash_key": "paft_premium_outcome_0002_daily_target_v1:policy",
         "params": {
           "entry_rule": "first_next_daily_ohlc_bar_after_decision",
-          "stop_premium": 11.2,
-          "target_premiums": [
-            18.3,
-            24.4
+          "price_level_mode": "entry_relative",
+          "stop_premium": null,
+          "target_premiums": [],
+          "stop_fraction_of_entry": 0.9105691057,
+          "target_multiples_of_entry": [
+            1.487804878,
+            1.983739837
           ],
           "max_holding_bars": 5,
           "max_holding_days": 7,
@@ -197,13 +200,16 @@
         "declared_at_utc": "2026-07-07T00:00:00Z",
         "fixed_before_traversal": true,
         "traversal_started_at_utc": "2026-07-07T00:01:00Z",
-        "digest": "sha256:659cabe6dd1efb6b23c6c20e48661f31a1f71f8e5da94589aec6bd8814c51e1e",
+        "digest": "sha256:1a5021eddf6d5c1249ee6f46e3999e18d04550606836cd58b9c300281e92d982",
         "provenance_hash_key": "paft_premium_outcome_0002_daily_same_bar_ambiguous_v1:policy",
         "params": {
           "entry_rule": "first_next_daily_ohlc_bar_after_decision",
-          "stop_premium": 11.2,
-          "target_premiums": [
-            18.3
+          "price_level_mode": "entry_relative",
+          "stop_premium": null,
+          "target_premiums": [],
+          "stop_fraction_of_entry": 0.9105691057,
+          "target_multiples_of_entry": [
+            1.487804878
           ],
           "max_holding_bars": 5,
           "max_holding_days": 7,
@@ -274,21 +280,10 @@
       "outcome_id": "paft_premium_outcome_0001_data_blocked_v1",
       "source_signal_id": "paft_scorecard_0001_kq_m_shfe_au_20260628000000",
       "decision_intent_signal_id": "paft_scorecard_0001_kq_m_shfe_au_20260628000000",
-      "source_contract_id": "scorecard_record:1:options_calls:0",
+      "source_contract_id": null,
       "decision_ts_utc": "2026-06-28T00:00:00Z",
-      "first_eligible_entry_ts_utc": "2026-06-29T00:00:00Z",
-      "selected_contract": {
-        "source_contract_id": "scorecard_record:1:options_calls:0",
-        "option_type": "call",
-        "exchange": "SHFE",
-        "product": "au",
-        "contract_symbol": "au2608c880",
-        "strike": 880.0,
-        "expiry": "2026-08-17",
-        "dte_at_decision": 45,
-        "contract_selection_asof_utc": "2026-06-28T00:00:00Z",
-        "selection_source_ref": "scorecard_record:1"
-      },
+      "first_eligible_entry_ts_utc": null,
+      "selected_contract": null,
       "policy": {
         "policy_id": "premium_stop_target_daily",
         "policy_version": "v1.fixture",
@@ -296,13 +291,16 @@
         "declared_at_utc": "2026-07-07T00:00:00Z",
         "fixed_before_traversal": true,
         "traversal_started_at_utc": "2026-07-07T00:01:00Z",
-        "digest": "sha256:22117d2000d65a0fdb564fc9dcc2dca61cbf2804feb8bba1b4787ea7aa230e5d",
+        "digest": "sha256:3be2a652a4417d96ffdc562b4938372ba542797ec0f0a1cf0475c7f96067233c",
         "provenance_hash_key": "paft_premium_outcome_0001_data_blocked_v1:policy",
         "params": {
           "entry_rule": "first_next_daily_ohlc_bar_after_decision",
-          "stop_premium": 17.9,
-          "target_premiums": [
-            27.75
+          "price_level_mode": "entry_relative",
+          "stop_premium": null,
+          "target_premiums": [],
+          "stop_fraction_of_entry": 0.9675675676,
+          "target_multiples_of_entry": [
+            1.5
           ],
           "max_holding_bars": 5,
           "max_holding_days": 7,
@@ -343,10 +341,10 @@
         "last_premium_observation_ts_utc": null,
         "ambiguity": null,
         "data_gap": {
-          "kind": "missing_entry",
-          "start_ts_utc": "2026-06-29T00:00:00Z",
-          "end_ts_utc": "2026-06-29T00:00:00Z",
-          "description": "first eligible entry bar is missing from the option premium store fixture"
+          "kind": "missing_contract",
+          "start_ts_utc": null,
+          "end_ts_utc": null,
+          "description": "selected option contract could not be resolved from decision-time evidence"
         },
         "notes": [
           "missing entry evidence is data_blocked, not observed"
@@ -389,16 +387,21 @@
         "declared_at_utc": "2026-07-07T00:00:00Z",
         "fixed_before_traversal": true,
         "traversal_started_at_utc": "2026-07-07T00:01:00Z",
-        "digest": "sha256:c77525a0d2bf46dbd8fbd3a1587bc69b03be34c5b04a2753108957d004ffa85e",
+        "digest": "sha256:8fcdc2a57361a53ea81c5e0804199308ceb4f120853300a40200375aec039dd4",
         "provenance_hash_key": "paft_premium_outcome_0003_model_not_evaluable_v1:policy",
         "params": {
           "entry_rule": "first_next_daily_ohlc_bar_after_decision",
+          "price_level_mode": "entry_relative",
           "stop_premium": null,
           "target_premiums": [],
+          "stop_fraction_of_entry": 0.9,
+          "target_multiples_of_entry": [
+            1.5
+          ],
           "max_holding_bars": 5,
           "max_holding_days": 7,
-          "stop_fill_rule": "not_applicable",
-          "target_fill_rule": "not_applicable",
+          "stop_fill_rule": "at_level",
+          "target_fill_rule": "at_level",
           "time_exit_fill_rule": "bar_close",
           "missing_bar_policy": "data_blocked",
           "same_bar_resolution": "not_applicable",

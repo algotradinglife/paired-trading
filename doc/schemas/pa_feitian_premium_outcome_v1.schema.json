@@ -30,7 +30,6 @@
     },
     "outcomes": {
       "type": "array",
-      "minItems": 1,
       "items": {
         "$ref": "#/$defs/outcome"
       }
@@ -185,7 +184,10 @@
           ]
         },
         "source_contract_id": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "decision_ts_utc": {
           "type": "string",
@@ -199,7 +201,7 @@
           "format": "date-time"
         },
         "selected_contract": {
-          "$ref": "#/$defs/selected_contract"
+          "$ref": "#/$defs/nullable_selected_contract"
         },
         "policy": {
           "$ref": "#/$defs/policy"
@@ -327,6 +329,63 @@
         }
       }
     },
+    "nullable_selected_contract": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "source_contract_id",
+        "option_type",
+        "exchange",
+        "product",
+        "contract_symbol",
+        "strike",
+        "expiry",
+        "dte_at_decision",
+        "contract_selection_asof_utc",
+        "selection_source_ref"
+      ],
+      "properties": {
+        "source_contract_id": {
+          "type": "string"
+        },
+        "option_type": {
+          "enum": [
+            "call",
+            "put"
+          ]
+        },
+        "exchange": {
+          "type": "string"
+        },
+        "product": {
+          "type": "string"
+        },
+        "contract_symbol": {
+          "type": "string"
+        },
+        "strike": {
+          "type": "number",
+          "minimum": 0
+        },
+        "expiry": {
+          "type": "string"
+        },
+        "dte_at_decision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "contract_selection_asof_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "selection_source_ref": {
+          "type": "string"
+        }
+      }
+    },
     "policy": {
       "type": "object",
       "additionalProperties": false,
@@ -381,8 +440,11 @@
       "additionalProperties": false,
       "required": [
         "entry_rule",
+        "price_level_mode",
         "stop_premium",
         "target_premiums",
+        "stop_fraction_of_entry",
+        "target_multiples_of_entry",
         "max_holding_bars",
         "max_holding_days",
         "stop_fill_rule",
@@ -397,6 +459,12 @@
         "entry_rule": {
           "type": "string"
         },
+        "price_level_mode": {
+          "enum": [
+            "absolute_premium",
+            "entry_relative"
+          ]
+        },
         "stop_premium": {
           "type": [
             "number",
@@ -405,6 +473,21 @@
           "minimum": 0
         },
         "target_premiums": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "stop_fraction_of_entry": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "target_multiples_of_entry": {
           "type": "array",
           "items": {
             "type": "number",
@@ -806,6 +889,7 @@
       "properties": {
         "kind": {
           "enum": [
+            "missing_contract",
             "missing_bars",
             "early_termination",
             "missing_entry",

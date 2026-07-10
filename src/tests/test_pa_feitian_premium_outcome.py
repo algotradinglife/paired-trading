@@ -64,6 +64,11 @@ def test_premium_outcome_fixture_validates_against_model_and_schema():
     assert observed.policy.origin == "retrospective_fixed"
     assert observed.policy.declared_at_utc > observed.decision_ts_utc
     assert observed.policy.fixed_before_traversal is True
+    assert observed.policy.params.price_level_mode == "entry_relative"
+    assert observed.policy.params.stop_fraction_of_entry == pytest.approx(0.9105691057)
+    assert observed.policy.params.stop_premium is None
+    assert observed.policy.params.target_multiples_of_entry == [1.487804878, 1.983739837]
+    assert observed.policy.params.target_premiums == []
     assert (
         sidecar.provenance.policy_hashes[observed.policy.provenance_hash_key]
         == observed.policy.digest
@@ -76,6 +81,8 @@ def test_premium_outcome_fixture_validates_against_model_and_schema():
 
     assert sidecar.outcomes[1].data_quality.ambiguity is not None
     assert sidecar.outcomes[2].data_quality.data_gap is not None
+    assert sidecar.outcomes[2].source_contract_id is None
+    assert sidecar.outcomes[2].selected_contract is None
     assert sidecar.outcomes[3].data_quality.premium_price_source_type == "model_derived"
     for outcome in sidecar.outcomes:
         if outcome.policy.origin == "retrospective_fixed":
@@ -102,9 +109,21 @@ def test_premium_outcome_schema_declares_m5_states_and_external_ref():
         "unknown",
     ]
     assert "policy_hashes" in schema["$defs"]["provenance"]["required"]
+    assert "minItems" not in schema["properties"]["outcomes"]
+    assert schema["$defs"]["outcome"]["properties"]["source_contract_id"]["type"] == [
+        "string",
+        "null",
+    ]
+    assert schema["$defs"]["outcome"]["properties"]["selected_contract"]["$ref"] == (
+        "#/$defs/nullable_selected_contract"
+    )
     assert schema["$defs"]["policy"]["properties"]["origin"]["enum"] == [
         "decision_declared",
         "retrospective_fixed",
+    ]
+    assert schema["$defs"]["policy_params"]["properties"]["price_level_mode"]["enum"] == [
+        "absolute_premium",
+        "entry_relative",
     ]
     assert {"digest", "fixed_before_traversal", "traversal_started_at_utc"}.issubset(
         schema["$defs"]["policy"]["required"]
@@ -126,6 +145,18 @@ def test_premium_outcome_schema_resolves_no_lookahead_external_ref():
         validate_pa_feitian_premium_outcome_schema(broken)
 
 
+def test_premium_outcome_allows_empty_no_signal_sidecar():
+    data = _load_json(FIXTURE_PATH)
+    empty = deepcopy(data)
+    empty["outcomes"] = []
+    empty["provenance"]["policy_hashes"] = {}
+
+    validate_pa_feitian_premium_outcome_schema(empty)
+    sidecar = validate_premium_outcome(empty)
+
+    assert sidecar.outcomes == []
+
+
 def test_premium_outcome_model_enforces_no_lookahead_and_observed_evidence():
     data = _load_json(FIXTURE_PATH)
 
@@ -136,6 +167,22 @@ def test_premium_outcome_model_enforces_no_lookahead_and_observed_evidence():
 
     with pytest.raises(ValidationError, match="contract selection"):
         validate_premium_outcome(future_contract_selection)
+
+    observed_without_contract = deepcopy(data)
+    observed_without_contract["outcomes"][0]["source_contract_id"] = None
+    observed_without_contract["outcomes"][0]["selected_contract"] = None
+
+    with pytest.raises(ValidationError, match="selected contract identifiers"):
+        validate_premium_outcome(observed_without_contract)
+
+    not_evaluable_without_contract = deepcopy(data)
+    not_evaluable_without_contract["outcomes"][3]["source_contract_id"] = None
+    not_evaluable_without_contract["outcomes"][3]["selected_contract"] = None
+
+    assert (
+        validate_premium_outcome(not_evaluable_without_contract).outcomes[3].selected_contract
+        is None
+    )
 
     decision_declared_after_decision = deepcopy(data)
     decision_declared_after_decision["outcomes"][0]["policy"]["origin"] = "decision_declared"
@@ -157,6 +204,12 @@ def test_premium_outcome_model_enforces_no_lookahead_and_observed_evidence():
     with pytest.raises(ValidationError, match="policy digest"):
         validate_premium_outcome(policy_hash_drift)
 
+    mixed_policy_levels = deepcopy(data)
+    mixed_policy_levels["outcomes"][0]["policy"]["params"]["stop_premium"] = 11.2
+
+    with pytest.raises(ValidationError, match="cannot mix absolute premium"):
+        validate_premium_outcome(mixed_policy_levels)
+
     future_entry = deepcopy(data)
     future_entry["outcomes"][0]["first_eligible_entry_ts_utc"] = "2026-06-29T00:00:00Z"
 
@@ -170,6 +223,20 @@ def test_premium_outcome_model_enforces_no_lookahead_and_observed_evidence():
 
     with pytest.raises(ValidationError, match="cannot carry ambiguity"):
         validate_premium_outcome(ambiguous_observed)
+
+    non_observed_with_exit = deepcopy(data)
+    non_observed_with_exit["outcomes"][1]["exit_fill"] = deepcopy(data["outcomes"][0]["exit_fill"])
+
+    with pytest.raises(ValidationError, match="non-observed outcome"):
+        validate_premium_outcome(non_observed_with_exit)
+
+    non_observed_with_metrics = deepcopy(data)
+    non_observed_with_metrics["outcomes"][2]["premium_metrics"] = deepcopy(
+        data["outcomes"][0]["premium_metrics"]
+    )
+
+    with pytest.raises(ValidationError, match="non-observed outcome"):
+        validate_premium_outcome(non_observed_with_metrics)
 
     model_as_observed = deepcopy(data)
     model_as_observed["outcomes"][3]["evaluation_status"] = "observed"

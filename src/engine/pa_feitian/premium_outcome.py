@@ -18,6 +18,7 @@ PremiumOutcomeStatus = Literal["observed", "ambiguous", "data_blocked", "not_eva
 PremiumPriceSourceType = Literal["observed", "model_derived", "unavailable"]
 PremiumBarGranularity = Literal["daily", "intraday", "tick", "unknown"]
 PremiumPolicyOrigin = Literal["decision_declared", "retrospective_fixed"]
+PremiumPolicyLevelMode = Literal["absolute_premium", "entry_relative"]
 PremiumExitReason = Literal[
     "premium_stop",
     "premium_target",
@@ -180,8 +181,11 @@ class PremiumOutcomePolicyParams(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     entry_rule: str
+    price_level_mode: PremiumPolicyLevelMode
     stop_premium: float | None = Field(default=None, ge=0)
     target_premiums: list[float] = Field(default_factory=list)
+    stop_fraction_of_entry: float | None = Field(default=None, gt=0, lt=1)
+    target_multiples_of_entry: list[float] = Field(default_factory=list)
     max_holding_bars: int | None = Field(default=None, ge=1)
     max_holding_days: int | None = Field(default=None, ge=1)
     stop_fill_rule: FillRule
@@ -199,6 +203,31 @@ class PremiumOutcomePolicyParams(BaseModel):
             if premium < 0:
                 raise ValueError("target premiums must be non-negative")
         return value
+
+    @field_validator("target_multiples_of_entry")
+    @classmethod
+    def _validate_target_multiples(cls, value: list[float]) -> list[float]:
+        for multiple in value:
+            if multiple <= 1:
+                raise ValueError("target multiples of entry must be greater than 1")
+        return value
+
+    @model_validator(mode="after")
+    def _validate_price_level_spec(self) -> PremiumOutcomePolicyParams:
+        if self.price_level_mode == "absolute_premium":
+            if self.stop_premium is None or not self.target_premiums:
+                raise ValueError("absolute_premium policy requires stop_premium and target_premiums")
+            if self.stop_fraction_of_entry is not None or self.target_multiples_of_entry:
+                raise ValueError("absolute_premium policy cannot mix entry-relative levels")
+        else:
+            if self.stop_fraction_of_entry is None or not self.target_multiples_of_entry:
+                raise ValueError(
+                    "entry_relative policy requires stop_fraction_of_entry and "
+                    "target_multiples_of_entry"
+                )
+            if self.stop_premium is not None or self.target_premiums:
+                raise ValueError("entry_relative policy cannot mix absolute premium levels")
+        return self
 
 
 class PremiumOutcomePolicy(BaseModel):
@@ -339,7 +368,14 @@ class PremiumOutcomeAmbiguity(BaseModel):
 class PremiumOutcomeDataGap(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    kind: Literal["missing_bars", "early_termination", "missing_entry", "missing_exit", "other"]
+    kind: Literal[
+        "missing_contract",
+        "missing_bars",
+        "early_termination",
+        "missing_entry",
+        "missing_exit",
+        "other",
+    ]
     start_ts_utc: datetime | None = None
     end_ts_utc: datetime | None = None
     description: str
@@ -401,10 +437,10 @@ class PremiumOutcomeRecord(BaseModel):
     outcome_id: str = Field(pattern=r"^[a-z0-9_:-]+$")
     source_signal_id: str
     decision_intent_signal_id: str | None = None
-    source_contract_id: str
+    source_contract_id: str | None = None
     decision_ts_utc: datetime
     first_eligible_entry_ts_utc: datetime | None = None
-    selected_contract: SelectedOptionContract
+    selected_contract: SelectedOptionContract | None = None
     policy: PremiumOutcomePolicy
     cost_model: PremiumOutcomeCostModel
     evaluation_status: PremiumOutcomeStatus
@@ -431,7 +467,10 @@ class PremiumOutcomeRecord(BaseModel):
         return self
 
     def _validate_no_lookahead_inputs(self) -> None:
-        if self.selected_contract.contract_selection_asof_utc > self.decision_ts_utc:
+        if (
+            self.selected_contract is not None
+            and self.selected_contract.contract_selection_asof_utc > self.decision_ts_utc
+        ):
             raise ValueError("contract selection must be at or before decision_ts_utc")
         if (
             self.policy.origin == "decision_declared"
@@ -478,6 +517,8 @@ class PremiumOutcomeRecord(BaseModel):
             raise ValueError("model-derived premium data cannot be an observed outcome")
 
         if self.evaluation_status == "observed":
+            if self.source_contract_id is None or self.selected_contract is None:
+                raise ValueError("observed outcome requires selected contract identifiers")
             if source_type != "observed":
                 raise ValueError("observed outcome requires observed premium data")
             if not self.data_quality.required_premium_bars_available:
@@ -488,9 +529,15 @@ class PremiumOutcomeRecord(BaseModel):
                 raise ValueError("observed outcome requires stop, target, or time exit reason")
             if self.entry_fill is None or self.exit_fill is None or self.premium_metrics is None:
                 raise ValueError("observed outcome requires entry fill, exit fill, and metrics")
+        else:
+            if self.exit_fill is not None or self.premium_metrics is not None:
+                raise ValueError("non-observed outcome cannot carry exit fill or premium metrics")
 
-        if self.evaluation_status == "ambiguous" and self.data_quality.ambiguity is None:
-            raise ValueError("ambiguous outcome requires ambiguity evidence")
+        if self.evaluation_status == "ambiguous":
+            if source_type != "observed" or not self.data_quality.required_premium_bars_available:
+                raise ValueError("ambiguous outcome requires observed premium bars")
+            if self.data_quality.ambiguity is None:
+                raise ValueError("ambiguous outcome requires ambiguity evidence")
         if self.evaluation_status == "data_blocked":
             blocked = (
                 not self.data_quality.required_premium_bars_available
@@ -499,8 +546,13 @@ class PremiumOutcomeRecord(BaseModel):
             )
             if not blocked:
                 raise ValueError("data_blocked outcome requires missing or unavailable data evidence")
-        if self.evaluation_status == "not_evaluable" and self.exit_reason != "not_evaluable":
-            raise ValueError("not_evaluable outcome requires not_evaluable exit_reason")
+            if self.selected_contract is None and self.data_quality.data_gap is None:
+                raise ValueError("missing-contract data_blocked outcome requires data gap evidence")
+        if self.evaluation_status == "not_evaluable":
+            if self.exit_reason != "not_evaluable":
+                raise ValueError("not_evaluable outcome requires not_evaluable exit_reason")
+            if self.entry_fill is not None:
+                raise ValueError("not_evaluable outcome cannot carry entry fill")
 
 
 class PaFeitianPremiumOutcomeSidecar(BaseModel):
@@ -512,7 +564,7 @@ class PaFeitianPremiumOutcomeSidecar(BaseModel):
     generated_at_utc: datetime
     source_commit: str = Field(min_length=7, max_length=40)
     provenance: PremiumOutcomeProvenance
-    outcomes: list[PremiumOutcomeRecord] = Field(min_length=1)
+    outcomes: list[PremiumOutcomeRecord] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
 
     @field_validator("generated_at_utc")
