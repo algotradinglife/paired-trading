@@ -9,15 +9,20 @@ import {
   DATA_ACCESS_DEFINITIONS,
   DECISION_STATE_DEFINITIONS,
   HASH_STATUS_DEFINITIONS,
+  PREMIUM_OUTCOME_STATUS_DEFINITIONS,
+  PREMIUM_PRICE_SOURCE_DEFINITIONS,
   SNAPSHOT_MODE_DEFINITIONS,
   STATUS_DEFINITIONS,
   SUPPORTED_DECISION_INTENT_VERSIONS,
+  SUPPORTED_PREMIUM_OUTCOME_VERSIONS,
   TRACE_NODE_STATUS_DEFINITIONS,
   artifactPathToUrl,
   buildDashboardModel,
   loadDecisionIntent,
+  loadPremiumOutcome,
   missingOptionalFields,
   normalizeDecisionIntentSidecar,
+  normalizePremiumOutcomeSidecar,
   renderDashboard,
 } from "../app.mjs";
 import { copySnapshotFixture } from "../scripts/copy-snapshot-fixture.mjs";
@@ -26,6 +31,7 @@ const fixtureUrl = new URL("../fixtures/pa_feitian_snapshot_v1.json", import.met
 const legacyFixtureUrl = new URL("../fixtures/pa_feitian_snapshot_v0.json", import.meta.url);
 const frontendManifestFixtureUrl = new URL("../fixtures/pa_feitian_run_manifest_v1.json", import.meta.url);
 const decisionIntentFixtureUrl = new URL("../fixtures/pa_feitian_decision_intent_v1.json", import.meta.url);
+const premiumOutcomeFixtureUrl = new URL("../fixtures/pa_feitian_premium_outcome_v1.json", import.meta.url);
 const manifestFixtureUrl = new URL("../../../src/tests/fixtures/pa_feitian_run_manifest_v1.json", import.meta.url);
 const appFiles = [
   new URL("../index.html", import.meta.url),
@@ -137,6 +143,8 @@ test("renders generated and review manifest provenance labels", async () => {
   assert.match(generatedHtml, /data_access classification/);
   assert.match(generatedHtml, /Sidecar hash status/);
   assert.match(generatedHtml, /Generated snapshot/);
+  assert.match(generatedHtml, /contract signal\(s\)/);
+  assert.doesNotMatch(generatedHtml, /fixture signal\(s\)/);
   assert.match(generatedHtml, /Scorecard artifact/);
   assert.match(generatedHtml, /Snapshot artifact/);
   assert.match(generatedHtml, /Frontend snapshot copy/);
@@ -161,6 +169,8 @@ test("renders generated and review manifest provenance labels", async () => {
 
   assert.equal(reviewModel.snapshotMode, "review");
   assert.match(reviewHtml, /Review snapshot/);
+  assert.match(reviewHtml, /contract signal\(s\)/);
+  assert.doesNotMatch(reviewHtml, /fixture signal\(s\)/);
   assert.match(reviewHtml, /approved/);
   assert.match(reviewHtml, /chatgpt/);
   assert.match(reviewHtml, /review gate approved/);
@@ -225,6 +235,231 @@ test("renders manifest-referenced decision-intent sidecar reviewer fields", asyn
   assert.match(html, /scorecard_record:2/);
   assert.match(html, /sha256:30d70f3ca92533885529ec662b92395cbbf62444da34b832d4749b3cee3a8fcc/);
   assert.match(html, /Posterior diagnostic fields are present/);
+});
+
+test("renders manifest-referenced premium outcome sidecar reviewer fields", async () => {
+  const snapshot = await loadFixture();
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const decisionIntent = await loadFixture(decisionIntentFixtureUrl);
+  const premiumOutcomeRaw = await readFile(premiumOutcomeFixtureUrl, "utf8");
+  const premiumOutcome = await loadFixture(premiumOutcomeFixtureUrl);
+  const premiumOutcomeHash = sha256Digest(premiumOutcomeRaw);
+  const normalized = normalizePremiumOutcomeSidecar(premiumOutcome);
+  const model = buildDashboardModel(snapshot, { manifest, decisionIntent, premiumOutcome });
+  const html = renderDashboard(snapshot, { manifest, decisionIntent, premiumOutcome });
+
+  assert.ok(SUPPORTED_PREMIUM_OUTCOME_VERSIONS.has("pa_feitian_premium_outcome_v1"));
+  assert.equal(PREMIUM_OUTCOME_STATUS_DEFINITIONS.observed, "Observed premium path");
+  assert.equal(PREMIUM_PRICE_SOURCE_DEFINITIONS.model_derived, "Model-derived evidence only");
+  assert.equal(normalized.schemaVersion, "pa_feitian_premium_outcome_v1");
+  assert.equal(model.premiumOutcome.status, "loaded");
+  assert.equal(
+    model.premiumOutcome.artifact.path,
+    "frontend/pa-feitian-dashboard/fixtures/pa_feitian_premium_outcome_v1.json",
+  );
+  assert.equal(manifest.premium_outcome_artifact.sha256, premiumOutcomeHash);
+  assert.equal(manifest.output_hashes.premium_outcome_artifact, premiumOutcomeHash);
+  assert.equal(manifest.output_hashes.frontend_premium_outcome_copy, premiumOutcomeHash);
+  assert.equal(model.premiumOutcome.evaluationCounts.observed, 1);
+  assert.equal(model.premiumOutcome.evaluationCounts.ambiguous, 1);
+  assert.equal(model.premiumOutcome.evaluationCounts.data_blocked, 1);
+  assert.equal(model.premiumOutcome.evaluationCounts.not_evaluable, 1);
+  assert.deepEqual(model.premiumOutcome.duplicateSourceSignalIds, [
+    "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
+  ]);
+  assert.equal(model.reviewOperations.premiumOutcomeHashStatus.status, "match");
+  assert.equal(
+    model.reviewOperations.artifactRows.find((row) => row.label === "Premium outcome artifact").hashStatus,
+    "match",
+  );
+  assert.equal(
+    model.reviewOperations.artifactRows.find((row) => row.label === "Premium outcome frontend copy").hashStatus,
+    "match",
+  );
+
+  const tradeReadySignal = model.signals.find(
+    (signal) => signal.id === "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
+  );
+  assert.equal(tradeReadySignal.premiumOutcomes.length, 2);
+  assert.deepEqual(
+    tradeReadySignal.premiumOutcomes.map((outcome) => outcome.evaluation_status),
+    ["observed", "ambiguous"],
+  );
+  const observedOutcome = tradeReadySignal.premiumOutcomes.find(
+    (outcome) => outcome.evaluation_status === "observed",
+  );
+  assert.equal(observedOutcome.premium_metrics.premium_r, 5.016949153);
+  assert.equal(observedOutcome.underlying_context.underlying_r, 0.42);
+
+  assert.match(html, /data-testid="premium-outcome-review"/);
+  assert.match(html, /data-testid="premium-outcome-signal-review"/);
+  assert.match(html, /data-testid="premium-outcome-card"/);
+  assert.match(html, /data-testid="premium-outcome-no-lookahead"/);
+  assert.match(html, /data-testid="premium-outcome-hash-status"/);
+  assert.match(html, /data-testid="premium-outcome-provenance"/);
+  assert.match(html, /Premium outcome artifact/);
+  assert.match(html, /Premium outcome frontend copy/);
+  assert.match(html, /manifest_referenced_premium_outcome_sidecar/);
+  assert.match(html, /observed/);
+  assert.match(html, /ambiguous/);
+  assert.match(html, /data_blocked/);
+  assert.match(html, /not_evaluable/);
+  assert.match(html, /Selected Contract/);
+  assert.match(html, /au2608c880/);
+  assert.match(html, /Policy/);
+  assert.match(html, /retrospective_fixed/);
+  assert.match(html, /Entry-relative stop/);
+  assert.match(html, /Entry-relative target/);
+  assert.match(html, /Entry \/ Exit/);
+  assert.match(html, /Fill reason/);
+  assert.match(html, /premium_target/);
+  assert.match(html, /Premium multiple/);
+  assert.match(html, /Premium R/);
+  assert.match(html, /Premium MFE/);
+  assert.match(html, /Premium MAE/);
+  assert.match(html, /Underlying-R Context/);
+  assert.match(html, /Underlying R context/);
+  assert.match(html, /daily OHLC; observation-only, not exact tick execution proof/);
+  assert.match(html, /Model-derived premium outcome evidence is not observed/);
+  assert.match(html, /Ambiguous premium outcome ordering/);
+  assert.match(html, /Data-blocked premium outcome records are not observed results/);
+  assert.match(html, /Multiple premium outcome policy records share source_signal_id/);
+  assert.doesNotMatch(html, /daily OHLC proves exact tick execution/);
+});
+
+test("flags premium outcome source and frontend copy hash mismatches", async () => {
+  const snapshot = await loadFixture();
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const premiumOutcome = await loadFixture(premiumOutcomeFixtureUrl);
+  const tamperedManifest = {
+    ...manifest,
+    output_hashes: {
+      ...manifest.output_hashes,
+      premium_outcome_artifact: `sha256:${"0".repeat(64)}`,
+      frontend_premium_outcome_copy: `sha256:${"2".repeat(64)}`,
+    },
+  };
+
+  const model = buildDashboardModel(snapshot, { manifest: tamperedManifest, premiumOutcome });
+  const html = renderDashboard(snapshot, { manifest: tamperedManifest, premiumOutcome });
+
+  assert.equal(model.reviewOperations.premiumOutcomeHashStatus.status, "mismatch");
+  assert.equal(
+    model.reviewOperations.artifactRows.find((row) => row.label === "Premium outcome artifact").hashStatus,
+    "mismatch",
+  );
+  assert.equal(
+    model.reviewOperations.artifactRows.find((row) => row.label === "Premium outcome frontend copy").hashStatus,
+    "mismatch",
+  );
+  assert.match(html, /Premium outcome artifact hash status is mismatch/);
+  assert.match(html, /Premium outcome frontend copy hash status is mismatch/);
+});
+
+test("loads premium outcome sidecar from the manifest artifact path", async () => {
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const premiumOutcome = await loadFixture(premiumOutcomeFixtureUrl);
+  const artifactUrl = artifactPathToUrl(manifest.premium_outcome_artifact.path);
+  const loaded = await loadPremiumOutcome(async (url) => {
+    assert.equal(url.pathname, "/frontend/pa-feitian-dashboard/fixtures/pa_feitian_premium_outcome_v1.json");
+    return {
+      ok: true,
+      status: 200,
+      json: async () => premiumOutcome,
+    };
+  }, manifest);
+
+  assert.equal(artifactUrl, "/frontend/pa-feitian-dashboard/fixtures/pa_feitian_premium_outcome_v1.json");
+  assert.equal(loaded.schema_version, "pa_feitian_premium_outcome_v1");
+});
+
+test("renders premium outcome missing, referenced_missing, and load_error states defensively", async () => {
+  const snapshot = await loadFixture();
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const manifestWithoutPremium = {
+    ...manifest,
+    premium_outcome_artifact: undefined,
+    output_hashes: {
+      ...manifest.output_hashes,
+      premium_outcome_artifact: undefined,
+      frontend_premium_outcome_copy: undefined,
+    },
+  };
+
+  const referencedMissingModel = buildDashboardModel(snapshot, { manifest });
+  const referencedMissingHtml = renderDashboard(snapshot, { manifest });
+  assert.equal(referencedMissingModel.premiumOutcome.status, "referenced_missing");
+  assert.match(referencedMissingHtml, /referenced_missing/);
+  assert.match(referencedMissingHtml, /Manifest references a premium outcome sidecar, but no sidecar payload is loaded/);
+
+  const loadErrorModel = buildDashboardModel(snapshot, {
+    manifest,
+    premiumOutcomeError: new Error("premium fixture HTTP 500"),
+  });
+  const loadErrorHtml = renderDashboard(snapshot, {
+    manifest,
+    premiumOutcomeError: new Error("premium fixture HTTP 500"),
+  });
+  assert.equal(loadErrorModel.premiumOutcome.status, "load_error");
+  assert.match(loadErrorHtml, /load_error/);
+  assert.match(loadErrorHtml, /Premium outcome sidecar failed to load: premium fixture HTTP 500/);
+
+  const notReferencedModel = buildDashboardModel(snapshot, { manifest: manifestWithoutPremium });
+  const notReferencedHtml = renderDashboard(snapshot, { manifest: manifestWithoutPremium });
+  assert.equal(notReferencedModel.premiumOutcome.status, "not_referenced");
+  assert.match(notReferencedHtml, /not_referenced/);
+  assert.match(notReferencedHtml, /Manifest does not reference a premium outcome sidecar/);
+});
+
+test("renders an empty premium outcome sidecar without fabricating signal outcomes", async () => {
+  const snapshot = await loadFixture();
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const premiumOutcome = await loadFixture(premiumOutcomeFixtureUrl);
+  const emptyPremiumOutcome = {
+    ...premiumOutcome,
+    outcomes: [],
+    warnings: [],
+  };
+  const model = buildDashboardModel(snapshot, { manifest, premiumOutcome: emptyPremiumOutcome });
+  const html = renderDashboard(snapshot, { manifest, premiumOutcome: emptyPremiumOutcome });
+
+  assert.equal(model.premiumOutcome.status, "loaded");
+  assert.equal(model.premiumOutcome.outcomes.length, 0);
+  assert.deepEqual(model.premiumOutcome.missingSignalIds, snapshot.signals.map((signal) => signal.id));
+  assert.equal(model.signals.every((signal) => signal.premiumOutcomes.length === 0), true);
+  assert.match(html, /data-testid="premium-outcome-empty"/);
+  assert.match(html, /No premium outcome records/);
+  assert.match(html, /data-testid="premium-outcome-missing"/);
+});
+
+test("detects unmatched premium outcome source signals while preserving multiple policy outcomes", async () => {
+  const snapshot = await loadFixture();
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const premiumOutcome = await loadFixture(premiumOutcomeFixtureUrl);
+  const unmatchedOutcome = {
+    ...premiumOutcome.outcomes[0],
+    outcome_id: "paft_premium_outcome_unmatched_signal_v1",
+    source_signal_id: "paft_scorecard_missing_source_signal",
+    decision_intent_signal_id: "paft_scorecard_missing_source_signal",
+  };
+  const modifiedPremiumOutcome = {
+    ...premiumOutcome,
+    outcomes: [...premiumOutcome.outcomes, unmatchedOutcome],
+  };
+  const model = buildDashboardModel(snapshot, { manifest, premiumOutcome: modifiedPremiumOutcome });
+  const html = renderDashboard(snapshot, { manifest, premiumOutcome: modifiedPremiumOutcome });
+
+  assert.deepEqual(model.premiumOutcome.unmatchedSourceSignalIds, ["paft_scorecard_missing_source_signal"]);
+  assert.deepEqual(model.premiumOutcome.duplicateSourceSignalIds, [
+    "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
+  ]);
+  assert.equal(
+    model.signals.find((signal) => signal.id === "paft_scorecard_0002_kq_m_shfe_au_20260629000000")
+      .premiumOutcomes.length,
+    2,
+  );
+  assert.match(html, /Premium outcome records without snapshot signals: paft_scorecard_missing_source_signal/);
+  assert.match(html, /Multiple premium outcome policy records share source_signal_id/);
 });
 
 test("flags sidecar hash mismatches as reviewer-ready warnings", async () => {
@@ -422,6 +657,9 @@ test("frontend files only reference the fixture contract, not raw data pipelines
     ["engine", "options"].join("/"),
     ["scripts", "analyze"].join("/"),
     ["scripts", "score_today"].join("/"),
+    "OptionStore",
+    "raw market",
+    "raw_market",
   ];
 
   assert.match(frontendSource, /fixtures\/pa_feitian_snapshot_v1\.json/);

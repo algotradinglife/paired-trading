@@ -6,6 +6,7 @@ export const SUPPORTED_CONTRACT_VERSIONS = new Set([
   "pa_feitian_snapshot_v0",
 ]);
 export const SUPPORTED_DECISION_INTENT_VERSIONS = new Set(["pa_feitian_decision_intent_v1"]);
+export const SUPPORTED_PREMIUM_OUTCOME_VERSIONS = new Set(["pa_feitian_premium_outcome_v1"]);
 
 export const SNAPSHOT_MODE_DEFINITIONS = {
   fixture: "Fixture snapshot",
@@ -46,6 +47,19 @@ export const DATA_ACCESS_DEFINITIONS = {
   unknown: "Data access was not classified",
 };
 
+export const PREMIUM_OUTCOME_STATUS_DEFINITIONS = {
+  observed: "Observed premium path",
+  ambiguous: "Observed bars with unresolved ordering",
+  data_blocked: "Required premium data unavailable",
+  not_evaluable: "Harness preconditions failed",
+};
+
+export const PREMIUM_PRICE_SOURCE_DEFINITIONS = {
+  observed: "Observed premium sidecar evidence",
+  model_derived: "Model-derived evidence only",
+  unavailable: "Premium evidence unavailable",
+};
+
 export const HASH_STATUS_DEFINITIONS = {
   match: "Manifest hash link matches",
   mismatch: "Manifest hash link differs",
@@ -67,6 +81,24 @@ const DECISION_INTENT_EMPTY_STATE = {
   executionAllowedCount: 0,
   unmatchedSignalIds: [],
   duplicateSignalIds: [],
+  error: null,
+};
+
+const PREMIUM_OUTCOME_EMPTY_STATE = {
+  status: "not_referenced",
+  schemaVersion: null,
+  generatedAt: null,
+  sourceCommit: null,
+  provenance: {},
+  artifact: null,
+  outcomes: [],
+  outcomesBySignalId: new Map(),
+  warnings: [],
+  evaluationCounts: {},
+  duplicateOutcomeIds: [],
+  duplicateSourceSignalIds: [],
+  unmatchedSourceSignalIds: [],
+  missingSignalIds: [],
   error: null,
 };
 
@@ -131,6 +163,20 @@ function percentageValue(value) {
   return escapeHtml(value);
 }
 
+function numberValue(value, maximumFractionDigits = 3) {
+  if (isMissing(value)) {
+    return '<span class="missing">Missing</span>';
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return escapeHtml(
+      new Intl.NumberFormat("en-US", {
+        maximumFractionDigits,
+      }).format(value),
+    );
+  }
+  return escapeHtml(value);
+}
+
 function traceValue(value) {
   if (value === undefined) {
     return '<span class="missing">Missing</span>';
@@ -186,6 +232,16 @@ function executionBadge(allowed) {
 function readinessBadge(value) {
   const normalized = (value || "unknown").replaceAll("_", "-");
   return `<span class="intent-badge readiness ${escapeHtml(normalized)}">${escapeHtml(value || "unknown")}</span>`;
+}
+
+function premiumOutcomeBadge(status) {
+  const normalized = PREMIUM_OUTCOME_STATUS_DEFINITIONS[status] ? status : "unknown";
+  return `<span class="outcome-badge ${escapeHtml(normalized)}">${escapeHtml(status || "unknown")}</span>`;
+}
+
+function premiumPriceSourceBadge(sourceType) {
+  const normalized = PREMIUM_PRICE_SOURCE_DEFINITIONS[sourceType] ? sourceType : "unknown";
+  return `<span class="price-source-badge ${escapeHtml(normalized)}">${escapeHtml(sourceType || "unknown")}</span>`;
 }
 
 function dataAccessBadge(status) {
@@ -267,6 +323,9 @@ function normalizeRenderOptions(options) {
   if (options.schema_version === "pa_feitian_decision_intent_v1") {
     return { decisionIntent: options };
   }
+  if (options.schema_version === "pa_feitian_premium_outcome_v1") {
+    return { premiumOutcome: options };
+  }
   return options;
 }
 
@@ -282,6 +341,7 @@ export function normalizeRunManifest(manifest) {
     scorecardArtifact: manifest.scorecard_artifact || null,
     snapshotArtifact: manifest.snapshot_artifact || null,
     decisionIntentArtifact: manifest.decision_intent_artifact || null,
+    premiumOutcomeArtifact: manifest.premium_outcome_artifact || null,
     cliArgs: Array.isArray(manifest.cli_args) ? manifest.cli_args : [],
     runConfig: manifest.run_config || {},
     dataAccess: manifest.data_access || {},
@@ -360,6 +420,12 @@ function buildArtifactProvenanceRows(manifest) {
       manifest.outputHashes.decision_intent_artifact,
       "output_hashes.decision_intent_artifact",
     ),
+    buildArtifactProvenanceRow(
+      "Premium outcome artifact",
+      manifest.premiumOutcomeArtifact,
+      manifest.outputHashes.premium_outcome_artifact,
+      "output_hashes.premium_outcome_artifact",
+    ),
   ];
 
   if (manifest.decisionIntentArtifact || manifest.outputHashes.frontend_decision_intent_copy) {
@@ -375,16 +441,29 @@ function buildArtifactProvenanceRows(manifest) {
     );
   }
 
+  if (manifest.premiumOutcomeArtifact || manifest.outputHashes.frontend_premium_outcome_copy) {
+    rows.push(
+      buildCopyProvenanceRow("Premium outcome frontend copy", {
+        kind: "premium_outcome_copy",
+        path: manifest.premiumOutcomeArtifact?.path,
+        actualHash: manifest.outputHashes.frontend_premium_outcome_copy,
+        expectedHash: manifest.premiumOutcomeArtifact?.sha256,
+        hashSource: "output_hashes.frontend_premium_outcome_copy",
+        schemaVersion: manifest.premiumOutcomeArtifact?.schema_version,
+      }),
+    );
+  }
+
   return rows;
 }
 
-function chooseSidecarHashStatus(rows) {
-  const sidecarRows = rows.filter((row) => row.kind?.includes("decision_intent"));
+function chooseHashStatus(rows, kindFragment, fallbackLabel, fallbackSummary) {
+  const sidecarRows = rows.filter((row) => row.kind?.includes(kindFragment));
   if (!sidecarRows.length) {
     return {
-      label: "Decision intent artifact",
+      label: fallbackLabel,
       status: "missing",
-      summary: "No decision-intent sidecar artifact is referenced.",
+      summary: fallbackSummary,
     };
   }
   const priority = ["mismatch", "missing", "untracked", "match"];
@@ -398,11 +477,39 @@ function chooseSidecarHashStatus(rows) {
   };
 }
 
+function chooseSidecarHashStatus(rows) {
+  return chooseHashStatus(
+    rows,
+    "decision_intent",
+    "Decision intent artifact",
+    "No decision-intent sidecar artifact is referenced.",
+  );
+}
+
+function choosePremiumOutcomeHashStatus(rows) {
+  return chooseHashStatus(
+    rows,
+    "premium_outcome",
+    "Premium outcome artifact",
+    "No premium outcome sidecar artifact is referenced.",
+  );
+}
+
 function uniqueStrings(values) {
   return [...new Set(values.filter((value) => typeof value === "string" && value.trim()))];
 }
 
-function buildReviewerWarnings({ manifest, artifactRows, dataAccessStatus, decisionIntent, decisionWarnings, snapshotWarnings, signals }) {
+function buildReviewerWarnings({
+  manifest,
+  artifactRows,
+  dataAccessStatus,
+  decisionIntent,
+  decisionWarnings,
+  premiumOutcome,
+  premiumOutcomeWarnings,
+  snapshotWarnings,
+  signals,
+}) {
   const warnings = [];
 
   if (!manifest) {
@@ -439,21 +546,36 @@ function buildReviewerWarnings({ manifest, artifactRows, dataAccessStatus, decis
     warnings.push(`Decision-intent sidecar status is ${decisionIntent.status}.`);
   }
 
-  return uniqueStrings([...warnings, ...snapshotWarnings, ...decisionWarnings]);
+  if (premiumOutcome.status !== "loaded") {
+    warnings.push(`Premium outcome sidecar status is ${premiumOutcome.status}.`);
+  }
+
+  return uniqueStrings([...warnings, ...snapshotWarnings, ...decisionWarnings, ...premiumOutcomeWarnings]);
 }
 
-function buildReviewOperationsModel({ manifest, decisionIntent, decisionWarnings, snapshotWarnings, signals }) {
+function buildReviewOperationsModel({
+  manifest,
+  decisionIntent,
+  decisionWarnings,
+  premiumOutcome,
+  premiumOutcomeWarnings,
+  snapshotWarnings,
+  signals,
+}) {
   const artifactRows = buildArtifactProvenanceRows(manifest);
   const dataAccessStatus = DATA_ACCESS_DEFINITIONS[manifest?.dataAccess?.status]
     ? manifest.dataAccess.status
     : "unknown";
   const sidecarHashStatus = chooseSidecarHashStatus(artifactRows);
+  const premiumOutcomeHashStatus = choosePremiumOutcomeHashStatus(artifactRows);
   const warnings = buildReviewerWarnings({
     manifest,
     artifactRows,
     dataAccessStatus,
     decisionIntent,
     decisionWarnings,
+    premiumOutcome,
+    premiumOutcomeWarnings,
     snapshotWarnings,
     signals,
   });
@@ -467,7 +589,9 @@ function buildReviewOperationsModel({ manifest, decisionIntent, decisionWarnings
     },
     artifactRows,
     sidecarHashStatus,
+    premiumOutcomeHashStatus,
     sidecarProvenance: decisionIntent.status === "loaded" ? decisionIntent.provenance || {} : {},
+    premiumOutcomeProvenance: premiumOutcome.status === "loaded" ? premiumOutcome.provenance || {} : {},
     warnings,
   };
 }
@@ -516,6 +640,64 @@ export function normalizeDecisionIntentSidecar(sidecar) {
     executionAllowedCount,
     unmatchedSignalIds: [],
     duplicateSignalIds,
+    error: null,
+  };
+}
+
+function emptyPremiumOutcomeCounts() {
+  return Object.fromEntries(Object.keys(PREMIUM_OUTCOME_STATUS_DEFINITIONS).map((status) => [status, 0]));
+}
+
+export function normalizePremiumOutcomeSidecar(sidecar) {
+  if (!sidecar) {
+    return null;
+  }
+  if (!SUPPORTED_PREMIUM_OUTCOME_VERSIONS.has(sidecar.schema_version)) {
+    throw new Error(`Unsupported premium outcome contract: ${sidecar?.schema_version ?? "missing"}`);
+  }
+
+  const outcomes = Array.isArray(sidecar.outcomes) ? sidecar.outcomes : [];
+  const outcomesBySignalId = new Map();
+  const evaluationCounts = emptyPremiumOutcomeCounts();
+  const seenOutcomeIds = new Set();
+  const duplicateOutcomeIds = [];
+  const duplicateSourceSignalIds = [];
+
+  for (const outcome of outcomes) {
+    const outcomeId = outcome?.outcome_id;
+    const sourceSignalId = outcome?.source_signal_id;
+    if (outcomeId) {
+      if (seenOutcomeIds.has(outcomeId)) {
+        duplicateOutcomeIds.push(outcomeId);
+      }
+      seenOutcomeIds.add(outcomeId);
+    }
+    if (sourceSignalId) {
+      if (outcomesBySignalId.has(sourceSignalId)) {
+        duplicateSourceSignalIds.push(sourceSignalId);
+      }
+      const existing = outcomesBySignalId.get(sourceSignalId) || [];
+      outcomesBySignalId.set(sourceSignalId, [...existing, outcome]);
+    }
+    const status = outcome?.evaluation_status || "unknown";
+    evaluationCounts[status] = (evaluationCounts[status] || 0) + 1;
+  }
+
+  return {
+    status: "loaded",
+    schemaVersion: sidecar.schema_version,
+    generatedAt: sidecar.generated_at_utc,
+    sourceCommit: sidecar.source_commit,
+    provenance: sidecar.provenance || {},
+    artifact: null,
+    outcomes,
+    outcomesBySignalId,
+    warnings: Array.isArray(sidecar.warnings) ? sidecar.warnings : [],
+    evaluationCounts,
+    duplicateOutcomeIds: uniqueStrings(duplicateOutcomeIds),
+    duplicateSourceSignalIds: uniqueStrings(duplicateSourceSignalIds),
+    unmatchedSourceSignalIds: [],
+    missingSignalIds: [],
     error: null,
   };
 }
@@ -597,6 +779,76 @@ function deriveDecisionIntentWarnings(signals, decisionIntent, manifest, error) 
   return warnings;
 }
 
+function derivePremiumOutcomeWarnings(signals, premiumOutcome, manifest, error) {
+  const warnings = [...(premiumOutcome?.warnings || [])];
+  const artifact = manifest?.premiumOutcomeArtifact;
+
+  if (error) {
+    warnings.push(`Premium outcome sidecar failed to load: ${error.message || error}`);
+  } else if (!artifact) {
+    warnings.push("Manifest does not reference a premium outcome sidecar.");
+  } else if (!premiumOutcome || premiumOutcome.status !== "loaded") {
+    warnings.push("Manifest references a premium outcome sidecar, but no sidecar payload is loaded.");
+  }
+
+  if (premiumOutcome?.duplicateOutcomeIds?.length) {
+    warnings.push(`Duplicate premium outcome ids: ${premiumOutcome.duplicateOutcomeIds.join(", ")}`);
+  }
+
+  if (premiumOutcome?.duplicateSourceSignalIds?.length) {
+    warnings.push(
+      `Multiple premium outcome policy records share source_signal_id: ${premiumOutcome.duplicateSourceSignalIds.join(", ")}.`,
+    );
+  }
+
+  const matchedSignalIds = new Set(signals.map((signal) => signal.id));
+  const unmatchedSourceSignalIds =
+    premiumOutcome?.outcomes
+      ?.map((outcome) => outcome.source_signal_id)
+      .filter((signalId) => signalId && !matchedSignalIds.has(signalId)) || [];
+  if (unmatchedSourceSignalIds.length) {
+    warnings.push(`Premium outcome records without snapshot signals: ${uniqueStrings(unmatchedSourceSignalIds).join(", ")}`);
+  }
+
+  const missingSignalIds = signals
+    .filter((signal) => premiumOutcome?.status === "loaded" && !premiumOutcome.outcomesBySignalId.has(signal.id))
+    .map((signal) => signal.id);
+  if (missingSignalIds.length) {
+    warnings.push(`Snapshot signals missing premium outcome records: ${missingSignalIds.join(", ")}`);
+  }
+
+  const outcomes = premiumOutcome?.outcomes || [];
+  const modelDerivedIds = outcomes
+    .filter((outcome) => outcome.data_quality?.premium_price_source_type === "model_derived")
+    .map((outcome) => outcome.outcome_id);
+  if (modelDerivedIds.length) {
+    warnings.push(`Model-derived premium outcome evidence is not observed: ${modelDerivedIds.join(", ")}.`);
+  }
+
+  const dailyIds = outcomes
+    .filter((outcome) => outcome.data_quality?.bar_granularity === "daily")
+    .map((outcome) => outcome.outcome_id);
+  if (dailyIds.length) {
+    warnings.push("Daily premium OHLC evidence is observation-only and cannot prove exact tick-level execution ordering.");
+  }
+
+  const ambiguousIds = outcomes
+    .filter((outcome) => outcome.evaluation_status === "ambiguous" || outcome.data_quality?.ambiguity)
+    .map((outcome) => outcome.outcome_id);
+  if (ambiguousIds.length) {
+    warnings.push(`Ambiguous premium outcome ordering requires reviewer caution: ${ambiguousIds.join(", ")}.`);
+  }
+
+  const blockedIds = outcomes
+    .filter((outcome) => outcome.evaluation_status === "data_blocked" || outcome.data_quality?.data_gap)
+    .map((outcome) => outcome.outcome_id);
+  if (blockedIds.length) {
+    warnings.push(`Data-blocked premium outcome records are not observed results: ${blockedIds.join(", ")}.`);
+  }
+
+  return warnings;
+}
+
 export function buildDashboardModel(snapshot, options = {}) {
   if (!snapshot || !SUPPORTED_CONTRACT_VERSIONS.has(snapshot.schema_version)) {
     throw new Error(`Unsupported snapshot contract: ${snapshot?.schema_version ?? "missing"}`);
@@ -605,7 +857,9 @@ export function buildDashboardModel(snapshot, options = {}) {
   const renderOptions = normalizeRenderOptions(options);
   const manifest = normalizeRunManifest(renderOptions.manifest);
   const decisionIntentError = renderOptions.decisionIntentError || null;
+  const premiumOutcomeError = renderOptions.premiumOutcomeError || null;
   const normalizedDecisionIntent = normalizeDecisionIntentSidecar(renderOptions.decisionIntent);
+  const normalizedPremiumOutcome = normalizePremiumOutcomeSidecar(renderOptions.premiumOutcome);
   const snapshotMode = inferSnapshotMode(snapshot, manifest);
   const signals = Array.isArray(snapshot.signals) ? snapshot.signals : [];
   const summary = snapshot.summary || {};
@@ -631,16 +885,46 @@ export function buildDashboardModel(snapshot, options = {}) {
     decisionIntent.intents
       ?.map((intent) => intent.signal_id)
       .filter((signalId) => signalId && !signals.some((signal) => signal.id === signalId)) || [];
+  const premiumOutcome =
+    normalizedPremiumOutcome ||
+    (premiumOutcomeError
+      ? {
+          ...PREMIUM_OUTCOME_EMPTY_STATE,
+          status: "load_error",
+          artifact: manifest?.premiumOutcomeArtifact || null,
+          error: premiumOutcomeError,
+        }
+      : {
+          ...PREMIUM_OUTCOME_EMPTY_STATE,
+          status: manifest?.premiumOutcomeArtifact ? "referenced_missing" : "not_referenced",
+          artifact: manifest?.premiumOutcomeArtifact || null,
+        });
+  premiumOutcome.artifact = manifest?.premiumOutcomeArtifact || premiumOutcome.artifact || null;
+  premiumOutcome.unmatchedSourceSignalIds =
+    premiumOutcome.outcomes
+      ?.map((outcome) => outcome.source_signal_id)
+      .filter((signalId) => signalId && !signals.some((signal) => signal.id === signalId)) || [];
+  premiumOutcome.missingSignalIds = signals
+    .filter((signal) => premiumOutcome.status === "loaded" && !premiumOutcome.outcomesBySignalId.has(signal.id))
+    .map((signal) => signal.id);
   const decisionWarnings = deriveDecisionIntentWarnings(
     signals,
     decisionIntent.status === "loaded" ? decisionIntent : null,
     manifest,
     decisionIntentError,
   );
+  const premiumOutcomeWarnings = derivePremiumOutcomeWarnings(
+    signals,
+    premiumOutcome.status === "loaded" ? premiumOutcome : null,
+    manifest,
+    premiumOutcomeError,
+  );
   const reviewOperations = buildReviewOperationsModel({
     manifest,
     decisionIntent,
     decisionWarnings,
+    premiumOutcome,
+    premiumOutcomeWarnings,
     snapshotWarnings: Array.isArray(snapshot.warnings) ? snapshot.warnings : [],
     signals,
   });
@@ -663,11 +947,17 @@ export function buildDashboardModel(snapshot, options = {}) {
       ...decisionIntent,
       warnings: decisionWarnings,
     },
+    premiumOutcome: {
+      ...premiumOutcome,
+      warnings: premiumOutcomeWarnings,
+    },
     reviewOperations,
     signals: signals.map((signal) => ({
       ...signal,
       decisionIntent:
         decisionIntent.status === "loaded" ? decisionIntent.intentsBySignalId.get(signal.id) || null : null,
+      premiumOutcomes:
+        premiumOutcome.status === "loaded" ? premiumOutcome.outcomesBySignalId.get(signal.id) || [] : [],
       decisionTrace: normalizeDecisionTrace(signal),
       missingOptional: missingOptionalFields(signal),
     })),
@@ -858,6 +1148,7 @@ function renderManifestProvenance(model) {
         ${renderArtifactRef("Scorecard artifact", manifest.scorecardArtifact)}
         ${renderArtifactRef("Snapshot artifact", manifest.snapshotArtifact)}
         ${renderArtifactRef("Decision intent artifact", manifest.decisionIntentArtifact)}
+        ${renderArtifactRef("Premium outcome artifact", manifest.premiumOutcomeArtifact)}
       </div>
       <div class="manifest-details">
         <details>
@@ -948,6 +1239,11 @@ function renderReviewOperations(model) {
           <strong>${hashStatusBadge(operations.sidecarHashStatus.status)}</strong>
           <small>${escapeHtml(operations.sidecarHashStatus.label)} / ${escapeHtml(operations.sidecarHashStatus.summary)}</small>
         </div>
+        <div class="manifest-item" data-testid="premium-outcome-hash-status">
+          <span>Premium outcome hash</span>
+          <strong>${hashStatusBadge(operations.premiumOutcomeHashStatus.status)}</strong>
+          <small>${escapeHtml(operations.premiumOutcomeHashStatus.label)} / ${escapeHtml(operations.premiumOutcomeHashStatus.summary)}</small>
+        </div>
       </div>
       <div class="table-wrap">
         <table class="ops-table" data-testid="artifact-provenance-table">
@@ -967,6 +1263,10 @@ function renderReviewOperations(model) {
       <details class="ops-provenance" data-testid="sidecar-provenance">
         <summary>Decision-intent sidecar provenance</summary>
         ${jsonBlock(operations.sidecarProvenance)}
+      </details>
+      <details class="ops-provenance" data-testid="premium-outcome-provenance">
+        <summary>Premium outcome sidecar provenance</summary>
+        ${jsonBlock(operations.premiumOutcomeProvenance)}
       </details>
       <div class="warnings-list" data-testid="reviewer-ready-warnings">${warningItems}</div>
     </section>
@@ -1039,6 +1339,78 @@ function renderDecisionIntentOverview(model) {
   `;
 }
 
+function renderPremiumOutcomeOverview(model) {
+  const sidecar = model.premiumOutcome;
+  const artifact = sidecar.artifact;
+  const hashStatus = model.reviewOperations.premiumOutcomeHashStatus;
+  const stateCells = Object.entries(PREMIUM_OUTCOME_STATUS_DEFINITIONS)
+    .map(([status, definition]) => {
+      const count = sidecar.evaluationCounts[status] || 0;
+      return `
+        <div class="outcome-state-cell ${escapeHtml(status)}">
+          <strong>${escapeHtml(count)}</strong>
+          ${premiumOutcomeBadge(status)}
+          <span>${escapeHtml(definition)}</span>
+        </div>
+      `;
+    })
+    .join("");
+
+  const warningItems = sidecar.warnings.length
+    ? sidecar.warnings
+        .map((warning) => `<div class="warning-item outcome-warning">${escapeHtml(warning)}</div>`)
+        .join("")
+    : '<div class="warning-item muted">No premium outcome reviewer warnings.</div>';
+
+  const emptyState =
+    sidecar.status === "loaded" && sidecar.outcomes.length === 0
+      ? `
+        <div class="manifest-empty" data-testid="premium-outcome-empty">
+          <strong>No premium outcome records</strong>
+          <span>The sidecar loaded, but its outcomes array is empty.</span>
+        </div>
+      `
+      : "";
+
+  return `
+    <section class="panel" aria-labelledby="premium-outcome-heading" data-testid="premium-outcome-review">
+      <div class="panel-header">
+        <div>
+          <h2 id="premium-outcome-heading">Premium Outcome Review</h2>
+          <p>${escapeHtml(sidecar.status)} / ${escapeHtml(sidecar.schemaVersion || "no sidecar")}</p>
+        </div>
+        ${artifact ? readinessBadge(artifact.kind) : readinessBadge("missing_sidecar")}
+      </div>
+      <div class="outcome-meta-grid">
+        <div class="manifest-item">
+          <span>Generated UTC</span>
+          <strong>${labelValue(formatDate(sidecar.generatedAt))}</strong>
+        </div>
+        <div class="manifest-item">
+          <span>Source commit</span>
+          <strong>${labelValue(sidecar.sourceCommit)}</strong>
+        </div>
+        <div class="manifest-item">
+          <span>Outcome records</span>
+          <strong>${escapeHtml(sidecar.outcomes.length)}</strong>
+        </div>
+        <div class="manifest-item">
+          <span>Artifact path</span>
+          <strong>${labelValue(artifact?.path)}</strong>
+        </div>
+        <div class="manifest-item">
+          <span>Premium outcome hash</span>
+          <strong>${hashStatusBadge(hashStatus.status)}</strong>
+          <small>${escapeHtml(hashStatus.label)} / ${escapeHtml(hashStatus.summary)}</small>
+        </div>
+      </div>
+      <div class="outcome-state-grid">${stateCells}</div>
+      ${emptyState}
+      <div class="warnings-list">${warningItems}</div>
+    </section>
+  `;
+}
+
 function renderSignalTable(model) {
   if (model.signals.length === 0) {
     return `
@@ -1057,6 +1429,8 @@ function renderSignalTable(model) {
       const optionSide = signal.option_leg?.side || "Missing";
       const missing = signal.missingOptional.length;
       const intent = signal.decisionIntent;
+      const outcomes = Array.isArray(signal.premiumOutcomes) ? signal.premiumOutcomes : [];
+      const outcomeStatuses = uniqueStrings(outcomes.map((outcome) => outcome.evaluation_status));
 
       return `
         <tr>
@@ -1073,6 +1447,16 @@ function renderSignalTable(model) {
           </td>
           <td>${escapeHtml(pattern)}<div class="muted">${escapeHtml(direction)}</div></td>
           <td>${escapeHtml(optionSide)}<div class="muted">${escapeHtml(premiumState)}</div></td>
+          <td>
+            <strong>${escapeHtml(outcomes.length)}</strong>
+            <div class="outcome-status-stack">
+              ${
+                outcomeStatuses.length
+                  ? outcomeStatuses.map((status) => premiumOutcomeBadge(status)).join("")
+                  : '<span class="missing">No outcome record</span>'
+              }
+            </div>
+          </td>
           <td>${intent ? renderReasonCodes(intent.reason_codes) : labelValue(signal.decision)}</td>
           <td>${missing ? `<span class="missing">${missing}</span>` : "0"}</td>
         </tr>
@@ -1085,7 +1469,7 @@ function renderSignalTable(model) {
       <div class="panel-header">
         <div>
           <h2 id="signals-heading">Signal Table</h2>
-          <p>${escapeHtml(model.signals.length)} fixture signal(s)</p>
+          <p>${escapeHtml(model.signals.length)} contract signal(s)</p>
         </div>
       </div>
       <div class="table-wrap">
@@ -1099,6 +1483,7 @@ function renderSignalTable(model) {
               <th>Decision State</th>
               <th>Underlying</th>
               <th>Option Leg</th>
+              <th>Premium Outcome</th>
               <th>Reason Codes</th>
               <th>Missing Optional</th>
             </tr>
@@ -1151,6 +1536,29 @@ function renderIntentInputRefs(inputRefs) {
 
   return `
     <ul class="trace-input-refs intent-input-refs" data-testid="decision-intent-no-lookahead">
+      ${inputRefs
+        .map(
+          (input) => `
+            <li>
+              <strong>${labelValue(input.id)}</strong>
+              <span>${escapeHtml(input.kind || "unknown")} / ${escapeHtml(input.source || "unknown")}</span>
+              <code>${labelValue(input.digest)}</code>
+              <small>index ${labelValue(input.record_index)} / ${escapeHtml(formatDate(input.asof_ts_utc))}</small>
+            </li>
+          `,
+        )
+        .join("")}
+    </ul>
+  `;
+}
+
+function renderOutcomeInputRefs(inputRefs) {
+  if (!Array.isArray(inputRefs) || inputRefs.length === 0) {
+    return '<p class="muted trace-empty">No premium outcome no-lookahead input references.</p>';
+  }
+
+  return `
+    <ul class="trace-input-refs outcome-input-refs" data-testid="premium-outcome-no-lookahead">
       ${inputRefs
         .map(
           (input) => `
@@ -1286,6 +1694,255 @@ function renderDecisionIntent(intent) {
   `;
 }
 
+function policyStopLabel(params) {
+  if (params?.price_level_mode === "entry_relative") {
+    const stopFraction = params.stop_fraction_of_entry;
+    return typeof stopFraction === "number"
+      ? `${numberValue(stopFraction * 100, 2)}% of entry`
+      : '<span class="missing">Missing</span>';
+  }
+  return labelValue(params?.stop_premium);
+}
+
+function policyTargetLabel(params) {
+  if (params?.price_level_mode === "entry_relative") {
+    const targets = Array.isArray(params.target_multiples_of_entry) ? params.target_multiples_of_entry : [];
+    return targets.length
+      ? targets.map((target) => `${numberValue(target, 3)}x entry`).join(", ")
+      : '<span class="missing">Missing</span>';
+  }
+  const targets = Array.isArray(params?.target_premiums) ? params.target_premiums : [];
+  return targets.length ? targets.map((target) => numberValue(target, 3)).join(", ") : '<span class="missing">Missing</span>';
+}
+
+function renderFillSummary(fill) {
+  if (!fill) {
+    return '<span class="missing">Missing</span>';
+  }
+  return `
+    <span>${numberValue(fill.fill_premium, 4)}</span>
+    <small>${escapeHtml(formatDate(fill.ts_utc))} / ${escapeHtml(fill.fill_rule || "unknown")}</small>
+  `;
+}
+
+function renderOutcomeEvidence(dataQuality = {}) {
+  const sourceType = dataQuality.premium_price_source_type;
+  const granularity = dataQuality.bar_granularity || "unknown";
+  const granularityLabel =
+    granularity === "daily"
+      ? "daily OHLC; observation-only, not exact tick execution proof"
+      : granularity;
+
+  return `
+    <section class="outcome-card-section">
+      <h5>Evidence</h5>
+      <dl class="kv compact">
+        <dt>Premium evidence</dt>
+        <dd>
+          ${premiumPriceSourceBadge(sourceType)}
+          <small>${escapeHtml(PREMIUM_PRICE_SOURCE_DEFINITIONS[sourceType] || "Unknown premium evidence source")}</small>
+        </dd>
+        <dt>Bar granularity</dt>
+        <dd>${labelValue(granularityLabel)}</dd>
+        <dt>Required bars</dt>
+        <dd>${labelValue(dataQuality.required_premium_bars_available)}</dd>
+        <dt>Observed window</dt>
+        <dd>${escapeHtml(formatDate(dataQuality.first_premium_observation_ts_utc))} to ${escapeHtml(formatDate(dataQuality.last_premium_observation_ts_utc))}</dd>
+      </dl>
+      ${
+        dataQuality.ambiguity
+          ? `<div class="warning-item outcome-warning"><strong>Ambiguity</strong> ${escapeHtml(dataQuality.ambiguity.kind || "unknown")}: ${escapeHtml(dataQuality.ambiguity.description || "No description")}</div>`
+          : ""
+      }
+      ${
+        dataQuality.data_gap
+          ? `<div class="warning-item outcome-warning"><strong>Data blocked</strong> ${escapeHtml(dataQuality.data_gap.kind || "unknown")}: ${escapeHtml(dataQuality.data_gap.description || "No description")}</div>`
+          : ""
+      }
+      ${
+        Array.isArray(dataQuality.notes) && dataQuality.notes.length
+          ? `<ul class="outcome-note-list">${dataQuality.notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}</ul>`
+          : ""
+      }
+    </section>
+  `;
+}
+
+function renderPremiumMetrics(metrics) {
+  if (!metrics) {
+    return `
+      <section class="outcome-card-section">
+        <h5>Premium Metrics</h5>
+        <p class="muted">No premium fill metrics are recorded for this non-observed outcome.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="outcome-card-section">
+      <h5>Premium Metrics</h5>
+      <dl class="kv compact">
+        <dt>Premium multiple</dt>
+        <dd>${numberValue(metrics.premium_multiple, 3)}x</dd>
+        <dt>Premium R</dt>
+        <dd>
+          ${numberValue(metrics.premium_r, 3)}
+          <small>${labelValue(metrics.risk?.denominator_label)}</small>
+        </dd>
+        <dt>Premium MFE</dt>
+        <dd>${numberValue(metrics.premium_mfe, 3)}</dd>
+        <dt>Premium MAE</dt>
+        <dd>${numberValue(metrics.premium_mae, 3)}</dd>
+        <dt>Net return</dt>
+        <dd>${numberValue(metrics.net_premium_return, 3)}</dd>
+        <dt>Declared risk</dt>
+        <dd>${numberValue(metrics.risk?.declared_risk_premium, 4)}</dd>
+      </dl>
+    </section>
+  `;
+}
+
+function renderUnderlyingContext(context) {
+  if (!context) {
+    return `
+      <section class="outcome-card-section underlying-context">
+        <h5>Underlying-R Context</h5>
+        <p class="muted">No separately labelled underlying-R context is recorded.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="outcome-card-section underlying-context">
+      <h5>Underlying-R Context</h5>
+      <dl class="kv compact">
+        <dt>Context source</dt>
+        <dd>${labelValue(context.context_source)}</dd>
+        <dt>Underlying R context</dt>
+        <dd>
+          ${numberValue(context.underlying_r, 3)}
+          <small>${labelValue(context.underlying_r_denominator)}</small>
+        </dd>
+        <dt>Underlying return</dt>
+        <dd>${numberValue(context.underlying_return, 4)}</dd>
+        <dt>Entry / exit</dt>
+        <dd>${numberValue(context.entry_underlying, 3)} to ${numberValue(context.exit_underlying, 3)}</dd>
+      </dl>
+      ${
+        Array.isArray(context.notes) && context.notes.length
+          ? `<ul class="outcome-note-list">${context.notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}</ul>`
+          : ""
+      }
+    </section>
+  `;
+}
+
+function renderPremiumOutcomeCard(outcome) {
+  const contract = outcome.selected_contract || {};
+  const policy = outcome.policy || {};
+  const params = policy.params || {};
+  const dataQuality = outcome.data_quality || {};
+
+  return `
+    <article class="outcome-card ${escapeHtml(outcome.evaluation_status || "unknown")}" data-testid="premium-outcome-card">
+      <div class="outcome-card-head">
+        <div>
+          <strong>${labelValue(outcome.outcome_id)}</strong>
+          <small>${labelValue(outcome.source_signal_id)}</small>
+        </div>
+        <div class="outcome-card-badges">
+          ${premiumOutcomeBadge(outcome.evaluation_status)}
+          ${premiumPriceSourceBadge(dataQuality.premium_price_source_type)}
+        </div>
+      </div>
+      <div class="outcome-card-grid">
+        <section class="outcome-card-section">
+          <h5>Selected Contract</h5>
+          <dl class="kv compact">
+            <dt>Contract</dt>
+            <dd>${labelValue(contract.contract_symbol)}</dd>
+            <dt>Type</dt>
+            <dd>${labelValue(contract.option_type)}</dd>
+            <dt>Exchange / product</dt>
+            <dd>${labelValue(contract.exchange)} / ${labelValue(contract.product)}</dd>
+            <dt>Strike / expiry</dt>
+            <dd>${numberValue(contract.strike, 4)} / ${labelValue(contract.expiry)}</dd>
+            <dt>DTE</dt>
+            <dd>${labelValue(contract.dte_at_decision)}</dd>
+          </dl>
+        </section>
+        <section class="outcome-card-section">
+          <h5>Policy</h5>
+          <dl class="kv compact">
+            <dt>Policy</dt>
+            <dd>${labelValue(policy.policy_id)} / ${labelValue(policy.policy_version)}</dd>
+            <dt>Origin</dt>
+            <dd>${labelValue(policy.origin)}</dd>
+            <dt>Entry-relative stop</dt>
+            <dd>${policyStopLabel(params)}</dd>
+            <dt>Entry-relative target</dt>
+            <dd>${policyTargetLabel(params)}</dd>
+            <dt>Max hold</dt>
+            <dd>${labelValue(params.max_holding_bars)} bars / ${labelValue(params.max_holding_days)} days</dd>
+          </dl>
+        </section>
+        <section class="outcome-card-section">
+          <h5>Entry / Exit</h5>
+          <dl class="kv compact">
+            <dt>Decision UTC</dt>
+            <dd>${escapeHtml(formatDate(outcome.decision_ts_utc))}</dd>
+            <dt>Entry fill</dt>
+            <dd>${renderFillSummary(outcome.entry_fill)}</dd>
+            <dt>Exit fill</dt>
+            <dd>${renderFillSummary(outcome.exit_fill)}</dd>
+            <dt>Fill reason</dt>
+            <dd>${labelValue(outcome.exit_reason)}</dd>
+          </dl>
+        </section>
+        ${renderPremiumMetrics(outcome.premium_metrics)}
+        ${renderUnderlyingContext(outcome.underlying_context)}
+        ${renderOutcomeEvidence(dataQuality)}
+        <section class="outcome-card-section outcome-provenance">
+          <h5>Provenance / Hashes</h5>
+          <dl class="kv compact">
+            <dt>Policy digest</dt>
+            <dd><code>${labelValue(policy.digest)}</code></dd>
+            <dt>Hash key</dt>
+            <dd>${labelValue(policy.provenance_hash_key)}</dd>
+            <dt>No-lookahead refs</dt>
+            <dd>${escapeHtml(Array.isArray(outcome.no_lookahead_inputs) ? outcome.no_lookahead_inputs.length : 0)}</dd>
+          </dl>
+          ${renderOutcomeInputRefs(outcome.no_lookahead_inputs)}
+        </section>
+      </div>
+    </article>
+  `;
+}
+
+function renderPremiumOutcomeReview(signal, premiumOutcomeStatus) {
+  const outcomes = Array.isArray(signal.premiumOutcomes) ? signal.premiumOutcomes : [];
+  if (!outcomes.length) {
+    return `
+      <section class="drill-section outcome-section" data-testid="premium-outcome-missing">
+        <h3>Premium Outcome</h3>
+        <div class="intent-missing">
+          <strong>Premium outcome record missing</strong>
+          <span>Sidecar status: ${escapeHtml(premiumOutcomeStatus)}. This dashboard does not infer outcomes from price data.</span>
+        </div>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="drill-section outcome-section" data-testid="premium-outcome-signal-review">
+      <h3>Premium Outcome</h3>
+      <div class="outcome-card-list">
+        ${outcomes.map((outcome) => renderPremiumOutcomeCard(outcome)).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderDecisionTrace(trace) {
   if (trace.kind !== "decision_trace_v1") {
     return `
@@ -1390,6 +2047,7 @@ function renderSignalDrilldown(model) {
               </dl>
             </section>
             ${renderDecisionIntent(signal.decisionIntent)}
+            ${renderPremiumOutcomeReview(signal, model.premiumOutcome.status)}
             ${renderDecisionTrace(signal.decisionTrace)}
             <section class="drill-section">
               <h3>Option Selection</h3>
@@ -1470,6 +2128,7 @@ export function renderDashboard(snapshot, options = {}) {
       ${renderManifestProvenance(model)}
       ${renderReviewOperations(model)}
       ${renderDecisionIntentOverview(model)}
+      ${renderPremiumOutcomeOverview(model)}
       ${renderSignalTable(model)}
       ${renderSignalDrilldown(model)}
     </div>
@@ -1531,6 +2190,26 @@ export async function loadDecisionIntent(fetchImpl = globalThis.fetch, manifest 
   return response.json();
 }
 
+export async function loadPremiumOutcome(fetchImpl = globalThis.fetch, manifest = null) {
+  if (typeof fetchImpl !== "function") {
+    throw new Error("fetch is not available");
+  }
+  const normalizedManifest = normalizeRunManifest(manifest);
+  const artifactUrl = artifactPathToUrl(normalizedManifest?.premiumOutcomeArtifact?.path);
+  if (!artifactUrl) {
+    return null;
+  }
+
+  const response = await fetchImpl(new URL(artifactUrl, import.meta.url));
+  if (response.status === 404) {
+    throw new Error(`Failed to load premium outcome: ${artifactUrl} returned HTTP 404`);
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to load premium outcome: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
 export function renderError(error) {
   return `
     <section class="error-panel" role="alert">
@@ -1549,6 +2228,8 @@ export async function mountDashboard(root = document.getElementById("dashboard-r
     let manifest = null;
     let decisionIntent = null;
     let decisionIntentError = null;
+    let premiumOutcome = null;
+    let premiumOutcomeError = null;
     try {
       manifest = await loadManifest();
     } catch (error) {
@@ -1560,7 +2241,19 @@ export async function mountDashboard(root = document.getElementById("dashboard-r
       decisionIntentError = error;
       console.warn?.("PA Feitian decision intent unavailable", error);
     }
-    root.innerHTML = renderDashboard(snapshot, { manifest, decisionIntent, decisionIntentError });
+    try {
+      premiumOutcome = await loadPremiumOutcome(globalThis.fetch, manifest);
+    } catch (error) {
+      premiumOutcomeError = error;
+      console.warn?.("PA Feitian premium outcome unavailable", error);
+    }
+    root.innerHTML = renderDashboard(snapshot, {
+      manifest,
+      decisionIntent,
+      decisionIntentError,
+      premiumOutcome,
+      premiumOutcomeError,
+    });
   } catch (error) {
     root.innerHTML = renderError(error);
   }
