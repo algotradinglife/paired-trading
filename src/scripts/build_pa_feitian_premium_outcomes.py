@@ -80,6 +80,40 @@ def _manifest_ref_path(path: str | Path) -> str:
     return _repo_relative(_repo_path(path))
 
 
+def _m5_data_access(source_m4_manifest, quant_data_root: Path) -> dict[str, object]:
+    daily_dir = quant_data_root / "daily"
+    source_status = source_m4_manifest.data_access.status
+    source_notes = list(source_m4_manifest.data_access.notes)
+    if not daily_dir.is_dir():
+        return {
+            "status": "data_blocked",
+            "source": _repo_relative(quant_data_root),
+            "notes": [
+                *source_notes,
+                "OptionStore daily directory is unavailable for M5 premium outcome traversal",
+            ],
+        }
+    if source_status in {"fixture_fallback", "data_blocked", "unknown"}:
+        return {
+            "status": source_status,
+            "source": source_m4_manifest.data_access.source,
+            "notes": [
+                *source_notes,
+                "M5 preserved source M4 data-access classification",
+                f"OptionStore daily root available: {_repo_relative(quant_data_root)}",
+            ],
+        }
+    return {
+        "status": "real_data_available",
+        "source": _repo_relative(quant_data_root),
+        "notes": [
+            *source_notes,
+            "M5 consumed explicit M4 artifacts and OptionStore daily bars only",
+            "M5 did not scan score_today and did not select or reselect contracts",
+        ],
+    }
+
+
 def _write_m5_manifest(
     *,
     manifest_out: Path,
@@ -94,7 +128,12 @@ def _write_m5_manifest(
     traversal_started_at_utc: datetime,
 ) -> None:
     source_m4_manifest = load_run_manifest(source_m4_manifest_path)
-    frontend_copy_path = frontend_outcome_copy if frontend_outcome_copy is not None else None
+    outcome_sidecar = load_premium_outcome(premium_outcome_path)
+    snapshot_frontend_copy_path = (
+        _manifest_ref_path(source_m4_manifest.frontend_copy_path)
+        if source_m4_manifest.frontend_copy_path is not None
+        else None
+    )
     manifest = build_run_manifest(
         scorecard_path=_manifest_ref_path(source_m4_manifest.scorecard_artifact.path),
         snapshot_path=_manifest_ref_path(source_m4_manifest.snapshot_artifact.path),
@@ -116,25 +155,19 @@ def _write_m5_manifest(
             "no_contract_reselection": True,
         },
         generated_at_utc=generated_at_utc,
-        frontend_copy_path=(
-            _repo_relative(frontend_copy_path) if frontend_copy_path is not None else None
-        ),
+        frontend_copy_path=snapshot_frontend_copy_path,
         decision_intent_path=(
             _manifest_ref_path(source_m4_manifest.decision_intent_artifact.path)
             if source_m4_manifest.decision_intent_artifact is not None
             else None
         ),
         premium_outcome_path=_repo_relative(premium_outcome_path),
-        data_access={
-            "status": "real_data_available",
-            "source": _repo_relative(quant_data_root),
-            "notes": [
-                "M5 consumed explicit M4 artifacts and OptionStore daily bars only",
-                "M5 did not scan score_today and did not select or reselect contracts",
-            ],
-        },
+        data_access=_m5_data_access(source_m4_manifest, quant_data_root),
     )
-    manifest.input_hashes["source_m4_manifest"] = sha256_file(source_m4_manifest_path)
+    manifest.input_hashes.update(outcome_sidecar.provenance.input_hashes)
+    manifest.input_hashes["source_m4_manifest"] = outcome_sidecar.provenance.input_hashes[
+        "source_manifest"
+    ]
     if frontend_outcome_copy is not None:
         manifest.output_hashes["frontend_premium_outcome_copy"] = sha256_file(
             frontend_outcome_copy

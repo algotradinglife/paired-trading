@@ -939,7 +939,6 @@ def evaluate_premium_outcome_signal(
 def _validate_source_manifest_links(
     *,
     source_manifest: PaFeitianRunManifest,
-    source_manifest_path: str | Path,
     snapshot_path: str | Path,
     decision_intent_path: str | Path,
 ) -> None:
@@ -953,8 +952,6 @@ def _validate_source_manifest_links(
         raise ValueError(
             "source M4 manifest decision-intent hash does not match explicit decision-intent input"
         )
-    if sha256_file(source_manifest_path) is None:
-        raise AssertionError("unreachable")
 
 
 def build_premium_outcome_sidecar(
@@ -1051,7 +1048,6 @@ def build_premium_outcome_sidecar_from_files(
     source_manifest = load_run_manifest(source_manifest_path)
     _validate_source_manifest_links(
         source_manifest=source_manifest,
-        source_manifest_path=source_manifest_path,
         snapshot_path=snapshot_path,
         decision_intent_path=decision_intent_path,
     )

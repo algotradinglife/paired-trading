@@ -157,9 +157,12 @@ def _scorecard(records: list[dict]) -> dict:
 
 def _bundle(tmp_path: Path, records: list[dict]):
     source = tmp_path / "source"
+    dashboard = tmp_path / "dashboard"
     source.mkdir(parents=True)
+    dashboard.mkdir(parents=True)
     scorecard_path = source / "scorecard.json"
     snapshot_path = source / "pa_feitian_snapshot_v1.json"
+    frontend_snapshot_path = dashboard / "pa_feitian_snapshot_v1.json"
     decision_path = source / "pa_feitian_decision_intent_v1.json"
     manifest_path = source / "pa_feitian_run_manifest_with_decision_intent_v1.json"
     scorecard = _scorecard(records)
@@ -172,6 +175,7 @@ def _bundle(tmp_path: Path, records: list[dict]):
         contract_version=PA_FEITIAN_SNAPSHOT_V1_SCHEMA_VERSION,
     )
     write_snapshot(snapshot, snapshot_path)
+    frontend_snapshot_path.write_text(snapshot_path.read_text(encoding="utf-8"), encoding="utf-8")
     decision = build_decision_intent_sidecar(
         snapshot,
         source_commit=COMMIT,
@@ -189,6 +193,7 @@ def _bundle(tmp_path: Path, records: list[dict]):
         cli_args=["m4-fixture"],
         run_config=snapshot.run_config,
         generated_at_utc=GENERATED_AT,
+        frontend_copy_path=frontend_snapshot_path,
         decision_intent_path=decision_path,
         data_access={"status": "fixture_fallback", "source": str(scorecard_path), "notes": []},
     )
@@ -196,6 +201,7 @@ def _bundle(tmp_path: Path, records: list[dict]):
     return {
         "scorecard": scorecard_path,
         "snapshot": snapshot_path,
+        "frontend_snapshot": frontend_snapshot_path,
         "decision": decision_path,
         "manifest": manifest_path,
     }
@@ -459,8 +465,69 @@ def test_m5_cli_is_deterministic_and_links_manifest_without_mutating_sources(tmp
     validate_pa_feitian_run_manifest_schema(manifest.model_dump(mode="json", exclude_none=False))
     assert manifest.premium_outcome_artifact.sha256 == sha256_file(out)
     assert manifest.output_hashes["premium_outcome_artifact"] == sha256_file(out)
+    assert manifest.frontend_copy_path == str(paths["frontend_snapshot"])
+    assert manifest.output_hashes["frontend_copy"] == sha256_file(paths["frontend_snapshot"])
     assert manifest.output_hashes["frontend_premium_outcome_copy"] == sha256_file(frontend_copy)
+    assert manifest.output_hashes["frontend_premium_outcome_copy"] != manifest.output_hashes[
+        "frontend_copy"
+    ]
     assert manifest.input_hashes["source_m4_manifest"] == sha256_file(paths["manifest"])
+    assert manifest.data_access.status == "fixture_fallback"
+    for key, digest in sidecar.provenance.input_hashes.items():
+        assert manifest.input_hashes[key] == digest
+
+    selected_bar_keys = [
+        key for key in sidecar.provenance.input_hashes if key.startswith("selected_option_bars:")
+    ]
+    assert selected_bar_keys
+    for key in selected_bar_keys:
+        assert manifest.input_hashes[key] == sidecar.provenance.input_hashes[key]
+
+
+def test_m5_cli_classifies_unavailable_option_store_data_blocked(tmp_path: Path):
+    paths = _bundle(tmp_path, [_record()])
+    missing_quant_root = tmp_path / "missing_quant_root"
+    out = tmp_path / "m5_missing" / "pa_feitian_premium_outcome_v1.json"
+    manifest_out = tmp_path / "m5_missing" / "pa_feitian_run_manifest_m5_v1.json"
+    command = [
+        str(PYTHON),
+        str(SCRIPT),
+        "--snapshot",
+        str(paths["snapshot"]),
+        "--decision-intent",
+        str(paths["decision"]),
+        "--source-m4-manifest",
+        str(paths["manifest"]),
+        "--quant-data-root",
+        str(missing_quant_root),
+        "--out",
+        str(out),
+        "--manifest-out",
+        str(manifest_out),
+        "--generated-at-utc",
+        "2026-07-10T00:00:00Z",
+        "--policy-declared-at-utc",
+        "2026-07-10T00:00:00Z",
+        "--traversal-started-at-utc",
+        "2026-07-10T00:01:00Z",
+        "--source-commit",
+        COMMIT,
+    ]
+    env = {**os.environ, "PYTHONPATH": str(SRC_ROOT)}
+
+    subprocess.run(command, cwd=REPO_ROOT, env=env, check=True, capture_output=True, text=True)
+
+    sidecar = load_premium_outcome(out)
+    manifest = load_run_manifest(manifest_out)
+    validate_pa_feitian_premium_outcome_schema(sidecar.model_dump(mode="json"))
+    validate_pa_feitian_run_manifest_schema(manifest.model_dump(mode="json", exclude_none=False))
+    assert manifest.data_access.status == "data_blocked"
+    assert manifest.frontend_copy_path == str(paths["frontend_snapshot"])
+    assert manifest.output_hashes["frontend_copy"] == sha256_file(paths["frontend_snapshot"])
+    assert "frontend_premium_outcome_copy" not in manifest.output_hashes
+    assert [outcome.evaluation_status for outcome in sidecar.outcomes] == ["data_blocked"]
+    for key, digest in sidecar.provenance.input_hashes.items():
+        assert manifest.input_hashes[key] == digest
 
 
 def test_m5_harness_supports_empty_no_signal_sidecar(tmp_path: Path):
