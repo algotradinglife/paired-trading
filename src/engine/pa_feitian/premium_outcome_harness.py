@@ -69,6 +69,7 @@ class PremiumOutcomeHarnessConfig:
     max_holding_bars: int = DEFAULT_MAX_HOLDING_BARS
     tick_sizes: dict[str, float] = field(default_factory=lambda: dict(DEFAULT_TICK_SIZES))
     cli_args: tuple[str, ...] = ()
+    recorded_quant_data_root: str | None = None
 
 
 @dataclass(frozen=True)
@@ -976,6 +977,9 @@ def build_premium_outcome_sidecar(
     config: PremiumOutcomeHarnessConfig,
 ) -> PaFeitianPremiumOutcomeSidecar:
     store = OptionStore(quant_data_root)
+    recorded_quant_data_root = config.recorded_quant_data_root or Path(
+        quant_data_root
+    ).as_posix()
     intents_by_id = {intent.signal_id: intent for intent in decision_intent.intents}
     outcomes: list[PremiumOutcomeRecord] = []
     bar_hashes: dict[str, str] = {}
@@ -1027,7 +1031,7 @@ def build_premium_outcome_sidecar(
             "M5 premium outcomes are posterior observation-only sidecar records",
             "source snapshot and decision-intent artifacts are immutable inputs",
             "source M4 manifest is hashed input; the M5 manifest hashes this sidecar separately",
-            f"quant_data_root={Path(quant_data_root).as_posix()}",
+            f"quant_data_root={recorded_quant_data_root}",
         ],
     )
     sidecar = PaFeitianPremiumOutcomeSidecar(

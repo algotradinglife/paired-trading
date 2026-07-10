@@ -80,14 +80,33 @@ def _manifest_ref_path(path: str | Path) -> str:
     return _repo_relative(_repo_path(path))
 
 
-def _m5_data_access(source_m4_manifest, quant_data_root: Path) -> dict[str, object]:
+def _recorded_cli_args(raw_argv: list[str], quant_data_root_label: str | None) -> list[str]:
+    recorded = [_repo_relative(SCRIPT_PATH), *raw_argv]
+    if quant_data_root_label is None:
+        return recorded
+
+    for index, value in enumerate(recorded):
+        if value == "--quant-data-root" and index + 1 < len(recorded):
+            recorded[index + 1] = quant_data_root_label
+            break
+        if value.startswith("--quant-data-root="):
+            recorded[index] = f"--quant-data-root={quant_data_root_label}"
+            break
+    return recorded
+
+
+def _m5_data_access(
+    source_m4_manifest,
+    quant_data_root: Path,
+    recorded_quant_data_root: str,
+) -> dict[str, object]:
     daily_dir = quant_data_root / "daily"
     source_status = source_m4_manifest.data_access.status
     source_notes = list(source_m4_manifest.data_access.notes)
     if not daily_dir.is_dir():
         return {
             "status": "data_blocked",
-            "source": _repo_relative(quant_data_root),
+            "source": recorded_quant_data_root,
             "notes": [
                 *source_notes,
                 "OptionStore daily directory is unavailable for M5 premium outcome traversal",
@@ -96,16 +115,16 @@ def _m5_data_access(source_m4_manifest, quant_data_root: Path) -> dict[str, obje
     if source_status in {"fixture_fallback", "data_blocked", "unknown"}:
         return {
             "status": source_status,
-            "source": source_m4_manifest.data_access.source,
+            "source": recorded_quant_data_root,
             "notes": [
                 *source_notes,
                 "M5 preserved source M4 data-access classification",
-                f"OptionStore daily root available: {_repo_relative(quant_data_root)}",
+                f"OptionStore daily root available: {recorded_quant_data_root}",
             ],
         }
     return {
         "status": "real_data_available",
-        "source": _repo_relative(quant_data_root),
+        "source": recorded_quant_data_root,
         "notes": [
             *source_notes,
             "M5 consumed explicit M4 artifacts and OptionStore daily bars only",
@@ -124,6 +143,7 @@ def _write_m5_manifest(
     source_commit: str,
     generated_at_utc: datetime,
     quant_data_root: Path,
+    recorded_quant_data_root: str,
     policy_declared_at_utc: datetime,
     traversal_started_at_utc: datetime,
 ) -> None:
@@ -144,7 +164,7 @@ def _write_m5_manifest(
             "mode": "premium_outcome_harness",
             "producer": _repo_relative(SCRIPT_PATH),
             "source_m4_manifest": _repo_relative(source_m4_manifest_path),
-            "quant_data_root": _repo_relative(quant_data_root),
+            "quant_data_root": recorded_quant_data_root,
             "policy_id": "pa_feitian_m5_daily_long_option_stop_target",
             "policy_version": "v1.default",
             "policy_declared_at_utc": policy_declared_at_utc.isoformat().replace("+00:00", "Z"),
@@ -162,7 +182,11 @@ def _write_m5_manifest(
             else None
         ),
         premium_outcome_path=_repo_relative(premium_outcome_path),
-        data_access=_m5_data_access(source_m4_manifest, quant_data_root),
+        data_access=_m5_data_access(
+            source_m4_manifest,
+            quant_data_root,
+            recorded_quant_data_root,
+        ),
     )
     manifest.input_hashes.update(outcome_sidecar.provenance.input_hashes)
     manifest.input_hashes["source_m4_manifest"] = outcome_sidecar.provenance.input_hashes[
@@ -185,6 +209,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--decision-intent", type=Path, required=True)
     parser.add_argument("--source-m4-manifest", type=Path, required=True)
     parser.add_argument("--quant-data-root", type=Path, required=True)
+    parser.add_argument(
+        "--quant-data-root-label",
+        default=None,
+        help="Stable public label recorded in artifacts instead of the runtime filesystem root.",
+    )
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--manifest-out", type=Path, required=True)
     parser.add_argument(
@@ -231,7 +260,8 @@ def main(argv: list[str] | None = None) -> int:
         else policy_declared_at_utc + timedelta(minutes=1)
     )
     source_commit = args.source_commit or _git_head()
-    cli_args = [_repo_relative(SCRIPT_PATH), *raw_argv]
+    recorded_quant_data_root = args.quant_data_root_label or _repo_relative(quant_data_root)
+    cli_args = _recorded_cli_args(raw_argv, args.quant_data_root_label)
 
     config = PremiumOutcomeHarnessConfig(
         source_commit=source_commit,
@@ -239,6 +269,7 @@ def main(argv: list[str] | None = None) -> int:
         policy_declared_at_utc=policy_declared_at_utc,
         traversal_started_at_utc=traversal_started_at_utc,
         cli_args=tuple(cli_args),
+        recorded_quant_data_root=recorded_quant_data_root,
     )
     sidecar = build_premium_outcome_sidecar_from_files(
         snapshot_path=snapshot_path,
@@ -264,6 +295,7 @@ def main(argv: list[str] | None = None) -> int:
         source_commit=source_commit,
         generated_at_utc=generated_at_utc,
         quant_data_root=quant_data_root,
+        recorded_quant_data_root=recorded_quant_data_root,
         policy_declared_at_utc=policy_declared_at_utc,
         traversal_started_at_utc=traversal_started_at_utc,
     )

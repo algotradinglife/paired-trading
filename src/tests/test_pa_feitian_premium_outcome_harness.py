@@ -457,6 +457,7 @@ def test_m5_cli_is_deterministic_and_links_manifest_without_mutating_sources(tmp
     out = tmp_path / "m5" / "pa_feitian_premium_outcome_v1.json"
     manifest_out = tmp_path / "m5" / "pa_feitian_run_manifest_m5_v1.json"
     frontend_copy = tmp_path / "frontend" / "pa_feitian_premium_outcome_v1.json"
+    quant_label = "external://optionstore/test-quant"
     command = [
         str(PYTHON),
         str(SCRIPT),
@@ -466,8 +467,9 @@ def test_m5_cli_is_deterministic_and_links_manifest_without_mutating_sources(tmp
         str(paths["decision"]),
         "--source-m4-manifest",
         str(paths["manifest"]),
-        "--quant-data-root",
-        str(quant),
+        f"--quant-data-root={quant}",
+        "--quant-data-root-label",
+        quant_label,
         "--out",
         str(out),
         "--manifest-out",
@@ -509,6 +511,13 @@ def test_m5_cli_is_deterministic_and_links_manifest_without_mutating_sources(tmp
     ]
     assert manifest.input_hashes["source_m4_manifest"] == sha256_file(paths["manifest"])
     assert manifest.data_access.status == "fixture_fallback"
+    assert manifest.data_access.source == quant_label
+    assert manifest.run_config["quant_data_root"] == quant_label
+    assert str(quant) not in json.dumps(manifest.model_dump(mode="json"))
+    assert str(quant) not in json.dumps(sidecar.model_dump(mode="json"))
+    assert f"--quant-data-root={quant_label}" in manifest.cli_args
+    assert f"--quant-data-root={quant_label}" in sidecar.provenance.cli_args
+    assert f"quant_data_root={quant_label}" in sidecar.provenance.notes
     for key, digest in sidecar.provenance.input_hashes.items():
         assert manifest.input_hashes[key] == digest
 
