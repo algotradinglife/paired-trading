@@ -1,6 +1,6 @@
 # PA / Feitian M6 策略评估与筛选范围 - 2026-07-11
 
-状态：设计文档，等待 ChatGPT 在 M6 开始前做阶段级审核。
+状态：设计文档，采用 Codex 内部 review 后推进实现；不依赖外部审核阻塞。
 
 基线：`main` at `bdcce5d`，包含 M5 merge PR #16。
 
@@ -184,7 +184,7 @@ schema 和 manifest extension；把 M5 outcome sidecar 转成不可变、可重�
 ### M6-D：Failure modes and reviewer dashboard
 
 提供 trace node / failure-mode drill-down、候选 shortlist 及审阅状态。
-完成后才提交 M6 final review packet，等待 ChatGPT 阶段验收。
+完成后提交 M6 final review packet，由 Codex 完成最终内部验收。
 
 ## 11. M6 完成验收标准
 
@@ -205,5 +205,5 @@ M6 final review 前必须同时具备：
 ## 12. 阶段决策
 
 M6 的最终产物是“可解释的候选评估证据”，不是“可执行策略”。只有在
-M6 完成并经 ChatGPT 阶段验收后，才进入 M7 半自动决策台设计；任何
+M6 完成并通过 Codex 内部验收后，才进入 M7 半自动决策台设计；任何
 `promising` 结果都必须重新经过人工决策链和 M7 审核闭环。
