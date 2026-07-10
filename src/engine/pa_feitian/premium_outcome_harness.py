@@ -273,6 +273,10 @@ def _build_selected_contract(
     )
 
 
+def _normalized_target_multiples(config: PremiumOutcomeHarnessConfig) -> list[float]:
+    return sorted({float(multiple) for multiple in config.target_multiples_of_entry})
+
+
 def _policy_params(tick_size: float | None, config: PremiumOutcomeHarnessConfig):
     return PremiumOutcomePolicyParams(
         entry_rule="first_valid_daily_option_store_bar_strictly_after_decision_open",
@@ -280,7 +284,7 @@ def _policy_params(tick_size: float | None, config: PremiumOutcomeHarnessConfig)
         stop_premium=None,
         target_premiums=[],
         stop_fraction_of_entry=config.stop_fraction_of_entry,
-        target_multiples_of_entry=list(config.target_multiples_of_entry),
+        target_multiples_of_entry=_normalized_target_multiples(config),
         max_holding_bars=config.max_holding_bars,
         max_holding_days=None,
         stop_fill_rule="at_level",
@@ -334,6 +338,7 @@ def _cost_model(tick_size: float | None, config: PremiumOutcomeHarnessConfig) ->
             "entry fill = daily open + slippage_ticks * tick_size for a long option buy",
             "exit fill = raw exit level/open/close - slippage_ticks * tick_size, floored at zero",
             "cost_premium excludes slippage; default commissions and fees are zero",
+            "tick_value=1 is premium-unit normalization only, not contract cash PnL",
         ],
     )
 
@@ -511,7 +516,7 @@ def _evaluate_path(
     tick_size = policy.params.tick_size
     assert tick_size is not None
     slippage = config.slippage_ticks * tick_size
-    target_multiple = config.target_multiples_of_entry[0]
+    target_multiples = policy.params.target_multiples_of_entry
     considered: list[dict[str, Any]] = []
 
     entry_row = bars.iloc[0]
@@ -548,7 +553,8 @@ def _evaluate_path(
     entry_raw = float(entry_row["open"])
     entry_fill_price = entry_raw + slippage
     stop_level = entry_fill_price * config.stop_fraction_of_entry
-    target_level = entry_fill_price * target_multiple
+    target_levels = [entry_fill_price * multiple for multiple in target_multiples]
+    target_level = target_levels[0]
     stop_exit_fill = max(stop_level - slippage, 0.0)
     entry_fill = PremiumFill(
         ts_utc=entry_ts,
@@ -686,7 +692,9 @@ def _evaluate_path(
                     ambiguity=ambiguity,
                     notes=[
                         "daily option OHLC is observation-only and cannot prove "
-                        "same-bar stop/target ordering"
+                        "same-bar stop/target ordering",
+                        "multiple target_multiples_of_entry are normalized unique ascending; "
+                        "the full position exits at the nearest declared target",
                     ],
                 ),
                 no_lookahead_inputs=_copied_no_lookahead_inputs(intent),
@@ -766,6 +774,10 @@ def _evaluate_path(
                 "tick-level execution proof",
                 "gap opens through stop/target fill at that bar open with adverse "
                 "exit slippage",
+                "multiple target_multiples_of_entry are normalized unique ascending; "
+                "the full position exits at the nearest declared target",
+                "premium_mfe and premium_mae are daily bar-envelope excursions through "
+                "the exit bar, not proven pre-exit intrabar MFE/MAE",
             ],
         ),
         no_lookahead_inputs=_copied_no_lookahead_inputs(intent),

@@ -207,12 +207,17 @@ def _bundle(tmp_path: Path, records: list[dict]):
     }
 
 
-def _sidecar(tmp_path: Path, bars: list[dict] | None, record: dict | None = None):
+def _sidecar(
+    tmp_path: Path,
+    bars: list[dict] | None,
+    record: dict | None = None,
+    config: PremiumOutcomeHarnessConfig | None = None,
+):
     paths = _bundle(tmp_path, [record or _record()])
     quant = tmp_path / "quant"
     if bars is not None:
         _write_contract(quant, "SHFE.au2608C880", bars)
-    config = PremiumOutcomeHarnessConfig(
+    harness_config = config or PremiumOutcomeHarnessConfig(
         source_commit=COMMIT,
         generated_at_utc=GENERATED_AT,
         policy_declared_at_utc=GENERATED_AT,
@@ -224,7 +229,7 @@ def _sidecar(tmp_path: Path, bars: list[dict] | None, record: dict | None = None
         decision_intent_path=paths["decision"],
         source_manifest_path=paths["manifest"],
         quant_data_root=quant,
-        config=config,
+        config=harness_config,
     )
     return sidecar, paths, quant
 
@@ -245,7 +250,10 @@ def test_m5_harness_observes_target_with_premium_r_math_and_policy_digest(tmp_pa
     assert outcome.entry_fill.fill_premium == pytest.approx(10.04)
     assert outcome.exit_fill.fill_premium == pytest.approx(20.04)
     assert outcome.underlying_context is None
-    assert "observation-only" in " ".join(outcome.data_quality.notes)
+    notes = " ".join(outcome.data_quality.notes)
+    assert "observation-only" in notes
+    assert "daily bar-envelope excursions through the exit bar" in notes
+    assert "premium-unit normalization only" in " ".join(outcome.cost_model.notes)
     assert outcome.premium_metrics.premium_multiple == pytest.approx(20.04 / 10.04)
     assert outcome.premium_metrics.premium_r == pytest.approx((20.04 - 10.04) / 5.06)
     assert outcome.premium_metrics.premium_mfe == pytest.approx((21.0 - 10.04) / 10.04)
@@ -262,6 +270,34 @@ def test_m5_harness_observes_target_with_premium_r_math_and_policy_digest(tmp_pa
         params=outcome.policy.params,
     )
     assert f"selected_option_bars:{outcome.outcome_id}" in sidecar.provenance.input_hashes
+
+
+def test_m5_harness_normalizes_unsorted_target_multiples_and_exits_nearest_target(
+    tmp_path: Path,
+):
+    sidecar, _, _ = _sidecar(
+        tmp_path,
+        [
+            _bar("2026-06-30", 10.0, 12.0, 9.0, 10.5),
+            _bar("2026-07-01", 10.5, 25.0, 10.0, 24.0),
+            *_ten_bars("2026-07-02")[:8],
+        ],
+        config=PremiumOutcomeHarnessConfig(
+            source_commit=COMMIT,
+            generated_at_utc=GENERATED_AT,
+            policy_declared_at_utc=GENERATED_AT,
+            traversal_started_at_utc=GENERATED_AT + timedelta(minutes=1),
+            target_multiples_of_entry=(3.0, 2.0, 2.0),
+            cli_args=("test-unsorted-targets",),
+        ),
+    )
+    outcome = sidecar.outcomes[0]
+
+    assert outcome.evaluation_status == "observed"
+    assert outcome.exit_reason == "premium_target"
+    assert outcome.policy.params.target_multiples_of_entry == [2.0, 3.0]
+    assert outcome.exit_fill.fill_premium == pytest.approx(20.04)
+    assert "nearest declared target" in " ".join(outcome.data_quality.notes)
 
 
 def test_m5_harness_observes_stop_and_gap_open_stop(tmp_path: Path):
