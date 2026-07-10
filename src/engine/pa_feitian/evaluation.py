@@ -306,7 +306,10 @@ class EvaluationAggregateGroup(BaseModel):
     value: str
     result_status: Literal["generated", "insufficient_sample", "data_blocked", "not_evaluable"]
     sample_count: int = Field(ge=0)
-    effective_sample_count: int = Field(ge=0)
+    effective_sample_count: int = Field(
+        ge=0,
+        description="Distinct observed event_id count; rows may contain dependent option legs.",
+    )
     status_counts: EvaluationStatusCounts
     premium_r: EvaluationRStatistics | None = None
     underlying_r_correlation: float | None = Field(default=None, ge=-1, le=1)
@@ -324,6 +327,41 @@ class EvaluationAggregateGroup(BaseModel):
         return self
 
 
+class EvaluationWalkForwardFold(BaseModel):
+    """A fixed, event-grouped chronological out-of-sample fold."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    fold_id: str = Field(pattern=r"^wf_[0-9]+$")
+    train_start_utc: datetime
+    train_end_utc: datetime
+    test_start_utc: datetime
+    test_end_utc: datetime
+    train_event_ids: list[str] = Field(min_length=1)
+    test_event_ids: list[str] = Field(min_length=1)
+    train_result: EvaluationAggregateGroup
+    test_result: EvaluationAggregateGroup
+    no_lookahead_verified: bool
+    notes: list[str] = Field(default_factory=list)
+
+    @field_validator("train_start_utc", "train_end_utc", "test_start_utc", "test_end_utc")
+    @classmethod
+    def _validate_timestamps(cls, value: datetime) -> datetime:
+        return _utc_datetime(value)
+
+    @model_validator(mode="after")
+    def _validate_chronology(self) -> EvaluationWalkForwardFold:
+        if self.train_end_utc >= self.test_start_utc:
+            raise ValueError("walk-forward training window must end before test window")
+        if self.train_end_utc < self.train_start_utc or self.test_end_utc < self.test_start_utc:
+            raise ValueError("walk-forward windows must be ordered")
+        if set(self.train_event_ids) & set(self.test_event_ids):
+            raise ValueError("walk-forward folds must not split an event across train and test")
+        if self.train_result.dimension != "pooled" or self.test_result.dimension != "pooled":
+            raise ValueError("walk-forward train and test results must be pooled aggregates")
+        return self
+
+
 class PaFeitianEvaluationAggregateResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -334,6 +372,7 @@ class PaFeitianEvaluationAggregateResult(BaseModel):
     provenance: EvaluationArtifactProvenance
     evaluation_dataset: EvaluationArtifactRef
     groups: list[EvaluationAggregateGroup] = Field(default_factory=list)
+    walk_forward_folds: list[EvaluationWalkForwardFold] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
 
     @field_validator("generated_at_utc")
