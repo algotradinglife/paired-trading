@@ -1,0 +1,17 @@
+{
+  "schema_version": "pa_feitian_evaluation_aggregate_result_v1",
+  "generated_at_utc": "2026-07-11T00:00:00Z",
+  "provenance": {
+    "role": "m6_aggregate_result", "source_manifest_path": "src/tests/fixtures/pa_feitian_run_manifest_with_premium_outcome_v1.json", "source_manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "source_manifest_schema_version": "pa_feitian_run_manifest_v1", "premium_outcome_artifact_path": "src/tests/fixtures/pa_feitian_premium_outcome_v1.json", "premium_outcome_artifact_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "premium_outcome_schema_version": "pa_feitian_premium_outcome_v1", "source_commit": "cccccccccccccccccccccccccccccccccccccccc", "producer": "engine.pa_feitian.evaluation_contract_fixture.v1", "cli_args": ["fixture-only-contract-test"], "policy_config_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "data_access_status": "fixture_fallback", "fixture_fallback": true, "random_seed": 7,
+    "input_hashes": {"source_manifest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "premium_outcome_artifact": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "policy_config": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "evaluation_dataset": "sha256:3cbe78492edca612d8b55eca9e1d18b6c7587d7a1bc6dd215f1dfb4ee8774824"}, "output_hashes": {}, "notes": ["contract fixture only"]
+  },
+  "evaluation_dataset": {"kind": "evaluation_dataset", "path": "src/tests/fixtures/pa_feitian_evaluation_dataset_v1.json", "sha256": "sha256:3cbe78492edca612d8b55eca9e1d18b6c7587d7a1bc6dd215f1dfb4ee8774824", "schema_version": "pa_feitian_evaluation_dataset_v1", "content_type": "application/json"},
+  "groups": [{
+    "group_id": "pooled", "dimension": "pooled", "value": "all", "result_status": "insufficient_sample", "sample_count": 1, "effective_sample_count": 1,
+    "status_counts": {"observed": 1, "ambiguous": 0, "data_blocked": 0, "not_evaluable": 0},
+    "premium_r": {"mean": 5.016949153, "median": 5.016949153, "standard_deviation": 0.0, "median_absolute_deviation": 0.0, "lower_quantile": 5.016949153, "worst_case": 5.016949153, "win_rate": 1.0, "win_definition": "premium_r_gt_zero", "bootstrap_95_ci": {"confidence_level": 0.95, "lower": 5.016949153, "upper": 5.016949153, "method": "fixture_only", "cluster_unit": "event"}},
+    "underlying_r_correlation": null, "underlying_r_difference_mean": 4.596949153, "notes": ["single event cannot qualify for screening"]
+  }],
+  "walk_forward_folds": [],
+  "warnings": ["insufficient sample; no candidate inference"]
+}

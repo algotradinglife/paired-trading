@@ -226,6 +226,156 @@ textarea {
   overflow-x: auto;
 }
 
+.evaluation-content {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.evaluation-content h3 {
+  margin: 0 0 -6px;
+  font-size: 0.95rem;
+}
+
+.evaluation-filters {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.evaluation-filters label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+}
+
+.evaluation-filters select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  text-transform: none;
+}
+
+.evaluation-summary,
+.evaluation-evidence-grid,
+.fold-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.evaluation-summary span,
+.evidence-card {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-alt);
+}
+
+.evaluation-evidence-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.evaluation-evidence-grid > section {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.fold-list,
+.evidence-list {
+  display: grid;
+  gap: 10px;
+}
+
+.fold-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 14px 0;
+}
+
+.fold-grid > div {
+  min-width: 0;
+}
+
+.fold-grid .evaluation-table {
+  min-width: 660px;
+  margin-top: 8px;
+}
+
+.evidence-card {
+  display: grid;
+  gap: 6px;
+}
+
+.evidence-card p,
+.evidence-card small {
+  margin: 0;
+}
+
+.evidence-card p,
+.evidence-card small {
+  color: var(--muted);
+}
+
+.evaluation-state,
+.evaluation-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.evaluation-state.fixture,
+.evaluation-status.insufficient-sample,
+.evaluation-status.inconclusive,
+.evaluation-status.pending,
+.evaluation-status.warning {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.evaluation-state.generated,
+.evaluation-status.generated,
+.evaluation-status.observed,
+.evaluation-status.promising,
+.evaluation-status.approved,
+.evaluation-status.info {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.evaluation-state.review,
+.evaluation-status.changes-requested {
+  color: var(--model);
+  background: var(--model-soft);
+}
+
+.evaluation-state.insufficient,
+.evaluation-state.not-referenced,
+.evaluation-status.data-blocked,
+.evaluation-status.blocked,
+.evaluation-status.negative,
+.evaluation-status.rejected,
+.evaluation-status.blocking,
+.evaluation-status.not-evaluable {
+  color: var(--blocked);
+  background: var(--blocked-soft);
+}
+
+.compact {
+  padding: 12px;
+}
+
 table {
   width: 100%;
   min-width: 1040px;
@@ -1204,6 +1354,10 @@ pre {
     .intent-summary,
     .intent-gate-grid,
     .outcome-card-grid,
+    .evaluation-filters,
+    .evaluation-summary,
+    .evaluation-evidence-grid,
+    .fold-grid,
     .manifest-details,
     .drill-grid,
     .trace-summary,

@@ -30,6 +30,34 @@
     "schema_version": "pa_feitian_premium_outcome_v1",
     "content_type": "application/json"
   },
+  "evaluation_dataset_artifact": {
+    "kind": "evaluation_dataset",
+    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_evaluation_dataset_v1.json",
+    "sha256": "sha256:3cbe78492edca612d8b55eca9e1d18b6c7587d7a1bc6dd215f1dfb4ee8774824",
+    "schema_version": "pa_feitian_evaluation_dataset_v1",
+    "content_type": "application/json"
+  },
+  "evaluation_aggregate_result_artifact": {
+    "kind": "evaluation_aggregate_result",
+    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_evaluation_aggregate_result_v1.json",
+    "sha256": "sha256:ed6d5dc574f18a64b7baf89fecea96425ba45315374f4401886088254c15d2ec",
+    "schema_version": "pa_feitian_evaluation_aggregate_result_v1",
+    "content_type": "application/json"
+  },
+  "evaluation_failure_mode_report_artifact": {
+    "kind": "evaluation_failure_mode_report",
+    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_evaluation_failure_mode_report_v1.json",
+    "sha256": "sha256:e1b7652d55f916bf56c2a7a6ae97d3a5b9d5648d93ec0c107724a182f727c9b0",
+    "schema_version": "pa_feitian_evaluation_failure_mode_report_v1",
+    "content_type": "application/json"
+  },
+  "evaluation_screening_report_artifact": {
+    "kind": "evaluation_screening_report",
+    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_evaluation_screening_report_v1.json",
+    "sha256": "sha256:623211c834973ea8b5466e8f3a6909c0ffa9fe40497bf9b075376dd4633739be",
+    "schema_version": "pa_feitian_evaluation_screening_report_v1",
+    "content_type": "application/json"
+  },
   "cli_args": [
     "src/scripts/build_pa_feitian_premium_outcomes.py",
     "--snapshot",
@@ -96,7 +124,15 @@
     "premium_outcome_artifact": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
     "frontend_copy": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf",
     "frontend_premium_outcome_copy": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
-    "frontend_decision_intent_copy": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0"
+    "frontend_decision_intent_copy": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
+    "evaluation_dataset_artifact": "sha256:3cbe78492edca612d8b55eca9e1d18b6c7587d7a1bc6dd215f1dfb4ee8774824",
+    "evaluation_aggregate_result_artifact": "sha256:ed6d5dc574f18a64b7baf89fecea96425ba45315374f4401886088254c15d2ec",
+    "evaluation_failure_mode_report_artifact": "sha256:e1b7652d55f916bf56c2a7a6ae97d3a5b9d5648d93ec0c107724a182f727c9b0",
+    "evaluation_screening_report_artifact": "sha256:623211c834973ea8b5466e8f3a6909c0ffa9fe40497bf9b075376dd4633739be",
+    "frontend_evaluation_dataset_copy": "sha256:3cbe78492edca612d8b55eca9e1d18b6c7587d7a1bc6dd215f1dfb4ee8774824",
+    "frontend_evaluation_aggregate_result_copy": "sha256:ed6d5dc574f18a64b7baf89fecea96425ba45315374f4401886088254c15d2ec",
+    "frontend_evaluation_failure_mode_report_copy": "sha256:e1b7652d55f916bf56c2a7a6ae97d3a5b9d5648d93ec0c107724a182f727c9b0",
+    "frontend_evaluation_screening_report_copy": "sha256:623211c834973ea8b5466e8f3a6909c0ffa9fe40497bf9b075376dd4633739be"
   },
   "frontend_copy_path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json",
   "review_state": {

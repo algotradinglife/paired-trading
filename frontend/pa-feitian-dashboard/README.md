@@ -4,6 +4,12 @@ Static dashboard shell for copied `pa_feitian_snapshot_v1` artifacts, optional
 manifest-referenced `pa_feitian_decision_intent_v1` sidecars, and legacy
 `pa_feitian_snapshot_v0` rendering fallback.
 
+M6 adds an optional, artifact-only evaluation review panel. When the manifest
+references them, it loads copied evaluation dataset, aggregate result,
+failure-mode, and screening JSON fixtures. Missing, unsupported, or failed
+sidecars remain visible as defensive review states; the dashboard never runs an
+evaluator or reads strategy data.
+
 Run from this directory:
 
 ```bash
