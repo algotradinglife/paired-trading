@@ -175,6 +175,20 @@ def test_premium_outcome_model_enforces_no_lookahead_and_observed_evidence():
     with pytest.raises(ValidationError, match="selected contract identifiers"):
         validate_premium_outcome(observed_without_contract)
 
+    contract_id_mismatch = deepcopy(data)
+    contract_id_mismatch["outcomes"][0]["source_contract_id"] = "scorecard_record:99"
+
+    with pytest.raises(ValidationError, match="selected_contract.source_contract_id"):
+        validate_premium_outcome(contract_id_mismatch)
+
+    decision_intent_mismatch = deepcopy(data)
+    decision_intent_mismatch["outcomes"][0]["decision_intent_signal_id"] = (
+        "paft_scorecard_other_signal"
+    )
+
+    with pytest.raises(ValidationError, match="decision_intent_signal_id"):
+        validate_premium_outcome(decision_intent_mismatch)
+
     not_evaluable_without_contract = deepcopy(data)
     not_evaluable_without_contract["outcomes"][3]["source_contract_id"] = None
     not_evaluable_without_contract["outcomes"][3]["selected_contract"] = None
@@ -209,6 +223,24 @@ def test_premium_outcome_model_enforces_no_lookahead_and_observed_evidence():
 
     with pytest.raises(ValidationError, match="cannot mix absolute premium"):
         validate_premium_outcome(mixed_policy_levels)
+
+    slippage_mismatch = deepcopy(data)
+    slippage_mismatch["outcomes"][0]["policy"]["params"]["slippage_ticks"] = 2.0
+
+    with pytest.raises(ValidationError, match="slippage_ticks"):
+        validate_premium_outcome(slippage_mismatch)
+
+    tick_size_mismatch = deepcopy(data)
+    tick_size_mismatch["outcomes"][0]["policy"]["params"]["tick_size"] = 0.01
+
+    with pytest.raises(ValidationError, match="tick_size"):
+        validate_premium_outcome(tick_size_mismatch)
+
+    risk_mismatch = deepcopy(data)
+    risk_mismatch["outcomes"][0]["premium_metrics"]["risk"]["declared_risk_premium"] = 1.19
+
+    with pytest.raises(ValidationError, match="declared_risk_premium"):
+        validate_premium_outcome(risk_mismatch)
 
     future_entry = deepcopy(data)
     future_entry["outcomes"][0]["first_eligible_entry_ts_utc"] = "2026-06-29T00:00:00Z"

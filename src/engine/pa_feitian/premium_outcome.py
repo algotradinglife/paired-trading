@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -13,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 PA_FEITIAN_PREMIUM_OUTCOME_SCHEMA_VERSION = "pa_feitian_premium_outcome_v1"
 HASH_DIGEST_PATTERN = r"^sha256:[a-f0-9]{64}$"
+NUMERIC_TOLERANCE = 1e-9
 
 PremiumOutcomeStatus = Literal["observed", "ambiguous", "data_blocked", "not_evaluable"]
 PremiumPriceSourceType = Literal["observed", "model_derived", "unavailable"]
@@ -301,6 +303,22 @@ class PremiumRiskBasis(BaseModel):
     def _validate_declared_risk(self) -> PremiumRiskBasis:
         if self.stop_premium >= self.entry_premium:
             raise ValueError("premium risk basis requires stop_premium below entry_premium")
+        expected = (
+            self.entry_premium
+            - self.stop_premium
+            + self.entry_cost_premium
+            + self.exit_cost_premium
+        )
+        if not math.isclose(
+            self.declared_risk_premium,
+            expected,
+            rel_tol=NUMERIC_TOLERANCE,
+            abs_tol=NUMERIC_TOLERANCE,
+        ):
+            raise ValueError(
+                "declared_risk_premium must equal entry_premium - stop_premium "
+                "+ entry_cost_premium + exit_cost_premium"
+            )
         return self
 
 
@@ -461,10 +479,38 @@ class PremiumOutcomeRecord(BaseModel):
 
     @model_validator(mode="after")
     def _validate_outcome_semantics(self) -> PremiumOutcomeRecord:
+        self._validate_identity_links()
+        self._validate_policy_cost_agreement()
         self._validate_no_lookahead_inputs()
         self._validate_observation_timing()
         self._validate_status_evidence()
         return self
+
+    def _validate_identity_links(self) -> None:
+        if (
+            self.selected_contract is not None
+            and self.source_contract_id is not None
+            and self.source_contract_id != self.selected_contract.source_contract_id
+        ):
+            raise ValueError(
+                "source_contract_id must match selected_contract.source_contract_id"
+            )
+        if (
+            self.decision_intent_signal_id is not None
+            and self.decision_intent_signal_id != self.source_signal_id
+        ):
+            raise ValueError("decision_intent_signal_id must match source_signal_id")
+
+    def _validate_policy_cost_agreement(self) -> None:
+        if not math.isclose(
+            self.policy.params.slippage_ticks,
+            self.cost_model.slippage_ticks,
+            rel_tol=NUMERIC_TOLERANCE,
+            abs_tol=NUMERIC_TOLERANCE,
+        ):
+            raise ValueError("policy slippage_ticks must match cost_model.slippage_ticks")
+        if self.policy.params.tick_size != self.cost_model.tick_size:
+            raise ValueError("policy tick_size must match cost_model.tick_size")
 
     def _validate_no_lookahead_inputs(self) -> None:
         if (
