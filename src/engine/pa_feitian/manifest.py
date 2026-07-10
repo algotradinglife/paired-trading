@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 PA_FEITIAN_RUN_MANIFEST_SCHEMA_VERSION = "pa_feitian_run_manifest_v1"
 HashDigest = str
-ArtifactKind = Literal["scorecard", "snapshot", "decision_intent"]
+ArtifactKind = Literal["scorecard", "snapshot", "decision_intent", "premium_outcome"]
 ReviewStatus = Literal["pending", "approved", "changes_requested", "rejected"]
 DataAccessStatus = Literal["real_data_available", "fixture_fallback", "data_blocked", "unknown"]
 HASH_DIGEST_PATTERN = re.compile(r"^sha256:[a-f0-9]{64}$")
@@ -103,6 +103,7 @@ class PaFeitianRunManifest(BaseModel):
     scorecard_artifact: PaFeitianArtifactRef
     snapshot_artifact: PaFeitianArtifactRef
     decision_intent_artifact: PaFeitianArtifactRef | None = None
+    premium_outcome_artifact: PaFeitianArtifactRef | None = None
     cli_args: list[str]
     run_config: dict[str, Any]
     data_access: PaFeitianDataAccess = Field(default_factory=PaFeitianDataAccess)
@@ -137,6 +138,11 @@ class PaFeitianRunManifest(BaseModel):
             and self.decision_intent_artifact.kind != "decision_intent"
         ):
             raise ValueError("decision_intent_artifact.kind must be decision_intent")
+        if (
+            self.premium_outcome_artifact is not None
+            and self.premium_outcome_artifact.kind != "premium_outcome"
+        ):
+            raise ValueError("premium_outcome_artifact.kind must be premium_outcome")
         if self.input_hashes.get("scorecard_artifact") != self.scorecard_artifact.sha256:
             raise ValueError("input_hashes.scorecard_artifact must match scorecard_artifact.sha256")
         if self.output_hashes.get("snapshot_artifact") != self.snapshot_artifact.sha256:
@@ -151,6 +157,17 @@ class PaFeitianRunManifest(BaseModel):
             raise ValueError(
                 "output_hashes.decision_intent_artifact must match "
                 "decision_intent_artifact.sha256"
+            )
+        premium_outcome_hash = self.output_hashes.get("premium_outcome_artifact")
+        if self.premium_outcome_artifact is None:
+            if premium_outcome_hash is not None:
+                raise ValueError(
+                    "premium_outcome_artifact is required when output_hashes includes it"
+                )
+        elif premium_outcome_hash != self.premium_outcome_artifact.sha256:
+            raise ValueError(
+                "output_hashes.premium_outcome_artifact must match "
+                "premium_outcome_artifact.sha256"
             )
         if self.frontend_copy_path is not None and "frontend_copy" not in self.output_hashes:
             raise ValueError("output_hashes.frontend_copy is required when frontend_copy_path is set")
@@ -181,6 +198,7 @@ def build_run_manifest(
     generated_at_utc: datetime | None = None,
     frontend_copy_path: str | Path | None = None,
     decision_intent_path: str | Path | None = None,
+    premium_outcome_path: str | Path | None = None,
     review_state: PaFeitianReviewState | Mapping[str, Any] | None = None,
     data_access: PaFeitianDataAccess | Mapping[str, Any] | None = None,
     scorecard_schema_version: str = "score_today_json",
@@ -204,6 +222,14 @@ def build_run_manifest(
             schema_version=_schema_version_from_json(decision_intent_path),
         )
         output_hashes["decision_intent_artifact"] = decision_intent_ref.sha256
+    premium_outcome_ref = None
+    if premium_outcome_path is not None:
+        premium_outcome_ref = artifact_ref_from_file(
+            premium_outcome_path,
+            kind="premium_outcome",
+            schema_version=_schema_version_from_json(premium_outcome_path),
+        )
+        output_hashes["premium_outcome_artifact"] = premium_outcome_ref.sha256
     frontend_copy_text = None
     if frontend_copy_path is not None:
         frontend_copy_text = _path_text(frontend_copy_path)
@@ -229,6 +255,7 @@ def build_run_manifest(
         scorecard_artifact=scorecard_ref,
         snapshot_artifact=snapshot_ref,
         decision_intent_artifact=decision_intent_ref,
+        premium_outcome_artifact=premium_outcome_ref,
         cli_args=list(cli_args),
         run_config=_jsonable_mapping(run_config),
         data_access=access,
@@ -247,6 +274,8 @@ def run_manifest_to_jsonable(manifest: PaFeitianRunManifest) -> dict[str, Any]:
     payload = manifest.model_dump(mode="json", exclude_none=False)
     if manifest.decision_intent_artifact is None:
         payload.pop("decision_intent_artifact", None)
+    if manifest.premium_outcome_artifact is None:
+        payload.pop("premium_outcome_artifact", None)
     return payload
 
 

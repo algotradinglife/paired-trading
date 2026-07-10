@@ -40,6 +40,9 @@
     "decision_intent_artifact": {
       "$ref": "#/$defs/decision_intent_artifact"
     },
+    "premium_outcome_artifact": {
+      "$ref": "#/$defs/premium_outcome_artifact"
+    },
     "cli_args": {
       "type": "array",
       "items": {
@@ -79,6 +82,9 @@
           "$ref": "#/$defs/hash_digest"
         },
         "decision_intent_artifact": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "premium_outcome_artifact": {
           "$ref": "#/$defs/hash_digest"
         },
         "frontend_copy": {
@@ -176,6 +182,37 @@
       "properties": {
         "kind": {
           "const": "decision_intent"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "schema_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "content_type": {
+          "const": "application/json"
+        }
+      }
+    },
+    "premium_outcome_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "path",
+        "sha256",
+        "schema_version",
+        "content_type"
+      ],
+      "properties": {
+        "kind": {
+          "const": "premium_outcome"
         },
         "path": {
           "type": "string"

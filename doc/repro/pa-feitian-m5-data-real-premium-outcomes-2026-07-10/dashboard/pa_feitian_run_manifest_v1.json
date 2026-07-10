@@ -11,21 +11,21 @@
   },
   "snapshot_artifact": {
     "kind": "snapshot",
-    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json",
+    "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_snapshot_v1.json",
     "sha256": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf",
     "schema_version": "pa_feitian_snapshot_v1",
     "content_type": "application/json"
   },
   "decision_intent_artifact": {
     "kind": "decision_intent",
-    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_decision_intent_v1.json",
+    "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/dashboard/pa_feitian_decision_intent_v1.json",
     "sha256": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
     "schema_version": "pa_feitian_decision_intent_v1",
     "content_type": "application/json"
   },
   "premium_outcome_artifact": {
     "kind": "premium_outcome",
-    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_premium_outcome_v1.json",
+    "path": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/dashboard/pa_feitian_premium_outcome_v1.json",
     "sha256": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
     "schema_version": "pa_feitian_premium_outcome_v1",
     "content_type": "application/json"
@@ -98,7 +98,7 @@
     "frontend_premium_outcome_copy": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
     "frontend_decision_intent_copy": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0"
   },
-  "frontend_copy_path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json",
+  "frontend_copy_path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/dashboard/pa_feitian_snapshot_v1.json",
   "review_state": {
     "status": "pending",
     "reviewer": null,

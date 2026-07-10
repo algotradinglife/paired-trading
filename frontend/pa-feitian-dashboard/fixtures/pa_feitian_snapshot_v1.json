@@ -1,109 +1,144 @@
 {
   "schema_version": "pa_feitian_snapshot_v1",
-  "generated_at_utc": "2026-07-07T00:00:00Z",
-  "source_commit": "cccccccccccccccccccccccccccccccccccccccc",
+  "generated_at_utc": "2026-07-10T00:00:00Z",
+  "source_commit": "d7a71db5bb48fe7077789bec1ee6b91910aa25cf",
   "run_config": {
     "contract": "pa_feitian_snapshot_v1",
     "mode": "scorecard",
     "producer": "src/scripts/emit_pa_feitian_snapshot.py",
-    "source_scorecard": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    "source_scorecard": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/score_today_cn_metal_120d_2026-07-10.json",
     "pool": "CN_METAL",
     "instrument_class": "cn_metal_futures",
-    "window_days": 30,
-    "active_rules": [
-      "pa-h2-cn-metal"
-    ],
+    "window_days": 120,
+    "active_rules": [],
     "iv_warmup": 1,
     "iv_max_rank": 0.66,
-    "max_signals": null
+    "max_signals": 20
   },
   "data_quality": {
     "raw_data_access": "not_used_by_pa_feitian_producer",
     "source_output_type": "score_today_json",
-    "source_records_total": 3,
-    "source_records_with_options": 3,
+    "source_records_total": 13,
+    "source_records_with_options": 4,
     "selected_option_price_sources": {
-      "model": 1,
-      "store": 2
+      "store": 4
     },
     "selected_option_missing_price": 0,
-    "selected_option_missing_iv_or_rank": 1
+    "selected_option_missing_iv_or_rank": 2
   },
   "summary": {
-    "signals_total": 3,
+    "signals_total": 4,
     "by_status": {
       "keep": 1,
-      "data_blocked": 1,
-      "model_dominated": 1
+      "drop": 1,
+      "data_blocked": 2
     },
     "by_instrument": {
-      "SHFE.au": 3
+      "SHFE.ag": 2,
+      "SHFE.au": 2
     },
     "integration_milestone": "producer_scorecard_to_pa_feitian_snapshot"
   },
   "signals": [
     {
-      "id": "paft_scorecard_0001_kq_m_shfe_au_20260628000000",
+      "id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
       "instrument": "SHFE.au",
       "contract": "kq_m_shfe_au",
       "interval": "1d",
-      "ts_utc": "2026-06-28T00:00:00Z",
+      "ts_utc": "2026-03-13T00:00:00Z",
       "underlying_signal": {
         "family": "pa_feitian",
         "source": "score_today",
         "symbol": "kq_m_shfe_au",
         "direction": "bottom",
-        "level": "pa_h2",
-        "subtype": "pa_h2",
-        "confidence": 0.75,
-        "score": 4,
-        "policy_rule": "pa-h2-cn-metal-tr-phase",
-        "policy_weight": 0.75,
+        "level": "context_a",
+        "subtype": "context_a",
+        "confidence": 0.6,
+        "score": 3,
+        "policy_rule": "context-a-k3-conditional",
+        "policy_weight": 0.6,
         "matched_sweet_spots": [],
-        "direction_verdict": null,
-        "direction_confidence": null,
-        "direction_sources": null,
-        "direction_rationale": null
+        "direction_verdict": "long_call",
+        "direction_confidence": 0.5,
+        "direction_sources": {
+          "daily_structure": "neutral",
+          "hourly_state": "bull",
+          "context": "bull",
+          "divergence": "neutral",
+          "weekly_trend": "bull",
+          "minute15_state": "bull",
+          "force_balance": "neutral",
+          "exhaustion": "neutral"
+        },
+        "direction_rationale": "daily_structure=neutral, hourly_state=bull, context=bull, divergence=neutral, weekly_trend=bull, minute15_state=bull, force_balance=neutral, exhaustion=neutral"
       },
       "features_det": {
         "lookahead_free": true,
-        "cutoff_ts_utc": "2026-06-28T00:00:00Z",
+        "cutoff_ts_utc": "2026-03-13T00:00:00Z",
         "source_record_index": 1,
-        "underlying_price": 860.0,
-        "invalidation_level": null,
+        "underlying_price": 1135.9,
+        "invalidation_level": 995.346,
         "position_size": "half",
         "pa_isolated": null,
-        "pa_phase": "TR",
+        "pa_phase": null,
         "pa_15m_confirmed": null,
         "signal_bar_quality": {
-          "body_frac": 0.82,
-          "close_pos": 0.97,
-          "double_strong": true
+          "body_frac": 0.802,
+          "close_pos": 0.045,
+          "double_strong": false
         },
         "options_calls": [
           {
             "rank": 1,
-            "strike": 880,
-            "otm_pct": 2.33,
-            "expiry_month": "2608",
-            "expiry_date": "2026-08-17",
-            "contract_sym": "au2608c880",
-            "days_to_expiry": 45,
+            "strike": 1152,
+            "otm_pct": 1.42,
+            "expiry_month": "2606",
+            "expiry_date": "2026-05-25",
+            "contract_sym": "au2606c1152",
+            "days_to_expiry": 73,
+            "mm_target_pct": null,
             "is_mm_strike": false,
-            "option_price": 18.5,
+            "option_price": 53.06,
             "price_source": "store",
-            "model_dominated": false,
-            "iv": 20.0
+            "iv": 29.9
+          },
+          {
+            "rank": 2,
+            "strike": 1168,
+            "otm_pct": 2.83,
+            "expiry_month": "2606",
+            "expiry_date": "2026-05-25",
+            "contract_sym": "au2606c1168",
+            "days_to_expiry": 73,
+            "mm_target_pct": null,
+            "is_mm_strike": false,
+            "option_price": 49.68,
+            "price_source": "store",
+            "iv": 31.49
+          },
+          {
+            "rank": 3,
+            "strike": 1184,
+            "otm_pct": 4.23,
+            "expiry_month": "2606",
+            "expiry_date": "2026-05-25",
+            "contract_sym": "au2606c1184",
+            "days_to_expiry": 73,
+            "mm_target_pct": null,
+            "is_mm_strike": false,
+            "option_price": 45.46,
+            "price_source": "store",
+            "iv": 32.39
           }
         ],
-        "selected_option_contract": "au2608c880"
+        "selected_option_contract": "au2606c1152"
       },
       "decision": "watch",
-      "decision_trace": "score_today:pa_h2 score=4 policy=pa-h2-cn-metal-tr-phase selected=au2608c880 status=data_blocked iv=iv_warmup(<1 prior signals)",
+      "decision_trace": "score_today:context_a score=3 policy=context-a-k3-conditional selected=au2606c1152 status=data_blocked iv=iv_warmup(<1 prior signals)",
       "option_leg": {
         "side": "call",
-        "strike": 880.0,
-        "dte": 45,
+        "strike": 1152.0,
+        "dte": 73,
         "otm_rank": 1,
         "delta_estimate": null,
         "selection_status": "data_blocked"
@@ -125,9 +160,9 @@
       "premium_r_outcome": {
         "available": false,
         "reason": "live_snapshot_no_forward_premium_outcome",
-        "entry_price": 18.5,
+        "entry_price": 53.06,
         "price_source": "store",
-        "selected_contract": "au2608c880"
+        "selected_contract": "au2606c1152"
       },
       "option_runner_outcome": null,
       "proxy_outcome": null,
@@ -143,8 +178,8 @@
         "summary": {
           "headline": "underlying signal accepted; causal IV rank blocked",
           "primary_blocker": "iv_rank_missing",
-          "selected_option_contract": "au2608c880",
-          "confidence": 0.75
+          "selected_option_contract": "au2606c1152",
+          "confidence": 0.6
         },
         "input_refs": [
           {
@@ -152,8 +187,8 @@
             "kind": "scorecard_record",
             "source": "score_today_json",
             "record_index": 1,
-            "asof_ts_utc": "2026-06-28T00:00:00Z",
-            "digest": "sha256:27dced3aa613b6b2555f45708b553f9e8be342061ef4fc75dd6681b4163592b1"
+            "asof_ts_utc": "2026-03-13T00:00:00Z",
+            "digest": "sha256:eaa2bd54bbb9bc689432b3256926c913e1a07b55cba571e9a9b203fe189a553a"
           }
         ],
         "nodes": [
@@ -167,7 +202,7 @@
             "evidence": [
               {
                 "key": "score",
-                "value": 4,
+                "value": 3,
                 "source_ref": "scorecard_record:1"
               },
               {
@@ -177,7 +212,7 @@
               },
               {
                 "key": "level",
-                "value": "pa_h2",
+                "value": "context_a",
                 "source_ref": "scorecard_record:1"
               }
             ]
@@ -192,12 +227,12 @@
             "evidence": [
               {
                 "key": "policy_rule",
-                "value": "pa-h2-cn-metal-tr-phase",
+                "value": "context-a-k3-conditional",
                 "source_ref": "scorecard_record:1"
               },
               {
                 "key": "policy_weight",
-                "value": 0.75,
+                "value": 0.6,
                 "source_ref": "scorecard_record:1"
               }
             ]
@@ -212,7 +247,7 @@
             "evidence": [
               {
                 "key": "selected_option_contract",
-                "value": "au2608c880",
+                "value": "au2606c1152",
                 "source_ref": "scorecard_record:1"
               },
               {
@@ -222,12 +257,12 @@
               },
               {
                 "key": "strike",
-                "value": 880,
+                "value": 1152,
                 "source_ref": "scorecard_record:1"
               },
               {
                 "key": "dte",
-                "value": 45,
+                "value": 73,
                 "source_ref": "scorecard_record:1"
               },
               {
@@ -252,7 +287,7 @@
             "evidence": [
               {
                 "key": "iv",
-                "value": 20.0,
+                "value": 29.9,
                 "source_ref": "scorecard_record:1"
               },
               {
@@ -277,7 +312,7 @@
             "evidence": [
               {
                 "key": "option_price",
-                "value": 18.5,
+                "value": 53.06,
                 "source_ref": "scorecard_record:1"
               },
               {
@@ -311,21 +346,21 @@
       }
     },
     {
-      "id": "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
+      "id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
       "instrument": "SHFE.au",
       "contract": "kq_m_shfe_au",
       "interval": "1d",
-      "ts_utc": "2026-06-29T00:00:00Z",
+      "ts_utc": "2026-03-18T00:00:00Z",
       "underlying_signal": {
         "family": "pa_feitian",
         "source": "score_today",
         "symbol": "kq_m_shfe_au",
         "direction": "bottom",
-        "level": "pa_h2",
-        "subtype": "pa_h2",
+        "level": "bpull",
+        "subtype": "bpull",
         "confidence": 0.75,
         "score": 4,
-        "policy_rule": "pa-h2-cn-metal-tr-phase",
+        "policy_rule": "bpull-k3-cn-metal",
         "policy_weight": 0.75,
         "matched_sweet_spots": [],
         "direction_verdict": null,
@@ -335,43 +370,71 @@
       },
       "features_det": {
         "lookahead_free": true,
-        "cutoff_ts_utc": "2026-06-29T00:00:00Z",
+        "cutoff_ts_utc": "2026-03-18T00:00:00Z",
         "source_record_index": 2,
-        "underlying_price": 860.0,
-        "invalidation_level": null,
-        "position_size": "half",
+        "underlying_price": 1116.76,
+        "invalidation_level": 995.346,
+        "position_size": "full",
         "pa_isolated": null,
-        "pa_phase": "TR",
+        "pa_phase": null,
         "pa_15m_confirmed": null,
         "signal_bar_quality": {
-          "body_frac": 0.82,
-          "close_pos": 0.97,
-          "double_strong": true
+          "body_frac": 0.326,
+          "close_pos": 0.495,
+          "double_strong": false
         },
         "options_calls": [
           {
             "rank": 1,
-            "strike": 880,
-            "otm_pct": 2.33,
-            "expiry_month": "2608",
-            "expiry_date": "2026-08-17",
-            "contract_sym": "au2608c880",
-            "days_to_expiry": 45,
+            "strike": 1136,
+            "otm_pct": 1.72,
+            "expiry_month": "2606",
+            "expiry_date": "2026-05-25",
+            "contract_sym": "au2606c1136",
+            "days_to_expiry": 68,
+            "mm_target_pct": null,
             "is_mm_strike": false,
-            "option_price": 12.2,
+            "option_price": 41.5,
             "price_source": "store",
-            "model_dominated": false,
-            "iv": 10.0
+            "iv": 26.15
+          },
+          {
+            "rank": 2,
+            "strike": 1152,
+            "otm_pct": 3.16,
+            "expiry_month": "2606",
+            "expiry_date": "2026-05-25",
+            "contract_sym": "au2606c1152",
+            "days_to_expiry": 68,
+            "mm_target_pct": null,
+            "is_mm_strike": false,
+            "option_price": 35.98,
+            "price_source": "store",
+            "iv": 26.56
+          },
+          {
+            "rank": 3,
+            "strike": 1160,
+            "otm_pct": 3.87,
+            "expiry_month": "2606",
+            "expiry_date": "2026-05-25",
+            "contract_sym": "au2606c1160",
+            "days_to_expiry": 68,
+            "mm_target_pct": null,
+            "is_mm_strike": false,
+            "option_price": 33.4,
+            "price_source": "store",
+            "iv": 26.71
           }
         ],
-        "selected_option_contract": "au2608c880"
+        "selected_option_contract": "au2606c1136"
       },
       "decision": "take",
-      "decision_trace": "score_today:pa_h2 score=4 policy=pa-h2-cn-metal-tr-phase selected=au2608c880 status=keep",
+      "decision_trace": "score_today:bpull score=4 policy=bpull-k3-cn-metal selected=au2606c1136 status=keep",
       "option_leg": {
         "side": "call",
-        "strike": 880.0,
-        "dte": 45,
+        "strike": 1136.0,
+        "dte": 68,
         "otm_rank": 1,
         "delta_estimate": null,
         "selection_status": "keep"
@@ -393,9 +456,9 @@
       "premium_r_outcome": {
         "available": false,
         "reason": "live_snapshot_no_forward_premium_outcome",
-        "entry_price": 12.2,
+        "entry_price": 41.5,
         "price_source": "store",
-        "selected_contract": "au2608c880"
+        "selected_contract": "au2606c1136"
       },
       "option_runner_outcome": null,
       "proxy_outcome": null,
@@ -410,7 +473,7 @@
         "summary": {
           "headline": "premium runner candidate accepted",
           "primary_blocker": null,
-          "selected_option_contract": "au2608c880",
+          "selected_option_contract": "au2606c1136",
           "confidence": 0.75
         },
         "input_refs": [
@@ -419,8 +482,8 @@
             "kind": "scorecard_record",
             "source": "score_today_json",
             "record_index": 2,
-            "asof_ts_utc": "2026-06-29T00:00:00Z",
-            "digest": "sha256:30d70f3ca92533885529ec662b92395cbbf62444da34b832d4749b3cee3a8fcc"
+            "asof_ts_utc": "2026-03-18T00:00:00Z",
+            "digest": "sha256:1de24380193981223babe7b52c22b2dee3d6ffe88fc5b0aceae66da5e8d7fda3"
           }
         ],
         "nodes": [
@@ -444,7 +507,7 @@
               },
               {
                 "key": "level",
-                "value": "pa_h2",
+                "value": "bpull",
                 "source_ref": "scorecard_record:2"
               }
             ]
@@ -459,7 +522,7 @@
             "evidence": [
               {
                 "key": "policy_rule",
-                "value": "pa-h2-cn-metal-tr-phase",
+                "value": "bpull-k3-cn-metal",
                 "source_ref": "scorecard_record:2"
               },
               {
@@ -479,7 +542,7 @@
             "evidence": [
               {
                 "key": "selected_option_contract",
-                "value": "au2608c880",
+                "value": "au2606c1136",
                 "source_ref": "scorecard_record:2"
               },
               {
@@ -489,12 +552,12 @@
               },
               {
                 "key": "strike",
-                "value": 880,
+                "value": 1136,
                 "source_ref": "scorecard_record:2"
               },
               {
                 "key": "dte",
-                "value": 45,
+                "value": 68,
                 "source_ref": "scorecard_record:2"
               },
               {
@@ -519,7 +582,7 @@
             "evidence": [
               {
                 "key": "iv",
-                "value": 10.0,
+                "value": 26.15,
                 "source_ref": "scorecard_record:2"
               },
               {
@@ -544,7 +607,7 @@
             "evidence": [
               {
                 "key": "option_price",
-                "value": 12.2,
+                "value": 41.5,
                 "source_ref": "scorecard_record:2"
               },
               {
@@ -578,21 +641,21 @@
       }
     },
     {
-      "id": "paft_scorecard_0003_kq_m_shfe_au_20260630000000",
-      "instrument": "SHFE.au",
-      "contract": "kq_m_shfe_au",
+      "id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "instrument": "SHFE.ag",
+      "contract": "kq_m_shfe_ag",
       "interval": "1d",
-      "ts_utc": "2026-06-30T00:00:00Z",
+      "ts_utc": "2026-05-15T00:00:00Z",
       "underlying_signal": {
         "family": "pa_feitian",
         "source": "score_today",
-        "symbol": "kq_m_shfe_au",
+        "symbol": "kq_m_shfe_ag",
         "direction": "bottom",
-        "level": "pa_h2",
-        "subtype": "pa_h2",
+        "level": "bpull",
+        "subtype": "bpull",
         "confidence": 0.75,
         "score": 4,
-        "policy_rule": "pa-h2-cn-metal-tr-phase",
+        "policy_rule": "bpull-k3-cn-metal",
         "policy_weight": 0.75,
         "matched_sweet_spots": [],
         "direction_verdict": null,
@@ -602,55 +665,83 @@
       },
       "features_det": {
         "lookahead_free": true,
-        "cutoff_ts_utc": "2026-06-30T00:00:00Z",
+        "cutoff_ts_utc": "2026-05-15T00:00:00Z",
         "source_record_index": 3,
-        "underlying_price": 860.0,
-        "invalidation_level": null,
-        "position_size": "half",
+        "underlying_price": 19199.0,
+        "invalidation_level": 14919.3,
+        "position_size": "full",
         "pa_isolated": null,
-        "pa_phase": "TR",
+        "pa_phase": null,
         "pa_15m_confirmed": null,
         "signal_bar_quality": {
-          "body_frac": 0.82,
-          "close_pos": 0.97,
-          "double_strong": true
+          "body_frac": 0.913,
+          "close_pos": 0.054,
+          "double_strong": false
         },
         "options_calls": [
           {
             "rank": 1,
-            "strike": 880,
-            "otm_pct": 2.33,
-            "expiry_month": "2608",
-            "expiry_date": "2026-08-17",
-            "contract_sym": "au2608c880",
-            "days_to_expiry": 45,
+            "strike": 19900,
+            "otm_pct": 3.65,
+            "expiry_month": "2607",
+            "expiry_date": "2026-06-08",
+            "contract_sym": "ag2607c19900",
+            "days_to_expiry": 24,
+            "mm_target_pct": null,
             "is_mm_strike": false,
-            "option_price": 10.4,
-            "price_source": "model",
-            "model_dominated": true,
-            "iv": 12.0
+            "option_price": 1144.5,
+            "price_source": "store",
+            "iv": 73.62
+          },
+          {
+            "rank": 2,
+            "strike": 20000,
+            "otm_pct": 4.17,
+            "expiry_month": "2607",
+            "expiry_date": "2026-06-08",
+            "contract_sym": "ag2607c20000",
+            "days_to_expiry": 24,
+            "mm_target_pct": null,
+            "is_mm_strike": false,
+            "option_price": 1050.0,
+            "price_source": "store",
+            "iv": 70.73
+          },
+          {
+            "rank": 3,
+            "strike": 20100,
+            "otm_pct": 4.69,
+            "expiry_month": "2607",
+            "expiry_date": "2026-06-08",
+            "contract_sym": "ag2607c20100",
+            "days_to_expiry": 24,
+            "mm_target_pct": null,
+            "is_mm_strike": false,
+            "option_price": 1128.0,
+            "price_source": "store",
+            "iv": 76.66
           }
         ],
-        "selected_option_contract": "au2608c880"
+        "selected_option_contract": "ag2607c19900"
       },
       "decision": "watch",
-      "decision_trace": "score_today:pa_h2 score=4 policy=pa-h2-cn-metal-tr-phase selected=au2608c880 status=model_dominated",
+      "decision_trace": "score_today:bpull score=4 policy=bpull-k3-cn-metal selected=ag2607c19900 status=data_blocked iv=iv_warmup(<1 prior signals)",
       "option_leg": {
         "side": "call",
-        "strike": 880.0,
-        "dte": 45,
+        "strike": 19900.0,
+        "dte": 24,
         "otm_rank": 1,
         "delta_estimate": null,
-        "selection_status": "model_dominated"
+        "selection_status": "data_blocked"
       },
       "iv_regime": {
-        "iv_rank": 0.5,
-        "keep": true,
-        "reason": null
+        "iv_rank": null,
+        "keep": false,
+        "reason": "iv_warmup(<1 prior signals)"
       },
       "exit_policy": {
         "mode": "runner",
-        "status": "model_dominated",
+        "status": "data_blocked",
         "reason": "runner policy retained for review; final action blocked by status"
       },
       "underlying_r_outcome": {
@@ -660,25 +751,25 @@
       "premium_r_outcome": {
         "available": false,
         "reason": "live_snapshot_no_forward_premium_outcome",
-        "entry_price": 10.4,
-        "price_source": "model",
-        "selected_contract": "au2608c880"
+        "entry_price": 1144.5,
+        "price_source": "store",
+        "selected_contract": "ag2607c19900"
       },
       "option_runner_outcome": null,
       "proxy_outcome": null,
-      "status": "model_dominated",
+      "status": "data_blocked",
       "caveats": [
         "source record is date-granular; ts_utc uses start-of-day UTC",
-        "selected option leg is model-dominated; do not treat as market premium validation"
+        "premium entry or causal IV rank is unavailable in source scorecard"
       ],
       "decision_trace_v1": {
         "trace_version": "decision_trace_v1",
         "action": "watch",
-        "status": "model_dominated",
+        "status": "data_blocked",
         "summary": {
-          "headline": "underlying signal accepted; option leg model-dominated",
-          "primary_blocker": "model_dominated_premium",
-          "selected_option_contract": "au2608c880",
+          "headline": "underlying signal accepted; causal IV rank blocked",
+          "primary_blocker": "iv_rank_missing",
+          "selected_option_contract": "ag2607c19900",
           "confidence": 0.75
         },
         "input_refs": [
@@ -687,8 +778,8 @@
             "kind": "scorecard_record",
             "source": "score_today_json",
             "record_index": 3,
-            "asof_ts_utc": "2026-06-30T00:00:00Z",
-            "digest": "sha256:56ae38fb2e247d40219aae3ff6d5e00b28f0bed2f994400f582c6a007ca09c0e"
+            "asof_ts_utc": "2026-05-15T00:00:00Z",
+            "digest": "sha256:8738c5fd6fe30fd8a6ce868b686cf9f98faf42ddc0fc7fe800929c918a5cd7de"
           }
         ],
         "nodes": [
@@ -712,7 +803,7 @@
               },
               {
                 "key": "level",
-                "value": "pa_h2",
+                "value": "bpull",
                 "source_ref": "scorecard_record:3"
               }
             ]
@@ -727,7 +818,7 @@
             "evidence": [
               {
                 "key": "policy_rule",
-                "value": "pa-h2-cn-metal-tr-phase",
+                "value": "bpull-k3-cn-metal",
                 "source_ref": "scorecard_record:3"
               },
               {
@@ -747,7 +838,7 @@
             "evidence": [
               {
                 "key": "selected_option_contract",
-                "value": "au2608c880",
+                "value": "ag2607c19900",
                 "source_ref": "scorecard_record:3"
               },
               {
@@ -757,12 +848,12 @@
               },
               {
                 "key": "strike",
-                "value": 880,
+                "value": 19900,
                 "source_ref": "scorecard_record:3"
               },
               {
                 "key": "dte",
-                "value": 45,
+                "value": 24,
                 "source_ref": "scorecard_record:3"
               },
               {
@@ -781,23 +872,23 @@
             "id": "iv_regime",
             "kind": "gate",
             "label": "Causal IV regime",
-            "status": "pass",
-            "decision_effect": "promote",
-            "reason": "causal IV rank passed",
+            "status": "blocked",
+            "decision_effect": "block",
+            "reason": "iv_warmup(<1 prior signals)",
             "evidence": [
               {
                 "key": "iv",
-                "value": 12.0,
+                "value": 73.62,
                 "source_ref": "scorecard_record:3"
               },
               {
                 "key": "iv_rank",
-                "value": 0.5,
+                "value": null,
                 "source_ref": "scorecard_record:3"
               },
               {
                 "key": "iv_keep",
-                "value": true,
+                "value": false,
                 "source_ref": "scorecard_record:3"
               }
             ]
@@ -806,18 +897,18 @@
             "id": "premium_entry",
             "kind": "gate",
             "label": "Premium entry availability",
-            "status": "advisory",
-            "decision_effect": "block",
-            "reason": "selected option price is model-dominated",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "selected option leg has an entry price",
             "evidence": [
               {
                 "key": "option_price",
-                "value": 10.4,
+                "value": 1144.5,
                 "source_ref": "scorecard_record:3"
               },
               {
                 "key": "price_source",
-                "value": "model",
+                "value": "store",
                 "source_ref": "scorecard_record:3"
               }
             ]
@@ -837,8 +928,312 @@
               },
               {
                 "key": "exit_status",
-                "value": "model_dominated",
+                "value": "data_blocked",
                 "source_ref": "scorecard_record:3"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "instrument": "SHFE.ag",
+      "contract": "kq_m_shfe_ag",
+      "interval": "1d",
+      "ts_utc": "2026-06-02T00:00:00Z",
+      "underlying_signal": {
+        "family": "pa_feitian",
+        "source": "score_today",
+        "symbol": "kq_m_shfe_ag",
+        "direction": "bottom",
+        "level": "pa_h2",
+        "subtype": "pa_h2",
+        "confidence": 0.75,
+        "score": 3,
+        "policy_rule": "pa-h2-cn-metal-tr-phase",
+        "policy_weight": 0.75,
+        "matched_sweet_spots": [],
+        "direction_verdict": "skip",
+        "direction_confidence": 0.25,
+        "direction_sources": {
+          "daily_structure": "neutral",
+          "hourly_state": "bull",
+          "context": "neutral",
+          "divergence": "neutral",
+          "weekly_trend": "bull",
+          "minute15_state": "neutral",
+          "force_balance": "neutral",
+          "exhaustion": "neutral"
+        },
+        "direction_rationale": "daily_structure=neutral, hourly_state=bull, context=neutral, divergence=neutral, weekly_trend=bull, minute15_state=neutral, force_balance=neutral, exhaustion=neutral"
+      },
+      "features_det": {
+        "lookahead_free": true,
+        "cutoff_ts_utc": "2026-06-02T00:00:00Z",
+        "source_record_index": 4,
+        "underlying_price": 18522.0,
+        "invalidation_level": 17378.46,
+        "position_size": "half",
+        "pa_isolated": false,
+        "pa_phase": "TR_FORMING",
+        "pa_15m_confirmed": true,
+        "signal_bar_quality": {
+          "body_frac": 0.39,
+          "close_pos": 0.974,
+          "double_strong": false
+        },
+        "options_calls": [
+          {
+            "rank": 1,
+            "strike": 18800,
+            "otm_pct": 1.5,
+            "expiry_month": "2608",
+            "expiry_date": "2026-06-16",
+            "contract_sym": "ag2608c18800",
+            "days_to_expiry": 14,
+            "mm_target_pct": null,
+            "is_mm_strike": false,
+            "option_price": 1168.5,
+            "price_source": "store",
+            "iv": 89.53
+          },
+          {
+            "rank": 2,
+            "strike": 19100,
+            "otm_pct": 3.12,
+            "expiry_month": "2608",
+            "expiry_date": "2026-06-16",
+            "contract_sym": "ag2608c19100",
+            "days_to_expiry": 14,
+            "mm_target_pct": null,
+            "is_mm_strike": false,
+            "option_price": 1008.5,
+            "price_source": "store",
+            "iv": 87.03
+          },
+          {
+            "rank": 3,
+            "strike": 19300,
+            "otm_pct": 4.2,
+            "expiry_month": "2608",
+            "expiry_date": "2026-06-16",
+            "contract_sym": "ag2608c19300",
+            "days_to_expiry": 14,
+            "mm_target_pct": null,
+            "is_mm_strike": false,
+            "option_price": 967.0,
+            "price_source": "store",
+            "iv": 89.49
+          }
+        ],
+        "selected_option_contract": "ag2608c18800"
+      },
+      "decision": "skip",
+      "decision_trace": "score_today:pa_h2 score=3 policy=pa-h2-cn-metal-tr-phase selected=ag2608c18800 status=drop iv=iv_rank_rich(1.00>0.66)",
+      "option_leg": {
+        "side": "call",
+        "strike": 18800.0,
+        "dte": 14,
+        "otm_rank": 1,
+        "delta_estimate": null,
+        "selection_status": "drop"
+      },
+      "iv_regime": {
+        "iv_rank": 1.0,
+        "keep": false,
+        "reason": "iv_rank_rich(1.00>0.66)"
+      },
+      "exit_policy": {
+        "mode": "runner",
+        "status": "drop",
+        "reason": "runner policy retained for review; final action blocked by status"
+      },
+      "underlying_r_outcome": {
+        "available": false,
+        "reason": "live_snapshot_no_forward_underlying_outcome"
+      },
+      "premium_r_outcome": {
+        "available": false,
+        "reason": "live_snapshot_no_forward_premium_outcome",
+        "entry_price": 1168.5,
+        "price_source": "store",
+        "selected_contract": "ag2608c18800"
+      },
+      "option_runner_outcome": null,
+      "proxy_outcome": null,
+      "status": "drop",
+      "caveats": [
+        "source record is date-granular; ts_utc uses start-of-day UTC"
+      ],
+      "decision_trace_v1": {
+        "trace_version": "decision_trace_v1",
+        "action": "skip",
+        "status": "drop",
+        "summary": {
+          "headline": "candidate rejected by contract policy",
+          "primary_blocker": "iv_regime_rich",
+          "selected_option_contract": "ag2608c18800",
+          "confidence": 0.75
+        },
+        "input_refs": [
+          {
+            "id": "scorecard_record:4",
+            "kind": "scorecard_record",
+            "source": "score_today_json",
+            "record_index": 4,
+            "asof_ts_utc": "2026-06-02T00:00:00Z",
+            "digest": "sha256:3af80155fc9860f4852d6a4db4c1a840de18e47a20a3b0c036c7cd100f5a10d7"
+          }
+        ],
+        "nodes": [
+          {
+            "id": "underlying_signal",
+            "kind": "signal",
+            "label": "Score Today underlying signal",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "source scorecard emitted an option candidate",
+            "evidence": [
+              {
+                "key": "score",
+                "value": 3,
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "direction",
+                "value": "bottom",
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "level",
+                "value": "pa_h2",
+                "source_ref": "scorecard_record:4"
+              }
+            ]
+          },
+          {
+            "id": "policy_rule",
+            "kind": "policy",
+            "label": "PA / Feitian policy rule",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "source scorecard supplied a policy rule",
+            "evidence": [
+              {
+                "key": "policy_rule",
+                "value": "pa-h2-cn-metal-tr-phase",
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "policy_weight",
+                "value": 0.75,
+                "source_ref": "scorecard_record:4"
+              }
+            ]
+          },
+          {
+            "id": "option_selection",
+            "kind": "selection",
+            "label": "Option selection",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "selected best ranked scorecard option leg",
+            "evidence": [
+              {
+                "key": "selected_option_contract",
+                "value": "ag2608c18800",
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "side",
+                "value": "call",
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "strike",
+                "value": 18800,
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "dte",
+                "value": 14,
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "otm_rank",
+                "value": 1,
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "delta_estimate",
+                "value": null,
+                "source_ref": "scorecard_record:4"
+              }
+            ]
+          },
+          {
+            "id": "iv_regime",
+            "kind": "gate",
+            "label": "Causal IV regime",
+            "status": "fail",
+            "decision_effect": "demote",
+            "reason": "iv_rank_rich(1.00>0.66)",
+            "evidence": [
+              {
+                "key": "iv",
+                "value": 89.53,
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "iv_rank",
+                "value": 1.0,
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "iv_keep",
+                "value": false,
+                "source_ref": "scorecard_record:4"
+              }
+            ]
+          },
+          {
+            "id": "premium_entry",
+            "kind": "gate",
+            "label": "Premium entry availability",
+            "status": "pass",
+            "decision_effect": "promote",
+            "reason": "selected option leg has an entry price",
+            "evidence": [
+              {
+                "key": "option_price",
+                "value": 1168.5,
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "price_source",
+                "value": "store",
+                "source_ref": "scorecard_record:4"
+              }
+            ]
+          },
+          {
+            "id": "exit_policy",
+            "kind": "policy",
+            "label": "Exit policy",
+            "status": "fail",
+            "decision_effect": "annotate",
+            "reason": "runner policy retained for review; final action blocked by status",
+            "evidence": [
+              {
+                "key": "exit_mode",
+                "value": "runner",
+                "source_ref": "scorecard_record:4"
+              },
+              {
+                "key": "exit_status",
+                "value": "drop",
+                "source_ref": "scorecard_record:4"
               }
             ]
           }
@@ -849,6 +1244,6 @@
   "warnings": [
     "producer consumes score_today/emission output; it does not read raw data stores",
     "forward premium/underlying outcomes are intentionally absent from live snapshots",
-    "1 selected option legs lack causal IV rank"
+    "2 selected option legs lack causal IV rank"
   ]
 }
