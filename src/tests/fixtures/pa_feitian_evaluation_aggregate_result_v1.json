@@ -12,5 +12,6 @@
     "premium_r": {"mean": 5.016949153, "median": 5.016949153, "standard_deviation": 0.0, "median_absolute_deviation": 0.0, "lower_quantile": 5.016949153, "worst_case": 5.016949153, "win_rate": 1.0, "win_definition": "premium_r_gt_zero", "bootstrap_95_ci": {"confidence_level": 0.95, "lower": 5.016949153, "upper": 5.016949153, "method": "fixture_only", "cluster_unit": "event"}},
     "underlying_r_correlation": null, "underlying_r_difference_mean": 4.596949153, "notes": ["single event cannot qualify for screening"]
   }],
+  "walk_forward_folds": [],
   "warnings": ["insufficient sample; no candidate inference"]
 }
