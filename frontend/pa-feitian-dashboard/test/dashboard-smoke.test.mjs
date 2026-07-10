@@ -143,6 +143,8 @@ test("renders generated and review manifest provenance labels", async () => {
   assert.match(generatedHtml, /data_access classification/);
   assert.match(generatedHtml, /Sidecar hash status/);
   assert.match(generatedHtml, /Generated snapshot/);
+  assert.match(generatedHtml, /contract signal\(s\)/);
+  assert.doesNotMatch(generatedHtml, /fixture signal\(s\)/);
   assert.match(generatedHtml, /Scorecard artifact/);
   assert.match(generatedHtml, /Snapshot artifact/);
   assert.match(generatedHtml, /Frontend snapshot copy/);
@@ -167,6 +169,8 @@ test("renders generated and review manifest provenance labels", async () => {
 
   assert.equal(reviewModel.snapshotMode, "review");
   assert.match(reviewHtml, /Review snapshot/);
+  assert.match(reviewHtml, /contract signal\(s\)/);
+  assert.doesNotMatch(reviewHtml, /fixture signal\(s\)/);
   assert.match(reviewHtml, /approved/);
   assert.match(reviewHtml, /chatgpt/);
   assert.match(reviewHtml, /review gate approved/);

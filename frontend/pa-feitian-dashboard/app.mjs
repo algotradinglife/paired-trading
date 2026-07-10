@@ -1469,7 +1469,7 @@ function renderSignalTable(model) {
       <div class="panel-header">
         <div>
           <h2 id="signals-heading">Signal Table</h2>
-          <p>${escapeHtml(model.signals.length)} fixture signal(s)</p>
+          <p>${escapeHtml(model.signals.length)} contract signal(s)</p>
         </div>
       </div>
       <div class="table-wrap">
