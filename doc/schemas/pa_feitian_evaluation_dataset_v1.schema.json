@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/algotradinglife/paired-trading/doc/schemas/pa_feitian_evaluation_dataset_v1.schema.json",
+  "title": "PA / Feitian M6 Evaluation Dataset v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "generated_at_utc", "provenance", "time_boundary", "rows", "filter_reason_counts", "warnings"],
+  "properties": {
+    "schema_version": {"const": "pa_feitian_evaluation_dataset_v1"},
+    "generated_at_utc": {"type": "string", "format": "date-time"},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "time_boundary": {"$ref": "#/$defs/time_boundary"},
+    "rows": {"type": "array", "items": {"$ref": "#/$defs/row"}},
+    "filter_reason_counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "warnings": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "hash_map": {"type": "object", "additionalProperties": {"$ref": "#/$defs/hash"}},
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["role", "source_manifest_path", "source_manifest_sha256", "source_manifest_schema_version", "premium_outcome_artifact_path", "premium_outcome_artifact_sha256", "premium_outcome_schema_version", "source_commit", "producer", "cli_args", "policy_config_sha256", "data_access_status", "fixture_fallback", "random_seed", "input_hashes", "output_hashes", "notes"],
+      "properties": {
+        "role": {"const": "m6_evaluation_dataset"}, "source_manifest_path": {"type": "string"}, "source_manifest_sha256": {"$ref": "#/$defs/hash"}, "source_manifest_schema_version": {"const": "pa_feitian_run_manifest_v1"}, "premium_outcome_artifact_path": {"type": "string"}, "premium_outcome_artifact_sha256": {"$ref": "#/$defs/hash"}, "premium_outcome_schema_version": {"const": "pa_feitian_premium_outcome_v1"}, "source_commit": {"type": "string", "minLength": 7, "maxLength": 40}, "producer": {"type": "string"}, "cli_args": {"type": "array", "items": {"type": "string"}}, "policy_config_sha256": {"$ref": "#/$defs/hash"}, "data_access_status": {"enum": ["real_data_available", "fixture_fallback", "data_blocked", "unknown"]}, "fixture_fallback": {"type": "boolean"}, "random_seed": {"type": ["integer", "null"]}, "input_hashes": {"$ref": "#/$defs/hash_map"}, "output_hashes": {"$ref": "#/$defs/hash_map"}, "notes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "time_boundary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["timezone", "trading_calendar", "decision_start_utc", "decision_end_utc", "split_method", "folds_declared"],
+      "properties": {"timezone": {"type": "string", "minLength": 1}, "trading_calendar": {"type": "string", "minLength": 1}, "decision_start_utc": {"type": "string", "format": "date-time"}, "decision_end_utc": {"type": "string", "format": "date-time"}, "split_method": {"enum": ["walk_forward", "fixed_time_holdout", "not_applicable"]}, "folds_declared": {"type": "integer", "minimum": 0}}
+    },
+    "row": {
+      "type": "object", "additionalProperties": false,
+      "required": ["row_id", "event_id", "outcome_id", "source_signal_id", "source_contract_id", "decision_ts_utc", "pool", "underlying", "decision_state", "decision_trace_node_ids", "iv_gate_status", "option_type", "contract_family", "moneyness_bucket", "policy_id", "policy_version", "policy_sha256", "evaluation_status", "exit_reason", "premium_r", "underlying_r", "premium_mfe", "premium_mae", "input_refs"],
+      "properties": {
+        "row_id": {"type": "string", "pattern": "^[a-z0-9_:-]+$"}, "event_id": {"type": "string"}, "outcome_id": {"type": "string"}, "source_signal_id": {"type": "string"}, "source_contract_id": {"type": ["string", "null"]}, "decision_ts_utc": {"type": "string", "format": "date-time"}, "pool": {"type": "string"}, "underlying": {"type": "string"}, "decision_state": {"enum": ["reject", "watch", "armed_watch", "trade_ready", "observation_runner"]}, "decision_trace_node_ids": {"type": "array", "items": {"type": "string"}}, "iv_gate_status": {"enum": ["pass", "fail", "unknown", "not_evaluable"]}, "option_type": {"enum": ["call", "put", "unknown"]}, "contract_family": {"type": "string"}, "moneyness_bucket": {"type": "string"}, "policy_id": {"type": "string"}, "policy_version": {"type": "string"}, "policy_sha256": {"$ref": "#/$defs/hash"}, "evaluation_status": {"enum": ["observed", "ambiguous", "data_blocked", "not_evaluable"]}, "exit_reason": {"enum": ["premium_stop", "premium_target", "time_exit", "data_gap", "unresolved", "not_evaluable"]}, "premium_r": {"type": ["number", "null"]}, "underlying_r": {"type": ["number", "null"]}, "premium_mfe": {"type": ["number", "null"]}, "premium_mae": {"type": ["number", "null"]}, "input_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      }
+    }
+  }
+}

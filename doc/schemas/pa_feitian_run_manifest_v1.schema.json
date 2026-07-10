@@ -43,6 +43,30 @@
     "premium_outcome_artifact": {
       "$ref": "#/$defs/premium_outcome_artifact"
     },
+    "evaluation_dataset_artifact": {
+      "anyOf": [
+        {"$ref": "#/$defs/evaluation_dataset_artifact"},
+        {"type": "null"}
+      ]
+    },
+    "evaluation_aggregate_result_artifact": {
+      "anyOf": [
+        {"$ref": "#/$defs/evaluation_aggregate_result_artifact"},
+        {"type": "null"}
+      ]
+    },
+    "evaluation_failure_mode_report_artifact": {
+      "anyOf": [
+        {"$ref": "#/$defs/evaluation_failure_mode_report_artifact"},
+        {"type": "null"}
+      ]
+    },
+    "evaluation_screening_report_artifact": {
+      "anyOf": [
+        {"$ref": "#/$defs/evaluation_screening_report_artifact"},
+        {"type": "null"}
+      ]
+    },
     "cli_args": {
       "type": "array",
       "items": {
@@ -85,6 +109,18 @@
           "$ref": "#/$defs/hash_digest"
         },
         "premium_outcome_artifact": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "evaluation_dataset_artifact": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "evaluation_aggregate_result_artifact": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "evaluation_failure_mode_report_artifact": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "evaluation_screening_report_artifact": {
           "$ref": "#/$defs/hash_digest"
         },
         "frontend_copy": {
@@ -229,6 +265,54 @@
         "content_type": {
           "const": "application/json"
         }
+      }
+    },
+    "evaluation_dataset_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "sha256", "schema_version", "content_type"],
+      "properties": {
+        "kind": {"const": "evaluation_dataset"},
+        "path": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/hash_digest"},
+        "schema_version": {"const": "pa_feitian_evaluation_dataset_v1"},
+        "content_type": {"const": "application/json"}
+      }
+    },
+    "evaluation_aggregate_result_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "sha256", "schema_version", "content_type"],
+      "properties": {
+        "kind": {"const": "evaluation_aggregate_result"},
+        "path": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/hash_digest"},
+        "schema_version": {"const": "pa_feitian_evaluation_aggregate_result_v1"},
+        "content_type": {"const": "application/json"}
+      }
+    },
+    "evaluation_failure_mode_report_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "sha256", "schema_version", "content_type"],
+      "properties": {
+        "kind": {"const": "evaluation_failure_mode_report"},
+        "path": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/hash_digest"},
+        "schema_version": {"const": "pa_feitian_evaluation_failure_mode_report_v1"},
+        "content_type": {"const": "application/json"}
+      }
+    },
+    "evaluation_screening_report_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "sha256", "schema_version", "content_type"],
+      "properties": {
+        "kind": {"const": "evaluation_screening_report"},
+        "path": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/hash_digest"},
+        "schema_version": {"const": "pa_feitian_evaluation_screening_report_v1"},
+        "content_type": {"const": "application/json"}
       }
     },
     "review_state": {

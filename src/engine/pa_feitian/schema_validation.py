@@ -95,6 +95,24 @@ class _SchemaValidator:
         if schema is False:
             raise self._error("boolean false schema rejected value", data_path)
 
+        any_of = schema.get("anyOf")
+        if any_of is not None:
+            if not isinstance(any_of, list):
+                raise JsonSchemaValidationError("schema anyOf must be an array")
+            errors: list[JsonSchemaValidationError] = []
+            for candidate in any_of:
+                if not isinstance(candidate, (Mapping, bool)):
+                    raise JsonSchemaValidationError("schema anyOf entries must be schemas")
+                try:
+                    self._validate(data, candidate, root_schema, data_path)
+                except JsonSchemaValidationError as exc:
+                    errors.append(exc)
+                else:
+                    break
+            else:
+                detail = errors[0] if errors else "no alternatives"
+                raise self._error(f"did not match anyOf ({detail})", data_path)
+
         ref = schema.get("$ref")
         if isinstance(ref, str):
             target_schema, target_root = self._resolve_ref(ref, root_schema)
@@ -271,3 +289,41 @@ def validate_pa_feitian_premium_outcome_schema(
     schema_dir: str | Path = SCHEMA_DIR,
 ) -> None:
     validate_json_schema(data, "pa_feitian_premium_outcome_v1.schema.json", schema_dir=schema_dir)
+
+
+def validate_pa_feitian_evaluation_dataset_schema(
+    data: Any,
+    *,
+    schema_dir: str | Path = SCHEMA_DIR,
+) -> None:
+    validate_json_schema(data, "pa_feitian_evaluation_dataset_v1.schema.json", schema_dir=schema_dir)
+
+
+def validate_pa_feitian_evaluation_aggregate_result_schema(
+    data: Any,
+    *,
+    schema_dir: str | Path = SCHEMA_DIR,
+) -> None:
+    validate_json_schema(
+        data, "pa_feitian_evaluation_aggregate_result_v1.schema.json", schema_dir=schema_dir
+    )
+
+
+def validate_pa_feitian_evaluation_failure_mode_report_schema(
+    data: Any,
+    *,
+    schema_dir: str | Path = SCHEMA_DIR,
+) -> None:
+    validate_json_schema(
+        data, "pa_feitian_evaluation_failure_mode_report_v1.schema.json", schema_dir=schema_dir
+    )
+
+
+def validate_pa_feitian_evaluation_screening_report_schema(
+    data: Any,
+    *,
+    schema_dir: str | Path = SCHEMA_DIR,
+) -> None:
+    validate_json_schema(
+        data, "pa_feitian_evaluation_screening_report_v1.schema.json", schema_dir=schema_dir
+    )
