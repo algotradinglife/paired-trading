@@ -33,11 +33,33 @@ const frontendManifestFixtureUrl = new URL("../fixtures/pa_feitian_run_manifest_
 const decisionIntentFixtureUrl = new URL("../fixtures/pa_feitian_decision_intent_v1.json", import.meta.url);
 const premiumOutcomeFixtureUrl = new URL("../fixtures/pa_feitian_premium_outcome_v1.json", import.meta.url);
 const manifestFixtureUrl = new URL("../../../src/tests/fixtures/pa_feitian_run_manifest_v1.json", import.meta.url);
+const defensiveSnapshotFixtureUrl = new URL("../../../src/tests/fixtures/pa_feitian_snapshot_v1.json", import.meta.url);
+const defensiveDecisionIntentFixtureUrl = new URL(
+  "../../../src/tests/fixtures/pa_feitian_decision_intent_v1.json",
+  import.meta.url,
+);
+const defensivePremiumOutcomeFixtureUrl = new URL(
+  "../../../src/tests/fixtures/pa_feitian_premium_outcome_v1.json",
+  import.meta.url,
+);
+const defensiveManifestFixtureUrl = new URL(
+  "../../../src/tests/fixtures/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+  import.meta.url,
+);
 const appFiles = [
   new URL("../index.html", import.meta.url),
   new URL("../app.mjs", import.meta.url),
   new URL("../styles.css", import.meta.url),
 ];
+
+const realSignalIds = [
+  "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+  "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+  "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+  "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+];
+
+const realContracts = ["au2606c1152", "au2606c1136", "ag2607c19900", "ag2608c18800"];
 
 async function loadFixture(url = fixtureUrl) {
   return JSON.parse(await readFile(url, "utf8"));
@@ -47,13 +69,27 @@ function sha256Digest(raw) {
   return `sha256:${createHash("sha256").update(raw).digest("hex")}`;
 }
 
-test("renders summary, warning, signal table, and trace nodes from the v1 fixture", async () => {
+async function loadDefensiveManifest() {
+  const manifest = await loadFixture(defensiveManifestFixtureUrl);
+  manifest.snapshot_artifact.path = "src/tests/fixtures/pa_feitian_snapshot_v1.json";
+  manifest.decision_intent_artifact.path = "src/tests/fixtures/pa_feitian_decision_intent_v1.json";
+  manifest.premium_outcome_artifact.path = "src/tests/fixtures/pa_feitian_premium_outcome_v1.json";
+  manifest.frontend_copy_path = "src/tests/fixtures/pa_feitian_snapshot_v1.json";
+  manifest.output_hashes.frontend_premium_outcome_copy = manifest.premium_outcome_artifact.sha256;
+  return manifest;
+}
+
+test("renders summary, warning, signal table, and trace nodes from the real M5 frontend fixture", async () => {
   const snapshot = await loadFixture();
   const html = renderDashboard(snapshot);
 
   assert.match(html, /Total signals/);
-  assert.match(html, /paft_scorecard_0001_kq_m_shfe_au_20260628000000/);
-  assert.match(html, /paft_scorecard_0002_kq_m_shfe_au_20260629000000/);
+  for (const signalId of realSignalIds) {
+    assert.match(html, new RegExp(signalId));
+  }
+  for (const contract of realContracts) {
+    assert.match(html, new RegExp(contract));
+  }
   assert.match(html, /data-testid="signal-table"/);
   assert.match(html, /data-testid="signal-drill-down"/);
   assert.match(html, /data-testid="decision-trace-v1"/);
@@ -67,11 +103,11 @@ test("renders summary, warning, signal table, and trace nodes from the v1 fixtur
   assert.match(html, /sha256:/);
   assert.match(html, /iv_regime/);
   assert.match(html, /producer consumes score_today\/emission output/);
-  assert.match(html, /forward premium\/underlying outcomes/);
+  assert.match(html, /candidate rejected by contract policy/);
 });
 
 test("surfaces defensive states, trace node states, and missing optional fields", async () => {
-  const snapshot = await loadFixture();
+  const snapshot = await loadFixture(defensiveSnapshotFixtureUrl);
   const model = buildDashboardModel(snapshot);
   const html = renderDashboard(snapshot);
 
@@ -107,27 +143,18 @@ test("surfaces defensive states, trace node states, and missing optional fields"
   );
 });
 
-test("renders generated and review manifest provenance labels", async () => {
+test("renders generated and review manifest provenance labels for real M5 frontend fixtures", async () => {
   const snapshot = await loadFixture();
-  const manifest = await loadFixture(manifestFixtureUrl);
-  const generatedSnapshot = {
-    ...snapshot,
-    run_config: {
-      ...snapshot.run_config,
-      mode: "scorecard",
-      source_scorecard: "src/tests/fixtures/pa_feitian_scorecard_v1.json",
-    },
-    warnings: ["generated manifest smoke"],
-  };
-
-  const generatedModel = buildDashboardModel(generatedSnapshot, { manifest });
-  const generatedHtml = renderDashboard(generatedSnapshot, { manifest });
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const generatedModel = buildDashboardModel(snapshot, { manifest });
+  const generatedHtml = renderDashboard(snapshot, { manifest });
 
   assert.equal(generatedModel.snapshotMode, "generated");
-  assert.equal(generatedModel.manifest.dataAccess.status, "fixture_fallback");
-  assert.equal(DATA_ACCESS_DEFINITIONS.fixture_fallback, "Deterministic fixture fallback");
+  assert.equal(generatedModel.totalSignals, 4);
+  assert.equal(generatedModel.manifest.dataAccess.status, "real_data_available");
+  assert.equal(DATA_ACCESS_DEFINITIONS.real_data_available, "Explicit generated scorecard artifact");
   assert.equal(HASH_STATUS_DEFINITIONS.match, "Manifest hash link matches");
-  assert.equal(generatedModel.reviewOperations.dataAccess.status, "fixture_fallback");
+  assert.equal(generatedModel.reviewOperations.dataAccess.status, "real_data_available");
   assert.equal(
     generatedModel.reviewOperations.artifactRows.find((row) => row.label === "Scorecard artifact").hashStatus,
     "match",
@@ -136,7 +163,9 @@ test("renders generated and review manifest provenance labels", async () => {
     generatedModel.reviewOperations.artifactRows.find((row) => row.label === "Snapshot artifact").hashStatus,
     "match",
   );
-  assert.equal(generatedModel.reviewOperations.sidecarHashStatus.status, "missing");
+  assert.equal(generatedModel.reviewOperations.sidecarHashStatus.status, "match");
+  assert.equal(generatedModel.reviewOperations.premiumOutcomeHashStatus.status, "match");
+  assert.ok(generatedModel.reviewOperations.artifactRows.every((row) => row.hashStatus === "match"));
   assert.match(generatedHtml, /data-testid="run-manifest-provenance"/);
   assert.match(generatedHtml, /data-testid="review-operations"/);
   assert.match(generatedHtml, /data-testid="artifact-provenance-table"/);
@@ -148,10 +177,13 @@ test("renders generated and review manifest provenance labels", async () => {
   assert.match(generatedHtml, /Scorecard artifact/);
   assert.match(generatedHtml, /Snapshot artifact/);
   assert.match(generatedHtml, /Frontend snapshot copy/);
-  assert.match(generatedHtml, /src\/tests\/fixtures\/pa_feitian_scorecard_v1\.json/);
-  assert.match(generatedHtml, /fixture_fallback/);
-  assert.match(generatedHtml, /Decision intent artifact hash status is missing/);
+  assert.match(generatedHtml, /doc\/repro\/pa-feitian-m4b-real-data-artifacts-2026-07-10\/score_today_cn_metal_120d_2026-07-10\.json/);
+  assert.match(generatedHtml, /real_data_available/);
+  assert.match(generatedHtml, /Decision-intent sidecar status is referenced_missing/);
+  assert.match(generatedHtml, /Premium outcome sidecar status is referenced_missing/);
   assert.match(generatedHtml, /frontend\/pa-feitian-dashboard\/fixtures\/pa_feitian_snapshot_v1\.json/);
+  assert.match(generatedHtml, /frontend\/pa-feitian-dashboard\/fixtures\/pa_feitian_decision_intent_v1\.json/);
+  assert.match(generatedHtml, /frontend\/pa-feitian-dashboard\/fixtures\/pa_feitian_premium_outcome_v1\.json/);
   assert.match(generatedHtml, /Input hashes/);
   assert.match(generatedHtml, /Output hashes/);
 
@@ -164,8 +196,8 @@ test("renders generated and review manifest provenance labels", async () => {
       notes: ["review gate approved"],
     },
   };
-  const reviewModel = buildDashboardModel(generatedSnapshot, { manifest: reviewedManifest });
-  const reviewHtml = renderDashboard(generatedSnapshot, { manifest: reviewedManifest });
+  const reviewModel = buildDashboardModel(snapshot, { manifest: reviewedManifest });
+  const reviewHtml = renderDashboard(snapshot, { manifest: reviewedManifest });
 
   assert.equal(reviewModel.snapshotMode, "review");
   assert.match(reviewHtml, /Review snapshot/);
@@ -196,8 +228,11 @@ test("renders manifest-referenced decision-intent sidecar reviewer fields", asyn
   );
   assert.equal(manifest.decision_intent_artifact.sha256, decisionIntentHash);
   assert.equal(manifest.output_hashes.decision_intent_artifact, decisionIntentHash);
-  assert.equal(model.decisionIntent.stateCounts.trade_ready, 1);
-  assert.equal(model.decisionIntent.executionAllowedCount, 1);
+  assert.equal(model.decisionIntent.stateCounts.watch, 3);
+  assert.equal(model.decisionIntent.stateCounts.reject, 1);
+  assert.equal(model.decisionIntent.executionAllowedCount, 0);
+  assert.deepEqual(model.decisionIntent.unmatchedSignalIds, []);
+  assert.equal(model.signals.every((signal) => signal.decisionIntent), true);
   assert.equal(model.reviewOperations.sidecarHashStatus.status, "match");
   assert.equal(
     model.reviewOperations.artifactRows.find((row) => row.label === "Decision intent artifact").hashStatus,
@@ -208,10 +243,13 @@ test("renders manifest-referenced decision-intent sidecar reviewer fields", asyn
     "match",
   );
 
-  const tradeReadySignal = model.signals.find((signal) => signal.decisionIntent?.decision_state === "trade_ready");
-  assert.ok(tradeReadySignal);
-  assert.equal(tradeReadySignal.decisionIntent.execution_allowed, true);
-  assert.equal(tradeReadySignal.decisionIntent.product_direction_tier, "aligned_trade_candidate");
+  const rejectedSignal = model.signals.find(
+    (signal) => signal.id === "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+  );
+  assert.ok(rejectedSignal);
+  assert.equal(rejectedSignal.decisionIntent.decision_state, "reject");
+  assert.equal(rejectedSignal.decisionIntent.execution_allowed, false);
+  assert.equal(rejectedSignal.decisionIntent.product_direction_tier, "aligned_trade_candidate");
 
   assert.match(html, /data-testid="decision-intent-review"/);
   assert.match(html, /data-testid="decision-intent-sidecar"/);
@@ -223,18 +261,19 @@ test("renders manifest-referenced decision-intent sidecar reviewer fields", asyn
   assert.match(html, /manifest_referenced_decision_intent_sidecar/);
   assert.match(html, /engine\.pa_feitian\.decision_intent_adapter\.v0_2/);
   assert.match(html, /decision_state/);
-  assert.match(html, /execution_allowed: true/);
+  assert.match(html, /execution_allowed: false/);
   assert.match(html, /aligned_trade_candidate/);
-  assert.match(html, /TRADE_READY_PREMIUM_CONFIRMED/);
-  assert.match(html, /PREMIUM_STOP_CLEAR/);
-  assert.match(html, /LIQUIDITY_OK/);
+  assert.match(html, /PREMIUM_STOP_UNAVAILABLE/);
+  assert.match(html, /STOP_CLEAR_DOWNGRADED/);
+  assert.match(html, /LIQ_RECOVERY_REQUIRED/);
+  assert.match(html, /SOURCE_STATUS_DROP/);
   assert.match(html, /Stop distance/);
-  assert.match(html, /swing_low_premium/);
-  assert.match(html, /premium_macd/);
-  assert.match(html, /adequate/);
+  assert.match(html, /blocked/);
+  assert.match(html, /pending/);
+  assert.match(html, /unknown/);
   assert.match(html, /scorecard_record:2/);
-  assert.match(html, /sha256:30d70f3ca92533885529ec662b92395cbbf62444da34b832d4749b3cee3a8fcc/);
-  assert.match(html, /Posterior diagnostic fields are present/);
+  assert.match(html, /sha256:1de24380193981223babe7b52c22b2dee3d6ffe88fc5b0aceae66da5e8d7fda3/);
+  assert.doesNotMatch(html, /TRADE_READY_PREMIUM_CONFIRMED/);
 });
 
 test("renders manifest-referenced premium outcome sidecar reviewer fields", async () => {
@@ -260,13 +299,15 @@ test("renders manifest-referenced premium outcome sidecar reviewer fields", asyn
   assert.equal(manifest.premium_outcome_artifact.sha256, premiumOutcomeHash);
   assert.equal(manifest.output_hashes.premium_outcome_artifact, premiumOutcomeHash);
   assert.equal(manifest.output_hashes.frontend_premium_outcome_copy, premiumOutcomeHash);
-  assert.equal(model.premiumOutcome.evaluationCounts.observed, 1);
-  assert.equal(model.premiumOutcome.evaluationCounts.ambiguous, 1);
-  assert.equal(model.premiumOutcome.evaluationCounts.data_blocked, 1);
-  assert.equal(model.premiumOutcome.evaluationCounts.not_evaluable, 1);
-  assert.deepEqual(model.premiumOutcome.duplicateSourceSignalIds, [
-    "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
-  ]);
+  assert.equal(model.totalSignals, 4);
+  assert.equal(model.premiumOutcome.evaluationCounts.observed, 4);
+  assert.equal(model.premiumOutcome.evaluationCounts.ambiguous, 0);
+  assert.equal(model.premiumOutcome.evaluationCounts.data_blocked, 0);
+  assert.equal(model.premiumOutcome.evaluationCounts.not_evaluable, 0);
+  assert.deepEqual(model.premiumOutcome.duplicateOutcomeIds, []);
+  assert.deepEqual(model.premiumOutcome.duplicateSourceSignalIds, []);
+  assert.deepEqual(model.premiumOutcome.unmatchedSourceSignalIds, []);
+  assert.deepEqual(model.premiumOutcome.missingSignalIds, []);
   assert.equal(model.reviewOperations.premiumOutcomeHashStatus.status, "match");
   assert.equal(
     model.reviewOperations.artifactRows.find((row) => row.label === "Premium outcome artifact").hashStatus,
@@ -276,6 +317,81 @@ test("renders manifest-referenced premium outcome sidecar reviewer fields", asyn
     model.reviewOperations.artifactRows.find((row) => row.label === "Premium outcome frontend copy").hashStatus,
     "match",
   );
+
+  assert.deepEqual(model.signals.map((signal) => signal.id), realSignalIds);
+  assert.equal(model.signals.every((signal) => signal.premiumOutcomes.length === 1), true);
+  const realOutcome = model.signals
+    .find((signal) => signal.id === "paft_scorecard_0002_kq_m_shfe_au_20260318000000")
+    .premiumOutcomes.at(0);
+  assert.equal(realOutcome.evaluation_status, "observed");
+  assert.equal(realOutcome.exit_reason, "premium_stop");
+  assert.equal(realOutcome.selected_contract.contract_symbol, "au2606c1136");
+  assert.equal(realOutcome.premium_metrics.premium_r, -1.0036144578);
+  assert.equal(realOutcome.underlying_context, null);
+  assert.equal(
+    realOutcome.premium_metrics.risk.denominator_label,
+    "declared_premium_risk_after_costs",
+  );
+
+  assert.match(html, /data-testid="premium-outcome-review"/);
+  assert.match(html, /data-testid="premium-outcome-signal-review"/);
+  assert.match(html, /data-testid="premium-outcome-card"/);
+  assert.match(html, /data-testid="premium-outcome-no-lookahead"/);
+  assert.match(html, /data-testid="premium-outcome-hash-status"/);
+  assert.match(html, /data-testid="premium-outcome-provenance"/);
+  assert.match(html, /Premium outcome artifact/);
+  assert.match(html, /Premium outcome frontend copy/);
+  assert.match(html, /manifest_referenced_premium_outcome_sidecar/);
+  assert.match(html, /observed/);
+  assert.match(html, /Selected Contract/);
+  assert.match(html, /au2606c1152/);
+  assert.match(html, /ag2608c18800/);
+  assert.match(html, /Policy/);
+  assert.match(html, /retrospective_fixed/);
+  assert.match(html, /Entry-relative stop/);
+  assert.match(html, /Entry-relative target/);
+  assert.match(html, /Entry \/ Exit/);
+  assert.match(html, /Fill reason/);
+  assert.match(html, /premium_stop/);
+  assert.match(html, /Premium multiple/);
+  assert.match(html, /Premium R/);
+  assert.match(html, /Premium MFE/);
+  assert.match(html, /Premium MAE/);
+  assert.match(html, /Underlying-R Context/);
+  assert.match(html, /No separately labelled underlying-R context is recorded/);
+  assert.match(html, /daily OHLC; observation-only, not exact tick execution proof/);
+  assert.doesNotMatch(html, /Model-derived premium outcome evidence is not observed/);
+  assert.doesNotMatch(html, /Ambiguous premium outcome ordering/);
+  assert.doesNotMatch(html, /Data-blocked premium outcome records are not observed results/);
+  assert.doesNotMatch(html, /Multiple premium outcome policy records share source_signal_id/);
+  assert.doesNotMatch(html, /Premium outcome records without snapshot signals/);
+  assert.doesNotMatch(html, /Snapshot signals missing premium outcome records/);
+  assert.doesNotMatch(html, /daily OHLC proves exact tick execution/);
+});
+
+test("renders defensive premium outcome golden statuses from src test fixture", async () => {
+  const snapshot = await loadFixture(defensiveSnapshotFixtureUrl);
+  const manifest = await loadDefensiveManifest();
+  const decisionIntent = await loadFixture(defensiveDecisionIntentFixtureUrl);
+  const premiumOutcomeRaw = await readFile(defensivePremiumOutcomeFixtureUrl, "utf8");
+  const premiumOutcome = await loadFixture(defensivePremiumOutcomeFixtureUrl);
+  const premiumOutcomeHash = sha256Digest(premiumOutcomeRaw);
+  const model = buildDashboardModel(snapshot, { manifest, decisionIntent, premiumOutcome });
+  const html = renderDashboard(snapshot, { manifest, decisionIntent, premiumOutcome });
+
+  assert.equal(manifest.premium_outcome_artifact.path, "src/tests/fixtures/pa_feitian_premium_outcome_v1.json");
+  assert.equal(manifest.premium_outcome_artifact.sha256, premiumOutcomeHash);
+  assert.equal(manifest.output_hashes.premium_outcome_artifact, premiumOutcomeHash);
+  assert.equal(manifest.output_hashes.frontend_premium_outcome_copy, premiumOutcomeHash);
+  assert.equal(model.premiumOutcome.evaluationCounts.observed, 1);
+  assert.equal(model.premiumOutcome.evaluationCounts.ambiguous, 1);
+  assert.equal(model.premiumOutcome.evaluationCounts.data_blocked, 1);
+  assert.equal(model.premiumOutcome.evaluationCounts.not_evaluable, 1);
+  assert.deepEqual(model.premiumOutcome.unmatchedSourceSignalIds, []);
+  assert.deepEqual(model.premiumOutcome.missingSignalIds, []);
+  assert.deepEqual(model.premiumOutcome.duplicateSourceSignalIds, [
+    "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
+  ]);
 
   const tradeReadySignal = model.signals.find(
     (signal) => signal.id === "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
@@ -291,40 +407,17 @@ test("renders manifest-referenced premium outcome sidecar reviewer fields", asyn
   assert.equal(observedOutcome.premium_metrics.premium_r, 5.016949153);
   assert.equal(observedOutcome.underlying_context.underlying_r, 0.42);
 
-  assert.match(html, /data-testid="premium-outcome-review"/);
-  assert.match(html, /data-testid="premium-outcome-signal-review"/);
-  assert.match(html, /data-testid="premium-outcome-card"/);
-  assert.match(html, /data-testid="premium-outcome-no-lookahead"/);
-  assert.match(html, /data-testid="premium-outcome-hash-status"/);
-  assert.match(html, /data-testid="premium-outcome-provenance"/);
-  assert.match(html, /Premium outcome artifact/);
-  assert.match(html, /Premium outcome frontend copy/);
-  assert.match(html, /manifest_referenced_premium_outcome_sidecar/);
   assert.match(html, /observed/);
   assert.match(html, /ambiguous/);
   assert.match(html, /data_blocked/);
   assert.match(html, /not_evaluable/);
-  assert.match(html, /Selected Contract/);
   assert.match(html, /au2608c880/);
-  assert.match(html, /Policy/);
-  assert.match(html, /retrospective_fixed/);
-  assert.match(html, /Entry-relative stop/);
-  assert.match(html, /Entry-relative target/);
-  assert.match(html, /Entry \/ Exit/);
-  assert.match(html, /Fill reason/);
   assert.match(html, /premium_target/);
-  assert.match(html, /Premium multiple/);
-  assert.match(html, /Premium R/);
-  assert.match(html, /Premium MFE/);
-  assert.match(html, /Premium MAE/);
-  assert.match(html, /Underlying-R Context/);
   assert.match(html, /Underlying R context/);
-  assert.match(html, /daily OHLC; observation-only, not exact tick execution proof/);
   assert.match(html, /Model-derived premium outcome evidence is not observed/);
   assert.match(html, /Ambiguous premium outcome ordering/);
   assert.match(html, /Data-blocked premium outcome records are not observed results/);
   assert.match(html, /Multiple premium outcome policy records share source_signal_id/);
-  assert.doesNotMatch(html, /daily OHLC proves exact tick execution/);
 });
 
 test("flags premium outcome source and frontend copy hash mismatches", async () => {
@@ -374,8 +467,8 @@ test("loads premium outcome sidecar from the manifest artifact path", async () =
 });
 
 test("renders premium outcome missing, referenced_missing, and load_error states defensively", async () => {
-  const snapshot = await loadFixture();
-  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const snapshot = await loadFixture(defensiveSnapshotFixtureUrl);
+  const manifest = await loadDefensiveManifest();
   const manifestWithoutPremium = {
     ...manifest,
     premium_outcome_artifact: undefined,
@@ -433,9 +526,9 @@ test("renders an empty premium outcome sidecar without fabricating signal outcom
 });
 
 test("detects unmatched premium outcome source signals while preserving multiple policy outcomes", async () => {
-  const snapshot = await loadFixture();
-  const manifest = await loadFixture(frontendManifestFixtureUrl);
-  const premiumOutcome = await loadFixture(premiumOutcomeFixtureUrl);
+  const snapshot = await loadFixture(defensiveSnapshotFixtureUrl);
+  const manifest = await loadDefensiveManifest();
+  const premiumOutcome = await loadFixture(defensivePremiumOutcomeFixtureUrl);
   const unmatchedOutcome = {
     ...premiumOutcome.outcomes[0],
     outcome_id: "paft_premium_outcome_unmatched_signal_v1",
@@ -528,7 +621,7 @@ test("renders decision-intent missing, observation-only, and blocked states defe
   assert.equal(model.decisionIntent.stateCounts.watch, 1);
   assert.equal(model.decisionIntent.executionAllowedCount, 0);
   assert.equal(
-    model.signals.find((signal) => signal.id === "paft_scorecard_0002_kq_m_shfe_au_20260629000000")
+    model.signals.find((signal) => signal.id === "paft_scorecard_0002_kq_m_shfe_au_20260318000000")
       .decisionIntent,
     null,
   );

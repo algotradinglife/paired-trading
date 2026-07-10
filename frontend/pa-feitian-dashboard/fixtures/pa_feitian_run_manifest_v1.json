@@ -1,70 +1,102 @@
 {
   "schema_version": "pa_feitian_run_manifest_v1",
-  "generated_at_utc": "2026-07-07T00:00:00Z",
-  "source_commit": "cccccccccccccccccccccccccccccccccccccccc",
+  "generated_at_utc": "2026-07-10T00:00:00Z",
+  "source_commit": "5c74dd4964c814f1daefa09dc9f45ac3bfcc5788",
   "scorecard_artifact": {
     "kind": "scorecard",
-    "path": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
-    "sha256": "sha256:fb689b7d89cc577012db893fc531ed156eecfeaa0b360e76b20951f512130143",
+    "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/score_today_cn_metal_120d_2026-07-10.json",
+    "sha256": "sha256:68d36739cfa36440fffa4e72fd940b4c45dbf09ceb980c3ab94e9d1d298e6970",
     "schema_version": "score_today_json",
     "content_type": "application/json"
   },
   "snapshot_artifact": {
     "kind": "snapshot",
-    "path": "src/tests/fixtures/pa_feitian_snapshot_v1.json",
-    "sha256": "sha256:e112b3bac01cfa8147a7c043c6897e13525bfbfbd913384db07638603353fff6",
+    "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json",
+    "sha256": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf",
     "schema_version": "pa_feitian_snapshot_v1",
     "content_type": "application/json"
   },
   "decision_intent_artifact": {
     "kind": "decision_intent",
     "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_decision_intent_v1.json",
-    "sha256": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511",
+    "sha256": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
     "schema_version": "pa_feitian_decision_intent_v1",
     "content_type": "application/json"
   },
   "premium_outcome_artifact": {
     "kind": "premium_outcome",
     "path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_premium_outcome_v1.json",
-    "sha256": "sha256:7461ea04293be20fc876ffa25cdb9d4e669e50458430f641177558de152d852d",
+    "sha256": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
     "schema_version": "pa_feitian_premium_outcome_v1",
     "content_type": "application/json"
   },
   "cli_args": [
-    "src/scripts/build_pa_feitian_review_artifacts.py"
+    "src/scripts/build_pa_feitian_premium_outcomes.py",
+    "--snapshot",
+    "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_snapshot_v1.json",
+    "--decision-intent",
+    "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_decision_intent_v1.json",
+    "--source-m4-manifest",
+    "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_run_manifest_with_decision_intent_v1.json",
+    "--quant-data-root",
+    "external://optionstore/quant-data",
+    "--quant-data-root-label",
+    "external://optionstore/quant-data",
+    "--out",
+    "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_premium_outcome_v1.json",
+    "--manifest-out",
+    "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+    "--frontend-outcome-copy",
+    "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/dashboard/pa_feitian_premium_outcome_v1.json",
+    "--generated-at-utc",
+    "2026-07-10T00:00:00Z",
+    "--policy-declared-at-utc",
+    "2026-07-10T00:00:00Z",
+    "--traversal-started-at-utc",
+    "2026-07-10T00:01:00Z",
+    "--source-commit",
+    "5c74dd4964c814f1daefa09dc9f45ac3bfcc5788"
   ],
   "run_config": {
-    "contract": "pa_feitian_snapshot_v1",
-    "mode": "scorecard",
-    "producer": "src/scripts/emit_pa_feitian_snapshot.py",
-    "source_scorecard": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
-    "pool": "CN_METAL",
-    "instrument_class": "cn_metal_futures",
-    "window_days": 30,
-    "active_rules": [
-      "pa-h2-cn-metal"
-    ],
-    "iv_warmup": 1,
-    "iv_max_rank": 0.66,
-    "max_signals": null
+    "contract": "pa_feitian_premium_outcome_v1",
+    "mode": "premium_outcome_harness",
+    "producer": "src/scripts/build_pa_feitian_premium_outcomes.py",
+    "source_m4_manifest": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_run_manifest_with_decision_intent_v1.json",
+    "quant_data_root": "external://optionstore/quant-data",
+    "policy_id": "pa_feitian_m5_daily_long_option_stop_target",
+    "policy_version": "v1.default",
+    "policy_declared_at_utc": "2026-07-10T00:00:00Z",
+    "traversal_started_at_utc": "2026-07-10T00:01:00Z",
+    "observation_only": true,
+    "no_contract_reselection": true
   },
   "data_access": {
-    "status": "fixture_fallback",
-    "source": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    "status": "real_data_available",
+    "source": "external://optionstore/quant-data",
     "notes": [
-      "deterministic scorecard fixture fallback; no live score_today run was invoked"
+      "consumed existing score_today JSON artifact; producer did not read raw data stores",
+      "M5 consumed explicit M4 artifacts and OptionStore daily bars only",
+      "M5 did not scan score_today and did not select or reselect contracts"
     ]
   },
   "input_hashes": {
-    "scorecard_artifact": "sha256:fb689b7d89cc577012db893fc531ed156eecfeaa0b360e76b20951f512130143"
+    "scorecard_artifact": "sha256:68d36739cfa36440fffa4e72fd940b4c45dbf09ceb980c3ab94e9d1d298e6970",
+    "source_manifest": "sha256:5136ac942778f1a9e553c9ef8b3e05d0cd523decf36fb038d19f22ffcdcf501c",
+    "snapshot_artifact": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf",
+    "decision_intent_artifact": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
+    "selected_option_bars:paft_premium_outcome_0001_paft_scorecard_0001_kq_m_shfe_au_20260313000000_daily_v1": "sha256:351100182b31f2a83c4fb96415e3d97475210fdea5dea93811034b55f9a80bb4",
+    "selected_option_bars:paft_premium_outcome_0002_paft_scorecard_0002_kq_m_shfe_au_20260318000000_daily_v1": "sha256:b1c953c88b91930f0be381b7791966c35295052f6acdb1843028c444ddeb5ff5",
+    "selected_option_bars:paft_premium_outcome_0003_paft_scorecard_0003_kq_m_shfe_ag_20260515000000_daily_v1": "sha256:310f46efb6b88d1a40e2774dd3e8397a770cdcbc7a262b792811dbdb087a2246",
+    "selected_option_bars:paft_premium_outcome_0004_paft_scorecard_0004_kq_m_shfe_ag_20260602000000_daily_v1": "sha256:e0d9a7be35ce574fb260ba6966f292b14361ae4a93e7e759bdeeabeb9c6b287c",
+    "source_m4_manifest": "sha256:5136ac942778f1a9e553c9ef8b3e05d0cd523decf36fb038d19f22ffcdcf501c"
   },
   "output_hashes": {
-    "snapshot_artifact": "sha256:e112b3bac01cfa8147a7c043c6897e13525bfbfbd913384db07638603353fff6",
-    "decision_intent_artifact": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511",
-    "premium_outcome_artifact": "sha256:7461ea04293be20fc876ffa25cdb9d4e669e50458430f641177558de152d852d",
-    "frontend_copy": "sha256:e112b3bac01cfa8147a7c043c6897e13525bfbfbd913384db07638603353fff6",
-    "frontend_decision_intent_copy": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511",
-    "frontend_premium_outcome_copy": "sha256:7461ea04293be20fc876ffa25cdb9d4e669e50458430f641177558de152d852d"
+    "snapshot_artifact": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf",
+    "decision_intent_artifact": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
+    "premium_outcome_artifact": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+    "frontend_copy": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf",
+    "frontend_premium_outcome_copy": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+    "frontend_decision_intent_copy": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0"
   },
   "frontend_copy_path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json",
   "review_state": {

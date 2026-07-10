@@ -65,7 +65,7 @@
     "frontend_copy": "sha256:e112b3bac01cfa8147a7c043c6897e13525bfbfbd913384db07638603353fff6",
     "frontend_decision_intent_copy": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511"
   },
-  "frontend_copy_path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json",
+  "frontend_copy_path": "src/tests/fixtures/pa_feitian_snapshot_v1.json",
   "review_state": {
     "status": "pending",
     "reviewer": null,

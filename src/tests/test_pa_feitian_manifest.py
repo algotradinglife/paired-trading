@@ -46,9 +46,7 @@ MANIFEST_WITH_DECISION_INTENT_FIXTURE = (
 MANIFEST_WITH_PREMIUM_OUTCOME_FIXTURE = (
     FIXTURE_DIR / "pa_feitian_run_manifest_with_premium_outcome_v1.json"
 )
-FRONTEND_COPY_FIXTURE = REPO_ROOT / "frontend" / "pa-feitian-dashboard" / "fixtures" / (
-    "pa_feitian_snapshot_v1.json"
-)
+FRONTEND_COPY_FIXTURE = SNAPSHOT_V1_FIXTURE
 
 
 def _load_json(path: Path) -> dict:
@@ -67,9 +65,7 @@ def test_run_manifest_fixture_validates_against_model_and_schema():
     assert manifest.scorecard_artifact.sha256 == sha256_file(SCORECARD_FIXTURE)
     assert manifest.snapshot_artifact.sha256 == sha256_file(SNAPSHOT_V1_FIXTURE)
     assert manifest.output_hashes["frontend_copy"] == sha256_file(FRONTEND_COPY_FIXTURE)
-    assert manifest.frontend_copy_path == (
-        "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json"
-    )
+    assert manifest.frontend_copy_path == "src/tests/fixtures/pa_feitian_snapshot_v1.json"
     assert manifest.data_access.status == "fixture_fallback"
     assert manifest.data_access.source == "src/tests/fixtures/pa_feitian_scorecard_v1.json"
     assert manifest.review_state.status == "pending"

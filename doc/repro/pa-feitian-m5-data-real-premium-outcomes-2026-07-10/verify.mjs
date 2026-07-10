@@ -33,6 +33,15 @@ const m4bSourceDecisionIntentPath = `${m4bRoot}/source/pa_feitian_decision_inten
 const m4bDashboardDecisionIntentPath = `${m4bRoot}/dashboard/pa_feitian_decision_intent_v1.json`;
 const m4bSourceManifestPath = `${m4bRoot}/source/pa_feitian_run_manifest_with_decision_intent_v1.json`;
 const goldenOutcomeFixturePath = "src/tests/fixtures/pa_feitian_premium_outcome_v1.json";
+const frontendSnapshotFixturePath = "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json";
+const frontendDecisionIntentFixturePath = "frontend/pa-feitian-dashboard/fixtures/pa_feitian_decision_intent_v1.json";
+const frontendOutcomeFixturePath = "frontend/pa-feitian-dashboard/fixtures/pa_feitian_premium_outcome_v1.json";
+const frontendManifestFixturePath = "frontend/pa-feitian-dashboard/fixtures/pa_feitian_run_manifest_v1.json";
+const frontendAppPaths = [
+  "frontend/pa-feitian-dashboard/index.html",
+  "frontend/pa-feitian-dashboard/app.mjs",
+  "frontend/pa-feitian-dashboard/styles.css",
+];
 
 const expectedOutcomes = [
   {
@@ -235,6 +244,7 @@ from engine.pa_feitian.schema_validation import (
 paths = {
     "source_outcome": Path("${sourceOutcomePath}"),
     "dashboard_outcome": Path("${dashboardOutcomePath}"),
+    "frontend_outcome": Path("${frontendOutcomeFixturePath}"),
     "golden_outcome_fixture": Path("${goldenOutcomeFixturePath}"),
 }
 for label, path in paths.items():
@@ -244,6 +254,7 @@ for label, path in paths.items():
 for path in [
     Path("${sourceManifestPath}"),
     Path("${dashboardManifestPath}"),
+    Path("${frontendManifestFixturePath}"),
 ]:
     manifest = load_run_manifest(path)
     validate_pa_feitian_run_manifest_schema(manifest.model_dump(mode="json", exclude_none=False))
@@ -443,14 +454,89 @@ async function assertManifestAndCopies({ sourceOutcome, sourceManifest, dashboar
   );
 }
 
-function assertFrontendRenderCompatibility({ dashboardManifest, dashboardSnapshot, dashboardDecisionIntent }) {
-  const model = buildDashboardModel(dashboardSnapshot, {
-    manifest: dashboardManifest,
-    decisionIntent: dashboardDecisionIntent,
+async function assertFrontendFixtureCopies({
+  sourceOutcome,
+  dashboardManifest,
+  snapshot,
+  decisionIntent,
+  frontendSnapshot,
+  frontendDecisionIntent,
+  frontendOutcome,
+  frontendManifest,
+}) {
+  assert.deepEqual(frontendSnapshot, snapshot, "frontend snapshot copy is real M4b snapshot");
+  assert.deepEqual(frontendDecisionIntent, decisionIntent, "frontend decision-intent copy is real M4b sidecar");
+  assert.deepEqual(frontendOutcome, sourceOutcome, "frontend premium outcome copy is real M5 outcome");
+  assert.deepEqual(frontendOutcome.provenance, sourceOutcome.provenance, "frontend outcome provenance preserved");
+
+  assert.equal(frontendManifest.snapshot_artifact.path, frontendSnapshotFixturePath);
+  assert.equal(frontendManifest.decision_intent_artifact.path, frontendDecisionIntentFixturePath);
+  assert.equal(frontendManifest.premium_outcome_artifact.path, frontendOutcomeFixturePath);
+  assert.equal(frontendManifest.frontend_copy_path, frontendSnapshotFixturePath);
+  assert.equal(frontendManifest.snapshot_artifact.sha256, dashboardManifest.snapshot_artifact.sha256);
+  assert.equal(frontendManifest.decision_intent_artifact.sha256, dashboardManifest.decision_intent_artifact.sha256);
+  assert.equal(frontendManifest.premium_outcome_artifact.sha256, dashboardManifest.premium_outcome_artifact.sha256);
+  assert.deepEqual(frontendManifest.data_access, dashboardManifest.data_access, "frontend manifest data_access preserved");
+  assert.deepEqual(frontendManifest.input_hashes, dashboardManifest.input_hashes, "frontend manifest input hashes preserved");
+  assert.deepEqual(frontendManifest.output_hashes, dashboardManifest.output_hashes, "frontend manifest output hashes preserved");
+
+  await assertFileHash(frontendSnapshotFixturePath, frontendManifest.snapshot_artifact.sha256, "frontend snapshot");
+  await assertFileHash(
+    frontendDecisionIntentFixturePath,
+    frontendManifest.decision_intent_artifact.sha256,
+    "frontend decision intent",
+  );
+  await assertFileHash(frontendOutcomeFixturePath, frontendManifest.premium_outcome_artifact.sha256, "frontend outcome");
+}
+
+async function assertFrontendArtifactOnlyBoundary(html) {
+  const frontendSource = (
+    await Promise.all(frontendAppPaths.map((path) => readRaw(path).then((raw) => raw.toString("utf8"))))
+  ).join("\n");
+  const forbiddenSourceReferences = [
+    ["src", "data"].join("/"),
+    ["data", "store"].join("/"),
+    ["bar", "loader"].join("_"),
+    ["engine", "divergence"].join("/"),
+    ["engine", "options"].join("/"),
+    ["scripts", "analyze"].join("/"),
+    ["scripts", "score_today"].join("/"),
+    "OptionStore",
+    "raw market",
+    "raw_market",
+    "QUANT_DATA_ROOT",
+  ];
+  for (const forbidden of forbiddenSourceReferences) {
+    assert.equal(frontendSource.includes(forbidden), false, `frontend source is artifact-only: ${forbidden}`);
+  }
+  const forbiddenRenderedFragments = [
+    "QUANT_DATA_ROOT",
+    ["", "daily", "SHFE"].join("/"),
+    ".parquet",
+    ["/", "mnt"].join(""),
+    ["/", "Users"].join(""),
+  ];
+  for (const forbidden of forbiddenRenderedFragments) {
+    assert.equal(html.includes(forbidden), false, `rendered dashboard hides runtime/raw path fragment: ${forbidden}`);
+  }
+}
+
+async function assertFrontendRenderCompatibility({
+  frontendManifest,
+  frontendSnapshot,
+  frontendDecisionIntent,
+  frontendOutcome,
+}) {
+  const premiumOutcomeHash = sha256(await readRaw(frontendOutcomeFixturePath));
+  const model = buildDashboardModel(frontendSnapshot, {
+    manifest: frontendManifest,
+    decisionIntent: frontendDecisionIntent,
+    premiumOutcome: frontendOutcome,
   });
-  const html = renderDashboard(dashboardSnapshot, {
-    manifest: dashboardManifest,
-    decisionIntent: dashboardDecisionIntent,
+  const html = renderDashboard(frontendSnapshot, {
+    manifest: frontendManifest,
+    decisionIntent: frontendDecisionIntent,
+    premiumOutcome: frontendOutcome,
   });
 
   assert.equal(model.snapshotMode, "generated");
@@ -458,14 +544,44 @@ function assertFrontendRenderCompatibility({ dashboardManifest, dashboardSnapsho
   assert.equal(model.manifest.dataAccess.status, "real_data_available");
   assert.equal(model.decisionIntent.status, "loaded");
   assert.equal(model.decisionIntent.intents.length, 4);
+  assert.equal(model.premiumOutcome.status, "loaded");
+  assert.equal(model.premiumOutcome.outcomes.length, 4);
+  assert.equal(model.premiumOutcome.evaluationCounts.observed, 4);
+  assert.deepEqual(model.premiumOutcome.duplicateOutcomeIds, []);
+  assert.deepEqual(model.premiumOutcome.duplicateSourceSignalIds, []);
+  assert.deepEqual(model.premiumOutcome.unmatchedSourceSignalIds, []);
+  assert.deepEqual(model.premiumOutcome.missingSignalIds, []);
   assert.equal(model.reviewOperations.sidecarHashStatus.status, "match");
+  assert.equal(model.reviewOperations.premiumOutcomeHashStatus.status, "match");
+  assert.equal(frontendManifest.premium_outcome_artifact.sha256, premiumOutcomeHash);
+  assert.equal(frontendManifest.output_hashes.frontend_premium_outcome_copy, premiumOutcomeHash);
   assert.ok(
     model.reviewOperations.artifactRows.every((row) => row.hashStatus === "match"),
-    "current M4 dashboard artifact rows remain hash-clean with M5 manifest",
+    "frontend artifact rows remain hash-clean with M5 manifest",
   );
+  for (const expected of expectedOutcomes) {
+    const signal = model.signals.find((candidate) => candidate.id === expected.signalId);
+    assert.ok(signal, `${expected.signalId} rendered model signal`);
+    assert.equal(signal.premiumOutcomes.length, 1, `${expected.signalId} one premium outcome`);
+    const outcome = signal.premiumOutcomes[0];
+    assert.equal(outcome.evaluation_status, "observed", `${expected.signalId} observed model outcome`);
+    assert.equal(outcome.selected_contract.contract_symbol, expected.contract, `${expected.signalId} rendered contract`);
+    assert.ok(outcome.premium_metrics, `${expected.signalId} premium metrics rendered from artifact`);
+    assert.equal(outcome.exit_reason, "premium_stop", `${expected.signalId} premium stop rendered`);
+  }
   assert.match(html, /real_data_available/);
   assert.match(html, /data-testid="decision-intent-review"/);
+  assert.match(html, /data-testid="premium-outcome-review"/);
   assert.match(html, /paft_scorecard_0004_kq_m_shfe_ag_20260602000000/);
+  assert.match(html, /au2606c1152/);
+  assert.match(html, /ag2608c18800/);
+  assert.match(html, /Premium R/);
+  assert.match(html, /declared_premium_risk_after_costs/);
+  assert.match(html, /premium_stop/);
+  assert.doesNotMatch(html, /Premium outcome records without snapshot signals/);
+  assert.doesNotMatch(html, /Snapshot signals missing premium outcome records/);
+  assert.doesNotMatch(html, /daily OHLC proves exact tick execution/);
+  await assertFrontendArtifactOnlyBoundary(html);
 }
 
 async function assertNoObviousSecrets() {
@@ -474,6 +590,10 @@ async function assertNoObviousSecrets() {
     (await readRaw(sourceManifestPath)).toString("utf8"),
     (await readRaw(dashboardOutcomePath)).toString("utf8"),
     (await readRaw(dashboardManifestPath)).toString("utf8"),
+    (await readRaw(frontendSnapshotFixturePath)).toString("utf8"),
+    (await readRaw(frontendDecisionIntentFixturePath)).toString("utf8"),
+    (await readRaw(frontendOutcomeFixturePath)).toString("utf8"),
+    (await readRaw(frontendManifestFixturePath)).toString("utf8"),
     (await readRaw(readmePath)).toString("utf8"),
     (await readRaw(verifierPath)).toString("utf8"),
   ].join("\n");
@@ -499,6 +619,10 @@ const decisionIntent = await readJson(m4bSourceDecisionIntentPath);
 const dashboardSnapshot = await readJson(m4bDashboardSnapshotPath);
 const dashboardDecisionIntent = await readJson(m4bDashboardDecisionIntentPath);
 const goldenOutcome = await readJson(goldenOutcomeFixturePath);
+const frontendSnapshot = await readJson(frontendSnapshotFixturePath);
+const frontendDecisionIntent = await readJson(frontendDecisionIntentFixturePath);
+const frontendOutcome = await readJson(frontendOutcomeFixturePath);
+const frontendManifest = await readJson(frontendManifestFixturePath);
 
 assertRealOutcomes({ sourceOutcome, sourceManifest, snapshot, decisionIntent });
 await assertRealOptionFilesExistOnlyUnderOptionStore();
@@ -506,7 +630,22 @@ assertGoldenStatusFixture(goldenOutcome);
 await assertManifestAndCopies({ sourceOutcome, sourceManifest, dashboardOutcome, dashboardManifest });
 assert.deepEqual(dashboardSnapshot, snapshot, "M4b dashboard snapshot copy");
 assert.deepEqual(dashboardDecisionIntent, decisionIntent, "M4b dashboard decision-intent copy");
-assertFrontendRenderCompatibility({ dashboardManifest, dashboardSnapshot, dashboardDecisionIntent });
+await assertFrontendFixtureCopies({
+  sourceOutcome,
+  dashboardManifest,
+  snapshot,
+  decisionIntent,
+  frontendSnapshot,
+  frontendDecisionIntent,
+  frontendOutcome,
+  frontendManifest,
+});
+await assertFrontendRenderCompatibility({
+  frontendManifest,
+  frontendSnapshot,
+  frontendDecisionIntent,
+  frontendOutcome,
+});
 await assertNoObviousSecrets();
 
 console.log(
@@ -522,9 +661,12 @@ console.log(
       data_access: sourceManifest.data_access.status,
       source_outcome_sha256: sha256(await readRaw(sourceOutcomePath)),
       source_manifest_sha256: sha256(await readRaw(sourceManifestPath)),
-      dashboard_render_html_length: renderDashboard(dashboardSnapshot, {
-        manifest: dashboardManifest,
-        decisionIntent: dashboardDecisionIntent,
+      frontend_manifest_sha256: sha256(await readRaw(frontendManifestFixturePath)),
+      frontend_premium_outcome_sha256: sha256(await readRaw(frontendOutcomeFixturePath)),
+      dashboard_render_html_length: renderDashboard(frontendSnapshot, {
+        manifest: frontendManifest,
+        decisionIntent: frontendDecisionIntent,
+        premiumOutcome: frontendOutcome,
       }).length,
     },
     null,

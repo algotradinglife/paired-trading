@@ -35,7 +35,7 @@ Fixed timestamps:
 | `source/pa_feitian_run_manifest_with_premium_outcome_v1.json` | Source M5 run manifest | `sha256:2a0b3bfdf2b1c605ba9f4d1817dbe74847d9b90c3786b51b96c69137c5d782a4` |
 | `dashboard/pa_feitian_premium_outcome_v1.json` | Dashboard premium outcome copy | `sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e` |
 | `dashboard/pa_feitian_run_manifest_v1.json` | Dashboard-facing M5 manifest copy | `sha256:54e53eb8203b26da9519106ab27e6c21b2ba64edfb64439e212f42b19492ebda` |
-| `verify.mjs` | Evidence verifier | `sha256:ae7dca817743658ec3605c5d38ca3c1ffc808630da4d81850a106d1fb383277a` |
+| `verify.mjs` | Evidence verifier | `sha256:a112485eced71aed6e7c46729edb38256b555f8bca5ae45b517746c445b61008` |
 
 ## Real Outcomes
 
@@ -104,7 +104,7 @@ The verifier checks:
 
 - byte-identical rerun of the real-data build with fixed paths, timestamps, and
   source commit;
-- schema validity for source/dashboard M5 manifests and premium sidecars;
+- schema validity for source/dashboard/frontend M5 manifests and premium sidecars;
 - all four selected real contracts, original source statuses, M5 observed
   statuses, exit timestamps, and selected-option bar hashes;
 - no-lookahead timestamp ordering and decision-time input references;
@@ -114,6 +114,7 @@ The verifier checks:
   label;
 - existing golden fixture status coverage for `observed`, `ambiguous`,
   `data_blocked`, and `not_evaluable`;
-- current artifact-only dashboard render compatibility where possible;
+- frontend fixture copy hashes, real premium-outcome render compatibility, and
+  artifact-only dashboard boundary;
 - absence of obvious public token/private-key patterns in this packet.
 - absence of local runtime path fragments in this packet.

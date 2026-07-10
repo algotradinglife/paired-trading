@@ -9,7 +9,10 @@ const SUPPORTED_CONTRACT_VERSIONS = new Set([
 ]);
 const dashboardRoot = resolve(fileURLToPath(new URL("../", import.meta.url)));
 const repoRoot = resolve(dashboardRoot, "../..");
-const defaultSource = resolve(repoRoot, `src/tests/fixtures/${DEFAULT_CONTRACT_VERSION}.json`);
+const defaultSource = resolve(
+  repoRoot,
+  "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/dashboard/pa_feitian_snapshot_v1.json",
+);
 const defaultOut = resolve(dashboardRoot, `fixtures/${DEFAULT_CONTRACT_VERSION}.json`);
 
 function usage() {
@@ -17,7 +20,7 @@ function usage() {
     "Usage: node scripts/copy-snapshot-fixture.mjs [snapshot.json] [--out path]",
     "",
     "Copies a pa_feitian_snapshot_v1 or pa_feitian_snapshot_v0 JSON artifact into the dashboard fixture path.",
-    "Defaults to the shared contract fixture when no source is supplied.",
+    "Defaults to the real M4b dashboard snapshot used by the M5 frontend fixture when no source is supplied.",
   ].join("\n");
 }
 
