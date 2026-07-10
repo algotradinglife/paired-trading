@@ -263,3 +263,11 @@ def validate_pa_feitian_decision_intent_schema(
     schema_dir: str | Path = SCHEMA_DIR,
 ) -> None:
     validate_json_schema(data, "pa_feitian_decision_intent_v1.schema.json", schema_dir=schema_dir)
+
+
+def validate_pa_feitian_premium_outcome_schema(
+    data: Any,
+    *,
+    schema_dir: str | Path = SCHEMA_DIR,
+) -> None:
+    validate_json_schema(data, "pa_feitian_premium_outcome_v1.schema.json", schema_dir=schema_dir)

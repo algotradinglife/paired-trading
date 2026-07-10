@@ -1,0 +1,75 @@
+{
+  "schema_version": "pa_feitian_run_manifest_v1",
+  "generated_at_utc": "2026-07-07T00:00:00Z",
+  "source_commit": "cccccccccccccccccccccccccccccccccccccccc",
+  "scorecard_artifact": {
+    "kind": "scorecard",
+    "path": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    "sha256": "sha256:fb689b7d89cc577012db893fc531ed156eecfeaa0b360e76b20951f512130143",
+    "schema_version": "score_today_json",
+    "content_type": "application/json"
+  },
+  "snapshot_artifact": {
+    "kind": "snapshot",
+    "path": "src/tests/fixtures/pa_feitian_snapshot_v1.json",
+    "sha256": "sha256:e112b3bac01cfa8147a7c043c6897e13525bfbfbd913384db07638603353fff6",
+    "schema_version": "pa_feitian_snapshot_v1",
+    "content_type": "application/json"
+  },
+  "decision_intent_artifact": {
+    "kind": "decision_intent",
+    "path": "src/tests/fixtures/pa_feitian_decision_intent_v1.json",
+    "sha256": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511",
+    "schema_version": "pa_feitian_decision_intent_v1",
+    "content_type": "application/json"
+  },
+  "premium_outcome_artifact": {
+    "kind": "premium_outcome",
+    "path": "src/tests/fixtures/pa_feitian_premium_outcome_v1.json",
+    "sha256": "sha256:7ffb59c4c37dd30ee8ae61e0e3fc6214944b48931311f9b4c56f621ed5ee1c25",
+    "schema_version": "pa_feitian_premium_outcome_v1",
+    "content_type": "application/json"
+  },
+  "cli_args": [
+    "src/scripts/build_pa_feitian_review_artifacts.py"
+  ],
+  "run_config": {
+    "contract": "pa_feitian_snapshot_v1",
+    "mode": "scorecard",
+    "producer": "src/scripts/emit_pa_feitian_snapshot.py",
+    "source_scorecard": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    "pool": "CN_METAL",
+    "instrument_class": "cn_metal_futures",
+    "window_days": 30,
+    "active_rules": [
+      "pa-h2-cn-metal"
+    ],
+    "iv_warmup": 1,
+    "iv_max_rank": 0.66,
+    "max_signals": null
+  },
+  "data_access": {
+    "status": "fixture_fallback",
+    "source": "src/tests/fixtures/pa_feitian_scorecard_v1.json",
+    "notes": [
+      "deterministic scorecard fixture fallback; no live score_today run was invoked"
+    ]
+  },
+  "input_hashes": {
+    "scorecard_artifact": "sha256:fb689b7d89cc577012db893fc531ed156eecfeaa0b360e76b20951f512130143"
+  },
+  "output_hashes": {
+    "snapshot_artifact": "sha256:e112b3bac01cfa8147a7c043c6897e13525bfbfbd913384db07638603353fff6",
+    "decision_intent_artifact": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511",
+    "premium_outcome_artifact": "sha256:7ffb59c4c37dd30ee8ae61e0e3fc6214944b48931311f9b4c56f621ed5ee1c25",
+    "frontend_copy": "sha256:e112b3bac01cfa8147a7c043c6897e13525bfbfbd913384db07638603353fff6",
+    "frontend_decision_intent_copy": "sha256:e1bebb5ae167181e86cece949c338acc2e338f3aa9a7afd0bc603ea120c2b511"
+  },
+  "frontend_copy_path": "frontend/pa-feitian-dashboard/fixtures/pa_feitian_snapshot_v1.json",
+  "review_state": {
+    "status": "pending",
+    "reviewer": null,
+    "reviewed_at_utc": null,
+    "notes": []
+  }
+}

@@ -1,0 +1,896 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/algotradinglife/paired-trading/doc/schemas/pa_feitian_premium_outcome_v1.schema.json",
+  "title": "PA / Feitian Premium Outcome Sidecar v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "source_commit",
+    "provenance",
+    "outcomes",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pa_feitian_premium_outcome_v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_commit": {
+      "type": "string",
+      "minLength": 7,
+      "maxLength": 40
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/outcome"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "hash_digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "hash_map": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/hash_digest"
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "source_manifest_path",
+        "source_manifest_sha256",
+        "source_manifest_schema_version",
+        "snapshot_artifact_path",
+        "snapshot_artifact_sha256",
+        "snapshot_schema_version",
+        "decision_intent_artifact_path",
+        "decision_intent_artifact_sha256",
+        "decision_intent_schema_version",
+        "producer",
+        "cli_args",
+        "input_hashes",
+        "policy_hashes",
+        "output_hashes",
+        "notes"
+      ],
+      "properties": {
+        "role": {
+          "const": "manifest_referenced_premium_outcome_sidecar"
+        },
+        "source_manifest_path": {
+          "type": "string"
+        },
+        "source_manifest_sha256": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "source_manifest_schema_version": {
+          "const": "pa_feitian_run_manifest_v1"
+        },
+        "snapshot_artifact_path": {
+          "type": "string"
+        },
+        "snapshot_artifact_sha256": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "snapshot_schema_version": {
+          "enum": [
+            "pa_feitian_snapshot_v0",
+            "pa_feitian_snapshot_v1"
+          ]
+        },
+        "decision_intent_artifact_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decision_intent_artifact_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "decision_intent_schema_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "pa_feitian_decision_intent_v1",
+            null
+          ]
+        },
+        "producer": {
+          "type": "string"
+        },
+        "cli_args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "input_hashes": {
+          "$ref": "#/$defs/hash_map"
+        },
+        "policy_hashes": {
+          "$ref": "#/$defs/hash_map"
+        },
+        "output_hashes": {
+          "$ref": "#/$defs/hash_map"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome_id",
+        "source_signal_id",
+        "decision_intent_signal_id",
+        "source_contract_id",
+        "decision_ts_utc",
+        "first_eligible_entry_ts_utc",
+        "selected_contract",
+        "policy",
+        "cost_model",
+        "evaluation_status",
+        "exit_reason",
+        "entry_fill",
+        "exit_fill",
+        "premium_metrics",
+        "underlying_context",
+        "data_quality",
+        "no_lookahead_inputs"
+      ],
+      "properties": {
+        "outcome_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_:-]+$"
+        },
+        "source_signal_id": {
+          "type": "string"
+        },
+        "decision_intent_signal_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_contract_id": {
+          "type": "string"
+        },
+        "decision_ts_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "first_eligible_entry_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "selected_contract": {
+          "$ref": "#/$defs/selected_contract"
+        },
+        "policy": {
+          "$ref": "#/$defs/policy"
+        },
+        "cost_model": {
+          "$ref": "#/$defs/cost_model"
+        },
+        "evaluation_status": {
+          "$ref": "#/$defs/evaluation_status"
+        },
+        "exit_reason": {
+          "$ref": "#/$defs/exit_reason"
+        },
+        "entry_fill": {
+          "$ref": "#/$defs/nullable_fill"
+        },
+        "exit_fill": {
+          "$ref": "#/$defs/nullable_fill"
+        },
+        "premium_metrics": {
+          "$ref": "#/$defs/nullable_premium_metrics"
+        },
+        "underlying_context": {
+          "$ref": "#/$defs/nullable_underlying_context"
+        },
+        "data_quality": {
+          "$ref": "#/$defs/data_quality"
+        },
+        "no_lookahead_inputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "pa_feitian_decision_intent_v1.schema.json#/$defs/no_lookahead_input"
+          }
+        }
+      }
+    },
+    "evaluation_status": {
+      "enum": [
+        "observed",
+        "ambiguous",
+        "data_blocked",
+        "not_evaluable"
+      ]
+    },
+    "exit_reason": {
+      "enum": [
+        "premium_stop",
+        "premium_target",
+        "time_exit",
+        "data_gap",
+        "unresolved",
+        "not_evaluable"
+      ]
+    },
+    "fill_rule": {
+      "enum": [
+        "at_level",
+        "next_open",
+        "bar_close",
+        "gap_open",
+        "not_applicable"
+      ]
+    },
+    "same_bar_resolution": {
+      "enum": [
+        "ambiguous",
+        "stop_first",
+        "target_first",
+        "conservative_stop_first",
+        "not_applicable"
+      ]
+    },
+    "selected_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_contract_id",
+        "option_type",
+        "exchange",
+        "product",
+        "contract_symbol",
+        "strike",
+        "expiry",
+        "dte_at_decision",
+        "contract_selection_asof_utc",
+        "selection_source_ref"
+      ],
+      "properties": {
+        "source_contract_id": {
+          "type": "string"
+        },
+        "option_type": {
+          "enum": [
+            "call",
+            "put"
+          ]
+        },
+        "exchange": {
+          "type": "string"
+        },
+        "product": {
+          "type": "string"
+        },
+        "contract_symbol": {
+          "type": "string"
+        },
+        "strike": {
+          "type": "number",
+          "minimum": 0
+        },
+        "expiry": {
+          "type": "string"
+        },
+        "dte_at_decision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "contract_selection_asof_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "selection_source_ref": {
+          "type": "string"
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "policy_version",
+        "origin",
+        "declared_at_utc",
+        "fixed_before_traversal",
+        "traversal_started_at_utc",
+        "digest",
+        "provenance_hash_key",
+        "params"
+      ],
+      "properties": {
+        "policy_id": {
+          "type": "string"
+        },
+        "policy_version": {
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "decision_declared",
+            "retrospective_fixed"
+          ]
+        },
+        "declared_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fixed_before_traversal": {
+          "type": "boolean"
+        },
+        "traversal_started_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "digest": {
+          "$ref": "#/$defs/hash_digest"
+        },
+        "provenance_hash_key": {
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/policy_params"
+        }
+      }
+    },
+    "policy_params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_rule",
+        "stop_premium",
+        "target_premiums",
+        "max_holding_bars",
+        "max_holding_days",
+        "stop_fill_rule",
+        "target_fill_rule",
+        "time_exit_fill_rule",
+        "missing_bar_policy",
+        "same_bar_resolution",
+        "slippage_ticks",
+        "tick_size"
+      ],
+      "properties": {
+        "entry_rule": {
+          "type": "string"
+        },
+        "stop_premium": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "target_premiums": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "max_holding_bars": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "max_holding_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "stop_fill_rule": {
+          "$ref": "#/$defs/fill_rule"
+        },
+        "target_fill_rule": {
+          "$ref": "#/$defs/fill_rule"
+        },
+        "time_exit_fill_rule": {
+          "$ref": "#/$defs/fill_rule"
+        },
+        "missing_bar_policy": {
+          "enum": [
+            "data_blocked",
+            "skip_missing",
+            "time_exit"
+          ]
+        },
+        "same_bar_resolution": {
+          "$ref": "#/$defs/same_bar_resolution"
+        },
+        "slippage_ticks": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tick_size": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "cost_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_id",
+        "currency",
+        "commission_per_contract",
+        "fees_per_contract",
+        "slippage_ticks",
+        "tick_size",
+        "tick_value",
+        "entry_cost_premium",
+        "exit_cost_premium",
+        "notes"
+      ],
+      "properties": {
+        "model_id": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "commission_per_contract": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fees_per_contract": {
+          "type": "number",
+          "minimum": 0
+        },
+        "slippage_ticks": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tick_size": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "tick_value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "entry_cost_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "exit_cost_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "fill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ts_utc",
+        "fill_premium",
+        "fill_rule",
+        "slippage_premium",
+        "cost_premium"
+      ],
+      "properties": {
+        "ts_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fill_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fill_rule": {
+          "$ref": "#/$defs/fill_rule"
+        },
+        "slippage_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cost_premium": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "nullable_fill": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "ts_utc",
+        "fill_premium",
+        "fill_rule",
+        "slippage_premium",
+        "cost_premium"
+      ],
+      "properties": {
+        "ts_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fill_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fill_rule": {
+          "$ref": "#/$defs/fill_rule"
+        },
+        "slippage_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cost_premium": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "premium_risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_premium",
+        "stop_premium",
+        "entry_cost_premium",
+        "exit_cost_premium",
+        "declared_risk_premium",
+        "denominator_label"
+      ],
+      "properties": {
+        "entry_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stop_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "entry_cost_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "exit_cost_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "declared_risk_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "denominator_label": {
+          "const": "declared_premium_risk_after_costs"
+        }
+      }
+    },
+    "nullable_premium_metrics": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "gross_premium_return",
+        "net_premium_return",
+        "premium_multiple",
+        "premium_r",
+        "premium_mfe",
+        "premium_mae",
+        "risk"
+      ],
+      "properties": {
+        "gross_premium_return": {
+          "type": "number"
+        },
+        "net_premium_return": {
+          "type": "number"
+        },
+        "premium_multiple": {
+          "type": "number",
+          "minimum": 0
+        },
+        "premium_r": {
+          "type": "number"
+        },
+        "premium_mfe": {
+          "type": "number"
+        },
+        "premium_mae": {
+          "type": "number"
+        },
+        "risk": {
+          "$ref": "#/$defs/premium_risk"
+        }
+      }
+    },
+    "nullable_underlying_context": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "context_source",
+        "entry_ts_utc",
+        "exit_ts_utc",
+        "entry_underlying",
+        "exit_underlying",
+        "underlying_return",
+        "underlying_r",
+        "underlying_r_denominator",
+        "notes"
+      ],
+      "properties": {
+        "context_source": {
+          "enum": [
+            "observed_underlying",
+            "model_derived",
+            "unavailable"
+          ]
+        },
+        "entry_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "exit_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "entry_underlying": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "exit_underlying": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "underlying_return": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "underlying_r": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "underlying_r_denominator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ambiguity": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "bar_ts_utc",
+        "conservative_resolution",
+        "description"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "same_bar_stop_target",
+            "missing_ordering",
+            "daily_ohlc_limit",
+            "other"
+          ]
+        },
+        "bar_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "conservative_resolution": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "ambiguous",
+            "stop_first",
+            "target_first",
+            "conservative_stop_first",
+            "not_applicable",
+            null
+          ]
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "data_gap": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "start_ts_utc",
+        "end_ts_utc",
+        "description"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "missing_bars",
+            "early_termination",
+            "missing_entry",
+            "missing_exit",
+            "other"
+          ]
+        },
+        "start_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "end_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "data_quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "premium_price_source_type",
+        "bar_granularity",
+        "required_premium_bars_available",
+        "first_premium_observation_ts_utc",
+        "last_premium_observation_ts_utc",
+        "ambiguity",
+        "data_gap",
+        "notes"
+      ],
+      "properties": {
+        "premium_price_source_type": {
+          "enum": [
+            "observed",
+            "model_derived",
+            "unavailable"
+          ]
+        },
+        "bar_granularity": {
+          "enum": [
+            "daily",
+            "intraday",
+            "tick",
+            "unknown"
+          ]
+        },
+        "required_premium_bars_available": {
+          "type": "boolean"
+        },
+        "first_premium_observation_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "last_premium_observation_ts_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "ambiguity": {
+          "$ref": "#/$defs/ambiguity"
+        },
+        "data_gap": {
+          "$ref": "#/$defs/data_gap"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
