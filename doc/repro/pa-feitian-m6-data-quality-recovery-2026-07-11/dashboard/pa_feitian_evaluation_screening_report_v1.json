@@ -1,0 +1,139 @@
+{
+  "schema_version": "pa_feitian_evaluation_screening_report_v1",
+  "generated_at_utc": "2026-07-11T12:10:00Z",
+  "provenance": {
+    "role": "m6_screening_report",
+    "source_manifest_path": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+    "source_manifest_sha256": "sha256:2a0b3bfdf2b1c605ba9f4d1817dbe74847d9b90c3786b51b96c69137c5d782a4",
+    "source_manifest_schema_version": "pa_feitian_run_manifest_v1",
+    "premium_outcome_artifact_path": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_premium_outcome_v1.json",
+    "premium_outcome_artifact_sha256": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+    "premium_outcome_schema_version": "pa_feitian_premium_outcome_v1",
+    "source_commit": "5c74dd4964c814f1daefa09dc9f45ac3bfcc5788",
+    "producer": "engine.pa_feitian.policy_comparison.v1",
+    "cli_args": [
+      "src/scripts/compare_pa_feitian_m6_policies.py",
+      "--baseline-dataset",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_baseline_v1.json",
+      "--baseline-aggregate",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_aggregate_result_baseline_v1.json",
+      "--comparison-config",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/policy_comparison_config_v1.json",
+      "--candidate-input",
+      "candidate_stop_30pct",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_candidate_stop_30pct_v1.json",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_aggregate_result_candidate_stop_30pct_v1.json",
+      "--screening-out",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_screening_report_v1.json",
+      "--failure-report-dir",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/failure_modes",
+      "--generated-at-utc",
+      "2026-07-11T12:10:00Z"
+    ],
+    "policy_config_sha256": "sha256:725aa053f033e87de23e09edc1ffdeca0b61930a1a5e109256474178c3185ae5",
+    "data_access_status": "real_data_available",
+    "fixture_fallback": false,
+    "random_seed": 7,
+    "input_hashes": {
+      "source_manifest": "sha256:2a0b3bfdf2b1c605ba9f4d1817dbe74847d9b90c3786b51b96c69137c5d782a4",
+      "premium_outcome_artifact": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+      "decision_intent_artifact": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
+      "policy_config": "sha256:725aa053f033e87de23e09edc1ffdeca0b61930a1a5e109256474178c3185ae5",
+      "evaluation_dataset": "sha256:70bad7e48391b71eb3cb01ad7482e5938d26c58d47e5fd518fe3338179592d1c",
+      "aggregate_result": "sha256:350d5bcdcada75fb25e5408db8c09c8e826a6f8d8319d7eb2858fa5b4c404e76",
+      "policy_comparison_config": "sha256:725aa053f033e87de23e09edc1ffdeca0b61930a1a5e109256474178c3185ae5",
+      "policy_comparison_config_file": "sha256:e7eb3c9989af6168658ace66cf7663f92c37db7305369dcd81eabf2ee3d3a882"
+    },
+    "output_hashes": {},
+    "notes": [
+      "M6-C consumed explicit baseline/candidate M6 artifacts only",
+      "no score_today rerun, market scan, contract reselection, live trading, or execution occurred"
+    ]
+  },
+  "evaluation_dataset": {
+    "kind": "evaluation_dataset",
+    "path": "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_baseline_v1.json",
+    "sha256": "sha256:70bad7e48391b71eb3cb01ad7482e5938d26c58d47e5fd518fe3338179592d1c",
+    "schema_version": "pa_feitian_evaluation_dataset_v1",
+    "content_type": "application/json"
+  },
+  "aggregate_result": {
+    "kind": "evaluation_aggregate_result",
+    "path": "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_aggregate_result_baseline_v1.json",
+    "sha256": "sha256:350d5bcdcada75fb25e5408db8c09c8e826a6f8d8319d7eb2858fa5b4c404e76",
+    "schema_version": "pa_feitian_evaluation_aggregate_result_v1",
+    "content_type": "application/json"
+  },
+  "candidates": [
+    {
+      "candidate_id": "candidate_stop_30pct",
+      "policy_id": "pa_feitian_m6_daily_long_option_stop_30pct",
+      "policy_version": "v1.retro_20260711",
+      "classification": "inconclusive",
+      "classification_basis": [
+        "inconclusive: retrospective exploratory comparison cannot support promotion and cannot advance M7"
+      ],
+      "comparable_oos_window_count": 2,
+      "effective_event_count": 4,
+      "baseline_policy_id": "pa_feitian_m5_daily_long_option_stop_target",
+      "reviewer_status": "pending",
+      "limitations": [
+        "retrospective exploratory comparison; descriptive evidence only and cannot advance M7"
+      ],
+      "comparison": {
+        "comparability_status": "comparable",
+        "baseline_dataset_sha256": "sha256:70bad7e48391b71eb3cb01ad7482e5938d26c58d47e5fd518fe3338179592d1c",
+        "candidate_dataset_sha256": "sha256:dad77b16a6fc2b660b050999c2411e0916550c2903c3f8b343bae15e20b5133b",
+        "baseline_aggregate_sha256": "sha256:350d5bcdcada75fb25e5408db8c09c8e826a6f8d8319d7eb2858fa5b4c404e76",
+        "candidate_aggregate_sha256": "sha256:da447eef3aa3cb3067a4bb59a878f4bd3d5bebb36e7bfbefe81cd4072f6fc5a5",
+        "paired_effective_event_count": 4,
+        "baseline_mean_premium_r": -1.0009036144499999,
+        "candidate_mean_premium_r": -0.841500172225,
+        "mean_premium_r_difference": 0.15940344222499997,
+        "median_premium_r_difference": 0.0,
+        "adjusted_bootstrap_ci": {
+          "confidence_level": 0.95,
+          "lower": 0.0,
+          "upper": 0.4782103266749999,
+          "method": "seeded_event_paired_bootstrap_bonferroni_v1",
+          "cluster_unit": "event"
+        },
+        "comparable_oos_windows": [
+          {
+            "fold_id": "wf_1",
+            "effective_event_count": 1,
+            "mean_premium_r_difference": 0.6376137688999999,
+            "result_status": "generated",
+            "notes": [
+              "paired observed events only; dependent legs were averaged within event"
+            ]
+          },
+          {
+            "fold_id": "wf_2",
+            "effective_event_count": 2,
+            "mean_premium_r_difference": 0.0,
+            "result_status": "generated",
+            "notes": [
+              "paired observed events only; dependent legs were averaged within event"
+            ]
+          }
+        ],
+        "limitations": [
+          "retrospective exploratory comparison; descriptive evidence only and cannot advance M7"
+        ]
+      }
+    }
+  ],
+  "multiple_comparison": {
+    "configuration_sha256": "sha256:725aa053f033e87de23e09edc1ffdeca0b61930a1a5e109256474178c3185ae5",
+    "method": "bonferroni",
+    "family_size": 1,
+    "alpha": 0.05,
+    "adjusted_confidence_level": 0.95,
+    "tested_candidate_count": 1,
+    "unavailable_candidate_count": 0
+  },
+  "warnings": [
+    "M6-C comparison is an audit shortlist only; no candidate is approved for execution"
+  ]
+}

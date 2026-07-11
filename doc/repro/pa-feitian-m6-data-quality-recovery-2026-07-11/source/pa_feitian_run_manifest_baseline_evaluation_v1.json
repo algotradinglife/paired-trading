@@ -1,0 +1,133 @@
+{
+  "schema_version": "pa_feitian_run_manifest_v1",
+  "generated_at_utc": "2026-07-11T12:05:00Z",
+  "source_commit": "5c74dd4964c814f1daefa09dc9f45ac3bfcc5788",
+  "scorecard_artifact": {
+    "kind": "scorecard",
+    "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/score_today_cn_metal_120d_2026-07-10.json",
+    "sha256": "sha256:68d36739cfa36440fffa4e72fd940b4c45dbf09ceb980c3ab94e9d1d298e6970",
+    "schema_version": "score_today_json",
+    "content_type": "application/json"
+  },
+  "snapshot_artifact": {
+    "kind": "snapshot",
+    "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_snapshot_v1.json",
+    "sha256": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf",
+    "schema_version": "pa_feitian_snapshot_v1",
+    "content_type": "application/json"
+  },
+  "decision_intent_artifact": {
+    "kind": "decision_intent",
+    "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_decision_intent_v1.json",
+    "sha256": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
+    "schema_version": "pa_feitian_decision_intent_v1",
+    "content_type": "application/json"
+  },
+  "premium_outcome_artifact": {
+    "kind": "premium_outcome",
+    "path": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_premium_outcome_v1.json",
+    "sha256": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+    "schema_version": "pa_feitian_premium_outcome_v1",
+    "content_type": "application/json"
+  },
+  "evaluation_dataset_artifact": {
+    "kind": "evaluation_dataset",
+    "path": "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_baseline_v1.json",
+    "sha256": "sha256:70bad7e48391b71eb3cb01ad7482e5938d26c58d47e5fd518fe3338179592d1c",
+    "schema_version": "pa_feitian_evaluation_dataset_v1",
+    "content_type": "application/json"
+  },
+  "evaluation_aggregate_result_artifact": {
+    "kind": "evaluation_aggregate_result",
+    "path": "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_aggregate_result_baseline_v1.json",
+    "sha256": "sha256:350d5bcdcada75fb25e5408db8c09c8e826a6f8d8319d7eb2858fa5b4c404e76",
+    "schema_version": "pa_feitian_evaluation_aggregate_result_v1",
+    "content_type": "application/json"
+  },
+  "cli_args": [
+    "src/scripts/evaluate_pa_feitian_m6_baseline.py",
+    "--m5-manifest",
+    "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+    "--premium-outcome",
+    "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_premium_outcome_v1.json",
+    "--decision-intent",
+    "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_decision_intent_v1.json",
+    "--dataset-out",
+    "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_baseline_v1.json",
+    "--aggregate-out",
+    "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_aggregate_result_baseline_v1.json",
+    "--manifest-out",
+    "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_run_manifest_baseline_evaluation_v1.json",
+    "--generated-at-utc",
+    "2026-07-11T12:05:00Z",
+    "--seed",
+    "7",
+    "--bootstrap-replicates",
+    "1000",
+    "--lower-quantile",
+    "0.05",
+    "--minimum-effective-samples",
+    "3",
+    "--folds",
+    "2",
+    "--minimum-train-events",
+    "1",
+    "--timezone",
+    "UTC",
+    "--trading-calendar",
+    "XSGE"
+  ],
+  "run_config": {
+    "contract": "pa_feitian_evaluation_dataset_v1",
+    "mode": "m6_baseline_evaluator",
+    "source_m5_manifest": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+    "baseline_only": true,
+    "no_score_today_rerun": true,
+    "no_market_scan": true,
+    "no_contract_reselection": true,
+    "no_live_trading_or_execution": true,
+    "evaluation_config": {
+      "baseline": "m5_premium_outcome_fixed_policy_only",
+      "bootstrap_replicates": 1000,
+      "cluster_unit": "event",
+      "folds": 2,
+      "lower_quantile": 0.05,
+      "minimum_effective_samples": 3,
+      "minimum_train_events": 1,
+      "random_seed": 7,
+      "split_method": "fixed_time_series_walk_forward_event_grouped",
+      "timezone": "UTC",
+      "trading_calendar": "XSGE"
+    }
+  },
+  "data_access": {
+    "status": "real_data_available",
+    "source": "external://optionstore/quant-data",
+    "notes": [
+      "consumed existing score_today JSON artifact; producer did not read raw data stores",
+      "M5 consumed explicit M4 artifacts and OptionStore daily bars only",
+      "M5 did not scan score_today and did not select or reselect contracts"
+    ]
+  },
+  "input_hashes": {
+    "scorecard_artifact": "sha256:68d36739cfa36440fffa4e72fd940b4c45dbf09ceb980c3ab94e9d1d298e6970",
+    "source_m5_manifest": "sha256:2a0b3bfdf2b1c605ba9f4d1817dbe74847d9b90c3786b51b96c69137c5d782a4",
+    "decision_intent_artifact": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
+    "premium_outcome_artifact": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+    "policy_config": "sha256:f278a4dbe13d3899ff8043d3ff0a704364e01dbf2f4dbc2b1842b3e2fa4ee71f"
+  },
+  "output_hashes": {
+    "snapshot_artifact": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf",
+    "decision_intent_artifact": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
+    "premium_outcome_artifact": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+    "evaluation_dataset_artifact": "sha256:70bad7e48391b71eb3cb01ad7482e5938d26c58d47e5fd518fe3338179592d1c",
+    "evaluation_aggregate_result_artifact": "sha256:350d5bcdcada75fb25e5408db8c09c8e826a6f8d8319d7eb2858fa5b4c404e76"
+  },
+  "frontend_copy_path": null,
+  "review_state": {
+    "status": "pending",
+    "reviewer": null,
+    "reviewed_at_utc": null,
+    "notes": []
+  }
+}
