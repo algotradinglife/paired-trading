@@ -1,0 +1,65 @@
+{
+  "schema_version": "pa_feitian_evaluation_dataset_v1",
+  "generated_at_utc": "2026-07-11T00:00:00Z",
+  "provenance": {
+    "role": "m6_evaluation_dataset",
+    "source_manifest_path": "src/tests/fixtures/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+    "source_manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_manifest_schema_version": "pa_feitian_run_manifest_v1",
+    "premium_outcome_artifact_path": "src/tests/fixtures/pa_feitian_premium_outcome_v1.json",
+    "premium_outcome_artifact_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "premium_outcome_schema_version": "pa_feitian_premium_outcome_v1",
+    "source_commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "producer": "engine.pa_feitian.evaluation_contract_fixture.v1",
+    "cli_args": ["fixture-only-contract-test"],
+    "policy_config_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "data_access_status": "fixture_fallback",
+    "fixture_fallback": true,
+    "random_seed": 7,
+    "input_hashes": {
+      "source_manifest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "premium_outcome_artifact": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "policy_config": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "output_hashes": {},
+    "notes": ["contract fixture only; this is not an evaluator result"]
+  },
+  "time_boundary": {
+    "timezone": "UTC",
+    "trading_calendar": "XSGE",
+    "decision_start_utc": "2026-06-29T00:00:00Z",
+    "decision_end_utc": "2026-06-30T00:00:00Z",
+    "split_method": "not_applicable",
+    "folds_declared": 0
+  },
+  "rows": [
+    {
+      "row_id": "m6_row_0001",
+      "event_id": "event:paft_scorecard_0002",
+      "outcome_id": "paft_premium_outcome_0002_daily_target_v1",
+      "source_signal_id": "paft_scorecard_0002_kq_m_shfe_au_20260629000000",
+      "source_contract_id": "scorecard_record:2:options_calls:0",
+      "decision_ts_utc": "2026-06-29T00:00:00Z",
+      "pool": "cn_futures",
+      "underlying": "SHFE.au",
+      "decision_state": "trade_ready",
+      "decision_trace_node_ids": ["premium_stop", "premium_confirmation", "liquidity"],
+      "iv_gate_status": "unknown",
+      "option_type": "call",
+      "contract_family": "au_monthly_call",
+      "moneyness_bucket": "unknown",
+      "policy_id": "premium_stop_target_daily",
+      "policy_version": "v1.fixture",
+      "policy_sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "evaluation_status": "observed",
+      "exit_reason": "premium_target",
+      "premium_r": 5.016949153,
+      "underlying_r": 0.42,
+      "premium_mfe": 0.552845528,
+      "premium_mae": -0.081300813,
+      "input_refs": ["scorecard_record:2", "snapshot_signal:paft_scorecard_0002_kq_m_shfe_au_20260629000000"]
+    }
+  ],
+  "filter_reason_counts": {"missing_iv_gate": 0},
+  "warnings": ["unknown IV gate is retained as unknown rather than inferred as pass"]
+}

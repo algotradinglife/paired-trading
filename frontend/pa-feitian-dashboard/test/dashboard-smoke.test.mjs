@@ -9,15 +9,19 @@ import {
   DATA_ACCESS_DEFINITIONS,
   DECISION_STATE_DEFINITIONS,
   HASH_STATUS_DEFINITIONS,
+  EVALUATION_ARTIFACT_DEFINITIONS,
   PREMIUM_OUTCOME_STATUS_DEFINITIONS,
   PREMIUM_PRICE_SOURCE_DEFINITIONS,
   SNAPSHOT_MODE_DEFINITIONS,
   STATUS_DEFINITIONS,
   SUPPORTED_DECISION_INTENT_VERSIONS,
   SUPPORTED_PREMIUM_OUTCOME_VERSIONS,
+  SUPPORTED_EVALUATION_DATASET_VERSIONS,
   TRACE_NODE_STATUS_DEFINITIONS,
   artifactPathToUrl,
   buildDashboardModel,
+  buildEvaluationReviewModel,
+  loadEvaluationDataset,
   loadDecisionIntent,
   loadPremiumOutcome,
   missingOptionalFields,
@@ -32,6 +36,22 @@ const legacyFixtureUrl = new URL("../fixtures/pa_feitian_snapshot_v0.json", impo
 const frontendManifestFixtureUrl = new URL("../fixtures/pa_feitian_run_manifest_v1.json", import.meta.url);
 const decisionIntentFixtureUrl = new URL("../fixtures/pa_feitian_decision_intent_v1.json", import.meta.url);
 const premiumOutcomeFixtureUrl = new URL("../fixtures/pa_feitian_premium_outcome_v1.json", import.meta.url);
+const evaluationDatasetFixtureUrl = new URL(
+  "../fixtures/pa_feitian_evaluation_dataset_v1.json",
+  import.meta.url,
+);
+const evaluationAggregateFixtureUrl = new URL(
+  "../fixtures/pa_feitian_evaluation_aggregate_result_v1.json",
+  import.meta.url,
+);
+const evaluationFailureFixtureUrl = new URL(
+  "../fixtures/pa_feitian_evaluation_failure_mode_report_v1.json",
+  import.meta.url,
+);
+const evaluationScreeningFixtureUrl = new URL(
+  "../fixtures/pa_feitian_evaluation_screening_report_v1.json",
+  import.meta.url,
+);
 const manifestFixtureUrl = new URL("../../../src/tests/fixtures/pa_feitian_run_manifest_v1.json", import.meta.url);
 const defensiveSnapshotFixtureUrl = new URL("../../../src/tests/fixtures/pa_feitian_snapshot_v1.json", import.meta.url);
 const defensiveDecisionIntentFixtureUrl = new URL(
@@ -104,6 +124,94 @@ test("renders summary, warning, signal table, and trace nodes from the real M5 f
   assert.match(html, /iv_regime/);
   assert.match(html, /producer consumes score_today\/emission output/);
   assert.match(html, /candidate rejected by contract policy/);
+});
+
+test("renders copied M6 evaluation artifacts as insufficient fixture evidence with defensive filters", async () => {
+  const [snapshot, manifest, dataset, aggregate, failureModes, screening] = await Promise.all([
+    loadFixture(),
+    loadFixture(frontendManifestFixtureUrl),
+    loadFixture(evaluationDatasetFixtureUrl),
+    loadFixture(evaluationAggregateFixtureUrl),
+    loadFixture(evaluationFailureFixtureUrl),
+    loadFixture(evaluationScreeningFixtureUrl),
+  ]);
+  const options = {
+    manifest,
+    evaluationDataset: dataset,
+    evaluationAggregate: aggregate,
+    evaluationFailureModes: failureModes,
+    evaluationScreening: screening,
+  };
+  const model = buildDashboardModel(snapshot, options);
+  const filtered = buildEvaluationReviewModel(
+    { ...options, evaluationFilters: { pool: "cn_futures", trace: "premium_stop", iv: "unknown" } },
+    model.manifest,
+  );
+  const html = renderDashboard(snapshot, options);
+
+  assert.ok(SUPPORTED_EVALUATION_DATASET_VERSIONS.has(dataset.schema_version));
+  assert.equal(EVALUATION_ARTIFACT_DEFINITIONS.length, 4);
+  assert.equal(model.evaluation.state, "insufficient");
+  assert.equal(model.evaluation.dataset.status, "loaded");
+  assert.equal(model.evaluation.groups[0].result_status, "insufficient_sample");
+  assert.ok(model.evaluation.linkRows.every((row) => row.hashStatus === "match"));
+  assert.ok(model.evaluation.filterOptions.trace.includes("premium_stop"));
+  assert.equal(filtered.filteredRows.length, 1);
+  assert.match(html, /data-testid="evaluation-review"/);
+  assert.match(html, /data-testid="evaluation-filters"/);
+  assert.match(html, /Baseline Metrics/);
+  assert.match(html, /Walk-Forward \/ OOS Drill-Down/);
+  assert.match(html, /No walk-forward folds were supplied/);
+  assert.match(html, /unknown IV gate/);
+  assert.match(html, /premium_stop_target_daily/);
+  assert.match(html, /data-testid="evaluation-provenance"/);
+  assert.match(html, /insufficient evidence/);
+});
+
+test("keeps M6 artifacts optional and can show generated or review evidence states", async () => {
+  const [dataset, aggregate] = await Promise.all([
+    loadFixture(evaluationDatasetFixtureUrl),
+    loadFixture(evaluationAggregateFixtureUrl),
+  ]);
+  const generatedDataset = structuredClone(dataset);
+  generatedDataset.provenance.fixture_fallback = false;
+  const generatedAggregate = structuredClone(aggregate);
+  generatedAggregate.provenance.fixture_fallback = false;
+  generatedAggregate.groups[0].result_status = "generated";
+  const fixtureAggregate = structuredClone(aggregate);
+  fixtureAggregate.groups[0].result_status = "generated";
+  const fixture = buildEvaluationReviewModel({
+    evaluationDataset: dataset,
+    evaluationAggregate: fixtureAggregate,
+  });
+  const generated = buildEvaluationReviewModel({
+    evaluationDataset: generatedDataset,
+    evaluationAggregate: generatedAggregate,
+  });
+  const reviewManifest = await loadFixture(frontendManifestFixtureUrl);
+  reviewManifest.review_state.status = "approved";
+  const review = buildEvaluationReviewModel(
+    { evaluationDataset: generatedDataset, evaluationAggregate: generatedAggregate },
+    buildDashboardModel(await loadFixture(), { manifest: reviewManifest }).manifest,
+  );
+  const empty = buildEvaluationReviewModel({});
+
+  assert.equal(generated.state, "generated");
+  assert.equal(fixture.state, "fixture");
+  assert.equal(review.state, "review");
+  assert.equal(empty.state, "not_referenced");
+  assert.equal(empty.dataset.status, "not_referenced");
+});
+
+test("loads an optional M6 dataset only through the manifest copied-artifact path", async () => {
+  const manifest = await loadFixture(frontendManifestFixtureUrl);
+  const dataset = await loadFixture(evaluationDatasetFixtureUrl);
+  const loaded = await loadEvaluationDataset(async (url) => {
+    assert.equal(url.pathname, "/frontend/pa-feitian-dashboard/fixtures/pa_feitian_evaluation_dataset_v1.json");
+    return { ok: true, status: 200, json: async () => dataset };
+  }, manifest);
+
+  assert.equal(loaded.schema_version, "pa_feitian_evaluation_dataset_v1");
 });
 
 test("surfaces defensive states, trace node states, and missing optional fields", async () => {

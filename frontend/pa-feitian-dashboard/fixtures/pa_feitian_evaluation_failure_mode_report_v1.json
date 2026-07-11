@@ -1,0 +1,11 @@
+{
+  "schema_version": "pa_feitian_evaluation_failure_mode_report_v1",
+  "generated_at_utc": "2026-07-11T00:00:00Z",
+  "provenance": {
+    "role": "m6_failure_mode_report", "source_manifest_path": "src/tests/fixtures/pa_feitian_run_manifest_with_premium_outcome_v1.json", "source_manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "source_manifest_schema_version": "pa_feitian_run_manifest_v1", "premium_outcome_artifact_path": "src/tests/fixtures/pa_feitian_premium_outcome_v1.json", "premium_outcome_artifact_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "premium_outcome_schema_version": "pa_feitian_premium_outcome_v1", "source_commit": "cccccccccccccccccccccccccccccccccccccccc", "producer": "engine.pa_feitian.evaluation_contract_fixture.v1", "cli_args": ["fixture-only-contract-test"], "policy_config_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "data_access_status": "fixture_fallback", "fixture_fallback": true, "random_seed": 7,
+    "input_hashes": {"source_manifest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "premium_outcome_artifact": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "policy_config": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "evaluation_dataset": "sha256:3cbe78492edca612d8b55eca9e1d18b6c7587d7a1bc6dd215f1dfb4ee8774824"}, "output_hashes": {}, "notes": ["contract fixture only"]
+  },
+  "evaluation_dataset": {"kind": "evaluation_dataset", "path": "src/tests/fixtures/pa_feitian_evaluation_dataset_v1.json", "sha256": "sha256:3cbe78492edca612d8b55eca9e1d18b6c7587d7a1bc6dd215f1dfb4ee8774824", "schema_version": "pa_feitian_evaluation_dataset_v1", "content_type": "application/json"},
+  "failure_modes": [{"failure_mode_id": "unknown_iv_gate", "category": "iv_gate", "label": "unknown IV gate", "affected_row_count": 1, "outcome_ids": ["paft_premium_outcome_0002_daily_target_v1"], "source_signal_ids": ["paft_scorecard_0002_kq_m_shfe_au_20260629000000"], "input_refs": ["scorecard_record:2"], "severity": "warning", "notes": ["retained for reviewer inspection"]}],
+  "warnings": []
+}

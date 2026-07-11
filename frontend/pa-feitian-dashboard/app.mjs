@@ -7,6 +7,16 @@ export const SUPPORTED_CONTRACT_VERSIONS = new Set([
 ]);
 export const SUPPORTED_DECISION_INTENT_VERSIONS = new Set(["pa_feitian_decision_intent_v1"]);
 export const SUPPORTED_PREMIUM_OUTCOME_VERSIONS = new Set(["pa_feitian_premium_outcome_v1"]);
+export const SUPPORTED_EVALUATION_DATASET_VERSIONS = new Set(["pa_feitian_evaluation_dataset_v1"]);
+export const SUPPORTED_EVALUATION_AGGREGATE_VERSIONS = new Set([
+  "pa_feitian_evaluation_aggregate_result_v1",
+]);
+export const SUPPORTED_EVALUATION_FAILURE_MODE_VERSIONS = new Set([
+  "pa_feitian_evaluation_failure_mode_report_v1",
+]);
+export const SUPPORTED_EVALUATION_SCREENING_VERSIONS = new Set([
+  "pa_feitian_evaluation_screening_report_v1",
+]);
 
 export const SNAPSHOT_MODE_DEFINITIONS = {
   fixture: "Fixture snapshot",
@@ -67,6 +77,45 @@ export const HASH_STATUS_DEFINITIONS = {
   untracked: "No manifest hash link recorded",
 };
 
+export const EVALUATION_ARTIFACT_DEFINITIONS = [
+  {
+    optionKey: "evaluationDataset",
+    manifestKey: "evaluationDatasetArtifact",
+    outputHashKey: "evaluation_dataset_artifact",
+    frontendCopyHashKey: "frontend_evaluation_dataset_copy",
+    label: "Evaluation dataset",
+    kind: "evaluation_dataset",
+    versions: SUPPORTED_EVALUATION_DATASET_VERSIONS,
+  },
+  {
+    optionKey: "evaluationAggregate",
+    manifestKey: "evaluationAggregateArtifact",
+    outputHashKey: "evaluation_aggregate_result_artifact",
+    frontendCopyHashKey: "frontend_evaluation_aggregate_result_copy",
+    label: "Evaluation aggregate result",
+    kind: "evaluation_aggregate_result",
+    versions: SUPPORTED_EVALUATION_AGGREGATE_VERSIONS,
+  },
+  {
+    optionKey: "evaluationFailureModes",
+    manifestKey: "evaluationFailureModeArtifact",
+    outputHashKey: "evaluation_failure_mode_report_artifact",
+    frontendCopyHashKey: "frontend_evaluation_failure_mode_report_copy",
+    label: "Evaluation failure-mode report",
+    kind: "evaluation_failure_mode_report",
+    versions: SUPPORTED_EVALUATION_FAILURE_MODE_VERSIONS,
+  },
+  {
+    optionKey: "evaluationScreening",
+    manifestKey: "evaluationScreeningArtifact",
+    outputHashKey: "evaluation_screening_report_artifact",
+    frontendCopyHashKey: "frontend_evaluation_screening_report_copy",
+    label: "Evaluation screening report",
+    kind: "evaluation_screening_report",
+    versions: SUPPORTED_EVALUATION_SCREENING_VERSIONS,
+  },
+];
+
 const DECISION_INTENT_EMPTY_STATE = {
   status: "not_referenced",
   schemaVersion: null,
@@ -99,6 +148,14 @@ const PREMIUM_OUTCOME_EMPTY_STATE = {
   duplicateSourceSignalIds: [],
   unmatchedSourceSignalIds: [],
   missingSignalIds: [],
+  error: null,
+};
+
+const EVALUATION_EMPTY_ARTIFACT = {
+  status: "not_referenced",
+  payload: null,
+  artifact: null,
+  warnings: [],
   error: null,
 };
 
@@ -342,6 +399,10 @@ export function normalizeRunManifest(manifest) {
     snapshotArtifact: manifest.snapshot_artifact || null,
     decisionIntentArtifact: manifest.decision_intent_artifact || null,
     premiumOutcomeArtifact: manifest.premium_outcome_artifact || null,
+    evaluationDatasetArtifact: manifest.evaluation_dataset_artifact || null,
+    evaluationAggregateArtifact: manifest.evaluation_aggregate_result_artifact || null,
+    evaluationFailureModeArtifact: manifest.evaluation_failure_mode_report_artifact || null,
+    evaluationScreeningArtifact: manifest.evaluation_screening_report_artifact || null,
     cliArgs: Array.isArray(manifest.cli_args) ? manifest.cli_args : [],
     runConfig: manifest.run_config || {},
     dataAccess: manifest.data_access || {},
@@ -426,6 +487,31 @@ function buildArtifactProvenanceRows(manifest) {
       manifest.outputHashes.premium_outcome_artifact,
       "output_hashes.premium_outcome_artifact",
     ),
+    ...EVALUATION_ARTIFACT_DEFINITIONS.flatMap((definition) => {
+      const artifact = manifest[definition.manifestKey];
+      const outputHash = manifest.outputHashes[definition.outputHashKey];
+      const rows = [
+        buildArtifactProvenanceRow(
+          `${definition.label} artifact`,
+          artifact,
+          outputHash,
+          `output_hashes.${definition.outputHashKey}`,
+        ),
+      ];
+      if (artifact || manifest.outputHashes[definition.frontendCopyHashKey]) {
+        rows.push(
+          buildCopyProvenanceRow(`${definition.label} frontend copy`, {
+            kind: `${definition.kind}_copy`,
+            path: artifact?.path,
+            actualHash: manifest.outputHashes[definition.frontendCopyHashKey],
+            expectedHash: artifact?.sha256,
+            hashSource: `output_hashes.${definition.frontendCopyHashKey}`,
+            schemaVersion: artifact?.schema_version,
+          }),
+        );
+      }
+      return rows;
+    }),
   ];
 
   if (manifest.decisionIntentArtifact || manifest.outputHashes.frontend_decision_intent_copy) {
@@ -702,6 +788,153 @@ export function normalizePremiumOutcomeSidecar(sidecar) {
   };
 }
 
+function valueList(values) {
+  return [...new Set(values.filter((value) => value !== null && value !== undefined && value !== ""))]
+    .map(String)
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function evaluationFilterValues(row, filter) {
+  if (filter === "time") {
+    return row?.decision_ts_utc ? [String(row.decision_ts_utc).slice(0, 10)] : [];
+  }
+  if (filter === "trace") {
+    return Array.isArray(row?.decision_trace_node_ids) ? row.decision_trace_node_ids : [];
+  }
+  if (filter === "leg") {
+    return [row?.option_type, row?.contract_family].filter(Boolean);
+  }
+  if (filter === "iv") {
+    return row?.iv_gate_status ? [row.iv_gate_status] : [];
+  }
+  return row?.[filter] ? [row[filter]] : [];
+}
+
+export function normalizeEvaluationArtifact(payload, definition, artifact = null, error = null) {
+  if (error) {
+    return { ...EVALUATION_EMPTY_ARTIFACT, status: "load_error", artifact, error };
+  }
+  if (!payload) {
+    return {
+      ...EVALUATION_EMPTY_ARTIFACT,
+      status: artifact ? "referenced_missing" : "not_referenced",
+      artifact,
+    };
+  }
+  if (!definition.versions.has(payload.schema_version)) {
+    return {
+      ...EVALUATION_EMPTY_ARTIFACT,
+      status: "unsupported",
+      artifact,
+      payload,
+      warnings: [`Unsupported ${definition.label.toLowerCase()} contract: ${payload?.schema_version ?? "missing"}.`],
+    };
+  }
+  return {
+    status: "loaded",
+    artifact,
+    payload,
+    warnings: Array.isArray(payload.warnings) ? payload.warnings : [],
+    error: null,
+  };
+}
+
+function buildEvaluationLinkRows(evaluation) {
+  const datasetHash = evaluation.dataset.artifact?.sha256 || null;
+  const aggregateHash = evaluation.aggregate.artifact?.sha256 || null;
+  const refRows = [
+    ["Aggregate → dataset", evaluation.aggregate.payload?.evaluation_dataset, datasetHash],
+    ["Failure modes → dataset", evaluation.failureModes.payload?.evaluation_dataset, datasetHash],
+    ["Screening → dataset", evaluation.screening.payload?.evaluation_dataset, datasetHash],
+    ["Screening → aggregate", evaluation.screening.payload?.aggregate_result, aggregateHash],
+  ];
+  return refRows.map(([label, reference, actualHash]) => ({
+    label,
+    path: reference?.path || null,
+    expectedHash: reference?.sha256 || null,
+    actualHash,
+    schemaVersion: reference?.schema_version || null,
+    hashStatus: reference ? classifyHashStatus(actualHash, reference.sha256) : "missing",
+  }));
+}
+
+export function buildEvaluationReviewModel(options = {}, manifest = null) {
+  const artifacts = {};
+  for (const definition of EVALUATION_ARTIFACT_DEFINITIONS) {
+    artifacts[definition.optionKey] = normalizeEvaluationArtifact(
+      options[definition.optionKey],
+      definition,
+      manifest?.[definition.manifestKey] || null,
+      options[`${definition.optionKey}Error`] || null,
+    );
+  }
+  const dataset = artifacts.evaluationDataset;
+  const aggregate = artifacts.evaluationAggregate;
+  const failureModes = artifacts.evaluationFailureModes;
+  const screening = artifacts.evaluationScreening;
+  const rows = Array.isArray(dataset.payload?.rows) ? dataset.payload.rows : [];
+  const filterOptions = Object.fromEntries(
+    ["pool", "underlying", "time", "trace", "leg", "iv"].map((filter) => [
+      filter,
+      valueList(rows.flatMap((row) => evaluationFilterValues(row, filter))),
+    ]),
+  );
+  const filters = Object.fromEntries(
+    Object.keys(filterOptions).map((filter) => [filter, options.evaluationFilters?.[filter] || "all"]),
+  );
+  const filteredRows = rows.filter((row) =>
+    Object.entries(filters).every(([filter, selected]) =>
+      selected === "all" || evaluationFilterValues(row, filter).includes(selected),
+    ),
+  );
+  const groups = Array.isArray(aggregate.payload?.groups) ? aggregate.payload.groups : [];
+  const folds = Array.isArray(aggregate.payload?.walk_forward_folds)
+    ? aggregate.payload.walk_forward_folds
+    : [];
+  const allArtifacts = Object.values(artifacts);
+  const hasArtifact = allArtifacts.some((entry) => entry.status !== "not_referenced");
+  const isFixture = allArtifacts.some((entry) => entry.payload?.provenance?.fixture_fallback === true);
+  const isReview = REVIEW_MODE_STATUSES.has(manifest?.reviewState?.status);
+  const insufficient =
+    !aggregate.payload || groups.length === 0 || groups.some((group) => group.result_status === "insufficient_sample");
+  const state = !hasArtifact
+    ? "not_referenced"
+    : insufficient
+      ? "insufficient"
+      : isReview
+        ? "review"
+        : isFixture
+          ? "fixture"
+          : "generated";
+  const warnings = uniqueStrings(
+    allArtifacts.flatMap((entry) => entry.warnings || []).concat(
+      allArtifacts
+        .filter((entry) => entry.status !== "loaded" && entry.status !== "not_referenced")
+        .map((entry) => `${entry.artifact?.kind || "Evaluation"} artifact status is ${entry.status}.`),
+    ),
+  );
+  return {
+    state,
+    dataset,
+    aggregate,
+    failureModes,
+    screening,
+    rows,
+    filteredRows,
+    filterOptions,
+    filters,
+    groups,
+    folds,
+    warnings,
+    linkRows: buildEvaluationLinkRows({
+      dataset,
+      aggregate,
+      failureModes,
+      screening,
+    }),
+  };
+}
+
 function inferSnapshotMode(snapshot, manifest) {
   const reviewStatus = manifest?.reviewState?.status;
   if (reviewStatus && REVIEW_MODE_STATUSES.has(reviewStatus)) {
@@ -928,6 +1161,7 @@ export function buildDashboardModel(snapshot, options = {}) {
     snapshotWarnings: Array.isArray(snapshot.warnings) ? snapshot.warnings : [],
     signals,
   });
+  const evaluation = buildEvaluationReviewModel(renderOptions, manifest);
 
   return {
     contract: snapshot.schema_version,
@@ -951,6 +1185,7 @@ export function buildDashboardModel(snapshot, options = {}) {
       ...premiumOutcome,
       warnings: premiumOutcomeWarnings,
     },
+    evaluation,
     reviewOperations,
     signals: signals.map((signal) => ({
       ...signal,
@@ -1149,6 +1384,10 @@ function renderManifestProvenance(model) {
         ${renderArtifactRef("Snapshot artifact", manifest.snapshotArtifact)}
         ${renderArtifactRef("Decision intent artifact", manifest.decisionIntentArtifact)}
         ${renderArtifactRef("Premium outcome artifact", manifest.premiumOutcomeArtifact)}
+        ${renderArtifactRef("Evaluation dataset artifact", manifest.evaluationDatasetArtifact)}
+        ${renderArtifactRef("Evaluation aggregate artifact", manifest.evaluationAggregateArtifact)}
+        ${renderArtifactRef("Evaluation failure-mode artifact", manifest.evaluationFailureModeArtifact)}
+        ${renderArtifactRef("Evaluation screening artifact", manifest.evaluationScreeningArtifact)}
       </div>
       <div class="manifest-details">
         <details>
@@ -2116,6 +2355,198 @@ function renderSignalDrilldown(model) {
   `;
 }
 
+function evaluationStateBadge(state) {
+  const labels = {
+    fixture: "fixture evidence",
+    generated: "generated evidence",
+    review: "review evidence",
+    insufficient: "insufficient evidence",
+    not_referenced: "no evaluation artifacts",
+  };
+  return `<span class="evaluation-state ${escapeHtml(state)}">${escapeHtml(labels[state] || state)}</span>`;
+}
+
+function evaluationStatusBadge(status) {
+  const normalized = String(status || "unknown").replaceAll("_", "-");
+  return `<span class="evaluation-status ${escapeHtml(normalized)}">${escapeHtml(status || "unknown")}</span>`;
+}
+
+function renderEvaluationFilters(evaluation) {
+  const labels = {
+    pool: "Pool",
+    underlying: "Underlying",
+    time: "Time",
+    trace: "Trace",
+    leg: "Leg",
+    iv: "IV gate",
+  };
+  const controls = Object.entries(labels)
+    .map(([filter, label]) => {
+      const values = evaluation.filterOptions[filter] || [];
+      const options = ["<option value=\"all\">All</option>"]
+        .concat(
+          values.map(
+            (value) =>
+              `<option value="${escapeHtml(value)}"${evaluation.filters[filter] === value ? " selected" : ""}>${escapeHtml(value)}</option>`,
+          ),
+        )
+        .join("");
+      return `
+        <label>
+          <span>${escapeHtml(label)}</span>
+          <select data-evaluation-filter="${escapeHtml(filter)}" ${values.length ? "" : "disabled"}>${options}</select>
+        </label>
+      `;
+    })
+    .join("");
+  return `<div class="evaluation-filters" data-testid="evaluation-filters">${controls}</div>`;
+}
+
+function renderEvaluationMetricTable(groups) {
+  if (!groups.length) {
+    return '<div class="empty-state compact"><p>No aggregate result groups are available.</p></div>';
+  }
+  return `
+    <div class="table-wrap">
+      <table class="evaluation-table" data-testid="evaluation-metrics-table">
+        <thead><tr><th>Group</th><th>Status</th><th>Sample / effective</th><th>Premium R</th><th>95% CI</th><th>Win rate</th><th>Underlying ΔR</th></tr></thead>
+        <tbody>${groups
+          .map((group) => {
+            const stats = group.premium_r || {};
+            const ci = stats.bootstrap_95_ci;
+            return `<tr>
+              <td><strong>${escapeHtml(group.dimension || "group")}</strong><div class="muted">${escapeHtml(group.value || group.group_id || "Missing")}</div></td>
+              <td>${evaluationStatusBadge(group.result_status)}</td>
+              <td>${numberValue(group.sample_count, 0)} / ${numberValue(group.effective_sample_count, 0)}</td>
+              <td>mean ${numberValue(stats.mean)}<div class="muted">median ${numberValue(stats.median)}</div></td>
+              <td>${ci ? `${numberValue(ci.lower)} to ${numberValue(ci.upper)}<div class="muted">${escapeHtml(ci.method || "method missing")} / ${escapeHtml(ci.cluster_unit || "cluster missing")}</div>` : '<span class="missing">Missing</span>'}</td>
+              <td>${typeof stats.win_rate === "number" ? percentageValue(stats.win_rate * 100) : '<span class="missing">Missing</span>'}</td>
+              <td>${numberValue(group.underlying_r_difference_mean)}</td>
+            </tr>`;
+          })
+          .join("")}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderWalkForwardFolds(folds) {
+  if (!folds.length) {
+    return '<div class="empty-state compact"><p>No walk-forward folds were supplied; OOS comparison is unavailable.</p></div>';
+  }
+  return `<div class="fold-list" data-testid="evaluation-fold-drilldown">${folds
+    .map(
+      (fold) => `
+        <details class="drilldown">
+          <summary><strong>${escapeHtml(fold.fold_id || "fold")}</strong> ${evaluationStatusBadge(fold.test_result?.result_status)} <span>${escapeHtml(formatDate(fold.test_start_utc))} → ${escapeHtml(formatDate(fold.test_end_utc))}</span></summary>
+          <div class="fold-grid">
+            <div><strong>Baseline / train</strong>${renderEvaluationMetricTable([fold.train_result || {}])}</div>
+            <div><strong>OOS / test</strong>${renderEvaluationMetricTable([fold.test_result || {}])}</div>
+          </div>
+          <dl class="kv compact"><dt>No lookahead verified</dt><dd>${labelValue(fold.no_lookahead_verified)}</dd><dt>Train events</dt><dd>${labelValue(fold.train_event_ids || [])}</dd><dt>Test events</dt><dd>${labelValue(fold.test_event_ids || [])}</dd></dl>
+          ${fold.notes?.length ? `<div class="muted">${escapeHtml(fold.notes.join(" · "))}</div>` : ""}
+        </details>
+      `,
+    )
+    .join("")}</div>`;
+}
+
+function renderEvaluationRows(evaluation) {
+  if (evaluation.dataset.status !== "loaded") {
+    return `<div class="empty-state compact"><p>Evaluation dataset is ${escapeHtml(evaluation.dataset.status)}; row review is unavailable.</p></div>`;
+  }
+  if (!evaluation.filteredRows.length) {
+    return '<div class="empty-state compact"><p>No dataset rows match the selected filters.</p></div>';
+  }
+  return `
+    <div class="table-wrap">
+      <table class="evaluation-table" data-testid="evaluation-dataset-table">
+        <thead><tr><th>Decision</th><th>Pool / underlying</th><th>Trace / leg / IV</th><th>Status</th><th>Premium R</th><th>Exit</th></tr></thead>
+        <tbody>${evaluation.filteredRows
+          .map(
+            (row) => `<tr>
+              <td><strong>${escapeHtml(row.row_id || "Missing")}</strong><div class="muted">${escapeHtml(formatDate(row.decision_ts_utc))}</div></td>
+              <td>${labelValue(row.pool)}<div class="muted">${labelValue(row.underlying)}</div></td>
+              <td>${labelValue(row.decision_trace_node_ids || [])}<div class="muted">${labelValue(row.option_type || row.contract_family)} / IV ${labelValue(row.iv_gate_status)}</div></td>
+              <td>${evaluationStatusBadge(row.evaluation_status)}</td>
+              <td>${numberValue(row.premium_r)}</td>
+              <td>${labelValue(row.exit_reason)}</td>
+            </tr>`,
+          )
+          .join("")}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderFailureModes(evaluation) {
+  const report = evaluation.failureModes;
+  const modes = Array.isArray(report.payload?.failure_modes) ? report.payload.failure_modes : [];
+  if (report.status !== "loaded") {
+    return `<div class="empty-state compact"><p>Failure-mode report is ${escapeHtml(report.status)}.</p></div>`;
+  }
+  if (!modes.length) {
+    return '<div class="empty-state compact"><p>No failure modes were reported.</p></div>';
+  }
+  return `<div class="evidence-list" data-testid="evaluation-failure-modes">${modes
+    .map(
+      (mode) => `<article class="evidence-card">
+        <div><strong>${escapeHtml(mode.label || mode.failure_mode_id || "Failure mode")}</strong> ${evaluationStatusBadge(mode.severity)}</div>
+        <p>${numberValue(mode.affected_row_count, 0)} affected row(s) · ${escapeHtml(mode.category || "uncategorized")}</p>
+        <small>Outcomes: ${labelValue(mode.outcome_ids || [])}</small><small>Signals: ${labelValue(mode.source_signal_ids || [])}</small><small>Inputs: ${labelValue(mode.input_refs || [])}</small>
+        ${mode.notes?.length ? `<small>${escapeHtml(mode.notes.join(" · "))}</small>` : ""}
+      </article>`,
+    )
+    .join("")}</div>`;
+}
+
+function renderScreening(evaluation) {
+  const report = evaluation.screening;
+  const candidates = Array.isArray(report.payload?.candidates) ? report.payload.candidates : [];
+  if (report.status !== "loaded") {
+    return `<div class="empty-state compact"><p>Screening report is ${escapeHtml(report.status)}.</p></div>`;
+  }
+  if (!candidates.length) {
+    return '<div class="empty-state compact"><p>No screening candidates were supplied.</p></div>';
+  }
+  return `<div class="evidence-list" data-testid="evaluation-screening">${candidates
+    .map(
+      (candidate) => `<article class="evidence-card">
+        <div><strong>${escapeHtml(candidate.policy_id || candidate.candidate_id || "Candidate")}</strong> ${evaluationStatusBadge(candidate.classification)} ${evaluationStatusBadge(candidate.reviewer_status)}</div>
+        <p>${numberValue(candidate.effective_event_count, 0)} effective event(s) · ${numberValue(candidate.comparable_oos_window_count, 0)} comparable OOS window(s)</p>
+        <small>Baseline: ${labelValue(candidate.baseline_policy_id)}</small><small>Basis: ${labelValue(candidate.classification_basis || [])}</small><small>Limitations: ${labelValue(candidate.limitations || [])}</small>
+      </article>`,
+    )
+    .join("")}</div>`;
+}
+
+function renderEvaluationReview(model) {
+  const evaluation = model.evaluation;
+  const warningItems = evaluation.warnings.length
+    ? evaluation.warnings.map((warning) => `<div class="warning-item">${escapeHtml(warning)}</div>`).join("")
+    : '<div class="warning-item muted">No M6 evaluation warnings.</div>';
+  const linkRows = evaluation.linkRows
+    .map(
+      (row) => `<tr><td>${escapeHtml(row.label)}</td><td>${labelValue(row.path)}</td><td><code>${labelValue(row.actualHash)}</code></td><td><code>${labelValue(row.expectedHash)}</code></td><td>${hashStatusBadge(row.hashStatus)}</td></tr>`,
+    )
+    .join("");
+  return `
+    <section class="panel" aria-labelledby="evaluation-heading" data-testid="evaluation-review">
+      <div class="panel-header"><div><h2 id="evaluation-heading">M6 Evaluation Review</h2><p>Artifact-only baseline and OOS evidence. No data source is queried from this dashboard.</p></div>${evaluationStateBadge(evaluation.state)}</div>
+      <div class="evaluation-content">
+        ${renderEvaluationFilters(evaluation)}
+        <div class="evaluation-summary"><span>${numberValue(evaluation.filteredRows.length, 0)} / ${numberValue(evaluation.rows.length, 0)} dataset row(s)</span><span>${numberValue(evaluation.groups.length, 0)} aggregate group(s)</span><span>${numberValue(evaluation.folds.length, 0)} OOS fold(s)</span></div>
+        <h3>Baseline Metrics</h3>${renderEvaluationMetricTable(evaluation.groups)}
+        <h3>Walk-Forward / OOS Drill-Down</h3>${renderWalkForwardFolds(evaluation.folds)}
+        <h3>Dataset Rows</h3>${renderEvaluationRows(evaluation)}
+        <div class="evaluation-evidence-grid"><section><h3>Failure-Mode Evidence</h3>${renderFailureModes(evaluation)}</section><section><h3>Screening Evidence</h3>${renderScreening(evaluation)}</section></div>
+        <h3>Provenance Links</h3><div class="table-wrap"><table class="evaluation-table" data-testid="evaluation-provenance"><thead><tr><th>Link</th><th>Artifact path</th><th>Loaded hash</th><th>Referenced hash</th><th>Status</th></tr></thead><tbody>${linkRows || '<tr><td colspan="5" class="muted">No M6 provenance links.</td></tr>'}</tbody></table></div>
+        <div class="warnings-list">${warningItems}</div>
+      </div>
+    </section>
+  `;
+}
+
 export function renderDashboard(snapshot, options = {}) {
   const model = buildDashboardModel(snapshot, options);
 
@@ -2129,6 +2560,7 @@ export function renderDashboard(snapshot, options = {}) {
       ${renderReviewOperations(model)}
       ${renderDecisionIntentOverview(model)}
       ${renderPremiumOutcomeOverview(model)}
+      ${renderEvaluationReview(model)}
       ${renderSignalTable(model)}
       ${renderSignalDrilldown(model)}
     </div>
@@ -2210,6 +2642,41 @@ export async function loadPremiumOutcome(fetchImpl = globalThis.fetch, manifest 
   return response.json();
 }
 
+export async function loadEvaluationArtifact(fetchImpl = globalThis.fetch, manifest = null, definition) {
+  if (typeof fetchImpl !== "function") {
+    throw new Error("fetch is not available");
+  }
+  const normalizedManifest = normalizeRunManifest(manifest);
+  const artifactUrl = artifactPathToUrl(normalizedManifest?.[definition.manifestKey]?.path);
+  if (!artifactUrl) {
+    return null;
+  }
+  const response = await fetchImpl(new URL(artifactUrl, import.meta.url));
+  if (response.status === 404) {
+    throw new Error(`Failed to load ${definition.label.toLowerCase()}: ${artifactUrl} returned HTTP 404`);
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to load ${definition.label.toLowerCase()}: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+export function loadEvaluationDataset(fetchImpl = globalThis.fetch, manifest = null) {
+  return loadEvaluationArtifact(fetchImpl, manifest, EVALUATION_ARTIFACT_DEFINITIONS[0]);
+}
+
+export function loadEvaluationAggregate(fetchImpl = globalThis.fetch, manifest = null) {
+  return loadEvaluationArtifact(fetchImpl, manifest, EVALUATION_ARTIFACT_DEFINITIONS[1]);
+}
+
+export function loadEvaluationFailureModes(fetchImpl = globalThis.fetch, manifest = null) {
+  return loadEvaluationArtifact(fetchImpl, manifest, EVALUATION_ARTIFACT_DEFINITIONS[2]);
+}
+
+export function loadEvaluationScreening(fetchImpl = globalThis.fetch, manifest = null) {
+  return loadEvaluationArtifact(fetchImpl, manifest, EVALUATION_ARTIFACT_DEFINITIONS[3]);
+}
+
 export function renderError(error) {
   return `
     <section class="error-panel" role="alert">
@@ -2230,6 +2697,7 @@ export async function mountDashboard(root = document.getElementById("dashboard-r
     let decisionIntentError = null;
     let premiumOutcome = null;
     let premiumOutcomeError = null;
+    const evaluationOptions = {};
     try {
       manifest = await loadManifest();
     } catch (error) {
@@ -2247,12 +2715,45 @@ export async function mountDashboard(root = document.getElementById("dashboard-r
       premiumOutcomeError = error;
       console.warn?.("PA Feitian premium outcome unavailable", error);
     }
-    root.innerHTML = renderDashboard(snapshot, {
-      manifest,
-      decisionIntent,
-      decisionIntentError,
-      premiumOutcome,
-      premiumOutcomeError,
+    await Promise.all(
+      EVALUATION_ARTIFACT_DEFINITIONS.map(async (definition) => {
+        try {
+          evaluationOptions[definition.optionKey] = await loadEvaluationArtifact(
+            globalThis.fetch,
+            manifest,
+            definition,
+          );
+        } catch (error) {
+          evaluationOptions[`${definition.optionKey}Error`] = error;
+          console.warn?.(`PA Feitian ${definition.label} unavailable`, error);
+        }
+      }),
+    );
+    const renderWithFilters = (evaluationFilters = {}) => {
+      root.innerHTML = renderDashboard(snapshot, {
+        manifest,
+        decisionIntent,
+        decisionIntentError,
+        premiumOutcome,
+        premiumOutcomeError,
+        ...evaluationOptions,
+        evaluationFilters,
+      });
+    };
+    renderWithFilters();
+    root.addEventListener("change", (event) => {
+      const filter = event.target?.dataset?.evaluationFilter;
+      if (!filter) {
+        return;
+      }
+      const currentFilters = Object.fromEntries(
+        [...root.querySelectorAll("[data-evaluation-filter]")].map((control) => [
+          control.dataset.evaluationFilter,
+          control.value,
+        ]),
+      );
+      currentFilters[filter] = event.target.value;
+      renderWithFilters(currentFilters);
     });
   } catch (error) {
     root.innerHTML = renderError(error);
