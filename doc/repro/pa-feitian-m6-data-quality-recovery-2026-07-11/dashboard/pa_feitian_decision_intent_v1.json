@@ -1,0 +1,264 @@
+{
+  "schema_version": "pa_feitian_decision_intent_v1",
+  "generated_at_utc": "2026-07-10T00:00:00Z",
+  "source_commit": "d7a71db5bb48fe7077789bec1ee6b91910aa25cf",
+  "provenance": {
+    "role": "manifest_referenced_decision_intent_sidecar",
+    "source_manifest_path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_run_manifest_with_decision_intent_v1.json",
+    "source_manifest_schema_version": "pa_feitian_run_manifest_v1",
+    "source_manifest_generated_at_utc": "2026-07-10T00:00:00Z",
+    "snapshot_artifact_path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_snapshot_v1.json",
+    "snapshot_artifact_sha256": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf",
+    "snapshot_schema_version": "pa_feitian_snapshot_v1",
+    "producer": "engine.pa_feitian.decision_intent_adapter.v0_2",
+    "notes": [
+      "focused v0.2 strategy adapter sidecar; snapshot v0/v1 semantics unchanged",
+      "execution_allowed remains false unless explicit premium stop, confirmation, and liquidity gates pass at decision time"
+    ]
+  },
+  "intents": [
+    {
+      "signal_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "instrument": "SHFE.au",
+      "contract": "kq_m_shfe_au",
+      "interval": "1d",
+      "decision_ts_utc": "2026-03-13T00:00:00Z",
+      "decision_state": "watch",
+      "execution_allowed": false,
+      "product_direction_tier": "aligned_trade_candidate",
+      "premium_stop": {
+        "status": "blocked",
+        "source": "unavailable",
+        "entry_premium": 53.06,
+        "stop_premium": null,
+        "stop_distance_pct": null,
+        "soft_gate_min_pct": 4.0,
+        "soft_gate_max_pct": 12.0,
+        "asof_ts_utc": "2026-03-13T00:00:00Z",
+        "evidence_ref": "scorecard_record:1"
+      },
+      "confirmation": {
+        "status": "pending",
+        "source": "unavailable",
+        "confirmed_at_utc": null,
+        "evidence_ref": "scorecard_record:1"
+      },
+      "liquidity": {
+        "status": "unknown",
+        "quote_count": null,
+        "last_quote_age_seconds": null,
+        "recovery_required": true,
+        "evidence_ref": "scorecard_record:1"
+      },
+      "reason_codes": [
+        "PREMIUM_STOP_UNAVAILABLE",
+        "STOP_CLEAR_DOWNGRADED",
+        "PREMIUM_CONFIRMATION_PENDING",
+        "LIQ_RECOVERY_REQUIRED",
+        "PRODUCT_DIRECTION_ALIGNED",
+        "SOURCE_STATUS_DATA_BLOCKED"
+      ],
+      "no_lookahead_inputs": [
+        {
+          "id": "scorecard_record:1",
+          "kind": "scorecard_record",
+          "source": "score_today_json",
+          "record_index": 1,
+          "asof_ts_utc": "2026-03-13T00:00:00Z",
+          "digest": "sha256:eaa2bd54bbb9bc689432b3256926c913e1a07b55cba571e9a9b203fe189a553a"
+        },
+        {
+          "id": "snapshot_signal:paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+          "kind": "snapshot_signal",
+          "source": "pa_feitian_snapshot_v1.decision_fields",
+          "record_index": 1,
+          "asof_ts_utc": "2026-03-13T00:00:00Z",
+          "digest": "sha256:b60dd832e69fbf941dbf9d2d5a653d6b833d1e0b4875f023931af7d08c1b23a4"
+        }
+      ]
+    },
+    {
+      "signal_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "instrument": "SHFE.au",
+      "contract": "kq_m_shfe_au",
+      "interval": "1d",
+      "decision_ts_utc": "2026-03-18T00:00:00Z",
+      "decision_state": "watch",
+      "execution_allowed": false,
+      "product_direction_tier": "aligned_trade_candidate",
+      "premium_stop": {
+        "status": "blocked",
+        "source": "unavailable",
+        "entry_premium": 41.5,
+        "stop_premium": null,
+        "stop_distance_pct": null,
+        "soft_gate_min_pct": 4.0,
+        "soft_gate_max_pct": 12.0,
+        "asof_ts_utc": "2026-03-18T00:00:00Z",
+        "evidence_ref": "scorecard_record:2"
+      },
+      "confirmation": {
+        "status": "pending",
+        "source": "unavailable",
+        "confirmed_at_utc": null,
+        "evidence_ref": "scorecard_record:2"
+      },
+      "liquidity": {
+        "status": "unknown",
+        "quote_count": null,
+        "last_quote_age_seconds": null,
+        "recovery_required": true,
+        "evidence_ref": "scorecard_record:2"
+      },
+      "reason_codes": [
+        "PREMIUM_STOP_UNAVAILABLE",
+        "STOP_CLEAR_DOWNGRADED",
+        "PREMIUM_CONFIRMATION_PENDING",
+        "LIQ_RECOVERY_REQUIRED",
+        "PRODUCT_DIRECTION_ALIGNED"
+      ],
+      "no_lookahead_inputs": [
+        {
+          "id": "scorecard_record:2",
+          "kind": "scorecard_record",
+          "source": "score_today_json",
+          "record_index": 2,
+          "asof_ts_utc": "2026-03-18T00:00:00Z",
+          "digest": "sha256:1de24380193981223babe7b52c22b2dee3d6ffe88fc5b0aceae66da5e8d7fda3"
+        },
+        {
+          "id": "snapshot_signal:paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+          "kind": "snapshot_signal",
+          "source": "pa_feitian_snapshot_v1.decision_fields",
+          "record_index": 2,
+          "asof_ts_utc": "2026-03-18T00:00:00Z",
+          "digest": "sha256:749b212f94cd96e4bf8a25e91fba677082fbef0f00d0d52dc69771175caeac0f"
+        }
+      ]
+    },
+    {
+      "signal_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "instrument": "SHFE.ag",
+      "contract": "kq_m_shfe_ag",
+      "interval": "1d",
+      "decision_ts_utc": "2026-05-15T00:00:00Z",
+      "decision_state": "watch",
+      "execution_allowed": false,
+      "product_direction_tier": "aligned_trade_candidate",
+      "premium_stop": {
+        "status": "blocked",
+        "source": "unavailable",
+        "entry_premium": 1144.5,
+        "stop_premium": null,
+        "stop_distance_pct": null,
+        "soft_gate_min_pct": null,
+        "soft_gate_max_pct": null,
+        "asof_ts_utc": "2026-05-15T00:00:00Z",
+        "evidence_ref": "scorecard_record:3"
+      },
+      "confirmation": {
+        "status": "pending",
+        "source": "unavailable",
+        "confirmed_at_utc": null,
+        "evidence_ref": "scorecard_record:3"
+      },
+      "liquidity": {
+        "status": "unknown",
+        "quote_count": null,
+        "last_quote_age_seconds": null,
+        "recovery_required": true,
+        "evidence_ref": "scorecard_record:3"
+      },
+      "reason_codes": [
+        "PREMIUM_STOP_UNAVAILABLE",
+        "STOP_CLEAR_DOWNGRADED",
+        "PREMIUM_CONFIRMATION_PENDING",
+        "LIQ_RECOVERY_REQUIRED",
+        "PRODUCT_DIRECTION_ALIGNED",
+        "SOURCE_STATUS_DATA_BLOCKED"
+      ],
+      "no_lookahead_inputs": [
+        {
+          "id": "scorecard_record:3",
+          "kind": "scorecard_record",
+          "source": "score_today_json",
+          "record_index": 3,
+          "asof_ts_utc": "2026-05-15T00:00:00Z",
+          "digest": "sha256:8738c5fd6fe30fd8a6ce868b686cf9f98faf42ddc0fc7fe800929c918a5cd7de"
+        },
+        {
+          "id": "snapshot_signal:paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+          "kind": "snapshot_signal",
+          "source": "pa_feitian_snapshot_v1.decision_fields",
+          "record_index": 3,
+          "asof_ts_utc": "2026-05-15T00:00:00Z",
+          "digest": "sha256:285ebf6e17d58dfa42c888d9208298aa01c48246b6eebb49a2169d97a015d290"
+        }
+      ]
+    },
+    {
+      "signal_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "instrument": "SHFE.ag",
+      "contract": "kq_m_shfe_ag",
+      "interval": "1d",
+      "decision_ts_utc": "2026-06-02T00:00:00Z",
+      "decision_state": "reject",
+      "execution_allowed": false,
+      "product_direction_tier": "aligned_trade_candidate",
+      "premium_stop": {
+        "status": "blocked",
+        "source": "unavailable",
+        "entry_premium": 1168.5,
+        "stop_premium": null,
+        "stop_distance_pct": null,
+        "soft_gate_min_pct": null,
+        "soft_gate_max_pct": null,
+        "asof_ts_utc": "2026-06-02T00:00:00Z",
+        "evidence_ref": "scorecard_record:4"
+      },
+      "confirmation": {
+        "status": "pending",
+        "source": "unavailable",
+        "confirmed_at_utc": null,
+        "evidence_ref": "scorecard_record:4"
+      },
+      "liquidity": {
+        "status": "unknown",
+        "quote_count": null,
+        "last_quote_age_seconds": null,
+        "recovery_required": true,
+        "evidence_ref": "scorecard_record:4"
+      },
+      "reason_codes": [
+        "PREMIUM_STOP_UNAVAILABLE",
+        "STOP_CLEAR_DOWNGRADED",
+        "PREMIUM_CONFIRMATION_PENDING",
+        "LIQ_RECOVERY_REQUIRED",
+        "PRODUCT_DIRECTION_ALIGNED",
+        "SOURCE_STATUS_DROP"
+      ],
+      "no_lookahead_inputs": [
+        {
+          "id": "scorecard_record:4",
+          "kind": "scorecard_record",
+          "source": "score_today_json",
+          "record_index": 4,
+          "asof_ts_utc": "2026-06-02T00:00:00Z",
+          "digest": "sha256:3af80155fc9860f4852d6a4db4c1a840de18e47a20a3b0c036c7cd100f5a10d7"
+        },
+        {
+          "id": "snapshot_signal:paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+          "kind": "snapshot_signal",
+          "source": "pa_feitian_snapshot_v1.decision_fields",
+          "record_index": 4,
+          "asof_ts_utc": "2026-06-02T00:00:00Z",
+          "digest": "sha256:f0e275c83626b6f9580f04a3afa5de7837a148793a01fc96a9e13ee7955c7437"
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "decision intent sidecar is readiness metadata only; it does not execute orders",
+    "missing premium stop, confirmation, or liquidity inputs are downgraded instead of being inferred from outcomes"
+  ]
+}

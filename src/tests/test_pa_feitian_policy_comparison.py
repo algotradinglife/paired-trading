@@ -24,6 +24,7 @@ from engine.pa_feitian.policy_comparison import (
 )
 from engine.pa_feitian.schema_validation import (
     validate_pa_feitian_evaluation_screening_report_schema,
+    validate_pa_feitian_m6_policy_comparison_config_schema,
 )
 
 
@@ -100,6 +101,7 @@ def _config(baseline: CandidateArtifacts) -> PolicyComparisonConfig:
             "schema_version": "pa_feitian_m6_policy_comparison_config_v1",
             "registration_id": "m6-c-fixture",
             "registered_at_utc": "2026-06-01T00:00:00Z",
+            "registration_mode": "prospective",
             "baseline": {
                 "policy_id": baseline.dataset.rows[0].policy_id,
                 "policy_version": baseline.dataset.rows[0].policy_version,
@@ -171,6 +173,102 @@ def test_controlled_comparison_is_event_paired_oos_and_bonferroni_bound(tmp_path
     validate_pa_feitian_evaluation_screening_report_schema(
         evaluation_screening_report_to_jsonable(screening)
     )
+    validate_pa_feitian_m6_policy_comparison_config_schema(config.model_dump(mode="json"))
+
+
+def test_late_prospective_registration_remains_hard_blocked(tmp_path: Path):
+    baseline = _write_artifacts(tmp_path, "baseline")
+    candidate = _write_artifacts(tmp_path, "candidate", candidate=True)
+    config = _config(baseline).model_copy(
+        update={
+            "registered_at_utc": datetime(2026, 7, 1, tzinfo=UTC),
+            "registration_mode": "prospective",
+        }
+    )
+    config_path = tmp_path / "comparison_config.json"
+    config_path.write_text(json.dumps(config.model_dump(mode="json")), encoding="utf-8")
+
+    screening, _ = build_policy_comparison_reports(
+        baseline=baseline,
+        candidates={"candidate_exit": candidate},
+        config=config,
+        config_path=config_path,
+        generated_at_utc=datetime(2026, 7, 4, tzinfo=UTC),
+        cli_args=["test"],
+    )
+
+    result = screening.candidates[0]
+    assert result.classification == "blocked"
+    assert result.comparison is not None
+    assert result.comparison.paired_effective_event_count == 0
+    assert "registered after the evaluation decision window began" in result.classification_basis[0]
+    assert result.reviewer_status == "pending"
+
+
+def test_retrospective_exploratory_computes_metrics_but_never_promotes(tmp_path: Path):
+    baseline = _write_artifacts(tmp_path, "baseline")
+    candidate = _write_artifacts(tmp_path, "candidate", candidate=True)
+    config = _config(baseline).model_copy(
+        update={
+            "registered_at_utc": datetime(2026, 7, 1, tzinfo=UTC),
+            "registration_mode": "retrospective_exploratory",
+        }
+    )
+    config_path = tmp_path / "comparison_config.json"
+    config_path.write_text(json.dumps(config.model_dump(mode="json")), encoding="utf-8")
+
+    screening, _ = build_policy_comparison_reports(
+        baseline=baseline,
+        candidates={"candidate_exit": candidate},
+        config=config,
+        config_path=config_path,
+        generated_at_utc=datetime(2026, 7, 4, tzinfo=UTC),
+        cli_args=["test"],
+    )
+
+    result = screening.candidates[0]
+    assert result.classification == "inconclusive"
+    assert result.comparison is not None
+    assert result.comparison.comparability_status == "comparable"
+    assert result.comparison.paired_effective_event_count == 4
+    assert result.comparison.mean_premium_r_difference == pytest.approx(1.0)
+    assert len(result.comparison.comparable_oos_windows) == 2
+    assert result.comparison.adjusted_bootstrap_ci is not None
+    assert result.comparison.adjusted_bootstrap_ci.lower > 0
+    assert "retrospective exploratory" in result.classification_basis[0]
+    assert "cannot advance M7" in result.classification_basis[0]
+    assert any("descriptive evidence only" in limitation for limitation in result.limitations)
+    assert result.reviewer_status == "pending"
+
+    negative_rows = [
+        candidate_row.model_copy(update={"premium_r": baseline_row.premium_r - 1.0})
+        for baseline_row, candidate_row in zip(
+            baseline.dataset.rows, candidate.dataset.rows, strict=True
+        )
+    ]
+    negative_candidate = _rewrite_artifacts(
+        candidate, candidate.dataset.model_copy(update={"rows": negative_rows})
+    )
+    negative_screening, _ = build_policy_comparison_reports(
+        baseline=baseline,
+        candidates={"candidate_exit": negative_candidate},
+        config=config,
+        config_path=config_path,
+        generated_at_utc=datetime(2026, 7, 4, tzinfo=UTC),
+        cli_args=["test"],
+    )
+    negative_result = negative_screening.candidates[0]
+    assert negative_result.classification == "inconclusive"
+    assert negative_result.comparison is not None
+    assert negative_result.comparison.mean_premium_r_difference == pytest.approx(-1.0)
+    assert negative_result.comparison.adjusted_bootstrap_ci is not None
+    assert negative_result.comparison.adjusted_bootstrap_ci.upper < 0
+    assert "cannot advance M7" in negative_result.classification_basis[0]
+
+    validate_pa_feitian_evaluation_screening_report_schema(
+        evaluation_screening_report_to_jsonable(screening)
+    )
+    validate_pa_feitian_m6_policy_comparison_config_schema(config.model_dump(mode="json"))
 
 
 def test_missing_registered_candidate_is_blocked_not_fabricated(tmp_path: Path):

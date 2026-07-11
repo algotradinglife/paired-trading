@@ -1,0 +1,227 @@
+{
+  "schema_version": "pa_feitian_evaluation_failure_mode_report_v1",
+  "generated_at_utc": "2026-07-11T12:10:00Z",
+  "provenance": {
+    "role": "m6_failure_mode_report",
+    "source_manifest_path": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+    "source_manifest_sha256": "sha256:2a0b3bfdf2b1c605ba9f4d1817dbe74847d9b90c3786b51b96c69137c5d782a4",
+    "source_manifest_schema_version": "pa_feitian_run_manifest_v1",
+    "premium_outcome_artifact_path": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_premium_outcome_v1.json",
+    "premium_outcome_artifact_sha256": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+    "premium_outcome_schema_version": "pa_feitian_premium_outcome_v1",
+    "source_commit": "5c74dd4964c814f1daefa09dc9f45ac3bfcc5788",
+    "producer": "engine.pa_feitian.policy_comparison.v1",
+    "cli_args": [
+      "src/scripts/compare_pa_feitian_m6_policies.py",
+      "--baseline-dataset",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_baseline_v1.json",
+      "--baseline-aggregate",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_aggregate_result_baseline_v1.json",
+      "--comparison-config",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/policy_comparison_config_v1.json",
+      "--candidate-input",
+      "candidate_stop_30pct",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_candidate_stop_30pct_v1.json",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_aggregate_result_candidate_stop_30pct_v1.json",
+      "--screening-out",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_screening_report_v1.json",
+      "--failure-report-dir",
+      "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/failure_modes",
+      "--generated-at-utc",
+      "2026-07-11T12:10:00Z"
+    ],
+    "policy_config_sha256": "sha256:725aa053f033e87de23e09edc1ffdeca0b61930a1a5e109256474178c3185ae5",
+    "data_access_status": "real_data_available",
+    "fixture_fallback": false,
+    "random_seed": 7,
+    "input_hashes": {
+      "source_manifest": "sha256:2a0b3bfdf2b1c605ba9f4d1817dbe74847d9b90c3786b51b96c69137c5d782a4",
+      "premium_outcome_artifact": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+      "decision_intent_artifact": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
+      "policy_config": "sha256:725aa053f033e87de23e09edc1ffdeca0b61930a1a5e109256474178c3185ae5",
+      "evaluation_dataset": "sha256:dad77b16a6fc2b660b050999c2411e0916550c2903c3f8b343bae15e20b5133b",
+      "aggregate_result": "sha256:350d5bcdcada75fb25e5408db8c09c8e826a6f8d8319d7eb2858fa5b4c404e76",
+      "policy_comparison_config": "sha256:725aa053f033e87de23e09edc1ffdeca0b61930a1a5e109256474178c3185ae5",
+      "policy_comparison_config_file": "sha256:e7eb3c9989af6168658ace66cf7663f92c37db7305369dcd81eabf2ee3d3a882",
+      "candidate_evaluation_dataset": "sha256:dad77b16a6fc2b660b050999c2411e0916550c2903c3f8b343bae15e20b5133b",
+      "candidate_aggregate_result": "sha256:da447eef3aa3cb3067a4bb59a878f4bd3d5bebb36e7bfbefe81cd4072f6fc5a5"
+    },
+    "output_hashes": {},
+    "notes": [
+      "M6-C consumed explicit baseline/candidate M6 artifacts only",
+      "no score_today rerun, market scan, contract reselection, live trading, or execution occurred"
+    ]
+  },
+  "evaluation_dataset": {
+    "kind": "evaluation_dataset",
+    "path": "doc/repro/pa-feitian-m6-data-quality-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_candidate_stop_30pct_v1.json",
+    "sha256": "sha256:dad77b16a6fc2b660b050999c2411e0916550c2903c3f8b343bae15e20b5133b",
+    "schema_version": "pa_feitian_evaluation_dataset_v1",
+    "content_type": "application/json"
+  },
+  "failure_modes": [
+    {
+      "failure_mode_id": "candidate_stop_30pct:exit:premium_stop",
+      "category": "exit_reason",
+      "label": "premium_stop",
+      "affected_row_count": 3,
+      "outcome_ids": [
+        "paft_premium_outcome_0001_paft_scorecard_0001_kq_m_shfe_au_20260313000000_daily_v1",
+        "paft_premium_outcome_0003_paft_scorecard_0003_kq_m_shfe_ag_20260515000000_daily_v1",
+        "paft_premium_outcome_0004_paft_scorecard_0004_kq_m_shfe_ag_20260602000000_daily_v1"
+      ],
+      "source_signal_ids": [
+        "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+        "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+        "paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+      ],
+      "input_refs": [
+        "scorecard_record:1",
+        "scorecard_record:3",
+        "scorecard_record:4",
+        "snapshot_signal:paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+        "snapshot_signal:paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+        "snapshot_signal:paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+      ],
+      "severity": "warning",
+      "notes": [
+        "exit outcome is retained for reviewer drill-down"
+      ]
+    },
+    {
+      "failure_mode_id": "candidate_stop_30pct:exit:time_exit",
+      "category": "exit_reason",
+      "label": "time_exit",
+      "affected_row_count": 1,
+      "outcome_ids": [
+        "paft_premium_outcome_0002_paft_scorecard_0002_kq_m_shfe_au_20260318000000_daily_v1"
+      ],
+      "source_signal_ids": [
+        "paft_scorecard_0002_kq_m_shfe_au_20260318000000"
+      ],
+      "input_refs": [
+        "scorecard_record:2",
+        "snapshot_signal:paft_scorecard_0002_kq_m_shfe_au_20260318000000"
+      ],
+      "severity": "warning",
+      "notes": [
+        "exit outcome is retained for reviewer drill-down"
+      ]
+    },
+    {
+      "failure_mode_id": "candidate_stop_30pct:iv:unknown",
+      "category": "iv_gate",
+      "label": "IV gate unknown",
+      "affected_row_count": 4,
+      "outcome_ids": [
+        "paft_premium_outcome_0001_paft_scorecard_0001_kq_m_shfe_au_20260313000000_daily_v1",
+        "paft_premium_outcome_0002_paft_scorecard_0002_kq_m_shfe_au_20260318000000_daily_v1",
+        "paft_premium_outcome_0003_paft_scorecard_0003_kq_m_shfe_ag_20260515000000_daily_v1",
+        "paft_premium_outcome_0004_paft_scorecard_0004_kq_m_shfe_ag_20260602000000_daily_v1"
+      ],
+      "source_signal_ids": [
+        "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+        "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+        "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+        "paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+      ],
+      "input_refs": [
+        "scorecard_record:1",
+        "scorecard_record:2",
+        "scorecard_record:3",
+        "scorecard_record:4",
+        "snapshot_signal:paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+        "snapshot_signal:paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+        "snapshot_signal:paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+        "snapshot_signal:paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+      ],
+      "severity": "warning",
+      "notes": [
+        "IV status is not treated as pass"
+      ]
+    },
+    {
+      "failure_mode_id": "candidate_stop_30pct:leg:unknown",
+      "category": "option_leg",
+      "label": "unknown option-leg dimension",
+      "affected_row_count": 4,
+      "outcome_ids": [
+        "paft_premium_outcome_0001_paft_scorecard_0001_kq_m_shfe_au_20260313000000_daily_v1",
+        "paft_premium_outcome_0002_paft_scorecard_0002_kq_m_shfe_au_20260318000000_daily_v1",
+        "paft_premium_outcome_0003_paft_scorecard_0003_kq_m_shfe_ag_20260515000000_daily_v1",
+        "paft_premium_outcome_0004_paft_scorecard_0004_kq_m_shfe_ag_20260602000000_daily_v1"
+      ],
+      "source_signal_ids": [
+        "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+        "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+        "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+        "paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+      ],
+      "input_refs": [
+        "scorecard_record:1",
+        "scorecard_record:2",
+        "scorecard_record:3",
+        "scorecard_record:4",
+        "snapshot_signal:paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+        "snapshot_signal:paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+        "snapshot_signal:paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+        "snapshot_signal:paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+      ],
+      "severity": "warning",
+      "notes": [
+        "missing leg labels are retained"
+      ]
+    },
+    {
+      "failure_mode_id": "candidate_stop_30pct:decision_state:reject",
+      "category": "decision_trace",
+      "label": "decision state reject",
+      "affected_row_count": 1,
+      "outcome_ids": [
+        "paft_premium_outcome_0004_paft_scorecard_0004_kq_m_shfe_ag_20260602000000_daily_v1"
+      ],
+      "source_signal_ids": [
+        "paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+      ],
+      "input_refs": [
+        "scorecard_record:4",
+        "snapshot_signal:paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+      ],
+      "severity": "info",
+      "notes": [
+        "decision-state cohort retained for trace review"
+      ]
+    },
+    {
+      "failure_mode_id": "candidate_stop_30pct:decision_state:watch",
+      "category": "decision_trace",
+      "label": "decision state watch",
+      "affected_row_count": 3,
+      "outcome_ids": [
+        "paft_premium_outcome_0001_paft_scorecard_0001_kq_m_shfe_au_20260313000000_daily_v1",
+        "paft_premium_outcome_0002_paft_scorecard_0002_kq_m_shfe_au_20260318000000_daily_v1",
+        "paft_premium_outcome_0003_paft_scorecard_0003_kq_m_shfe_ag_20260515000000_daily_v1"
+      ],
+      "source_signal_ids": [
+        "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+        "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+        "paft_scorecard_0003_kq_m_shfe_ag_20260515000000"
+      ],
+      "input_refs": [
+        "scorecard_record:1",
+        "scorecard_record:2",
+        "scorecard_record:3",
+        "snapshot_signal:paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+        "snapshot_signal:paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+        "snapshot_signal:paft_scorecard_0003_kq_m_shfe_ag_20260515000000"
+      ],
+      "severity": "info",
+      "notes": [
+        "decision-state cohort retained for trace review"
+      ]
+    }
+  ],
+  "warnings": [
+    "failure modes are descriptive artifact evidence, not execution instructions"
+  ]
+}

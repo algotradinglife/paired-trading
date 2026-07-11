@@ -1,4 +1,4 @@
-"""Artifact-only, pre-registered M6-C policy comparisons.
+"""Artifact-only M6-C prospective and retrospective policy comparisons.
 
 This module deliberately works only with already-written M6 evaluation datasets
 and aggregates.  It does not import the scoring, market-data, option-selection,
@@ -80,7 +80,7 @@ _VALID_DIMENSIONS = {"exit_policy", "iv_gate", "option_leg"}
 
 
 class PolicyComparisonConfig(BaseModel):
-    """The checked-in/pre-run candidate family and fixed screening discipline."""
+    """The registered candidate family and fixed screening discipline."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -89,6 +89,7 @@ class PolicyComparisonConfig(BaseModel):
     )
     registration_id: str = Field(min_length=1)
     registered_at_utc: datetime
+    registration_mode: Literal["prospective", "retrospective_exploratory"] = "prospective"
     baseline: RegisteredPolicy
     candidates: list[RegisteredCandidate] = Field(min_length=1)
     minimum_effective_events: int = Field(ge=1)
@@ -299,7 +300,10 @@ def _comparison_error(
             or set(left.test_event_ids) != set(right.test_event_ids)
         ):
             return f"{fold_id}: candidate OOS event window differs from baseline"
-    if config.registered_at_utc > baseline.dataset.time_boundary.decision_start_utc:
+    if (
+        config.registration_mode == "prospective"
+        and config.registered_at_utc > baseline.dataset.time_boundary.decision_start_utc
+    ):
         return "candidate configuration was registered after the evaluation decision window began"
     return None
 
@@ -484,7 +488,17 @@ def build_policy_comparison_reports(
                     limitations=[] if enough else ["insufficient paired event-level/OOS evidence; no promotion inference"],
                 )
                 tested += 1
-                if not enough:
+                if config.registration_mode == "retrospective_exploratory":
+                    retrospective_limitation = (
+                        "retrospective exploratory comparison; descriptive evidence only and cannot advance M7"
+                    )
+                    evidence = evidence.model_copy(
+                        update={"limitations": [*evidence.limitations, retrospective_limitation]}
+                    )
+                    classification, basis = "inconclusive", [
+                        "inconclusive: retrospective exploratory comparison cannot support promotion and cannot advance M7"
+                    ]
+                elif not enough:
                     classification, basis = "inconclusive", ["inconclusive: pre-registered effective-event or OOS-window minimum not met"]
                 elif ci is not None and ci.lower is not None and ci.lower > 0:
                     classification, basis = "promising", ["paired premium-R difference has positive Bonferroni-adjusted bootstrap lower bound; reviewer approval remains required"]
