@@ -42,6 +42,24 @@ const frontendAppPaths = [
   "frontend/pa-feitian-dashboard/app.mjs",
   "frontend/pa-feitian-dashboard/styles.css",
 ];
+const m5FrontendOutputHashKeys = [
+  "snapshot_artifact",
+  "decision_intent_artifact",
+  "premium_outcome_artifact",
+  "frontend_copy",
+  "frontend_decision_intent_copy",
+  "frontend_premium_outcome_copy",
+];
+const downstreamM6FrontendOutputHashKeys = [
+  "evaluation_dataset_artifact",
+  "evaluation_aggregate_result_artifact",
+  "evaluation_failure_mode_report_artifact",
+  "evaluation_screening_report_artifact",
+  "frontend_evaluation_dataset_copy",
+  "frontend_evaluation_aggregate_result_copy",
+  "frontend_evaluation_failure_mode_report_copy",
+  "frontend_evaluation_screening_report_copy",
+];
 
 const expectedOutcomes = [
   {
@@ -478,7 +496,27 @@ async function assertFrontendFixtureCopies({
   assert.equal(frontendManifest.premium_outcome_artifact.sha256, dashboardManifest.premium_outcome_artifact.sha256);
   assert.deepEqual(frontendManifest.data_access, dashboardManifest.data_access, "frontend manifest data_access preserved");
   assert.deepEqual(frontendManifest.input_hashes, dashboardManifest.input_hashes, "frontend manifest input hashes preserved");
-  assert.deepEqual(frontendManifest.output_hashes, dashboardManifest.output_hashes, "frontend manifest output hashes preserved");
+  assert.deepEqual(
+    Object.keys(dashboardManifest.output_hashes).sort(),
+    [...m5FrontendOutputHashKeys].sort(),
+    "M5 dashboard manifest owns exactly the M5 output hashes",
+  );
+  assert.deepEqual(
+    Object.fromEntries(
+      m5FrontendOutputHashKeys.map((key) => [key, frontendManifest.output_hashes[key]]),
+    ),
+    Object.fromEntries(
+      m5FrontendOutputHashKeys.map((key) => [key, dashboardManifest.output_hashes[key]]),
+    ),
+    "frontend manifest preserves every M5-owned output hash",
+  );
+  assert.deepEqual(
+    Object.keys(frontendManifest.output_hashes)
+      .filter((key) => !m5FrontendOutputHashKeys.includes(key))
+      .sort(),
+    [...downstreamM6FrontendOutputHashKeys].sort(),
+    "shared frontend manifest retains additive downstream M6 evaluation hashes",
+  );
 
   await assertFileHash(frontendSnapshotFixturePath, frontendManifest.snapshot_artifact.sha256, "frontend snapshot");
   await assertFileHash(
