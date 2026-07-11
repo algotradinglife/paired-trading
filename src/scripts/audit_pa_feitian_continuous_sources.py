@@ -1,4 +1,4 @@
-"""Build frozen decision-time PA / Feitian input and coverage artifacts."""
+"""Audit the six frozen continuous candidates for M6-HIST-002A."""
 
 from __future__ import annotations
 
@@ -24,13 +24,10 @@ def _utc(value: str) -> datetime:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description=(
-            "Audit the six bounded continuous candidates only. No detector run, "
-            "source discovery, contract selection, outcome traversal, or execution."
-        )
+        description="Audit only six hash-pinned continuous candidates; never discover files."
     )
     parser.add_argument("--protocol", type=Path, required=True)
-    parser.add_argument("--quant-data-root", type=Path, required=True)
+    parser.add_argument("--continuous-root", type=Path, required=True)
     parser.add_argument("--artifact-out", type=Path, required=True)
     parser.add_argument("--audit-out", type=Path, required=True)
     parser.add_argument("--generated-at-utc", type=_utc, required=True)
@@ -40,7 +37,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("artifact and audit output paths must be distinct")
     audit = run_continuous_source_audit(
         protocol_path=args.protocol,
-        continuous_root=args.quant_data_root / "continuous",
+        continuous_root=args.continuous_root,
         artifact_out=args.artifact_out,
         audit_out=args.audit_out,
         generated_at_utc=args.generated_at_utc,

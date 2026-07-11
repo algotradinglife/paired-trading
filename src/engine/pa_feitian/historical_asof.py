@@ -109,9 +109,12 @@ def load_asof_protocol(path: str | Path) -> dict[str, Any]:
         previous = ts
     capabilities = protocol.get("capability_policy", {})
     expected_capabilities = {
-        "underlying_ohlcv_asof": "supported",
+        "source_identity_pinning": "supported",
+        "strict_asof_aggregation_mechanics": "supported",
+        "underlying_ohlcv_asof": "data_present_but_unverified",
+        "roll_provenance": "data_present_but_unverified",
         "delta_dte": "blocked",
-        "causal_iv": "blocked",
+        "causal_iv": "data_present_but_unverified",
         "regime": "blocked",
         "option_price_cadence": "blocked",
         "dd_line": "blocked",
@@ -121,6 +124,19 @@ def load_asof_protocol(path: str | Path) -> dict[str, Any]:
         expected_capabilities
     ):
         raise ValueError("capability statuses must retain the frozen support boundary")
+    candidates = protocol.get("candidate_sources")
+    if not isinstance(candidates, list) or len(candidates) != 6:
+        raise ValueError("protocol must pin the six exact continuous candidates")
+    expected_filenames = {
+        f"SHFE.{product}0.{suffix}.parquet"
+        for product in ("ag", "au")
+        for suffix in ("5min", "option_ivskew", "regime")
+    }
+    if {item.get("filename") for item in candidates} != expected_filenames:
+        raise ValueError("candidate source filenames are not the frozen exact set")
+    for candidate in candidates:
+        if not str(candidate.get("sha256", "")).startswith("sha256:"):
+            raise ValueError("every candidate source must pin SHA-256")
     return protocol
 
 

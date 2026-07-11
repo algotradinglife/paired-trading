@@ -1,9 +1,266 @@
 {
+  "aggregation_audit": [
+    {
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "first_timestamp": "2025-09-15T07:00:00Z",
+      "last_timestamp": "2026-03-13T07:00:00Z",
+      "level": "D",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 60,
+      "payload_hash": "sha256:ad90e968f745382609fb016b3bc860046ea0114eaed3a81d9925df53ca466dfd",
+      "product": "au",
+      "row_count": 112,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "first_timestamp": "2025-09-19T07:00:00Z",
+      "last_timestamp": "2026-03-13T07:00:00Z",
+      "level": "W",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 20,
+      "payload_hash": "sha256:4895227d3ea92b60179199d621fd5e1299e41a719b819880481198932b81ddd6",
+      "product": "au",
+      "row_count": 25,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "first_timestamp": "2025-09-15T01:30:00Z",
+      "last_timestamp": "2026-03-13T07:00:00Z",
+      "level": "60min",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 120,
+      "payload_hash": "sha256:5e30f334309ee625efdb41cea7be34cadf474a2a1ee0e367decb8f544ed37e4e",
+      "product": "au",
+      "row_count": 1098,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "first_timestamp": "2025-09-15T01:15:00Z",
+      "last_timestamp": "2026-03-13T07:00:00Z",
+      "level": "15min",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 120,
+      "payload_hash": "sha256:c0e1778353dd420e501cca9c80bf1b5a5f50aabee1ce4b1866d44522fc7ac196",
+      "product": "au",
+      "row_count": 4049,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "first_timestamp": "2025-09-19T07:00:00Z",
+      "last_timestamp": "2026-03-18T07:00:00Z",
+      "level": "D",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 60,
+      "payload_hash": "sha256:99e3560124ff29814bb9a4c318f81545c1625d52202579739cb105a4c26fba05",
+      "product": "au",
+      "row_count": 111,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "first_timestamp": "2025-09-19T07:00:00Z",
+      "last_timestamp": "2026-03-18T07:00:00Z",
+      "level": "W",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 20,
+      "payload_hash": "sha256:8c89c1f7a9e74a0a43fb1c0804d29ea8a7475fa6103e04bf080120fbdc97db63",
+      "product": "au",
+      "row_count": 26,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "first_timestamp": "2025-09-19T07:00:00Z",
+      "last_timestamp": "2026-03-18T07:00:00Z",
+      "level": "60min",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 120,
+      "payload_hash": "sha256:bdcf793d274f31e60a5ee938fcba1bbce15e6b4176831ec4af3dfa648145e008",
+      "product": "au",
+      "row_count": 1084,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "first_timestamp": "2025-09-19T07:00:00Z",
+      "last_timestamp": "2026-03-18T07:00:00Z",
+      "level": "15min",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 120,
+      "payload_hash": "sha256:6e7deeba24e41963d47be243fc5c5e88c7cdbcdc1e48b1a5486deb11d8785592",
+      "product": "au",
+      "row_count": 3998,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "first_timestamp": "2025-11-17T07:00:00Z",
+      "last_timestamp": "2026-05-15T07:00:00Z",
+      "level": "D",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 60,
+      "payload_hash": "sha256:7fa70db937ff16de9d6ba320b3f332afe86cd22756c5b65e3dbda0b69c939eb1",
+      "product": "ag",
+      "row_count": 118,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "first_timestamp": "2025-11-21T07:00:00Z",
+      "last_timestamp": "2026-05-15T07:00:00Z",
+      "level": "W",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 20,
+      "payload_hash": "sha256:78822a4e973b38dc16bbf5273d1779ac932d456302c66e4e90984dee69eb7425",
+      "product": "ag",
+      "row_count": 25,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "first_timestamp": "2025-11-17T01:30:00Z",
+      "last_timestamp": "2026-05-15T07:00:00Z",
+      "level": "60min",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 120,
+      "payload_hash": "sha256:12e760f7381a7a970ad78e66afbfcf2e599fa5929d84742f17e451c0e8620c0b",
+      "product": "ag",
+      "row_count": 1155,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "first_timestamp": "2025-11-17T01:15:00Z",
+      "last_timestamp": "2026-05-15T07:00:00Z",
+      "level": "15min",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 120,
+      "payload_hash": "sha256:501cbe463d9c2852bc7665db28cfc33b3ae465fa880acbb45efd3c4b64bf9046",
+      "product": "ag",
+      "row_count": 4260,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "first_timestamp": "2025-12-04T07:00:00Z",
+      "last_timestamp": "2026-06-02T07:00:00Z",
+      "level": "D",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 60,
+      "payload_hash": "sha256:0e81f88a30c7522483d29d6245b8368e162323b66949454581148b044e79f81e",
+      "product": "ag",
+      "row_count": 117,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "first_timestamp": "2025-12-05T07:00:00Z",
+      "last_timestamp": "2026-06-02T07:00:00Z",
+      "level": "W",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 20,
+      "payload_hash": "sha256:066320c6b6ed656982b6ab372663eac1449f951d98f335051e9fd461605686e3",
+      "product": "ag",
+      "row_count": 26,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "first_timestamp": "2025-12-04T07:00:00Z",
+      "last_timestamp": "2026-06-02T07:00:00Z",
+      "level": "60min",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 120,
+      "payload_hash": "sha256:36ba90153b88a4a62a7bffcfc3f8201a9a67584468b49a11b65f59ea2a5797bd",
+      "product": "ag",
+      "row_count": 1141,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    },
+    {
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "first_timestamp": "2025-12-04T07:00:00Z",
+      "last_timestamp": "2026-06-02T07:00:00Z",
+      "level": "15min",
+      "minimum_rows_met": true,
+      "minimum_rows_required": 120,
+      "payload_hash": "sha256:76f9a267fedaa4779d3fbd997fa582268b4649b8fc9957d74868c3d9e85733da",
+      "product": "ag",
+      "row_count": 4209,
+      "semantic_eligibility": "unverified_roll_and_session_provenance",
+      "status": "data_present_but_unverified",
+      "strict_asof_passed": true
+    }
+  ],
   "capabilities": [
     {
-      "basis": "BarStore accepts an explicit UTC as_of and the lane disables continuous-contract synthesis and every fallback; actual per-series presence remains a coverage result.",
-      "capability": "underlying_ohlcv_asof",
+      "basis": "All six exact candidate byte streams are SHA-256 pinned and the audit rejects any mismatch without discovery or fallback.",
+      "capability": "source_identity_pinning",
       "status": "supported"
+    },
+    {
+      "basis": "Tests prove filter-before-calendar-and-resample behavior and invariance to appended post-decision rows for deterministic D/W/60/15 candidate aggregation; semantic source eligibility remains quarantined.",
+      "capability": "strict_asof_aggregation_mechanics",
+      "status": "supported"
+    },
+    {
+      "basis": "Pinned au0/ag0 5-minute candidates cover all frozen decisions, but their bytes lack a bound generator/input manifest and their main_month annotations mostly change at calendar midnight inside a trading session.",
+      "capability": "underlying_ohlcv_asof",
+      "status": "data_present_but_unverified"
+    },
+    {
+      "basis": "main_month/is_roll are internally consistent, but no artifact manifest binds the source panel and causal schedule; calendar-midnight roll annotations prevent treating these columns as proven trading-day provenance.",
+      "capability": "roll_provenance",
+      "status": "data_present_but_unverified"
     },
     {
       "basis": "The bounded paired-trading input contract has no decision-time CN option delta series or exact exchange expiry calendar; percentage OTM and approximate expiry are prohibited proxies.",
@@ -11,17 +268,17 @@
       "status": "blocked"
     },
     {
-      "basis": "No protocol-pinned, decision-time IV history with a declared causal warmup is available through the bounded current interfaces; Black-Scholes back-out and upstream metrics are prohibited proxies.",
+      "basis": "Pinned option_ivskew rows cover all dates, but date-only labels do not prove same-day availability or bind maturity, chain, main-month, rate, raw option inputs, and build cutoff.",
       "capability": "causal_iv",
-      "status": "blocked"
+      "status": "data_present_but_unverified"
     },
     {
-      "basis": "No frozen causal CN Feitian regime-label contract is present in paired-trading; upstream trend/range/stress labels are independent evidence and are not imported.",
+      "basis": "Pinned regime rows exist, but date-only availability and lineage are unproven; the located unbound generator uses a full-series ATR quantile, which is noncausal.",
       "capability": "regime",
       "status": "blocked"
     },
     {
-      "basis": "The paired-trading OptionStore interface is daily-only and the frozen runtime store has no files; Feitian DD/tight-stop work requires option 15-minute or finer bars.",
+      "basis": "The exact audited 5-minute files are underlying futures, not option premiums. No option intraday candidate is in the frozen exact source set.",
       "capability": "option_price_cadence",
       "status": "blocked"
     },
@@ -36,233 +293,408 @@
       "status": "blocked"
     }
   ],
-  "coverage": [
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
-      "decision_ts_utc": "2026-03-13T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "D",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/daily/SHFE.au0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_au_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
-      "decision_ts_utc": "2026-03-13T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "W",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/weekly/SHFE.au0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_au_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
-      "decision_ts_utc": "2026-03-13T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "60min",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/hour/SHFE.au0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_au_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
-      "decision_ts_utc": "2026-03-13T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "15min",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/min15/SHFE.au0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_au_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
-      "decision_ts_utc": "2026-03-18T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "D",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/daily/SHFE.au0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_au_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
-      "decision_ts_utc": "2026-03-18T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "W",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/weekly/SHFE.au0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_au_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
-      "decision_ts_utc": "2026-03-18T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "60min",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/hour/SHFE.au0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_au_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
-      "decision_ts_utc": "2026-03-18T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "15min",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/min15/SHFE.au0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_au_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
-      "decision_ts_utc": "2026-05-15T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "D",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/daily/SHFE.ag0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_ag_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
-      "decision_ts_utc": "2026-05-15T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "W",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/weekly/SHFE.ag0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_ag_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
-      "decision_ts_utc": "2026-05-15T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "60min",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/hour/SHFE.ag0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_ag_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
-      "decision_ts_utc": "2026-05-15T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "15min",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/min15/SHFE.ag0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_ag_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
-      "decision_ts_utc": "2026-06-02T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "D",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/daily/SHFE.ag0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_ag_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
-      "decision_ts_utc": "2026-06-02T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "W",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/weekly/SHFE.ag0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_ag_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
-      "decision_ts_utc": "2026-06-02T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "60min",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/hour/SHFE.ag0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_ag_continuous"
-    },
-    {
-      "blocked_reason": "ValueError",
-      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
-      "decision_ts_utc": "2026-06-02T07:00:00Z",
-      "first_timestamp": null,
-      "last_timestamp": null,
-      "level": "15min",
-      "payload_hash": null,
-      "row_count": 0,
-      "source": "external://quant-data/min15/SHFE.ag0.parquet",
-      "status": "data_blocked",
-      "universe_id": "shfe_ag_continuous"
-    }
-  ],
   "data_root": "external://quant-data",
-  "funnel": {
-    "data_blocked_series": 16,
-    "requested_series": 16,
-    "supported_series": 0
-  },
   "gate": {
     "advance_m7": false,
-    "classification": "coverage_feasibility_only",
+    "classification": "candidate_sources_present_but_unverified",
     "faithful_feitian_ready": false,
-    "next_gate": "Provision the exact eight frozen underlying files (au0/ag0 x D/W/60min/15min) with provenance sufficient to cover all 16 requested decision-series snapshots through their decision timestamps; then rerun this verifier. Faithful Feitian evaluation remains separately blocked until a new protocol pins decision-time CN delta plus exact DTE, causal IV warmup/history, causal regime labels, option <=15min bars, a formal DD-line definition, and historical bid/ask.",
+    "next_gate": "Produce a generator manifest that binds each of the six pinned candidate hashes to immutable generator/source commits, exact raw-input hashes, query/build cutoff, timezone and period-end contract, and the causal prior-session roll schedule; repair main_month/is_roll to trading-date semantics and prove prefix invariance. Replace the regime full-sample ATR threshold with a declared expanding or trailing causal threshold, add explicit availability timestamps for IV/regime, and prove prefix invariance before promoting those inputs. D/W/60/15 aggregation mechanics need no new files, but remain quarantined from score_today until source provenance passes. Faithful Feitian still separately requires decision-time delta/exact DTE, option <=15min bars, a formal DD-line definition, and historical bid/ask.",
     "performance_evaluation_allowed": false,
     "strategy_inference_allowed": false
   },
-  "generated_at_utc": "2026-07-11T14:00:00Z",
+  "generated_at_utc": "2026-07-11T16:00:00Z",
   "protocol_id": "m6_hist_002_frozen_v1",
-  "protocol_sha256": "sha256:55652f37b93db653b3259fb6e1a419565ba00d6101a83a66fb99b74edc57c7dc",
+  "protocol_sha256": "sha256:1ee6e334ada94fa928d311f3d7992d1708e4334c5b16e8e39b51ffedafcd7a1d",
   "schema_version": "pa_feitian_historical_asof_coverage_audit_v1",
-  "source_commit": "dacbec20d8c69d07aeaa64dde8f69c837a33632c"
+  "source_audit": [
+    {
+      "byte_size": 4220494,
+      "candidate_status": "data_present_but_unverified",
+      "first_observation": "2021-01-04 09:00:00",
+      "kind": "underlying_5min",
+      "last_observation": "2026-06-06 02:30:00",
+      "parquet_provenance_metadata_present": false,
+      "product": "au",
+      "quality_and_roll": {
+        "duplicate_timestamps": 0,
+        "invalid_ohlc_rows": 0,
+        "is_roll_count": 26,
+        "main_month_count": 27,
+        "midnight_roll_annotations": 23,
+        "month_change_count": 26,
+        "roll_change_times": {
+          "00:00": 23,
+          "09:05": 3
+        },
+        "roll_flag_mismatch_count": 0,
+        "roll_provenance_reason": "main_month/is_roll are internally consistent, but most changes occur at calendar midnight inside a CN trading session and the Parquet metadata does not bind the generator, input panel, schedule, or build cutoff",
+        "roll_provenance_status": "data_present_but_unverified",
+        "timestamps_sorted": true
+      },
+      "row_count": 142162,
+      "schema": [
+        {
+          "dtype": "datetime64[us]",
+          "name": "datetime"
+        },
+        {
+          "dtype": "float64",
+          "name": "open"
+        },
+        {
+          "dtype": "float64",
+          "name": "high"
+        },
+        {
+          "dtype": "float64",
+          "name": "low"
+        },
+        {
+          "dtype": "float64",
+          "name": "close"
+        },
+        {
+          "dtype": "float64",
+          "name": "volume"
+        },
+        {
+          "dtype": "float64",
+          "name": "turnover"
+        },
+        {
+          "dtype": "float64",
+          "name": "open_interest"
+        },
+        {
+          "dtype": "str",
+          "name": "main_month"
+        },
+        {
+          "dtype": "bool",
+          "name": "is_roll"
+        }
+      ],
+      "sha256": "sha256:2217ea2a243188bc8ffd59ec48c3f6ab04f17e61e992429d17ad53d21796e50b",
+      "source": "external://quant-data/continuous/SHFE.au0.5min.parquet",
+      "source_id": "shfe_au0_underlying_5min",
+      "source_identity_pinned": true
+    },
+    {
+      "byte_size": 1622991,
+      "candidate_status": "data_present_but_unverified",
+      "first_observation": "2024-07-01 09:05:00",
+      "kind": "underlying_5min",
+      "last_observation": "2026-06-06 02:30:00",
+      "parquet_provenance_metadata_present": false,
+      "product": "ag",
+      "quality_and_roll": {
+        "duplicate_timestamps": 0,
+        "invalid_ohlc_rows": 0,
+        "is_roll_count": 10,
+        "main_month_count": 11,
+        "midnight_roll_annotations": 9,
+        "month_change_count": 10,
+        "roll_change_times": {
+          "00:00": 9,
+          "09:05": 1
+        },
+        "roll_flag_mismatch_count": 0,
+        "roll_provenance_reason": "main_month/is_roll are internally consistent, but most changes occur at calendar midnight inside a CN trading session and the Parquet metadata does not bind the generator, input panel, schedule, or build cutoff",
+        "roll_provenance_status": "data_present_but_unverified",
+        "timestamps_sorted": true
+      },
+      "row_count": 51065,
+      "schema": [
+        {
+          "dtype": "datetime64[us]",
+          "name": "datetime"
+        },
+        {
+          "dtype": "float64",
+          "name": "open"
+        },
+        {
+          "dtype": "float64",
+          "name": "high"
+        },
+        {
+          "dtype": "float64",
+          "name": "low"
+        },
+        {
+          "dtype": "float64",
+          "name": "close"
+        },
+        {
+          "dtype": "float64",
+          "name": "volume"
+        },
+        {
+          "dtype": "float64",
+          "name": "turnover"
+        },
+        {
+          "dtype": "float64",
+          "name": "open_interest"
+        },
+        {
+          "dtype": "str",
+          "name": "main_month"
+        },
+        {
+          "dtype": "bool",
+          "name": "is_roll"
+        }
+      ],
+      "sha256": "sha256:0474a3ae5e86b8b2efe28a76b967d2fd2646459c464f1d2d27ad456de48b9a5d",
+      "source": "external://quant-data/continuous/SHFE.ag0.5min.parquet",
+      "source_id": "shfe_ag0_underlying_5min",
+      "source_identity_pinned": true
+    },
+    {
+      "availability_timestamp_present": false,
+      "byte_size": 28836,
+      "candidate_status": "data_present_but_unverified",
+      "causality_reason": "date-only rows do not prove when same-day option closes, maturity, chain membership, or main-month schedule became available",
+      "causality_status": "data_present_but_unverified",
+      "first_observation": "2024-07-01 00:00:00",
+      "frozen_decision_date_coverage": {
+        "paft_scorecard_0001_kq_m_shfe_au_20260313000000": true,
+        "paft_scorecard_0002_kq_m_shfe_au_20260318000000": true
+      },
+      "kind": "option_ivskew",
+      "last_observation": "2026-06-08 00:00:00",
+      "parquet_provenance_metadata_present": false,
+      "product": "au",
+      "row_count": 468,
+      "schema": [
+        {
+          "dtype": "object",
+          "name": "date"
+        },
+        {
+          "dtype": "str",
+          "name": "main_month"
+        },
+        {
+          "dtype": "float64",
+          "name": "F"
+        },
+        {
+          "dtype": "float64",
+          "name": "atm_iv"
+        },
+        {
+          "dtype": "float64",
+          "name": "iv_25dc"
+        },
+        {
+          "dtype": "float64",
+          "name": "iv_25dp"
+        },
+        {
+          "dtype": "float64",
+          "name": "rr_25d"
+        },
+        {
+          "dtype": "int64",
+          "name": "n_call"
+        },
+        {
+          "dtype": "int64",
+          "name": "n_put"
+        }
+      ],
+      "sha256": "sha256:6cc7d7ca8dd6013ba4c00bf72a372fe340affc16dbde45afe23d2da9d08176ba",
+      "source": "external://quant-data/continuous/SHFE.au0.option_ivskew.parquet",
+      "source_id": "shfe_au0_option_ivskew",
+      "source_identity_pinned": true
+    },
+    {
+      "availability_timestamp_present": false,
+      "byte_size": 28129,
+      "candidate_status": "data_present_but_unverified",
+      "causality_reason": "date-only rows do not prove when same-day option closes, maturity, chain membership, or main-month schedule became available",
+      "causality_status": "data_present_but_unverified",
+      "first_observation": "2024-07-01 00:00:00",
+      "frozen_decision_date_coverage": {
+        "paft_scorecard_0003_kq_m_shfe_ag_20260515000000": true,
+        "paft_scorecard_0004_kq_m_shfe_ag_20260602000000": true
+      },
+      "kind": "option_ivskew",
+      "last_observation": "2026-06-08 00:00:00",
+      "parquet_provenance_metadata_present": false,
+      "product": "ag",
+      "row_count": 466,
+      "schema": [
+        {
+          "dtype": "object",
+          "name": "date"
+        },
+        {
+          "dtype": "str",
+          "name": "main_month"
+        },
+        {
+          "dtype": "float64",
+          "name": "F"
+        },
+        {
+          "dtype": "float64",
+          "name": "atm_iv"
+        },
+        {
+          "dtype": "float64",
+          "name": "iv_25dc"
+        },
+        {
+          "dtype": "float64",
+          "name": "iv_25dp"
+        },
+        {
+          "dtype": "float64",
+          "name": "rr_25d"
+        },
+        {
+          "dtype": "int64",
+          "name": "n_call"
+        },
+        {
+          "dtype": "int64",
+          "name": "n_put"
+        }
+      ],
+      "sha256": "sha256:9d8eb906aa3eaae1450dba011a43b1bf5f7427dcc8004973aa925947e6bebfe3",
+      "source": "external://quant-data/continuous/SHFE.ag0.option_ivskew.parquet",
+      "source_id": "shfe_ag0_option_ivskew",
+      "source_identity_pinned": true
+    },
+    {
+      "availability_timestamp_present": false,
+      "byte_size": 95320,
+      "candidate_status": "data_present_but_unverified",
+      "causality_reason": "date-only rows have no availability timestamp or build manifest; the located unbound generator computes the ATR stress threshold from the full-series 80th percentile",
+      "causality_status": "blocked",
+      "first_observation": "2021-01-04 00:00:00",
+      "frozen_decision_date_coverage": {
+        "paft_scorecard_0001_kq_m_shfe_au_20260313000000": true,
+        "paft_scorecard_0002_kq_m_shfe_au_20260318000000": true
+      },
+      "kind": "regime",
+      "last_observation": "2026-06-08 00:00:00",
+      "parquet_provenance_metadata_present": false,
+      "product": "au",
+      "row_count": 1313,
+      "schema": [
+        {
+          "dtype": "object",
+          "name": "date"
+        },
+        {
+          "dtype": "float64",
+          "name": "close"
+        },
+        {
+          "dtype": "float64",
+          "name": "iv_rank"
+        },
+        {
+          "dtype": "float64",
+          "name": "atr_pct"
+        },
+        {
+          "dtype": "float64",
+          "name": "rvol20"
+        },
+        {
+          "dtype": "float64",
+          "name": "ema20_slope"
+        },
+        {
+          "dtype": "float64",
+          "name": "adx14"
+        },
+        {
+          "dtype": "float64",
+          "name": "vol_chg"
+        },
+        {
+          "dtype": "float64",
+          "name": "oi_chg"
+        },
+        {
+          "dtype": "str",
+          "name": "regime"
+        }
+      ],
+      "sha256": "sha256:8a95c1a069409857819a988f124ea28488d551a33d83f271afcad02584e20122",
+      "source": "external://quant-data/continuous/SHFE.au0.regime.parquet",
+      "source_id": "shfe_au0_regime",
+      "source_identity_pinned": true
+    },
+    {
+      "availability_timestamp_present": false,
+      "byte_size": 94257,
+      "candidate_status": "data_present_but_unverified",
+      "causality_reason": "date-only rows have no availability timestamp or build manifest; the located unbound generator computes the ATR stress threshold from the full-series 80th percentile",
+      "causality_status": "blocked",
+      "first_observation": "2021-01-04 00:00:00",
+      "frozen_decision_date_coverage": {
+        "paft_scorecard_0003_kq_m_shfe_ag_20260515000000": true,
+        "paft_scorecard_0004_kq_m_shfe_ag_20260602000000": true
+      },
+      "kind": "regime",
+      "last_observation": "2026-06-08 00:00:00",
+      "parquet_provenance_metadata_present": false,
+      "product": "ag",
+      "row_count": 1313,
+      "schema": [
+        {
+          "dtype": "object",
+          "name": "date"
+        },
+        {
+          "dtype": "float64",
+          "name": "close"
+        },
+        {
+          "dtype": "float64",
+          "name": "iv_rank"
+        },
+        {
+          "dtype": "float64",
+          "name": "atr_pct"
+        },
+        {
+          "dtype": "float64",
+          "name": "rvol20"
+        },
+        {
+          "dtype": "float64",
+          "name": "ema20_slope"
+        },
+        {
+          "dtype": "float64",
+          "name": "adx14"
+        },
+        {
+          "dtype": "float64",
+          "name": "vol_chg"
+        },
+        {
+          "dtype": "float64",
+          "name": "oi_chg"
+        },
+        {
+          "dtype": "str",
+          "name": "regime"
+        }
+      ],
+      "sha256": "sha256:a48e812db201815d27f2641134fd839b88dc1e0374c704d01f722c4ac517d1e5",
+      "source": "external://quant-data/continuous/SHFE.ag0.regime.parquet",
+      "source_id": "shfe_ag0_regime",
+      "source_identity_pinned": true
+    }
+  ],
+  "source_commit": "9f5910e8a9b5708603d6bd183be07b30e7ea3942"
 }

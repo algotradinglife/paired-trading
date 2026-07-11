@@ -144,9 +144,12 @@ def test_empty_explicit_store_is_classified_not_imputed(tmp_path: Path) -> None:
     assert series["payload_hash"] is None
     assert audit["funnel"]["data_blocked_series"] == 1
     assert {row["capability"]: row["status"] for row in audit["capabilities"]} == {
-        "underlying_ohlcv_asof": "supported",
+        "source_identity_pinning": "supported",
+        "strict_asof_aggregation_mechanics": "supported",
+        "underlying_ohlcv_asof": "data_present_but_unverified",
+        "roll_provenance": "data_present_but_unverified",
         "delta_dte": "blocked",
-        "causal_iv": "blocked",
+        "causal_iv": "data_present_but_unverified",
         "regime": "blocked",
         "option_price_cadence": "blocked",
         "dd_line": "blocked",
