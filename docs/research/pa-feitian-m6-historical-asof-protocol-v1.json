@@ -1,0 +1,222 @@
+{
+  "schema_version": "pa_feitian_historical_asof_protocol_v1",
+  "protocol_id": "m6_hist_002_frozen_v1",
+  "hermes_task": "t_efc47205",
+  "frozen_at_utc": "2026-07-11T14:00:00Z",
+  "amended_by_task": "t_f4920060",
+  "amended_at_utc": "2026-07-11T16:00:00Z",
+  "amendment_reason": "Independent probe identified six exact continuous candidate files. Presence is not causal eligibility; this amendment audits and quarantines them pending provenance proof.",
+  "research_mode": "coverage_and_feasibility_only",
+  "lookback_calendar_days": 180,
+  "timezone": "UTC",
+  "calendar": "XSGE",
+  "decision_time_rule": "M4 00:00Z timestamps are daily date markers, not availability instants. This lane freezes each cutoff at the SHFE day-session close, 15:00 Asia/Shanghai (07:00Z), so the completed daily signal bar may be visible without treating midnight as a completed session.",
+  "universe": [
+    {
+      "id": "shfe_au_continuous",
+      "source_symbol": "kq_m_shfe_au",
+      "quant_symbol": "au0",
+      "exchange_mic": "XSHF",
+      "product": "au"
+    },
+    {
+      "id": "shfe_ag_continuous",
+      "source_symbol": "kq_m_shfe_ag",
+      "quant_symbol": "ag0",
+      "exchange_mic": "XSHF",
+      "product": "ag"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "source_date_marker_ts_utc": "2026-03-13T00:00:00Z",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "source_date_marker_ts_utc": "2026-03-18T00:00:00Z",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "source_date_marker_ts_utc": "2026-05-15T00:00:00Z",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "source_date_marker_ts_utc": "2026-06-02T00:00:00Z",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "universe_id": "shfe_ag_continuous"
+    }
+  ],
+  "levels": [
+    "D",
+    "W",
+    "60min",
+    "15min"
+  ],
+  "minimum_rows": {
+    "D": 60,
+    "W": 20,
+    "60min": 120,
+    "15min": 120
+  },
+  "source_policy": {
+    "explicit_paths_only": true,
+    "allow_continuous_synthesis": false,
+    "allow_json_fallback": false,
+    "allow_raw_store_scan": false,
+    "allow_contract_selection": false,
+    "allow_contract_reselection": false,
+    "allow_proxies": false,
+    "candidate_sources_quarantined_until_proven": true
+  },
+  "candidate_sources": [
+    {
+      "source_id": "shfe_au0_underlying_5min",
+      "product": "au",
+      "kind": "underlying_5min",
+      "filename": "SHFE.au0.5min.parquet",
+      "sha256": "sha256:2217ea2a243188bc8ffd59ec48c3f6ab04f17e61e992429d17ad53d21796e50b",
+      "expected_columns": ["datetime", "open", "high", "low", "close", "volume", "turnover", "open_interest", "main_month", "is_roll"],
+      "claimed_timestamp_semantics": "naive Asia/Shanghai period-end; generator linkage unverified"
+    },
+    {
+      "source_id": "shfe_ag0_underlying_5min",
+      "product": "ag",
+      "kind": "underlying_5min",
+      "filename": "SHFE.ag0.5min.parquet",
+      "sha256": "sha256:0474a3ae5e86b8b2efe28a76b967d2fd2646459c464f1d2d27ad456de48b9a5d",
+      "expected_columns": ["datetime", "open", "high", "low", "close", "volume", "turnover", "open_interest", "main_month", "is_roll"],
+      "claimed_timestamp_semantics": "naive Asia/Shanghai period-end; generator linkage unverified"
+    },
+    {
+      "source_id": "shfe_au0_option_ivskew",
+      "product": "au",
+      "kind": "option_ivskew",
+      "filename": "SHFE.au0.option_ivskew.parquet",
+      "sha256": "sha256:6cc7d7ca8dd6013ba4c00bf72a372fe340affc16dbde45afe23d2da9d08176ba",
+      "expected_columns": ["date", "main_month", "F", "atm_iv", "iv_25dc", "iv_25dp", "rr_25d", "n_call", "n_put"]
+    },
+    {
+      "source_id": "shfe_ag0_option_ivskew",
+      "product": "ag",
+      "kind": "option_ivskew",
+      "filename": "SHFE.ag0.option_ivskew.parquet",
+      "sha256": "sha256:9d8eb906aa3eaae1450dba011a43b1bf5f7427dcc8004973aa925947e6bebfe3",
+      "expected_columns": ["date", "main_month", "F", "atm_iv", "iv_25dc", "iv_25dp", "rr_25d", "n_call", "n_put"]
+    },
+    {
+      "source_id": "shfe_au0_regime",
+      "product": "au",
+      "kind": "regime",
+      "filename": "SHFE.au0.regime.parquet",
+      "sha256": "sha256:8a95c1a069409857819a988f124ea28488d551a33d83f271afcad02584e20122",
+      "expected_columns": ["date", "close", "iv_rank", "atr_pct", "rvol20", "ema20_slope", "adx14", "vol_chg", "oi_chg", "regime"]
+    },
+    {
+      "source_id": "shfe_ag0_regime",
+      "product": "ag",
+      "kind": "regime",
+      "filename": "SHFE.ag0.regime.parquet",
+      "sha256": "sha256:a48e812db201815d27f2641134fd839b88dc1e0374c704d01f722c4ac517d1e5",
+      "expected_columns": ["date", "close", "iv_rank", "atr_pct", "rvol20", "ema20_slope", "adx14", "vol_chg", "oi_chg", "regime"]
+    }
+  ],
+  "observed_generator_candidates": {
+    "linkage_to_candidate_files": "data_present_but_unverified",
+    "quant_repository_commit_at_audit": "036811cc95cae54d2cebcbae738f264edc03bc96",
+    "files": [
+      {"path": "scripts/data_backfill/build_cn_continuous_5min.py", "sha256": "sha256:d5cc30c1ab707b220213a92f860d9160552209143021aca4bd2118d7982d71ae"},
+      {"path": "scripts/data_backfill/build_cn_option_ivskew.py", "sha256": "sha256:3eaf7db0637cc69c2a07eddfd0b69f02d1db6f590017f59fa894b9048fbcb37a"},
+      {"path": "scripts/data_backfill/build_feitian_regime_features.py", "sha256": "sha256:6e74a7d208698b4f8ceb95192733d809928eea7e8cd438ed4aed9aa5514dc25d"},
+      {"path": "paired-trading/src/data/continuous.py", "sha256": "sha256:334a3aea839d2753d518e4a3376e3d379b360e28c98f200ca3bd123ebc198bde"}
+    ],
+    "audit_findings": [
+      "candidate Parquet metadata does not bind generator code, raw input identities, roll schedule, build cutoff, or query parameters",
+      "located continuous generator claims prior-session OI/volume selection and three-day confirmation, but linkage to candidate bytes is not proven",
+      "located regime generator uses a full-series ATR 80th percentile for stress labels, so that implementation is not prefix-causal"
+    ]
+  },
+  "capability_policy": {
+    "source_identity_pinning": {
+      "status": "supported",
+      "basis": "All six exact candidate byte streams are SHA-256 pinned and the audit rejects any mismatch without discovery or fallback."
+    },
+    "strict_asof_aggregation_mechanics": {
+      "status": "supported",
+      "basis": "Tests prove filter-before-calendar-and-resample behavior and invariance to appended post-decision rows for deterministic D/W/60/15 candidate aggregation; semantic source eligibility remains quarantined."
+    },
+    "underlying_ohlcv_asof": {
+      "status": "data_present_but_unverified",
+      "basis": "Pinned au0/ag0 5-minute candidates cover all frozen decisions, but their bytes lack a bound generator/input manifest and their main_month annotations mostly change at calendar midnight inside a trading session."
+    },
+    "roll_provenance": {
+      "status": "data_present_but_unverified",
+      "basis": "main_month/is_roll are internally consistent, but no artifact manifest binds the source panel and causal schedule; calendar-midnight roll annotations prevent treating these columns as proven trading-day provenance."
+    },
+    "delta_dte": {
+      "status": "blocked",
+      "basis": "The bounded paired-trading input contract has no decision-time CN option delta series or exact exchange expiry calendar; percentage OTM and approximate expiry are prohibited proxies."
+    },
+    "causal_iv": {
+      "status": "data_present_but_unverified",
+      "basis": "Pinned option_ivskew rows cover all dates, but date-only labels do not prove same-day availability or bind maturity, chain, main-month, rate, raw option inputs, and build cutoff."
+    },
+    "regime": {
+      "status": "blocked",
+      "basis": "Pinned regime rows exist, but date-only availability and lineage are unproven; the located unbound generator uses a full-series ATR quantile, which is noncausal."
+    },
+    "option_price_cadence": {
+      "status": "blocked",
+      "basis": "The exact audited 5-minute files are underlying futures, not option premiums. No option intraday candidate is in the frozen exact source set."
+    },
+    "dd_line": {
+      "status": "blocked",
+      "basis": "There is neither a frozen DD-line definition nor bounded option intraday inputs in paired-trading; a percent stop or generic swing line would be an unapproved proxy."
+    },
+    "bid_ask": {
+      "status": "blocked",
+      "basis": "Current bar schemas contain OHLCV/turnover/open-interest but no historical bid or ask fields; costs are not imputed."
+    }
+  },
+  "upstream_research": {
+    "role": "independent_non_transferable_research_input",
+    "repository": "trade-philosopher",
+    "source_commit": "5802d0ff5d99819ad01ba9f3550b6a2d504f1e81",
+    "performance_metrics_imported": false,
+    "documents": [
+      {
+        "path": "doc/pa-replication/feitian-h1-premium-space-2026-06-16.md",
+        "sha256": "sha256:88bf71cb7c260076499254713fefa17444308d4e56f7e38c2db13308c293b08e"
+      },
+      {
+        "path": "doc/SYNTHESIS-AND-HANDOFF-2026-06-17.md",
+        "sha256": "sha256:1d64077d5d92d8ad434e9e62d9bf6eb405fa6dda15eb781ec0c1a9f0a0917d92"
+      },
+      {
+        "path": "doc/self-evolving-trader-methodology-2026-06-28.md",
+        "sha256": "sha256:2e36134eb763cfa4786ab6561a7ccb3704c5f3f88dfa28cc177ddaf44520b90d"
+      },
+      {
+        "path": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
+        "sha256": "sha256:67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb"
+      }
+    ]
+  },
+  "prohibited": [
+    "date.today or implicit current time",
+    "future rows at a decision timestamp",
+    "continuous-contract synthesis",
+    "raw-store glob or catalog discovery",
+    "contract selection or reselection",
+    "missing-data imputation or proxy metrics",
+    "optimization or performance claims",
+    "candidate promotion, M7, trading, or execution"
+  ],
+  "next_gate": "Produce a generator manifest that binds each of the six pinned candidate hashes to immutable generator/source commits, exact raw-input hashes, query/build cutoff, timezone and period-end contract, and the causal prior-session roll schedule; repair main_month/is_roll to trading-date semantics and prove prefix invariance. Replace the regime full-sample ATR threshold with a declared expanding or trailing causal threshold, add explicit availability timestamps for IV/regime, and prove prefix invariance before promoting those inputs. D/W/60/15 aggregation mechanics need no new files, but remain quarantined from score_today until source provenance passes. Faithful Feitian still separately requires decision-time delta/exact DTE, option <=15min bars, a formal DD-line definition, and historical bid/ask."
+}
