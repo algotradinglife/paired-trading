@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/algotradinglife/paired-trading/doc/schemas/pa_feitian_m6_policy_comparison_config_v1.schema.json",
+  "title": "PA / Feitian M6 Controlled Policy Comparison Configuration v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registration_id", "registered_at_utc", "baseline", "candidates", "minimum_effective_events", "minimum_comparable_oos_windows", "alpha", "bootstrap_replicates", "random_seed", "notes"],
+  "properties": {
+    "schema_version": {"const": "pa_feitian_m6_policy_comparison_config_v1"},
+    "registration_id": {"type": "string", "minLength": 1},
+    "registered_at_utc": {"type": "string", "format": "date-time"},
+    "baseline": {"$ref": "#/$defs/policy"},
+    "candidates": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/candidate"}},
+    "minimum_effective_events": {"type": "integer", "minimum": 1},
+    "minimum_comparable_oos_windows": {"type": "integer", "minimum": 2},
+    "alpha": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+    "bootstrap_replicates": {"type": "integer", "minimum": 1},
+    "random_seed": {"type": "integer"},
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "policy": {"type": "object", "additionalProperties": false, "required": ["policy_id", "policy_version", "policy_sha256s"], "properties": {"policy_id": {"type": "string", "minLength": 1}, "policy_version": {"type": "string", "minLength": 1}, "policy_sha256s": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/hash"}}}},
+    "candidate": {"type": "object", "additionalProperties": false, "required": ["candidate_id", "policy_id", "policy_version", "policy_sha256s", "dimensions", "notes"], "properties": {"candidate_id": {"type": "string", "pattern": "^[a-z0-9_:-]+$"}, "policy_id": {"type": "string", "minLength": 1}, "policy_version": {"type": "string", "minLength": 1}, "policy_sha256s": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/hash"}}, "dimensions": {"type": "array", "minItems": 1, "items": {"enum": ["exit_policy", "iv_gate", "option_leg"]}}, "notes": {"type": "array", "items": {"type": "string"}}}}
+  }
+}

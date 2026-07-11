@@ -471,6 +471,81 @@ class ScreeningCandidate(BaseModel):
     baseline_policy_id: str
     reviewer_status: Literal["pending", "approved", "changes_requested", "rejected"] = "pending"
     limitations: list[str] = Field(default_factory=list)
+    comparison: PolicyComparisonEvidence | None = None
+
+
+class ComparisonOosWindow(BaseModel):
+    """One event-grouped OOS comparison window, retained for audit rather than ranking."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    fold_id: str
+    effective_event_count: int = Field(ge=0)
+    mean_premium_r_difference: float | None = None
+    result_status: Literal["generated", "insufficient_sample", "blocked"]
+    notes: list[str] = Field(default_factory=list)
+
+
+class PolicyComparisonEvidence(BaseModel):
+    """Paired, event-level evidence for a registered policy candidate."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    comparability_status: Literal["comparable", "insufficient_sample", "blocked"]
+    baseline_dataset_sha256: str = Field(pattern=HASH_DIGEST_PATTERN)
+    candidate_dataset_sha256: str | None = Field(default=None, pattern=HASH_DIGEST_PATTERN)
+    baseline_aggregate_sha256: str = Field(pattern=HASH_DIGEST_PATTERN)
+    candidate_aggregate_sha256: str | None = Field(default=None, pattern=HASH_DIGEST_PATTERN)
+    paired_effective_event_count: int = Field(ge=0)
+    baseline_mean_premium_r: float | None = None
+    candidate_mean_premium_r: float | None = None
+    mean_premium_r_difference: float | None = None
+    median_premium_r_difference: float | None = None
+    adjusted_bootstrap_ci: EvaluationConfidenceInterval | None = None
+    comparable_oos_windows: list[ComparisonOosWindow] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _validate_evidence(self) -> PolicyComparisonEvidence:
+        metrics = (
+            self.baseline_mean_premium_r,
+            self.candidate_mean_premium_r,
+            self.mean_premium_r_difference,
+            self.median_premium_r_difference,
+        )
+        if self.comparability_status == "blocked":
+            if self.candidate_dataset_sha256 is not None and self.candidate_aggregate_sha256 is None:
+                raise ValueError("blocked candidate aggregate hash must accompany candidate dataset hash")
+            if any(value is not None for value in metrics) or self.adjusted_bootstrap_ci is not None:
+                raise ValueError("blocked comparisons cannot carry observed comparison metrics")
+        elif self.candidate_dataset_sha256 is None or self.candidate_aggregate_sha256 is None:
+            raise ValueError("comparable comparisons require candidate artifact hashes")
+        if self.paired_effective_event_count == 0 and any(value is not None for value in metrics):
+            raise ValueError("comparison metrics require paired effective events")
+        return self
+
+
+class MultipleComparisonAccounting(BaseModel):
+    """Predeclared family-wise accounting for a finite candidate family."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    configuration_sha256: str = Field(pattern=HASH_DIGEST_PATTERN)
+    method: Literal["bonferroni"]
+    family_size: int = Field(ge=1)
+    alpha: float = Field(gt=0, lt=1)
+    adjusted_confidence_level: float = Field(gt=0, lt=1)
+    tested_candidate_count: int = Field(ge=0)
+    unavailable_candidate_count: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def _validate_family(self) -> MultipleComparisonAccounting:
+        if self.tested_candidate_count + self.unavailable_candidate_count != self.family_size:
+            raise ValueError("multiple-comparison counts must account for the complete family")
+        expected = 1 - self.alpha / self.family_size
+        if abs(self.adjusted_confidence_level - expected) > 1e-12:
+            raise ValueError("Bonferroni adjusted confidence level does not match alpha/family_size")
+        return self
 
 
 class PaFeitianEvaluationScreeningReport(BaseModel):
@@ -484,6 +559,7 @@ class PaFeitianEvaluationScreeningReport(BaseModel):
     evaluation_dataset: EvaluationArtifactRef
     aggregate_result: EvaluationArtifactRef
     candidates: list[ScreeningCandidate] = Field(default_factory=list)
+    multiple_comparison: MultipleComparisonAccounting | None = None
     warnings: list[str] = Field(default_factory=list)
 
     @field_validator("generated_at_utc")
@@ -516,6 +592,15 @@ class PaFeitianEvaluationScreeningReport(BaseModel):
             raise ValueError("input_hashes.evaluation_dataset must match evaluation_dataset.sha256")
         if self.provenance.input_hashes.get("aggregate_result") != self.aggregate_result.sha256:
             raise ValueError("input_hashes.aggregate_result must match aggregate_result.sha256")
+        if self.multiple_comparison is not None:
+            if self.provenance.input_hashes.get("policy_comparison_config") != (
+                self.multiple_comparison.configuration_sha256
+            ):
+                raise ValueError(
+                    "input_hashes.policy_comparison_config must match comparison configuration"
+                )
+            if len(self.candidates) != self.multiple_comparison.family_size:
+                raise ValueError("screening candidates must match the registered comparison family")
         return self
 
 

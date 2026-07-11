@@ -195,6 +195,10 @@ class _SchemaValidator:
         min_items = schema.get("minItems")
         if min_items is not None and len(data) < min_items:
             raise self._error(f"expected at least {min_items} items", data_path)
+        if schema.get("uniqueItems") is True:
+            for index, value in enumerate(data):
+                if value in data[:index]:
+                    raise self._error("expected unique array items", (*data_path, index))
         items_schema = schema.get("items")
         if items_schema is None:
             return
@@ -228,9 +232,15 @@ class _SchemaValidator:
         minimum = schema.get("minimum")
         if minimum is not None and data < minimum:
             raise self._error(f"expected number >= {minimum}", data_path)
+        exclusive_minimum = schema.get("exclusiveMinimum")
+        if exclusive_minimum is not None and data <= exclusive_minimum:
+            raise self._error(f"expected number > {exclusive_minimum}", data_path)
         maximum = schema.get("maximum")
         if maximum is not None and data > maximum:
             raise self._error(f"expected number <= {maximum}", data_path)
+        exclusive_maximum = schema.get("exclusiveMaximum")
+        if exclusive_maximum is not None and data >= exclusive_maximum:
+            raise self._error(f"expected number < {exclusive_maximum}", data_path)
 
     def _validate_datetime(self, data: str, data_path: tuple[str | int, ...]) -> None:
         try:
@@ -326,4 +336,14 @@ def validate_pa_feitian_evaluation_screening_report_schema(
 ) -> None:
     validate_json_schema(
         data, "pa_feitian_evaluation_screening_report_v1.schema.json", schema_dir=schema_dir
+    )
+
+
+def validate_pa_feitian_m6_policy_comparison_config_schema(
+    data: Any,
+    *,
+    schema_dir: str | Path = SCHEMA_DIR,
+) -> None:
+    validate_json_schema(
+        data, "pa_feitian_m6_policy_comparison_config_v1.schema.json", schema_dir=schema_dir
     )
