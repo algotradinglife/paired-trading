@@ -159,6 +159,7 @@ class BarStore:
         start: datetime | None = None,
         end: datetime | None = None,
         as_of: datetime | None = None,
+        allow_continuous_synthesis: bool = True,
     ) -> BarFrame:
         """Read stored bars and return a BarFrame.
 
@@ -170,6 +171,9 @@ class BarStore:
             end: optional upper bound for the returned bars (UTC).
             as_of: snapshot time for BarFrame.as_of (default: now UTC).
                    Mid-session bars whose period_end > as_of are dropped.
+            allow_continuous_synthesis: when false, read only the exact mapped
+                Parquet path. Historical as-of artifact builders use this to
+                prohibit directory discovery of individual contract months.
 
         Raises:
             KeyError: if exchange or level is not in the mapping tables.
@@ -187,7 +191,8 @@ class BarStore:
         path = self._root / folder / f"{fname}.parquet"
         df_raw = pd.read_parquet(path) if path.exists() else None
         if (
-            exchange in _MIC_TO_EXCHANGE
+            allow_continuous_synthesis
+            and exchange in _MIC_TO_EXCHANGE
             and re.fullmatch(r"[A-Za-z]{1,2}0", symbol)
         ):
             # Continuous symbol: synthesize the main-contract series from

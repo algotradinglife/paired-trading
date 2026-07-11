@@ -1,0 +1,139 @@
+{
+  "schema_version": "pa_feitian_historical_asof_protocol_v1",
+  "protocol_id": "m6_hist_002_frozen_v1",
+  "hermes_task": "t_efc47205",
+  "frozen_at_utc": "2026-07-11T14:00:00Z",
+  "research_mode": "coverage_and_feasibility_only",
+  "lookback_calendar_days": 120,
+  "timezone": "UTC",
+  "calendar": "XSGE",
+  "decision_time_rule": "M4 00:00Z timestamps are daily date markers, not availability instants. This lane freezes each cutoff at the SHFE day-session close, 15:00 Asia/Shanghai (07:00Z), so the completed daily signal bar may be visible without treating midnight as a completed session.",
+  "universe": [
+    {
+      "id": "shfe_au_continuous",
+      "source_symbol": "kq_m_shfe_au",
+      "quant_symbol": "au0",
+      "exchange_mic": "XSHF",
+      "product": "au"
+    },
+    {
+      "id": "shfe_ag_continuous",
+      "source_symbol": "kq_m_shfe_ag",
+      "quant_symbol": "ag0",
+      "exchange_mic": "XSHF",
+      "product": "ag"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "source_date_marker_ts_utc": "2026-03-13T00:00:00Z",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "source_date_marker_ts_utc": "2026-03-18T00:00:00Z",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "source_date_marker_ts_utc": "2026-05-15T00:00:00Z",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "source_date_marker_ts_utc": "2026-06-02T00:00:00Z",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "universe_id": "shfe_ag_continuous"
+    }
+  ],
+  "levels": [
+    "D",
+    "W",
+    "60min",
+    "15min"
+  ],
+  "minimum_rows": {
+    "D": 60,
+    "W": 20,
+    "60min": 120,
+    "15min": 120
+  },
+  "source_policy": {
+    "explicit_paths_only": true,
+    "allow_continuous_synthesis": false,
+    "allow_json_fallback": false,
+    "allow_raw_store_scan": false,
+    "allow_contract_selection": false,
+    "allow_contract_reselection": false,
+    "allow_proxies": false
+  },
+  "capability_policy": {
+    "underlying_ohlcv_asof": {
+      "status": "supported",
+      "basis": "BarStore accepts an explicit UTC as_of and the lane disables continuous-contract synthesis and every fallback; actual per-series presence remains a coverage result."
+    },
+    "delta_dte": {
+      "status": "blocked",
+      "basis": "The bounded paired-trading input contract has no decision-time CN option delta series or exact exchange expiry calendar; percentage OTM and approximate expiry are prohibited proxies."
+    },
+    "causal_iv": {
+      "status": "blocked",
+      "basis": "No protocol-pinned, decision-time IV history with a declared causal warmup is available through the bounded current interfaces; Black-Scholes back-out and upstream metrics are prohibited proxies."
+    },
+    "regime": {
+      "status": "blocked",
+      "basis": "No frozen causal CN Feitian regime-label contract is present in paired-trading; upstream trend/range/stress labels are independent evidence and are not imported."
+    },
+    "option_price_cadence": {
+      "status": "blocked",
+      "basis": "The paired-trading OptionStore interface is daily-only and the frozen runtime store has no files; Feitian DD/tight-stop work requires option 15-minute or finer bars."
+    },
+    "dd_line": {
+      "status": "blocked",
+      "basis": "There is neither a frozen DD-line definition nor bounded option intraday inputs in paired-trading; a percent stop or generic swing line would be an unapproved proxy."
+    },
+    "bid_ask": {
+      "status": "blocked",
+      "basis": "Current bar schemas contain OHLCV/turnover/open-interest but no historical bid or ask fields; costs are not imputed."
+    }
+  },
+  "upstream_research": {
+    "role": "independent_non_transferable_research_input",
+    "repository": "trade-philosopher",
+    "source_commit": "5802d0ff5d99819ad01ba9f3550b6a2d504f1e81",
+    "performance_metrics_imported": false,
+    "documents": [
+      {
+        "path": "doc/pa-replication/feitian-h1-premium-space-2026-06-16.md",
+        "sha256": "sha256:88bf71cb7c260076499254713fefa17444308d4e56f7e38c2db13308c293b08e"
+      },
+      {
+        "path": "doc/SYNTHESIS-AND-HANDOFF-2026-06-17.md",
+        "sha256": "sha256:1d64077d5d92d8ad434e9e62d9bf6eb405fa6dda15eb781ec0c1a9f0a0917d92"
+      },
+      {
+        "path": "doc/self-evolving-trader-methodology-2026-06-28.md",
+        "sha256": "sha256:2e36134eb763cfa4786ab6561a7ccb3704c5f3f88dfa28cc177ddaf44520b90d"
+      },
+      {
+        "path": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
+        "sha256": "sha256:67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb"
+      }
+    ]
+  },
+  "prohibited": [
+    "date.today or implicit current time",
+    "future rows at a decision timestamp",
+    "continuous-contract synthesis",
+    "raw-store glob or catalog discovery",
+    "contract selection or reselection",
+    "missing-data imputation or proxy metrics",
+    "optimization or performance claims",
+    "candidate promotion, M7, trading, or execution"
+  ],
+  "next_gate": "Provision the exact eight frozen underlying files (au0/ag0 x D/W/60min/15min) with provenance sufficient to cover all 16 requested decision-series snapshots through their decision timestamps; then rerun this verifier. Faithful Feitian evaluation remains separately blocked until a new protocol pins decision-time CN delta plus exact DTE, causal IV warmup/history, causal regime labels, option <=15min bars, a formal DD-line definition, and historical bid/ask."
+}

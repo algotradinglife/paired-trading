@@ -1,0 +1,268 @@
+{
+  "capabilities": [
+    {
+      "basis": "BarStore accepts an explicit UTC as_of and the lane disables continuous-contract synthesis and every fallback; actual per-series presence remains a coverage result.",
+      "capability": "underlying_ohlcv_asof",
+      "status": "supported"
+    },
+    {
+      "basis": "The bounded paired-trading input contract has no decision-time CN option delta series or exact exchange expiry calendar; percentage OTM and approximate expiry are prohibited proxies.",
+      "capability": "delta_dte",
+      "status": "blocked"
+    },
+    {
+      "basis": "No protocol-pinned, decision-time IV history with a declared causal warmup is available through the bounded current interfaces; Black-Scholes back-out and upstream metrics are prohibited proxies.",
+      "capability": "causal_iv",
+      "status": "blocked"
+    },
+    {
+      "basis": "No frozen causal CN Feitian regime-label contract is present in paired-trading; upstream trend/range/stress labels are independent evidence and are not imported.",
+      "capability": "regime",
+      "status": "blocked"
+    },
+    {
+      "basis": "The paired-trading OptionStore interface is daily-only and the frozen runtime store has no files; Feitian DD/tight-stop work requires option 15-minute or finer bars.",
+      "capability": "option_price_cadence",
+      "status": "blocked"
+    },
+    {
+      "basis": "There is neither a frozen DD-line definition nor bounded option intraday inputs in paired-trading; a percent stop or generic swing line would be an unapproved proxy.",
+      "capability": "dd_line",
+      "status": "blocked"
+    },
+    {
+      "basis": "Current bar schemas contain OHLCV/turnover/open-interest but no historical bid or ask fields; costs are not imputed.",
+      "capability": "bid_ask",
+      "status": "blocked"
+    }
+  ],
+  "coverage": [
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "D",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/daily/SHFE.au0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "W",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/weekly/SHFE.au0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "60min",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/hour/SHFE.au0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "15min",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/min15/SHFE.au0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "D",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/daily/SHFE.au0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "W",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/weekly/SHFE.au0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "60min",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/hour/SHFE.au0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "15min",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/min15/SHFE.au0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "D",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/daily/SHFE.ag0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "W",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/weekly/SHFE.ag0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "60min",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/hour/SHFE.ag0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "15min",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/min15/SHFE.ag0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "D",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/daily/SHFE.ag0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "W",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/weekly/SHFE.ag0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "60min",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/hour/SHFE.ag0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "blocked_reason": "ValueError",
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "first_timestamp": null,
+      "last_timestamp": null,
+      "level": "15min",
+      "payload_hash": null,
+      "row_count": 0,
+      "source": "external://quant-data/min15/SHFE.ag0.parquet",
+      "status": "data_blocked",
+      "universe_id": "shfe_ag_continuous"
+    }
+  ],
+  "data_root": "external://quant-data",
+  "funnel": {
+    "data_blocked_series": 16,
+    "requested_series": 16,
+    "supported_series": 0
+  },
+  "gate": {
+    "advance_m7": false,
+    "classification": "coverage_feasibility_only",
+    "faithful_feitian_ready": false,
+    "next_gate": "Provision the exact eight frozen underlying files (au0/ag0 x D/W/60min/15min) with provenance sufficient to cover all 16 requested decision-series snapshots through their decision timestamps; then rerun this verifier. Faithful Feitian evaluation remains separately blocked until a new protocol pins decision-time CN delta plus exact DTE, causal IV warmup/history, causal regime labels, option <=15min bars, a formal DD-line definition, and historical bid/ask.",
+    "performance_evaluation_allowed": false,
+    "strategy_inference_allowed": false
+  },
+  "generated_at_utc": "2026-07-11T14:00:00Z",
+  "protocol_id": "m6_hist_002_frozen_v1",
+  "protocol_sha256": "sha256:55652f37b93db653b3259fb6e1a419565ba00d6101a83a66fb99b74edc57c7dc",
+  "schema_version": "pa_feitian_historical_asof_coverage_audit_v1",
+  "source_commit": "dacbec20d8c69d07aeaa64dde8f69c837a33632c"
+}

@@ -1,0 +1,229 @@
+{
+  "data_root": "external://quant-data",
+  "generated_at_utc": "2026-07-11T14:00:00Z",
+  "guardrails": {
+    "as_of_required": true,
+    "continuous_synthesis": false,
+    "contract_reselection": false,
+    "contract_selection": "none",
+    "date_today_used": false,
+    "explicit_source_paths_only": true,
+    "future_rows_allowed": false,
+    "json_fallback": false,
+    "raw_store_scan": false
+  },
+  "protocol_id": "m6_hist_002_frozen_v1",
+  "protocol_sha256": "sha256:55652f37b93db653b3259fb6e1a419565ba00d6101a83a66fb99b74edc57c7dc",
+  "schema_version": "pa_feitian_historical_asof_inputs_v1",
+  "snapshots": [
+    {
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "series": [
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "D",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/daily/SHFE.au0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "W",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/weekly/SHFE.au0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "60min",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/hour/SHFE.au0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "15min",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/min15/SHFE.au0.parquet",
+          "status": "data_blocked"
+        }
+      ],
+      "source_symbol": "kq_m_shfe_au",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "series": [
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "D",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/daily/SHFE.au0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "W",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/weekly/SHFE.au0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "60min",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/hour/SHFE.au0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "15min",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/min15/SHFE.au0.parquet",
+          "status": "data_blocked"
+        }
+      ],
+      "source_symbol": "kq_m_shfe_au",
+      "universe_id": "shfe_au_continuous"
+    },
+    {
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "series": [
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "D",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/daily/SHFE.ag0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "W",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/weekly/SHFE.ag0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "60min",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/hour/SHFE.ag0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "15min",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/min15/SHFE.ag0.parquet",
+          "status": "data_blocked"
+        }
+      ],
+      "source_symbol": "kq_m_shfe_ag",
+      "universe_id": "shfe_ag_continuous"
+    },
+    {
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "series": [
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "D",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/daily/SHFE.ag0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "W",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/weekly/SHFE.ag0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "60min",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/hour/SHFE.ag0.parquet",
+          "status": "data_blocked"
+        },
+        {
+          "bars": [],
+          "blocked_reason": "ValueError",
+          "first_timestamp": null,
+          "last_timestamp": null,
+          "level": "15min",
+          "payload_hash": null,
+          "row_count": 0,
+          "source": "external://quant-data/min15/SHFE.ag0.parquet",
+          "status": "data_blocked"
+        }
+      ],
+      "source_symbol": "kq_m_shfe_ag",
+      "universe_id": "shfe_ag_continuous"
+    }
+  ],
+  "source_commit": "dacbec20d8c69d07aeaa64dde8f69c837a33632c"
+}
