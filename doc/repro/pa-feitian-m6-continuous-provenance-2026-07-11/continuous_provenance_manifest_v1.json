@@ -1,0 +1,1457 @@
+{
+  "bound_candidates": [
+    {
+      "binding_status": "exact_byte_reconstruction_supported",
+      "build_cutoff": {
+        "historical_execution_time": "unverified",
+        "maximum_raw_observation": "2026-06-08T15:00:00+08:00"
+      },
+      "byte_size": 4220494,
+      "causal_roll_schedule": {
+        "confirmation_sessions": 3,
+        "effective_session": "next_session_after_third_confirmation",
+        "prefix_invariance": {
+          "checkpoints": [
+            "2021-05-20",
+            "2021-11-25",
+            "2021-12-30",
+            "2022-05-24",
+            "2022-11-07",
+            "2022-12-29",
+            "2023-03-02",
+            "2023-04-21",
+            "2023-07-03",
+            "2023-08-31",
+            "2023-10-30",
+            "2024-01-03",
+            "2024-02-29",
+            "2024-05-07",
+            "2024-07-04",
+            "2024-08-28",
+            "2024-11-07",
+            "2025-01-03",
+            "2025-03-25",
+            "2025-05-09",
+            "2025-07-02",
+            "2025-09-23",
+            "2025-11-25",
+            "2026-01-22",
+            "2026-03-12",
+            "2026-03-13",
+            "2026-03-18",
+            "2026-05-21",
+            "2026-06-08"
+          ],
+          "status": "supported_at_declared_checkpoints"
+        },
+        "record_count": 1313,
+        "records_sha256": "sha256:64ae4fc5a2e316e132c1b83c2c84ec14dcbd574d893cfd5729c7142042c69379",
+        "selection": "prior_session_OI_when_all_active_positive_else_volume"
+      },
+      "eligible_for_score_today": false,
+      "embedded_main_month_is_roll": {
+        "reason": "generator annotates by calendar date and ffill/bfill; it is not the causal trading-date roll ledger",
+        "status": "quarantined"
+      },
+      "filename": "SHFE.au0.5min.parquet",
+      "raw_acquisition_lineage": {
+        "reason": "raw Parquets have no acquisition manifest binding vendor query time, response identity, or availability",
+        "status": "quarantined"
+      },
+      "raw_input_set_sha256": "sha256:7c2b50b677871147e7e7ce7b62f252d2ddd918aba39706cdf5e17792d44f6ea9",
+      "raw_inputs": [
+        {
+          "month": "202102",
+          "path": "daily/SHFE.au2102.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:7d5c7b204b35b856e674da3eb26a569c0340cc251cbdaa9a9563add1e82ee8b8"
+        },
+        {
+          "month": "202104",
+          "path": "daily/SHFE.au2104.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:f0217df5256b6b5973bb83f75aae569fd382f954f0cc72bcb8a3726a7cb55dcb"
+        },
+        {
+          "month": "202106",
+          "path": "daily/SHFE.au2106.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:9a422c0a8af73b7ed13f9de3ab89d20315fd9250c3eb6c21565caad6a707ab40"
+        },
+        {
+          "month": "202108",
+          "path": "daily/SHFE.au2108.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:c0b4bb119dddfe2bcacfb4cb5fc90a0098f9b7355e6f5ed9720ecde51c76f8f1"
+        },
+        {
+          "month": "202110",
+          "path": "daily/SHFE.au2110.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:2ae1cb371e2a88403bc0d5025d984a81006ba87fc0c6f5e573594d989d877c11"
+        },
+        {
+          "month": "202112",
+          "path": "daily/SHFE.au2112.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:167449ce0011459c50850e9d3547201beb94d74727879cf26dd76a57ff2b7ec1"
+        },
+        {
+          "month": "202202",
+          "path": "daily/SHFE.au2202.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:a3e9c2bc7bbff578977d7fe000b88300e3c3a0050b336a69ef674a0278920748"
+        },
+        {
+          "month": "202204",
+          "path": "daily/SHFE.au2204.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:56162a32aa72c6d69aba8906ca78697e30c8fa28df3f0118e3712e6232dbf8b8"
+        },
+        {
+          "month": "202206",
+          "path": "daily/SHFE.au2206.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:9e87176cec93226a78b28c9122c5b9461eebf9cfba72b97a95a21d913ceaf6d8"
+        },
+        {
+          "month": "202208",
+          "path": "daily/SHFE.au2208.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:e0f26a0adf58ca185c5d88d173d39593347dfad2a5486ec3bad2a74ffb3473f2"
+        },
+        {
+          "month": "202210",
+          "path": "daily/SHFE.au2210.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:3a86325f7bc06fb750c6a1d60997f50dacd1909e76d4ac4f054fcdc8b6b4eb60"
+        },
+        {
+          "month": "202212",
+          "path": "daily/SHFE.au2212.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:c74e8570f42a189d5f82161f86a9c9c42ce35d7524e962cd457e6fdbf0874b3d"
+        },
+        {
+          "month": "202302",
+          "path": "daily/SHFE.au2302.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:71af1e4abed868b4575c8e4da0e2681c6431e041d12f716a1252ebb25903db8f"
+        },
+        {
+          "month": "202304",
+          "path": "daily/SHFE.au2304.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:03e9b81c14151b22a4c5fe4ad16a8bc5a61318b71c15a4ba3f630d29c6abeb6c"
+        },
+        {
+          "month": "202306",
+          "path": "daily/SHFE.au2306.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:c37612b5b03ede3fb10734493f24ec1832cfbc89fd8c4148c3f79b48e3565fc2"
+        },
+        {
+          "month": "202308",
+          "path": "daily/SHFE.au2308.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:d44b37fe9de65ef12a18b4b2745da111eaef1869277b710daa3b720dfd0a5241"
+        },
+        {
+          "month": "202310",
+          "path": "daily/SHFE.au2310.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:cb49f24df7957e385318a500b58182bc5b20f57327adbdfb32fd7e60e95d2de5"
+        },
+        {
+          "month": "202312",
+          "path": "daily/SHFE.au2312.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:16db6453e4278acff4b0b0e50e501446d6aed11f5f13c61bf239350734b872f5"
+        },
+        {
+          "month": "202402",
+          "path": "daily/SHFE.au2402.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:a7205d21de3eefa47844c7f99daa7b1145f4d3cd9a335f3da23798bd1ba894f7"
+        },
+        {
+          "month": "202404",
+          "path": "daily/SHFE.au2404.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:2d82f9363773ea4e3a33b62a6f27afa5346e9e9a59d1300b94495c976c8a1660"
+        },
+        {
+          "month": "202406",
+          "path": "daily/SHFE.au2406.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:95d7bdf2e48cdf4851e99e6013f8b209379a7328de7f4fa0331f9a51d355dde6"
+        },
+        {
+          "month": "202408",
+          "path": "daily/SHFE.au2408.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:55350edc12c1a75a519f52b634d1f205c8cc61547eea753ead4ee1446dbc84f1"
+        },
+        {
+          "month": "202410",
+          "path": "daily/SHFE.au2410.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:6aa96b4882c17f422da74b1e4e7d16913b597acfbefc8eae27b0081af8980422"
+        },
+        {
+          "month": "202412",
+          "path": "daily/SHFE.au2412.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:f3ecd1a67bdcec7aae1f06fce8283ea38ff73ecfc6b1ec26023d8c019f483b94"
+        },
+        {
+          "month": "202502",
+          "path": "daily/SHFE.au2502.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:7207b056d1d429ef74a22e867a267202292c896cf7885400d720c4055a1e7da3"
+        },
+        {
+          "month": "202504",
+          "path": "daily/SHFE.au2504.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:991201abee839f05118aa1c6e5814c0dbe7ab564f927047033de17fd8038d873"
+        },
+        {
+          "month": "202506",
+          "path": "daily/SHFE.au2506.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:2f96f71186b554c00e4ec36bbcf52a813b9da465805bd37ebc05deb4f9146b09"
+        },
+        {
+          "month": "202508",
+          "path": "daily/SHFE.au2508.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:616d7d113c7c40169c562cdc3adae2375f81591f8f5c4800f0bbf86ffad523e7"
+        },
+        {
+          "month": "202510",
+          "path": "daily/SHFE.au2510.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:ad054522f24ae784b984564307cfc845aa4912cf1065977cd339edc2c4475519"
+        },
+        {
+          "month": "202512",
+          "path": "daily/SHFE.au2512.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:2955a9c831f35a26ebc3966d9548eb14a71303dd44c4384fabbc4ee94be7888e"
+        },
+        {
+          "month": "202602",
+          "path": "daily/SHFE.au2602.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:7c0e65b9dbdb4afd0673d962a64ce3c2b7b54086fe412f02a57da6fe18ecdc89"
+        },
+        {
+          "month": "202604",
+          "path": "daily/SHFE.au2604.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:a26f774c6e4a2bd7083b020532421284b4a9a1aa99be289778230e6d6422402c"
+        },
+        {
+          "month": "202606",
+          "path": "daily/SHFE.au2606.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:78b85b1a9c43e9256f188922b578d74ecda1c7a393cf30ef93106fd77fc041be"
+        },
+        {
+          "month": "202607",
+          "path": "daily/SHFE.au2607.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:43019661374210d1ba346cba1a97a12310cec3f132a09bf5416ed6ab56fe0a3f"
+        },
+        {
+          "month": "202608",
+          "path": "daily/SHFE.au2608.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:dce87e555734b2508533d037a599db65cbfdf209a647de997a64a75d5dfba9b0"
+        },
+        {
+          "month": "202610",
+          "path": "daily/SHFE.au2610.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:ee4641437bce2e95c52426b26802b7d5b8d13398e535d705b4bce0f79ebc5418"
+        },
+        {
+          "month": "202612",
+          "path": "daily/SHFE.au2612.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:88a68bf03b08a08687beb3da59f9ce13d8961eeb8a6ed05b507696497a7442ca"
+        },
+        {
+          "month": "202702",
+          "path": "daily/SHFE.au2702.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:d708dd905bd02f62d664f9d77b18958a291fc41d2ca788f97cbe242834f5a573"
+        },
+        {
+          "month": "202704",
+          "path": "daily/SHFE.au2704.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:0c30da6ebb2bb8e4cf51bcc71ff5e5cc0db7b7a19b768f1304a0b51df659f2ce"
+        },
+        {
+          "month": "202706",
+          "path": "daily/SHFE.au2706.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:1e19ef9486b1f915cb288b18a6af93c07b91979989f249a20110a06cfa26ab30"
+        },
+        {
+          "month": "202102",
+          "path": "min5/SHFE.au2102.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:0aa81530ae60ae18c88ef133a6bc6d4e086ccd1514e92c56337ae46c5d7ab11f"
+        },
+        {
+          "month": "202104",
+          "path": "min5/SHFE.au2104.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:02659d23119226d76e042f0ce12241cfa7222d3ee676c389076ebecb3ddc186d"
+        },
+        {
+          "month": "202106",
+          "path": "min5/SHFE.au2106.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:b6fd063af44f79afa6d668c3d3769ade1ca058ed05778083a16d1ae1f104bc94"
+        },
+        {
+          "month": "202108",
+          "path": "min5/SHFE.au2108.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:6fae69d7f45ebe3d342eec55dcae2ecd142b1c8f08a4030b46ac85078fa57453"
+        },
+        {
+          "month": "202110",
+          "path": "min5/SHFE.au2110.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:929379cf4c25d081c8bc6c316b1eee8d9081fdfd69db114bcc6d24a82ff53ecc"
+        },
+        {
+          "month": "202112",
+          "path": "min5/SHFE.au2112.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:5eb8c7f535db7f20ef6e889ae0b968a6d2111f4c40e1e6a8d386ed417fbbdf7f"
+        },
+        {
+          "month": "202202",
+          "path": "min5/SHFE.au2202.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:f120b173e5c485ba06731b0701b2d5f6ddb02e383900c33b5608d2a0530641c2"
+        },
+        {
+          "month": "202204",
+          "path": "min5/SHFE.au2204.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:d36eccc5a6721246bbaf702929a3e6b341e5e2e8362f6871a25b7ec2e9354609"
+        },
+        {
+          "month": "202206",
+          "path": "min5/SHFE.au2206.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:6c0fd1069d7427d70654b5301776069813f462c707a33a53c5c72d402c2d5a13"
+        },
+        {
+          "month": "202208",
+          "path": "min5/SHFE.au2208.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:b39b0169cb750e1df4853e02738499d8eb52c4753fc2d9f89718aa6251e7a6a2"
+        },
+        {
+          "month": "202210",
+          "path": "min5/SHFE.au2210.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:3c51b7bde9286d96820e45571e032521e5b63b1d4047889667263ba29d6fd518"
+        },
+        {
+          "month": "202212",
+          "path": "min5/SHFE.au2212.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:6cad3f14b2dc28be9d3124fba91840ab828df8557ecc6fea8da9cabfeed50416"
+        },
+        {
+          "month": "202302",
+          "path": "min5/SHFE.au2302.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:dd58cef71c4a320cd44b72e3829963becb9a973384d325e232488e9d70764870"
+        },
+        {
+          "month": "202304",
+          "path": "min5/SHFE.au2304.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:9db3e9934d99482a88072454f0ef14fe65e72d8ef426dbd119ca108fae602d57"
+        },
+        {
+          "month": "202306",
+          "path": "min5/SHFE.au2306.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:f9afa6bec7822ecaf8adb45df2988ac99182b81a0b44e650c186b3743d614796"
+        },
+        {
+          "month": "202308",
+          "path": "min5/SHFE.au2308.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:87b8a4e1d309f6a5440ed2240450de8fdc8f253c748a8cd47c8dd79ec7874e64"
+        },
+        {
+          "month": "202310",
+          "path": "min5/SHFE.au2310.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:60f02ec6b3f8953ae282f70c2a9397b416e297e7103a8655789b40f161e7fa97"
+        },
+        {
+          "month": "202312",
+          "path": "min5/SHFE.au2312.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:41b6176950983c9a87f3581f9eb86e0c020e482b04622a1eb16196b84961929a"
+        },
+        {
+          "month": "202402",
+          "path": "min5/SHFE.au2402.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:583ab9b03028afa51c838ef35e969c82462e6cc49a3b0b52fd071d2d633ffd22"
+        },
+        {
+          "month": "202404",
+          "path": "min5/SHFE.au2404.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:660502a67848190ecc4e13ed003e58ed0efd265e159c80f909d852661ad288f4"
+        },
+        {
+          "month": "202406",
+          "path": "min5/SHFE.au2406.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:ef70095aefd050dbe7230ea1bb76e5bb20f5c5828173de2c42e1071b268f981c"
+        },
+        {
+          "month": "202408",
+          "path": "min5/SHFE.au2408.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:d397dc4f5da4749f3be290808e8d93be6dafcbe2e3157e8a0512dd9884483c7a"
+        },
+        {
+          "month": "202410",
+          "path": "min5/SHFE.au2410.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:fe6710268bf173323dc5f4fa28f0014a8c5621e6f169afb96ec40527deafcd23"
+        },
+        {
+          "month": "202412",
+          "path": "min5/SHFE.au2412.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:55944ab4b0c02bf421b62532fb80b9fa2be6b9433d5504fc32417f0e62c864f4"
+        },
+        {
+          "month": "202502",
+          "path": "min5/SHFE.au2502.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:6284330adf1443c3da53515898dfde9573b1bd2a86013d2cc0532186d4224271"
+        },
+        {
+          "month": "202504",
+          "path": "min5/SHFE.au2504.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:25d43285fbf65272fb93e617468b9f5194d0d59c88f660926fae490f21e196dc"
+        },
+        {
+          "month": "202506",
+          "path": "min5/SHFE.au2506.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:0a595abeb4d43cc2ae497dadf0255b4e2b7ffb977367dff9e891af352d03bd2e"
+        },
+        {
+          "month": "202508",
+          "path": "min5/SHFE.au2508.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:b9f1eee0b1ef3634d497fd1953c5ddb9c9bf62c84a53d2cc398f9e937959d7f5"
+        },
+        {
+          "month": "202510",
+          "path": "min5/SHFE.au2510.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:c9946eb8976a5dcccdaa325712d7c6efff6b763c8672ae5c11a2f8e9d5df470e"
+        },
+        {
+          "month": "202512",
+          "path": "min5/SHFE.au2512.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:9fbbec89350527c81b72da7bf4458e57d3cb4e8c367f9fee8c13bb9a32e05355"
+        },
+        {
+          "month": "202602",
+          "path": "min5/SHFE.au2602.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:5e3a4da9b09bb9b043c51f37fdd8d924967f0e2c281616f343ec920ffc9b37bd"
+        },
+        {
+          "month": "202604",
+          "path": "min5/SHFE.au2604.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:2da80e9237b4d209444c87df21ca316a386074009832897ccfa38e6e308a67f6"
+        },
+        {
+          "month": "202606",
+          "path": "min5/SHFE.au2606.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:4d579fe258854dd54f46c42a7a02a5a83cb341b85e2870162c6aaa5e8caab431"
+        },
+        {
+          "month": "202607",
+          "path": "min5/SHFE.au2607.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:328c5b0cb15c1f8ac39cefb90b51d10dd0299bf38a8210115d434a6ba111c745"
+        },
+        {
+          "month": "202608",
+          "path": "min5/SHFE.au2608.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:81a965101fdaf2407a8d2ad20fe80fe9ca9113832836506f0d3cd9e8d2f6748f"
+        },
+        {
+          "month": "202610",
+          "path": "min5/SHFE.au2610.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:ffac1dd0d03fc4812c0c4f7de551926f16f8a6d9c0880d4f97ff2464acb21c83"
+        },
+        {
+          "month": "202612",
+          "path": "min5/SHFE.au2612.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:6856bfc9395b25a0b7cf75be1438c2c54f4087bc1e94e0b9a755bbe24dc5220f"
+        },
+        {
+          "month": "202702",
+          "path": "min5/SHFE.au2702.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:8b017a08672241d73a995d9d8cfa5a2e78e2e4a3bb87cedb2f50762cf6853b15"
+        },
+        {
+          "month": "202704",
+          "path": "min5/SHFE.au2704.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:cd646c40c54b57f762ae70c61ba8a01bd297b56eb052a0abc53c91d81aaa609d"
+        },
+        {
+          "month": "202706",
+          "path": "min5/SHFE.au2706.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:155050288bd438136b270d07f17f33a09e2c22e3226367dfb274deceb6bf3dde"
+        }
+      ],
+      "sha256": "sha256:2217ea2a243188bc8ffd59ec48c3f6ab04f17e61e992429d17ad53d21796e50b",
+      "source_id": "shfe_au0_underlying_5min",
+      "timestamp_contract": {
+        "night_session_trading_date": "next_exchange_session",
+        "stamp": "naive_local_period_end",
+        "timezone": "Asia/Shanghai"
+      },
+      "window_start_local": "2021-01-01"
+    },
+    {
+      "binding_status": "exact_byte_reconstruction_supported",
+      "build_cutoff": {
+        "historical_execution_time": "unverified",
+        "maximum_raw_observation": "2026-06-08T15:00:00+08:00"
+      },
+      "byte_size": 1622991,
+      "causal_roll_schedule": {
+        "confirmation_sessions": 3,
+        "effective_session": "next_session_after_third_confirmation",
+        "prefix_invariance": {
+          "checkpoints": [
+            "2024-07-02",
+            "2024-11-28",
+            "2025-03-21",
+            "2025-05-16",
+            "2025-07-10",
+            "2025-09-22",
+            "2025-11-19",
+            "2025-12-30",
+            "2026-03-11",
+            "2026-05-15",
+            "2026-05-21",
+            "2026-06-02",
+            "2026-06-08"
+          ],
+          "status": "supported_at_declared_checkpoints"
+        },
+        "record_count": 469,
+        "records_sha256": "sha256:d9fedf5f0ad38073eee95c6f14f1156d68341195d38425ba5095796353c7b561",
+        "selection": "prior_session_OI_when_all_active_positive_else_volume"
+      },
+      "eligible_for_score_today": false,
+      "embedded_main_month_is_roll": {
+        "reason": "generator annotates by calendar date and ffill/bfill; it is not the causal trading-date roll ledger",
+        "status": "quarantined"
+      },
+      "filename": "SHFE.ag0.5min.parquet",
+      "raw_acquisition_lineage": {
+        "reason": "raw Parquets have no acquisition manifest binding vendor query time, response identity, or availability",
+        "status": "quarantined"
+      },
+      "raw_input_set_sha256": "sha256:d529da645b565206f6bedc28cad7dc39412372713fd62ab07c27c5454a985b0a",
+      "raw_inputs": [
+        {
+          "month": "202101",
+          "path": "daily/SHFE.ag2101.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:64dd948f9813c2b83c31195a5c2955f1ce26465ccfd7cfca02f1ac8687c20108"
+        },
+        {
+          "month": "202105",
+          "path": "daily/SHFE.ag2105.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:cd4acc0447903f1e443ee2130f41f42167f16068213b041e974c4aab3bba0e16"
+        },
+        {
+          "month": "202106",
+          "path": "daily/SHFE.ag2106.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:c928fcb6b21c7dbe3c8ad89853c958e502f6d938e8b3806e1bbab5c69a181d5d"
+        },
+        {
+          "month": "202107",
+          "path": "daily/SHFE.ag2107.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:d6cfd94874e38b2e9b5e17de830e37c1c83d182041195543a4776fbd61128dd9"
+        },
+        {
+          "month": "202108",
+          "path": "daily/SHFE.ag2108.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:fb03b8493ee84fdcc13443382b5a48e3ed98df60103ba1bc22e23ef14f742fbf"
+        },
+        {
+          "month": "202109",
+          "path": "daily/SHFE.ag2109.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:d33c47159c23c4a23000b17709ee46ee397d3eb66deb598527deed8dc53abe39"
+        },
+        {
+          "month": "202110",
+          "path": "daily/SHFE.ag2110.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:4b444698a1f27d93ca470684f4a6e0e58a753699905e1bf125ee3d11f040c5da"
+        },
+        {
+          "month": "202111",
+          "path": "daily/SHFE.ag2111.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:8e39997ac574cfe74b3b72f74a68f644d55e77c83b192eb7ef2f459074c17f58"
+        },
+        {
+          "month": "202112",
+          "path": "daily/SHFE.ag2112.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:559215b8087e7b9c959c326f8b7f16b0900b42fee4f93fc5472bcbc983f4862b"
+        },
+        {
+          "month": "202201",
+          "path": "daily/SHFE.ag2201.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:7009063e377c12c4ddeba6873f1dbb8ce065e8e754470db6135686c59b0d38f4"
+        },
+        {
+          "month": "202205",
+          "path": "daily/SHFE.ag2205.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:4991fb4fce8304603c9248cf78dd03e179087c908df1d1a97ee95cf7aca9a644"
+        },
+        {
+          "month": "202206",
+          "path": "daily/SHFE.ag2206.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:d905d8d5aa508a69ac85ba76d7df875daa9d33a43748c214b358fabfad53418e"
+        },
+        {
+          "month": "202207",
+          "path": "daily/SHFE.ag2207.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:be3b4e310e20c954487d25ddc976058d9e27f1726568bc1c4c8655c9491b981b"
+        },
+        {
+          "month": "202208",
+          "path": "daily/SHFE.ag2208.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:bfeb1e38b43856632e21fee5feb851a0b746645015f7cb1e996c6867afa036e9"
+        },
+        {
+          "month": "202209",
+          "path": "daily/SHFE.ag2209.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:0a185a26962fedf95fa8fe03db116609180fd7c26de54299712c48b0419e1a57"
+        },
+        {
+          "month": "202210",
+          "path": "daily/SHFE.ag2210.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:75fb390ff9ccf790bacdb657181b039d40d6dd76c357bc3f41a59beef26a046e"
+        },
+        {
+          "month": "202211",
+          "path": "daily/SHFE.ag2211.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:f4d7a2c64e684d2e8861ef3cf0ef9c4a01d5cd10f58b2d9edd658b8a89d3cb0c"
+        },
+        {
+          "month": "202212",
+          "path": "daily/SHFE.ag2212.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:a92a150983ab07a11c7f287c829f06965a45c5c496a2d281e5eba7dbc096e9cf"
+        },
+        {
+          "month": "202301",
+          "path": "daily/SHFE.ag2301.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:4196b0eea03e62afa52aabb76f2f67eed8748de67a4193eb5fe6bba7e5c5434f"
+        },
+        {
+          "month": "202305",
+          "path": "daily/SHFE.ag2305.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:d98d4c0a16c819264767c034d8c003cfb53deb39fdfac221ce4ea26e00ddb39e"
+        },
+        {
+          "month": "202306",
+          "path": "daily/SHFE.ag2306.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:58146c7aaece9a5e8902f1ae26721c5a14e08821037548946f56cda8e1933b7a"
+        },
+        {
+          "month": "202307",
+          "path": "daily/SHFE.ag2307.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:e23486487682c2586aca2b055feffd95314a15326d4c013d796d5be4ec344e07"
+        },
+        {
+          "month": "202308",
+          "path": "daily/SHFE.ag2308.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:5857020073126d7aabd1aad48e733a0c792dcdd57d07ce6e0c4aa02fb7d29d2a"
+        },
+        {
+          "month": "202309",
+          "path": "daily/SHFE.ag2309.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:52f87ba318700572f0fdb0e14e980fc6e1b551ac10625e10c78bd945d472d5a1"
+        },
+        {
+          "month": "202310",
+          "path": "daily/SHFE.ag2310.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:5926ae0ff27db36bac7b1a11ed347584a81cfb14928aafc3c78c2c17909192f9"
+        },
+        {
+          "month": "202311",
+          "path": "daily/SHFE.ag2311.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:4128cba2f5e94b11ab108b17d218d98e1d22799f38898019d9c5a7a7f2f2ca50"
+        },
+        {
+          "month": "202312",
+          "path": "daily/SHFE.ag2312.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:d9db5966187aac9de9bbcaf7dbc77be4541b40c668215f81bb937e4a146fd8e3"
+        },
+        {
+          "month": "202401",
+          "path": "daily/SHFE.ag2401.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:0c56dc4157b77981e78221021964fc541bf5a16b9dd8e75d1256a77c3d94d700"
+        },
+        {
+          "month": "202402",
+          "path": "daily/SHFE.ag2402.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:8e4f9384ba91f73cc334152f8e531eae519a0a11b36cadc72b49ce43eb31348d"
+        },
+        {
+          "month": "202405",
+          "path": "daily/SHFE.ag2405.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:30b95b837c29a834172f22f1e663ff3b49849f3ed4215a78b578d6b5ceeb3bc7"
+        },
+        {
+          "month": "202406",
+          "path": "daily/SHFE.ag2406.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:785ad81f979e8bcadc5c20b2c67ea7ce7a07f82747fb4bfdbddbcb5ad98569d7"
+        },
+        {
+          "month": "202407",
+          "path": "daily/SHFE.ag2407.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:1a8ac5f21bf2b8d567cb2dfe6b845dfcd808a387eb6c3a5d86798f56181a4451"
+        },
+        {
+          "month": "202408",
+          "path": "daily/SHFE.ag2408.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:7ac1a977ec2cf81fe58b7a02afdaf0f72994d634aea6a5d5062fb8271bd4c652"
+        },
+        {
+          "month": "202409",
+          "path": "daily/SHFE.ag2409.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:356900ff24cd4e12f8c60d65c59426e03e0ebf9dc1454feae78ed569d05118e1"
+        },
+        {
+          "month": "202410",
+          "path": "daily/SHFE.ag2410.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:4f65228b527c5f1f1b1a6026dc22bc23deb8fd1be76c0b5c7c0002ffa515ac54"
+        },
+        {
+          "month": "202411",
+          "path": "daily/SHFE.ag2411.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:016ef27007c49a43e8877bf622313619e3dcf58987b432d83d18bdaec4b18ef3"
+        },
+        {
+          "month": "202412",
+          "path": "daily/SHFE.ag2412.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:03f74d0ceeb186b05ccab2432093737fd664b92910070d0586139a36c4cb46e5"
+        },
+        {
+          "month": "202501",
+          "path": "daily/SHFE.ag2501.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:5677e3ee1837fe1fcb767e176fa9381f4a7b720c67a0a1cee5bfdc1e4678e439"
+        },
+        {
+          "month": "202503",
+          "path": "daily/SHFE.ag2503.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:87fe84d8dff9473f4274f0c291a36377780e1e5a06517d53d1c98b8816a5ccf1"
+        },
+        {
+          "month": "202504",
+          "path": "daily/SHFE.ag2504.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:7db1fc2d07a4d324777230cd37ebcd1ad02b2814c6ef183984e061edb461390d"
+        },
+        {
+          "month": "202505",
+          "path": "daily/SHFE.ag2505.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:99fe1a3dbada3105269a39169e23d67d8e08cbc51e93277c690fc9f3d8ba3793"
+        },
+        {
+          "month": "202506",
+          "path": "daily/SHFE.ag2506.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:f4be4fcde5603a232f52030af3a18e0f6ee3c4fac1aea91b8b138367a587d62c"
+        },
+        {
+          "month": "202507",
+          "path": "daily/SHFE.ag2507.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:7d153c3f53d3d93cff9cef86053eea0b2f0f524ca454c8617e1cca066af5c3c7"
+        },
+        {
+          "month": "202508",
+          "path": "daily/SHFE.ag2508.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:61a8793e51fdd2854de44c50ae00e93caed07936d21501953162716112cea058"
+        },
+        {
+          "month": "202509",
+          "path": "daily/SHFE.ag2509.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:792b4ad568e31de518de2236bb61e63125c9fe83ee480c44e42602572b14025f"
+        },
+        {
+          "month": "202510",
+          "path": "daily/SHFE.ag2510.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:1d6ceeacb911ca15734f018a66b7614eb5d3a86a27751d755a09e848c3428f29"
+        },
+        {
+          "month": "202511",
+          "path": "daily/SHFE.ag2511.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:95c0aec7f361755b79d04d8b28caf3a42eb0c7251952d06eb8f1e7d0c0bc1b8f"
+        },
+        {
+          "month": "202512",
+          "path": "daily/SHFE.ag2512.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:38632971cd5b772fe6de366cb6376c4a5f13b613a84c549f305f3be43018365a"
+        },
+        {
+          "month": "202601",
+          "path": "daily/SHFE.ag2601.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:54dabd319c08443c0951282904e6980eaad1d549cf8650cc023fdb7138b17cf9"
+        },
+        {
+          "month": "202602",
+          "path": "daily/SHFE.ag2602.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:4d56d27b2eec2b4e0e9b3d46df8beacf825bda28af08f4d32b69ff3446044f75"
+        },
+        {
+          "month": "202603",
+          "path": "daily/SHFE.ag2603.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:ff24c9f714b4fb72ded13e3473f4e4381fc65ff2df7f5e44ce4c0255e3965727"
+        },
+        {
+          "month": "202604",
+          "path": "daily/SHFE.ag2604.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:96ee673dffc6e3d853ecf1cfa7803c5956f8707b21698b0358313cfa0ca9b4f8"
+        },
+        {
+          "month": "202605",
+          "path": "daily/SHFE.ag2605.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:0ce92834646e28256283a9e4182ae4b14c81e8a82d932a839a70b43af4be134d"
+        },
+        {
+          "month": "202606",
+          "path": "daily/SHFE.ag2606.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:9a1e92ee61556748c1c3b4c8a7d0a41179e36b8332a01e32d9e4cb2d7a120819"
+        },
+        {
+          "month": "202607",
+          "path": "daily/SHFE.ag2607.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:29a90475cb4a3c38aa964d99b7a7076f1586284a92b239fcb7f1905db55f9964"
+        },
+        {
+          "month": "202608",
+          "path": "daily/SHFE.ag2608.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:c1d42d642bf0944f6acf95813d56c6fc851e54e172ed963331f4999cc0403a01"
+        },
+        {
+          "month": "202609",
+          "path": "daily/SHFE.ag2609.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:4559050704beb806a1b881adca908efd56a5857b870b5baf05e958b419c67578"
+        },
+        {
+          "month": "202610",
+          "path": "daily/SHFE.ag2610.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:8386da548dd988b12c10970ebc6cdcd4fbc8c0853659eba5359dc1aead8fd5dd"
+        },
+        {
+          "month": "202611",
+          "path": "daily/SHFE.ag2611.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:8291f4c471eb1d914ef800882beb4f70bea82ce55693592c25fc86bf166a7648"
+        },
+        {
+          "month": "202612",
+          "path": "daily/SHFE.ag2612.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:d5afbd8e6c0736674780fcd3954475260303d8095194efbb12e03116d923d810"
+        },
+        {
+          "month": "202701",
+          "path": "daily/SHFE.ag2701.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:bed96bba1014f572249454b24e4a353ac7a95e54d98f26c1050d7b5576e0a198"
+        },
+        {
+          "month": "202702",
+          "path": "daily/SHFE.ag2702.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:2d8705a2f9ded4d111cb43c9013d7a777de9a5a2b7bdecdafc343c91c2c058f4"
+        },
+        {
+          "month": "202703",
+          "path": "daily/SHFE.ag2703.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:a7f8315476d17ac16ae0c3083b1e9bf07ff554afdeda907b0b1f40c8e98b9c77"
+        },
+        {
+          "month": "202704",
+          "path": "daily/SHFE.ag2704.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:add1de31e134c6b5bcc776f0614cdfa8096188d0c6315750757705e6231790bf"
+        },
+        {
+          "month": "202705",
+          "path": "daily/SHFE.ag2705.parquet",
+          "role": "schedule_daily",
+          "sha256": "sha256:57b7e18a091488dd7d2f3e140f4a3f5f19bb354b9b13f94075242eda31518248"
+        },
+        {
+          "month": "202101",
+          "path": "min5/SHFE.ag2101.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:dcefcbb9638a2a90142e4a3bc3158a614191957706ea5192a755eaa70b78a490"
+        },
+        {
+          "month": "202105",
+          "path": "min5/SHFE.ag2105.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:c53037a282c0e8e966b3c2b957379f62e17bda589ad2705df3b7718062ef6a85"
+        },
+        {
+          "month": "202106",
+          "path": "min5/SHFE.ag2106.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:dd39b4de7168a8d1430dc84197f89915a375760f72c6fd6295cef72e3e364f34"
+        },
+        {
+          "month": "202107",
+          "path": "min5/SHFE.ag2107.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:bfb9a8e6352845ca02f21b3c86611e22e4e7059c37daede5af72148fc98a3da2"
+        },
+        {
+          "month": "202108",
+          "path": "min5/SHFE.ag2108.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:ba542cc3b146c59beeece53d53932fd00a81c2e763c7a467e7c3c8e9783d3560"
+        },
+        {
+          "month": "202109",
+          "path": "min5/SHFE.ag2109.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:052db5a4e5b1dbb1c0007207926526870f53baffd2a0598138d7ebee628dc544"
+        },
+        {
+          "month": "202110",
+          "path": "min5/SHFE.ag2110.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:e89a0498b6090e273d26957f0b594629d6a2758b140882289ec8bf4500d7122e"
+        },
+        {
+          "month": "202111",
+          "path": "min5/SHFE.ag2111.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:635a9d69be9c4d1c719e2f60fa8865fc6dc6245675e944dd36c945aae5d2be9b"
+        },
+        {
+          "month": "202112",
+          "path": "min5/SHFE.ag2112.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:04b40956e2457d919f653dec4fed99b217ffe33f12b46a8d78c585bd5f525e43"
+        },
+        {
+          "month": "202201",
+          "path": "min5/SHFE.ag2201.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:ee70a779d6ca9a57a77fd4200f16a714ecb7287f7f81cf941b5e572cc7359489"
+        },
+        {
+          "month": "202205",
+          "path": "min5/SHFE.ag2205.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:35c0ba972c19af822b8d83efcee045f11e918bceeb604906e0e10fe2aac2958e"
+        },
+        {
+          "month": "202206",
+          "path": "min5/SHFE.ag2206.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:be27e70480b2a4b5021ff970d4b0188d2664061bd298be418a355a62cded9cf1"
+        },
+        {
+          "month": "202207",
+          "path": "min5/SHFE.ag2207.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:6a8fa7b585641e86fd8c6a68e641b695733ef4c7a5f7778d3ceff94a78c6650b"
+        },
+        {
+          "month": "202208",
+          "path": "min5/SHFE.ag2208.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:ba8ce560d970cff666aee44a8d26541a31f8eecd4f963bb5938ba32b260ff77a"
+        },
+        {
+          "month": "202209",
+          "path": "min5/SHFE.ag2209.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:64979642e9b8acf0e133ba57e756031e4be1c37e364a780432e0c23ef9d17938"
+        },
+        {
+          "month": "202210",
+          "path": "min5/SHFE.ag2210.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:784cc6393199cb0458ba9323934fa6783fadcccdc61218850155a1f44f9fc27f"
+        },
+        {
+          "month": "202211",
+          "path": "min5/SHFE.ag2211.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:fe5076299720a2d08929208926e1f4898c6829d7648049a2738e6bfd36789004"
+        },
+        {
+          "month": "202212",
+          "path": "min5/SHFE.ag2212.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:9b863f85b9ce27547f15392e493934d2b85c326948fe0921187d8f2a28d03afb"
+        },
+        {
+          "month": "202301",
+          "path": "min5/SHFE.ag2301.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:bcd6c35bf5e9e59a877b7c36e3f5e7c94e9226a4a23a304cb9ef29e78e462ec4"
+        },
+        {
+          "month": "202305",
+          "path": "min5/SHFE.ag2305.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:f76f2b49e76098dda5a0aa392ee496f85a7ffac8816eee3d5473f6510ad522e5"
+        },
+        {
+          "month": "202306",
+          "path": "min5/SHFE.ag2306.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:a5eeb38d08dde944c6b845de4a2660955030e6062ff15e52ad65481050bb600b"
+        },
+        {
+          "month": "202307",
+          "path": "min5/SHFE.ag2307.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:1af671f9b1c5af17e719327ed5d9f8ac89b4be85003beaf92b9b772c80eb14e6"
+        },
+        {
+          "month": "202308",
+          "path": "min5/SHFE.ag2308.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:ebabd0727923a2c1c6a1daf38f01feeb535b2913695a13323e3645d1e3bca51e"
+        },
+        {
+          "month": "202309",
+          "path": "min5/SHFE.ag2309.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:09b3d8afaa7c9e24498be953105c355c58e760292b5b99cbfda46a4db7532965"
+        },
+        {
+          "month": "202310",
+          "path": "min5/SHFE.ag2310.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:3201556a6f2aead23125aaf649e4433d82e67f2a782dac8a16abe9ce23d2fb1c"
+        },
+        {
+          "month": "202311",
+          "path": "min5/SHFE.ag2311.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:8fa29497a58c08101da0bc79bf03cb423a5314983fa6965fd61a7f31dbca2468"
+        },
+        {
+          "month": "202312",
+          "path": "min5/SHFE.ag2312.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:253b2f642e347c2f7b059bd944c8a127177cbcf6217d825ad22730051ede7846"
+        },
+        {
+          "month": "202401",
+          "path": "min5/SHFE.ag2401.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:1dee61149a19a721b1a3cbf57a016a88a3acb06a6d8abfdf2e5c3bb1d9da83ce"
+        },
+        {
+          "month": "202402",
+          "path": "min5/SHFE.ag2402.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:b13a2ef37cf8b0e36105bbbadd0f096cf55a50c4077802c2696202ac35e54c34"
+        },
+        {
+          "month": "202405",
+          "path": "min5/SHFE.ag2405.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:d7acae1fc2eb306eef5cde20b2fe7aeb0bab29881c6dafa519c2bc88d6ef5335"
+        },
+        {
+          "month": "202406",
+          "path": "min5/SHFE.ag2406.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:7304f6943024f250639960837c9697ea53468fcecdd3e84c022f18bf1e184d00"
+        },
+        {
+          "month": "202407",
+          "path": "min5/SHFE.ag2407.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:c29a8ef861f0825c7974c8e0e05b0ca1a4f94ed20c5a0b1ac7a4c922e9d27777"
+        },
+        {
+          "month": "202408",
+          "path": "min5/SHFE.ag2408.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:76661ff2e6a038d926b8d32dda700f8266ddc5f4ae638cba17f441a4087c8d65"
+        },
+        {
+          "month": "202409",
+          "path": "min5/SHFE.ag2409.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:9d6542593d6f3a2c6f16531487cd3342f424b4b0002a514367b502a8f10b7bab"
+        },
+        {
+          "month": "202410",
+          "path": "min5/SHFE.ag2410.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:8f238ed2660ec45c36b8bfd4568edbed7fa07133b4851e08bf74bceacd3687cf"
+        },
+        {
+          "month": "202411",
+          "path": "min5/SHFE.ag2411.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:ef270a27d03e484cfdbb44c17bf34494d6e23ac84ab0117e6c953f19ed73b35f"
+        },
+        {
+          "month": "202412",
+          "path": "min5/SHFE.ag2412.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:1ddbbc795a185dbcbbb8a55b4c4c453f302573508ef832ba2ae9947c808f4228"
+        },
+        {
+          "month": "202501",
+          "path": "min5/SHFE.ag2501.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:cae054f7c2178bf1877dfbf6868e2c02568f63c87ccb746a028c220a00ffe622"
+        },
+        {
+          "month": "202503",
+          "path": "min5/SHFE.ag2503.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:3eb77b97cbfcf8a1b2ffc76729d221dfc5ff036d3145fe6b92d6777ecd084a77"
+        },
+        {
+          "month": "202504",
+          "path": "min5/SHFE.ag2504.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:91754b1885b4306a98385d9ecee8849fccb413ae06a19975c81c182d9f759368"
+        },
+        {
+          "month": "202505",
+          "path": "min5/SHFE.ag2505.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:02ee4408c08dab4538960a4f585d4b8c11e73e692fb4d29a23d67e9cb6f15af4"
+        },
+        {
+          "month": "202506",
+          "path": "min5/SHFE.ag2506.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:65b7649bd40c73a5302e50e4868bb6c2f5d6404b4fc4b905351243dcabce2b7f"
+        },
+        {
+          "month": "202507",
+          "path": "min5/SHFE.ag2507.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:dd3eb899fb897b2527c5ff804ed4762da15b41c7bf8d631a3e18c237c26fafa0"
+        },
+        {
+          "month": "202508",
+          "path": "min5/SHFE.ag2508.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:f7af366538be8501267a71e177f0efcd4122f3fa0142dd38d3fca170c810b881"
+        },
+        {
+          "month": "202509",
+          "path": "min5/SHFE.ag2509.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:5f499d400dd9211b14059ae21f040f4f9c738ff63442659446b277bf9043ab3f"
+        },
+        {
+          "month": "202510",
+          "path": "min5/SHFE.ag2510.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:9d692fda9e18519f1b7ae039225d910e1aed1ad6d36f6be0270e2858b0da395f"
+        },
+        {
+          "month": "202511",
+          "path": "min5/SHFE.ag2511.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:05a6f457a155daea410992b3d6e2a28ae746c269d0cac05e7d0aac317d804800"
+        },
+        {
+          "month": "202512",
+          "path": "min5/SHFE.ag2512.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:c38ddf166ed92da6fc5b02fcbf283bf84ae7f4884c927d34dcee8093275cc92f"
+        },
+        {
+          "month": "202601",
+          "path": "min5/SHFE.ag2601.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:26ae24efe659d163d37b53498671de6a270b34f7c1a585d3aa1fa1bd6eac1fd6"
+        },
+        {
+          "month": "202602",
+          "path": "min5/SHFE.ag2602.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:fc662494cd7a6babf51a25cce625eb15f175ade06ea753194c29a2133031cfa0"
+        },
+        {
+          "month": "202603",
+          "path": "min5/SHFE.ag2603.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:7dffc32f2a548d7aec176f9beb84eff3f008b8252b7366be154927099cd8f759"
+        },
+        {
+          "month": "202604",
+          "path": "min5/SHFE.ag2604.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:4883ecc0915e5628413de9df1eb3044edff6fa328f4648211567ecb435e9e7ea"
+        },
+        {
+          "month": "202605",
+          "path": "min5/SHFE.ag2605.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:0142c2c3169af58468a3bd0457b6386625a81ba3e200630ab8f061ad15c4adbf"
+        },
+        {
+          "month": "202606",
+          "path": "min5/SHFE.ag2606.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:33ab08cd31da60c5a7b47f9f971eb384f3d6f58266d44f7d0caf186e3e48db21"
+        },
+        {
+          "month": "202607",
+          "path": "min5/SHFE.ag2607.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:0aceb0c9dfdf6f875399889159c3e0c104b1add8922f48d7fd67802e9a738ea9"
+        },
+        {
+          "month": "202608",
+          "path": "min5/SHFE.ag2608.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:e8b9bb2e2bdb418f2192c0adb023043944fc5725cb09d236ea30ef150178aee5"
+        },
+        {
+          "month": "202609",
+          "path": "min5/SHFE.ag2609.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:56d49e743d2ec8c54ee5198a582e6f9710353dd86aa6c9d0f7573cb226019213"
+        },
+        {
+          "month": "202610",
+          "path": "min5/SHFE.ag2610.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:b9a3598a0a04c7b64d14fdb4f3c2fd94f059151db7bae5662ad54f09343e5e0f"
+        },
+        {
+          "month": "202611",
+          "path": "min5/SHFE.ag2611.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:4b6271287e8031ade3585624af3cd3a7e6d1493b4aa6127898abb9a4fe4c4bbd"
+        },
+        {
+          "month": "202612",
+          "path": "min5/SHFE.ag2612.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:742f4a46bfd9a49a570fd9fdf36d0766215280c7b5e3487745839af91615e748"
+        },
+        {
+          "month": "202701",
+          "path": "min5/SHFE.ag2701.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:5f2b478bcc63d3e80c2db02763f404b16ca4d16987115f3716cf3ef0dabed84f"
+        },
+        {
+          "month": "202702",
+          "path": "min5/SHFE.ag2702.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:832d8b7484d7b90193f09c681d642ee1edf5c164af6cb3ecdd0945b127cb954b"
+        },
+        {
+          "month": "202703",
+          "path": "min5/SHFE.ag2703.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:00894e107917241520ead3dbb799c590f9120393a24792690d21252f7ee5dfc5"
+        },
+        {
+          "month": "202704",
+          "path": "min5/SHFE.ag2704.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:d47b177e19e8fab5b38ab3f61c1710d6493de0d4276785a4adbcf71a407c942b"
+        },
+        {
+          "month": "202705",
+          "path": "min5/SHFE.ag2705.parquet",
+          "role": "constituent_5min",
+          "sha256": "sha256:d2dd3b087d1980370556ad078a6f20f4fc1de58845132ab87c33914f5638a92f"
+        }
+      ],
+      "sha256": "sha256:0474a3ae5e86b8b2efe28a76b967d2fd2646459c464f1d2d27ad456de48b9a5d",
+      "source_id": "shfe_ag0_underlying_5min",
+      "timestamp_contract": {
+        "night_session_trading_date": "next_exchange_session",
+        "stamp": "naive_local_period_end",
+        "timezone": "Asia/Shanghai"
+      },
+      "window_start_local": "2024-07-01"
+    }
+  ],
+  "capability_boundary": {
+    "advance_m7": false,
+    "candidate_data_eligible_for_score_today": false,
+    "causal_roll_schedule_at_declared_checkpoints": "supported",
+    "date_only_iv": "quarantined",
+    "embedded_roll_annotations": "quarantined",
+    "exact_derived_byte_reconstruction": "supported_for_two_underlying_5min_candidates",
+    "full_sample_atr_regime": "blocked",
+    "performance_evaluation_allowed": false,
+    "raw_provider_lineage_and_availability": "quarantined"
+  },
+  "generator_sources": [
+    {
+      "commit": "804f48915767abbdb848fc54be52f1e85d076567",
+      "path": "scripts/data_backfill/build_cn_continuous_5min.py",
+      "repository": "quant",
+      "sha256": "sha256:d5cc30c1ab707b220213a92f860d9160552209143021aca4bd2118d7982d71ae"
+    },
+    {
+      "commit": "af813b8c06f002433299bf86cc94a73a0c71a511",
+      "path": "src/data/continuous.py",
+      "repository": "paired-trading",
+      "sha256": "sha256:334a3aea839d2753d518e4a3376e3d379b360e28c98f200ca3bd123ebc198bde"
+    }
+  ],
+  "hermes_task": "t_6df19e2b",
+  "protocol": {
+    "path": "docs/research/pa-feitian-m6-historical-asof-protocol-v1.json",
+    "sha256": "sha256:1ee6e334ada94fa928d311f3d7992d1708e4334c5b16e8e39b51ffedafcd7a1d"
+  },
+  "quarantined_candidates": [
+    {
+      "eligible_for_score_today": false,
+      "filename": "SHFE.au0.option_ivskew.parquet",
+      "manifest_binding_attempted": false,
+      "reason": "date-only IV has no availability timestamp or raw chain/query manifest",
+      "sha256": "sha256:6cc7d7ca8dd6013ba4c00bf72a372fe340affc16dbde45afe23d2da9d08176ba",
+      "source_id": "shfe_au0_option_ivskew",
+      "status": "quarantined"
+    },
+    {
+      "eligible_for_score_today": false,
+      "filename": "SHFE.ag0.option_ivskew.parquet",
+      "manifest_binding_attempted": false,
+      "reason": "date-only IV has no availability timestamp or raw chain/query manifest",
+      "sha256": "sha256:9d8eb906aa3eaae1450dba011a43b1bf5f7427dcc8004973aa925947e6bebfe3",
+      "source_id": "shfe_ag0_option_ivskew",
+      "status": "quarantined"
+    },
+    {
+      "eligible_for_score_today": false,
+      "filename": "SHFE.au0.regime.parquet",
+      "manifest_binding_attempted": false,
+      "reason": "date-only availability and raw lineage are absent; observed generator uses a full-sample ATR 80th percentile",
+      "sha256": "sha256:8a95c1a069409857819a988f124ea28488d551a33d83f271afcad02584e20122",
+      "source_id": "shfe_au0_regime",
+      "status": "quarantined"
+    },
+    {
+      "eligible_for_score_today": false,
+      "filename": "SHFE.ag0.regime.parquet",
+      "manifest_binding_attempted": false,
+      "reason": "date-only availability and raw lineage are absent; observed generator uses a full-sample ATR 80th percentile",
+      "sha256": "sha256:a48e812db201815d27f2641134fd839b88dc1e0374c704d01f722c4ac517d1e5",
+      "source_id": "shfe_ag0_regime",
+      "status": "quarantined"
+    }
+  ],
+  "schema_version": "pa_feitian_continuous_provenance_manifest_v1"
+}
