@@ -262,3 +262,68 @@ class OptionStore:
         if eligible.empty:
             return None
         return float(eligible["close"].iloc[-1])
+
+
+class ExplicitContractOptionStore(OptionStore):
+    """OptionStore restricted to an explicit, preselected contract set.
+
+    Historical artifact replay must not discover contracts by walking the
+    market-data root.  This variant resolves only normalized SHFE/INE contract
+    symbols supplied by the caller and never calls ``Path.glob``.
+    """
+
+    _NORMALIZED_CN_RE = re.compile(
+        r"(?P<product>[a-z]+)(?P<month>\d{4})(?P<cp>[cp])(?P<strike>\d+(?:\.\d+)?)"
+    )
+
+    def __init__(self, data_root: Path | str, contract_symbols: list[str]) -> None:
+        super().__init__(data_root)
+        index: dict[str, OptionContract] = {}
+        for raw_symbol in contract_symbols:
+            symbol = raw_symbol.lower()
+            match = self._NORMALIZED_CN_RE.fullmatch(symbol)
+            if match is None:
+                raise ValueError(f"unsupported explicit option contract symbol: {raw_symbol!r}")
+            product = match.group("product")
+            exchange = _PRODUCT_TO_EXCHANGE.get(product)
+            if exchange not in {"SHFE", "INE"}:
+                raise ValueError(
+                    f"explicit historical replay does not support {product!r} on {exchange!r}"
+                )
+            strike = float(match.group("strike"))
+            strike_text = f"{strike:g}"
+            path = (
+                self._root
+                / "daily"
+                / (
+                    f"{exchange}.{product}{match.group('month')}"
+                    f"{match.group('cp').upper()}{strike_text}.parquet"
+                )
+            )
+            index[symbol] = OptionContract(
+                contract_sym=symbol,
+                product=product,
+                underlying_month=match.group("month"),
+                opt_type=match.group("cp").upper(),
+                strike=strike,
+                path=path,
+            )
+        self._sym_index = index
+
+    def catalog(self, product: str) -> list[OptionContract]:
+        """Return only explicitly registered contracts for ``product``."""
+
+        assert self._sym_index is not None
+        return sorted(
+            (contract for contract in self._sym_index.values() if contract.product == product),
+            key=lambda contract: (
+                contract.underlying_month,
+                contract.opt_type,
+                contract.strike,
+            ),
+        )
+
+    def explicit_contract(self, contract_symbol: str) -> OptionContract | None:
+        """Return one registered contract without catalog discovery."""
+
+        return self._lookup(contract_symbol)

@@ -1,0 +1,159 @@
+{
+  "schema_version": "pa_feitian_historical_cohort_protocol_v1",
+  "protocol_id": "m6_hist_001_frozen_v1",
+  "hermes_task": "t_b68066e4",
+  "frozen_at_utc": "2026-07-11T13:00:00Z",
+  "research_mode": "retrospective_descriptive_gate",
+  "bounds": {
+    "decision_date_start": "2026-03-01",
+    "decision_date_end": "2026-06-08",
+    "timezone": "UTC",
+    "trading_calendar": "XSGE",
+    "universe": [
+      {
+        "exchange": "SHFE",
+        "product": "ag",
+        "option_type": "call"
+      },
+      {
+        "exchange": "SHFE",
+        "product": "au",
+        "option_type": "call"
+      }
+    ],
+    "cadence": {
+      "kind": "immutable_artifact_event",
+      "rule": "evaluate each distinct in-range source scorecard decision at most once",
+      "calendar_backfill": false
+    },
+    "oos_windows": [
+      {
+        "id": "oos_1",
+        "decision_date_start": "2026-03-01",
+        "decision_date_end": "2026-04-30"
+      },
+      {
+        "id": "oos_2",
+        "decision_date_start": "2026-05-01",
+        "decision_date_end": "2026-06-08"
+      }
+    ]
+  },
+  "inputs": {
+    "scorecard": {
+      "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/score_today_cn_metal_120d_2026-07-10.json",
+      "sha256": "sha256:68d36739cfa36440fffa4e72fd940b4c45dbf09ceb980c3ab94e9d1d298e6970"
+    },
+    "snapshot": {
+      "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_snapshot_v1.json",
+      "sha256": "sha256:01055e4c28d402812eed9bf602fb5f57a8ce5c9a872e8671c337af2da900bbcf"
+    },
+    "decision_intent": {
+      "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_decision_intent_v1.json",
+      "sha256": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0"
+    },
+    "source_manifest": {
+      "path": "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_run_manifest_with_decision_intent_v1.json",
+      "sha256": "sha256:5136ac942778f1a9e553c9ef8b3e05d0cd523decf36fb038d19f22ffcdcf501c"
+    },
+    "runtime_option_store_label": "external://optionstore/quant-data"
+  },
+  "eligibility": {
+    "retain_every_source_scorecard_row": true,
+    "ordered_rules": [
+      "decision date is within the inclusive frozen bounds",
+      "symbol maps to an allowed exchange/product universe member",
+      "rank-1 selected option contract and decision-time premium are present",
+      "source snapshot and decision-intent artifacts contain the immutable decision",
+      "selected contract was listed by the decision date, evidenced by an OptionStore bar on or before the decision date",
+      "at least one valid daily OHLC bar exists strictly after the decision timestamp"
+    ],
+    "coverage_window": {
+      "bar_granularity": "daily",
+      "entry": "first valid bar strictly after decision timestamp, filled at open plus two ticks",
+      "maximum_post_decision_bars": 10,
+      "required_pre_decision_bars": 1,
+      "required_post_decision_bars": 1,
+      "same_bar_stop_target": "ambiguous",
+      "missing_or_invalid_bars": "excluded_with_reason"
+    },
+    "deduplication_key": [
+      "source signal id",
+      "selected contract symbol"
+    ]
+  },
+  "no_lookahead": {
+    "artifact_driven_only": true,
+    "rerun_score_today": false,
+    "scan_unlisted_contracts": false,
+    "reselect_contract": false,
+    "future_contract_selection": false,
+    "outcome_dependent_reselection": false,
+    "mutate_decision_intent": false,
+    "policy_fixed_before_traversal": true,
+    "posterior_fields_forbidden_from_eligibility": [
+      "premium_r",
+      "premium_return",
+      "mfe",
+      "mae",
+      "exit_reason",
+      "exit_timestamp"
+    ]
+  },
+  "policies": {
+    "common": {
+      "long_option_only": true,
+      "target_multiples_of_entry": [
+        2.0
+      ],
+      "maximum_holding_daily_bars": 10,
+      "slippage_ticks": 2.0,
+      "commission_and_fees": 0.0,
+      "gap_fill": "first_tradable_open_when_open_crosses_threshold",
+      "same_bar_stop_target": "ambiguous"
+    },
+    "baseline": {
+      "policy_id": "pa_feitian_m5_daily_long_option_stop_target",
+      "stop_fraction_of_entry": 0.5
+    },
+    "candidate": {
+      "policy_id": "pa_feitian_m6_daily_long_option_stop_30pct",
+      "stop_fraction_of_entry": 0.3,
+      "registration_mode": "retrospective_exploratory"
+    },
+    "identical_eligible_events_required": true
+  },
+  "sample_thresholds": {
+    "pooled_descriptive_minimum": 1,
+    "pooled_inference_minimum": 20,
+    "grouped_result_minimum_per_group": 10,
+    "oos_minimum_windows": 2,
+    "oos_minimum_events_per_window": 10,
+    "screening_minimum_effective_events": 30
+  },
+  "reporting": {
+    "always_emit": [
+      "coverage audit and every exclusion",
+      "eligibility funnel counts",
+      "policy outcome status counts",
+      "paired per-event premium R",
+      "pooled descriptive statistics",
+      "limitations and gate decision",
+      "input, protocol, selected-bar, and output hashes"
+    ],
+    "emit_only_when_threshold_met": [
+      "grouped policy comparisons",
+      "OOS or walk-forward comparisons",
+      "confidence intervals used for inference",
+      "screening classification other than insufficient_sample"
+    ],
+    "insufficient_sample_gate": "diagnostic_only_no_strategy_inference_no_m7"
+  },
+  "prohibited": [
+    "unbounded raw-data scan",
+    "live trading",
+    "order execution",
+    "production policy mutation",
+    "M7 implementation"
+  ]
+}
