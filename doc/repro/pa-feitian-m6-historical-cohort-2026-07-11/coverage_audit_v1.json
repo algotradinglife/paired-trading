@@ -1,0 +1,220 @@
+{
+  "bounded_contract_count": 4,
+  "data_source": "external://optionstore/quant-data",
+  "eligible_signal_ids": [
+    "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+    "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+    "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+    "paft_scorecard_0001_kq_m_shfe_au_20260313000000"
+  ],
+  "funnel": {
+    "eligible_rows": 4,
+    "excluded_rows": 9,
+    "exclusions_by_reason": {
+      "missing_rank1_selected_option_contract": 2,
+      "outside_frozen_universe": 7
+    },
+    "source_rows": 13
+  },
+  "generated_at_utc": "2026-07-11T13:30:00Z",
+  "guardrails": {
+    "contract_discovery": "explicit_artifact_selected_contracts_only",
+    "contract_reselection": false,
+    "raw_directory_glob": false,
+    "score_today_rerun": false
+  },
+  "protocol_id": "m6_hist_001_frozen_v1",
+  "protocol_path": "docs/research/pa-feitian-m6-historical-cohort-protocol-v1.json",
+  "protocol_sha256": "sha256:33a2a32a436a1b1ca8921809b86724ce7401672681952aac510b3375cf039875",
+  "rows": [
+    {
+      "coverage": null,
+      "decision_date": "2026-04-29",
+      "eligible": false,
+      "exchange": "SHFE",
+      "exclusion_reason": "outside_frozen_universe",
+      "product": "cu",
+      "selected_contract": null,
+      "signal_id": null,
+      "source_row_index": 0,
+      "symbol": "kq_m_shfe_cu"
+    },
+    {
+      "coverage": null,
+      "decision_date": "2026-05-18",
+      "eligible": false,
+      "exchange": "SHFE",
+      "exclusion_reason": "outside_frozen_universe",
+      "product": "cu",
+      "selected_contract": null,
+      "signal_id": null,
+      "source_row_index": 1,
+      "symbol": "kq_m_shfe_cu"
+    },
+    {
+      "coverage": {
+        "bars_on_or_before_decision": 57,
+        "bars_strictly_after_decision": 44,
+        "file": "SHFE.au2606C1136.parquet",
+        "first_date": "2025-10-16",
+        "last_date": "2026-05-25",
+        "source": "external://optionstore/quant-data",
+        "valid_daily_bars": 101
+      },
+      "decision_date": "2026-03-18",
+      "eligible": true,
+      "exchange": "SHFE",
+      "exclusion_reason": null,
+      "product": "au",
+      "selected_contract": "au2606c1136",
+      "signal_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "source_row_index": 2,
+      "symbol": "kq_m_shfe_au"
+    },
+    {
+      "coverage": {
+        "bars_on_or_before_decision": 6,
+        "bars_strictly_after_decision": 15,
+        "file": "SHFE.ag2607C19900.parquet",
+        "first_date": "2026-04-29",
+        "last_date": "2026-06-05",
+        "source": "external://optionstore/quant-data",
+        "valid_daily_bars": 21
+      },
+      "decision_date": "2026-05-15",
+      "eligible": true,
+      "exchange": "SHFE",
+      "exclusion_reason": null,
+      "product": "ag",
+      "selected_contract": "ag2607c19900",
+      "signal_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "source_row_index": 3,
+      "symbol": "kq_m_shfe_ag"
+    },
+    {
+      "coverage": null,
+      "decision_date": "2026-03-25",
+      "eligible": false,
+      "exchange": "INE",
+      "exclusion_reason": "outside_frozen_universe",
+      "product": "sc",
+      "selected_contract": null,
+      "signal_id": null,
+      "source_row_index": 4,
+      "symbol": "kq_m_ine_sc"
+    },
+    {
+      "coverage": {
+        "bars_on_or_before_decision": 106,
+        "bars_strictly_after_decision": 10,
+        "file": "SHFE.ag2608C18800.parquet",
+        "first_date": "2025-12-19",
+        "last_date": "2026-06-16",
+        "source": "external://optionstore/quant-data",
+        "valid_daily_bars": 116
+      },
+      "decision_date": "2026-06-02",
+      "eligible": true,
+      "exchange": "SHFE",
+      "exclusion_reason": null,
+      "product": "ag",
+      "selected_contract": "ag2608c18800",
+      "signal_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "source_row_index": 5,
+      "symbol": "kq_m_shfe_ag"
+    },
+    {
+      "coverage": null,
+      "decision_date": "2026-05-11",
+      "eligible": false,
+      "exchange": "INE",
+      "exclusion_reason": "outside_frozen_universe",
+      "product": "sc",
+      "selected_contract": null,
+      "signal_id": null,
+      "source_row_index": 6,
+      "symbol": "kq_m_ine_sc"
+    },
+    {
+      "coverage": null,
+      "decision_date": "2026-03-13",
+      "eligible": false,
+      "exchange": "SHFE",
+      "exclusion_reason": "outside_frozen_universe",
+      "product": "cu",
+      "selected_contract": null,
+      "signal_id": null,
+      "source_row_index": 7,
+      "symbol": "kq_m_shfe_cu"
+    },
+    {
+      "coverage": null,
+      "decision_date": "2026-04-08",
+      "eligible": false,
+      "exchange": "INE",
+      "exclusion_reason": "outside_frozen_universe",
+      "product": "sc",
+      "selected_contract": null,
+      "signal_id": null,
+      "source_row_index": 8,
+      "symbol": "kq_m_ine_sc"
+    },
+    {
+      "coverage": null,
+      "decision_date": "2026-06-08",
+      "eligible": false,
+      "exchange": "SHFE",
+      "exclusion_reason": "outside_frozen_universe",
+      "product": "cu",
+      "selected_contract": null,
+      "signal_id": null,
+      "source_row_index": 9,
+      "symbol": "kq_m_shfe_cu"
+    },
+    {
+      "coverage": {
+        "bars_on_or_before_decision": 59,
+        "bars_strictly_after_decision": 47,
+        "file": "SHFE.au2606C1152.parquet",
+        "first_date": "2025-10-17",
+        "last_date": "2026-05-25",
+        "source": "external://optionstore/quant-data",
+        "valid_daily_bars": 106
+      },
+      "decision_date": "2026-03-13",
+      "eligible": true,
+      "exchange": "SHFE",
+      "exclusion_reason": null,
+      "product": "au",
+      "selected_contract": "au2606c1152",
+      "signal_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "source_row_index": 10,
+      "symbol": "kq_m_shfe_au"
+    },
+    {
+      "coverage": null,
+      "decision_date": "2026-04-01",
+      "eligible": false,
+      "exchange": "SHFE",
+      "exclusion_reason": "missing_rank1_selected_option_contract",
+      "product": "au",
+      "selected_contract": null,
+      "signal_id": null,
+      "source_row_index": 11,
+      "symbol": "kq_m_shfe_au"
+    },
+    {
+      "coverage": null,
+      "decision_date": "2026-04-01",
+      "eligible": false,
+      "exchange": "SHFE",
+      "exclusion_reason": "missing_rank1_selected_option_contract",
+      "product": "ag",
+      "selected_contract": null,
+      "signal_id": null,
+      "source_row_index": 12,
+      "symbol": "kq_m_shfe_ag"
+    }
+  ],
+  "schema_version": "pa_feitian_historical_cohort_coverage_audit_v1"
+}

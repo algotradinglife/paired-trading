@@ -975,8 +975,9 @@ def build_premium_outcome_sidecar(
     input_paths: HarnessInputPaths,
     quant_data_root: str | Path,
     config: PremiumOutcomeHarnessConfig,
+    store: OptionStore | None = None,
 ) -> PaFeitianPremiumOutcomeSidecar:
-    store = OptionStore(quant_data_root)
+    store = store or OptionStore(quant_data_root)
     recorded_quant_data_root = config.recorded_quant_data_root or Path(
         quant_data_root
     ).as_posix()
