@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -37,6 +38,18 @@ from engine.pa_feitian.schema_validation import (  # noqa: E402
     validate_pa_feitian_evaluation_dataset_schema,
     validate_pa_feitian_run_manifest_schema,
 )
+
+
+SRC_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = SRC_ROOT.parent
+
+
+def _repo_relative(path: str | Path) -> str:
+    raw = Path(path)
+    try:
+        return raw.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return raw.as_posix()
 
 
 def _parse_utc(value: str) -> datetime:
@@ -89,6 +102,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--trading-calendar", default="unknown")
     args = parser.parse_args(raw_argv)
     _resolve_and_validate_paths(args, parser)
+    os.chdir(REPO_ROOT)
 
     config = BaselineEvaluationConfig(
         random_seed=args.seed,
@@ -103,14 +117,19 @@ def main(argv: list[str] | None = None) -> int:
     manifest = load_run_manifest(args.m5_manifest)
     premium_outcome = load_premium_outcome(args.premium_outcome)
     decision_intent = load_decision_intent(args.decision_intent)
-    recorded_args = [str(Path(__file__).resolve()), *raw_argv]
+    recorded_args = [_repo_relative(Path(__file__)), *raw_argv]
+    m5_manifest_ref = _repo_relative(args.m5_manifest)
+    premium_outcome_ref = _repo_relative(args.premium_outcome)
+    decision_intent_ref = _repo_relative(args.decision_intent)
+    dataset_out_ref = _repo_relative(args.dataset_out)
+    aggregate_out_ref = _repo_relative(args.aggregate_out)
     dataset = build_evaluation_dataset(
         manifest=manifest,
-        manifest_path=args.m5_manifest,
+        manifest_path=m5_manifest_ref,
         premium_outcome=premium_outcome,
-        premium_outcome_path=args.premium_outcome,
+        premium_outcome_path=premium_outcome_ref,
         decision_intent=decision_intent,
-        decision_intent_path=args.decision_intent,
+        decision_intent_path=decision_intent_ref,
         config=config,
         generated_at_utc=args.generated_at_utc,
         cli_args=recorded_args,
@@ -121,7 +140,7 @@ def main(argv: list[str] | None = None) -> int:
 
     aggregate = build_aggregate_result(
         dataset=loaded_dataset,
-        dataset_path=args.dataset_out,
+        dataset_path=dataset_out_ref,
         config=config,
         generated_at_utc=args.generated_at_utc,
     )
@@ -139,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
         run_config={
             "contract": "pa_feitian_evaluation_dataset_v1",
             "mode": "m6_baseline_evaluator",
-            "source_m5_manifest": str(args.m5_manifest),
+            "source_m5_manifest": m5_manifest_ref,
             "baseline_only": True,
             "no_score_today_rerun": True,
             "no_market_scan": True,
@@ -148,10 +167,10 @@ def main(argv: list[str] | None = None) -> int:
             "evaluation_config": config.canonical_payload(),
         },
         generated_at_utc=args.generated_at_utc,
-        decision_intent_path=args.decision_intent,
-        premium_outcome_path=args.premium_outcome,
-        evaluation_dataset_path=args.dataset_out,
-        evaluation_aggregate_result_path=args.aggregate_out,
+        decision_intent_path=decision_intent_ref,
+        premium_outcome_path=premium_outcome_ref,
+        evaluation_dataset_path=dataset_out_ref,
+        evaluation_aggregate_result_path=aggregate_out_ref,
         data_access=manifest.data_access,
     )
     evaluation_manifest.input_hashes.update(

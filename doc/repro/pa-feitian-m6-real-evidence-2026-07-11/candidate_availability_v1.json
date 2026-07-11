@@ -1,0 +1,51 @@
+{
+  "schema_version": "pa_feitian_m6_candidate_availability_v1",
+  "generated_at_utc": "2026-07-11T00:00:00Z",
+  "classification": "retrospective_exploratory_blocked_evidence",
+  "not_prospective_preregistration": true,
+  "comparison_artifacts_generated": false,
+  "dashboard_copies_generated": false,
+  "automatic_strategy_approval": false,
+  "baseline": {
+    "policy_id": "pa_feitian_m5_daily_long_option_stop_target",
+    "policy_version": "v1.default",
+    "source_m5_manifest": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+    "premium_outcome": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_premium_outcome_v1.json",
+    "evaluation_dataset": "source/pa_feitian_evaluation_dataset_baseline_v1.json",
+    "evaluation_aggregate_result": "source/pa_feitian_evaluation_aggregate_result_baseline_v1.json",
+    "expected_status_counts": {
+      "observed": 4,
+      "ambiguous": 0,
+      "data_blocked": 0,
+      "not_evaluable": 0
+    }
+  },
+  "candidate_evaluation": {
+    "status": "data_blocked",
+    "raw_premium_path_reproducible": false,
+    "m5_candidate_sidecar_generated": false,
+    "m6_candidate_artifacts_generated": false,
+    "conclusion": "unavailable and inconclusive; no candidate return, relative-baseline difference, ranking, or strategy inference exists.",
+    "reason": "The inspected OptionStore daily root has zero files, so the selected M4b option premium paths cannot be reproduced from raw data.",
+    "recovery_requirement": {
+      "required_input": "Recover the original OptionStore daily OHLC series, with provenance, for every M4b-selected contract before declaring an alternative policy and rebuilding a new packet.",
+      "selected_contracts": [
+        "au2606c1152",
+        "au2606c1136",
+        "ag2607c19900",
+        "ag2608c18800"
+      ],
+      "required_checks": [
+        "daily series begin strictly after each decision timestamp and cover the complete declared holding window without invalid OHLC bars",
+        "the recovered baseline traversal reproduces the existing M5 selected-option-bar SHA-256 evidence for each applicable outcome",
+        "the alternative exit policy is fixed in a new retrospective declaration before its traversal and is clearly not described as prospective preregistration",
+        "a new sidecar, M6 dataset, aggregate artifact, and verifier are generated from the recovered paths"
+      ]
+    }
+  },
+  "artifact_sha256": {
+    "source/pa_feitian_evaluation_dataset_baseline_v1.json": "sha256:b7307d5617698c089309b1facea7ce6782ce2962d4295c8b6ca1906f2a1773ba",
+    "source/pa_feitian_evaluation_aggregate_result_baseline_v1.json": "sha256:6613ca6b6536d942f5750d168170038559b3be270540f86aa488041528fd2d3c",
+    "source/pa_feitian_run_manifest_baseline_evaluation_v1.json": "sha256:309cb36af5a20b6a3f1cb2c5a3d9a54f2581efbffd858fb5c18231f5f547d03a"
+  }
+}
