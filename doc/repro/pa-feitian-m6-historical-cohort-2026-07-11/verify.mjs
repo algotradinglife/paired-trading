@@ -20,11 +20,11 @@ assert.equal(
 const protocol = "docs/research/pa-feitian-m6-historical-cohort-protocol-v1.json";
 const packet = "doc/repro/pa-feitian-m6-historical-cohort-2026-07-11";
 const files = {
-  [protocol]: "sha256:26334611239774812ebc42aa824aa6cf1a406e683110e57ee22ab72a78201cf9",
-  [`${packet}/coverage_audit_v1.json`]: "sha256:3091610774d7210bbbfda1b7e5a4be1d70a6da2ecdb7302b45e36cd8d5509cf1",
+  [protocol]: "sha256:33a2a32a436a1b1ca8921809b86724ce7401672681952aac510b3375cf039875",
+  [`${packet}/coverage_audit_v1.json`]: "sha256:90ed911fcbd0c664979a93307906e98db8531269f3e71b8cb9e635a01051c701",
   [`${packet}/premium_outcome_baseline_50pct_v1.json`]: "sha256:71e34e7fa1844f9138e38c19bd5f668b5ee293b25fdef8505861f2a44accf598",
   [`${packet}/premium_outcome_candidate_30pct_v1.json`]: "sha256:5114c9b3ddc256907fd18738baa0acb82fe11f058861f3dc1856b1c7d32c04e4",
-  [`${packet}/historical_cohort_report_v1.json`]: "sha256:b989da4fd1bbcf349993a27ec7d3d863aef29574dcb8ec1a3ac488b463e4556e",
+  [`${packet}/historical_cohort_report_v1.json`]: "sha256:f48952da3046161b2c21249c164c2caae206c66cbcac0662324cc9d210bf9e46",
 };
 
 function bytes(path) {
@@ -68,6 +68,18 @@ assert.deepEqual(report.policy_status_counts, {
   baseline: { observed: 4 },
   candidate: { observed: 4 },
 });
+assert.equal(report.research_interpretation.evaluated_track.name, "legacy_m5_integration_control");
+assert.equal(report.research_interpretation.evaluated_track.faithful_feitian_hypothesis, false);
+assert.equal(
+  report.research_interpretation.faithful_hypothesis_track.status,
+  "coverage_gap_not_evaluated",
+);
+assert.match(
+  report.research_interpretation.faithful_hypothesis_track.packet_conclusion,
+  /neither tests nor refutes/,
+);
+assert.equal(report.research_interpretation.upstream_research.documents.length, 4);
+assert.equal(report.research_interpretation.upstream_performance_metrics_imported, false);
 
 const temp = mkdtempSync(join(tmpdir(), "pa-feitian-m6-hist-"));
 try {

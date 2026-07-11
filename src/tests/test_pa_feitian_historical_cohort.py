@@ -83,6 +83,21 @@ def test_frozen_cohort_retains_exclusions_and_suppresses_small_sample(
         "strategy_inference_allowed": False,
         "advance_m7": False,
     }
+    interpretation = report["research_interpretation"]
+    assert interpretation["evaluated_track"] == {
+        "name": "legacy_m5_integration_control",
+        "description": (
+            "The 50% and 30% entry-relative premium stops, fixed 2x target, and "
+            "10-daily-bar horizon test paired-trading M5/M6 artifact integration "
+            "mechanics only."
+        ),
+        "faithful_feitian_hypothesis": False,
+    }
+    assert interpretation["faithful_hypothesis_track"]["status"] == (
+        "coverage_gap_not_evaluated"
+    )
+    assert interpretation["upstream_performance_metrics_imported"] is False
+    assert len(interpretation["upstream_research"]["documents"]) == 4
     audit = json.loads((output / "audit.json").read_text(encoding="utf-8"))
     assert len(audit["rows"]) == 13
     assert audit["bounded_contract_count"] == 4

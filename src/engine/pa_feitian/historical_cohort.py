@@ -51,6 +51,19 @@ def load_frozen_protocol(path: str | Path) -> dict[str, Any]:
     protocol = json.loads(protocol_path.read_text(encoding="utf-8"))
     if protocol.get("schema_version") != PROTOCOL_VERSION:
         raise ValueError(f"protocol schema_version must be {PROTOCOL_VERSION!r}")
+    interpretation = protocol.get("interpretation", {})
+    if interpretation.get("evaluated_track", {}).get("faithful_feitian_hypothesis") is not False:
+        raise ValueError("protocol must label the evaluated track as non-faithful Feitian")
+    if (
+        interpretation.get("faithful_hypothesis_track", {}).get("status")
+        != "coverage_gap_not_evaluated"
+    ):
+        raise ValueError("protocol must retain the faithful Feitian track as an unevaluated gap")
+    upstream = protocol.get("upstream_research", {})
+    if upstream.get("role") != "independent_non_transferable_research_input":
+        raise ValueError("upstream research must be marked non-transferable")
+    if upstream.get("performance_metrics_imported") is not False:
+        raise ValueError("upstream performance metrics must not be imported")
     bounds = protocol.get("bounds", {})
     start = _parse_date(bounds.get("decision_date_start"), "decision_date_start")
     end = _parse_date(bounds.get("decision_date_end"), "decision_date_end")
@@ -456,6 +469,25 @@ def build_research_report(
         "protocol_id": protocol["protocol_id"],
         "generated_at_utc": generated_at_utc.astimezone(UTC).isoformat().replace("+00:00", "Z"),
         "research_mode": protocol["research_mode"],
+        "research_interpretation": {
+            "evaluated_track": protocol["interpretation"]["evaluated_track"],
+            "faithful_hypothesis_track": protocol["interpretation"][
+                "faithful_hypothesis_track"
+            ],
+            "upstream_research": protocol["upstream_research"],
+            "independently_reproduced_here": [
+                "bounded explicit-contract coverage for the four pinned M4 decisions",
+                "legacy M5 integration-control replay for 50% and 30% premium stops on identical events",
+                "insufficient-sample suppression of grouped, OOS, strategy, and M7 conclusions",
+            ],
+            "prior_evidence_not_reproduced_here": [
+                "faithful delta/DTE selection effects",
+                "causal IV-rank or low-IV/range regime effects",
+                "runner superiority over fixed targets",
+                "DD-line structural-stop behavior or bid/ask-aware tight-stop execution",
+            ],
+            "upstream_performance_metrics_imported": False,
+        },
         "artifact_hashes": {
             "protocol": sha256_file(protocol_path),
             "coverage_audit": sha256_file(coverage_audit_path),
@@ -530,6 +562,7 @@ def build_research_report(
             "score_today currently filters relative to date.today() and scans full loaded series, so it is not used as a historical as-of replay engine here.",
             "Daily option OHLC cannot identify intraday event ordering or executable bid/ask fills.",
             "The candidate is retrospective exploratory evidence and cannot mutate decision intent, production policy, or execution permission.",
+            "Both evaluated policies are legacy M5 integration controls, not faithful Feitian hypotheses; this packet does not test or refute the faithful track.",
             "Grouped and OOS results are suppressed unless their frozen sample thresholds are met.",
         ],
         "guardrails": {

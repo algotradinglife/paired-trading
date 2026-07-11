@@ -25,7 +25,7 @@
   },
   "protocol_id": "m6_hist_001_frozen_v1",
   "protocol_path": "docs/research/pa-feitian-m6-historical-cohort-protocol-v1.json",
-  "protocol_sha256": "sha256:26334611239774812ebc42aa824aa6cf1a406e683110e57ee22ab72a78201cf9",
+  "protocol_sha256": "sha256:33a2a32a436a1b1ca8921809b86724ce7401672681952aac510b3375cf039875",
   "rows": [
     {
       "coverage": null,

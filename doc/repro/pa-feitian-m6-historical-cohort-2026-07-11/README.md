@@ -9,6 +9,42 @@ four option contracts already selected in those artifacts. It does not run
 `score_today`, discover contracts, scan the raw data directory, reselect a
 contract, mutate decision intent, trade, execute, or perform M7 work.
 
+## Interpretation correction
+
+The evaluated 50% baseline and 30% sensitivity both retain the M5 fixed `2x`
+target and ten-daily-bar horizon. They are **legacy M5 integration controls**,
+not faithful 飞天 hypotheses. This packet tests artifact wiring and bounded
+premium-path mechanics only. It does not test or refute a faithful 飞天 track.
+
+The faithful track remains `coverage_gap_not_evaluated` and would require real
+premium bars with decision-time shallow-OTM eligibility (approximately delta
+`0.25–0.45`, DTE `20–60`), causal IV-rank, predeclared low-IV/range and other
+regime splits, a runner without fixed TP, a stop-distance curve plus DD-line
+structural-stop proxy, and pessimistic treatment of missing bid/ask. The pinned
+paired-trading artifacts cannot currently reproduce those elements faithfully.
+
+### Independent upstream research provenance
+
+The following `trade-philosopher` documents were reviewed at source commit
+`5802d0ff5d99819ad01ba9f3550b6a2d504f1e81` as independent, non-transferable
+research inputs:
+
+- `doc/pa-replication/feitian-h1-premium-space-2026-06-16.md`
+- `doc/SYNTHESIS-AND-HANDOFF-2026-06-17.md`
+- `doc/self-evolving-trader-methodology-2026-06-28.md`
+- `doc/xiao-feitian-options-timing-system-2026-06-16.md`
+
+Their relevant prior evidence is that faithful delta/DTE eligibility materially
+changed conclusions; causal IV-rank, low-IV/range regime, and runner versus
+fixed-target behavior require independent as-of reproduction; and bid/ask plus
+the DD-line structural stop remain blockers. No upstream historical performance
+metrics are imported into this packet.
+
+Independently reproduced here: four-contract bounded coverage, identical-event
+legacy M5 control replay, and the insufficient-sample gate. Merely prior and not
+reproduced here: faithful selection effects, IV/regime effects, runner behavior,
+and DD-line/bid-ask execution behavior.
+
 ## Gate result
 
 - Source scorecard rows retained: `13`
@@ -32,12 +68,12 @@ are zero. This is a bounded diagnostic, not evidence for a policy change.
 
 | Artifact | SHA-256 |
 | --- | --- |
-| Frozen protocol | `sha256:26334611239774812ebc42aa824aa6cf1a406e683110e57ee22ab72a78201cf9` |
-| Coverage audit | `sha256:3091610774d7210bbbfda1b7e5a4be1d70a6da2ecdb7302b45e36cd8d5509cf1` |
+| Frozen protocol | `sha256:33a2a32a436a1b1ca8921809b86724ce7401672681952aac510b3375cf039875` |
+| Coverage audit | `sha256:90ed911fcbd0c664979a93307906e98db8531269f3e71b8cb9e635a01051c701` |
 | Baseline 50% outcome | `sha256:71e34e7fa1844f9138e38c19bd5f668b5ee293b25fdef8505861f2a44accf598` |
 | Candidate 30% outcome | `sha256:5114c9b3ddc256907fd18738baa0acb82fe11f058861f3dc1856b1c7d32c04e4` |
-| Cohort report | `sha256:b989da4fd1bbcf349993a27ec7d3d863aef29574dcb8ec1a3ac488b463e4556e` |
-| Verifier | `sha256:af41a4c1c454bb47b43dcf26505d43721b77a309892c4d89ce50e1e4c2212d61` |
+| Cohort report | `sha256:f48952da3046161b2c21249c164c2caae206c66cbcac0662324cc9d210bf9e46` |
+| Verifier | `sha256:1c37c416862de535213dc412243be7be21632e23c91e5ea51ac6fce97c70c93f` |
 
 ## Rebuild and verify
 

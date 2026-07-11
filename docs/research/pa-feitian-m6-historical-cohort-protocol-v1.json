@@ -3,7 +3,66 @@
   "protocol_id": "m6_hist_001_frozen_v1",
   "hermes_task": "t_b68066e4",
   "frozen_at_utc": "2026-07-11T13:00:00Z",
+  "amended_at_utc": "2026-07-11T15:00:00Z",
+  "amendment_scope": "provenance_and_interpretation_only",
   "research_mode": "retrospective_descriptive_gate",
+  "interpretation": {
+    "evaluated_track": {
+      "name": "legacy_m5_integration_control",
+      "description": "The 50% and 30% entry-relative premium stops, fixed 2x target, and 10-daily-bar horizon test paired-trading M5/M6 artifact integration mechanics only.",
+      "faithful_feitian_hypothesis": false
+    },
+    "faithful_hypothesis_track": {
+      "name": "feitian_faithful_hypothesis_unreproduced",
+      "status": "coverage_gap_not_evaluated",
+      "required_elements": [
+        "real option premium bars",
+        "decision-time shallow OTM eligibility with delta approximately 0.25 to 0.45 and DTE 20 to 60",
+        "causal decision-time IV-rank gate",
+        "runner exit without a fixed profit target",
+        "predeclared stop-distance curve and DD-line structural-stop proxy",
+        "predeclared low-IV/range, trend, and stress regime splits",
+        "explicit pessimism for absent bid/ask evidence"
+      ],
+      "current_blockers": [
+        "pinned M4 artifacts select contracts by rank/OTM metadata and do not establish faithful decision-time delta eligibility",
+        "pinned M4 artifacts do not provide a reproducible causal IV-rank history or faithful regime labels",
+        "available selected-contract evidence is daily OHLC and cannot reproduce DD-line structure or tick-level execution",
+        "historical bid/ask is absent, so the tight-stop cost geometry cannot be independently validated",
+        "the immutable eligible cohort contains only four events"
+      ],
+      "packet_conclusion": "This packet neither tests nor refutes the faithful Feitian hypothesis track."
+    }
+  },
+  "upstream_research": {
+    "role": "independent_non_transferable_research_input",
+    "repository": "trade-philosopher",
+    "source_commit": "5802d0ff5d99819ad01ba9f3550b6a2d504f1e81",
+    "documents": [
+      {
+        "path": "doc/pa-replication/feitian-h1-premium-space-2026-06-16.md",
+        "sha256": "sha256:88bf71cb7c260076499254713fefa17444308d4e56f7e38c2db13308c293b08e"
+      },
+      {
+        "path": "doc/SYNTHESIS-AND-HANDOFF-2026-06-17.md",
+        "sha256": "sha256:1d64077d5d92d8ad434e9e62d9bf6eb405fa6dda15eb781ec0c1a9f0a0917d92"
+      },
+      {
+        "path": "doc/self-evolving-trader-methodology-2026-06-28.md",
+        "sha256": "sha256:2e36134eb763cfa4786ab6561a7ccb3704c5f3f88dfa28cc177ddaf44520b90d"
+      },
+      {
+        "path": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
+        "sha256": "sha256:67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb"
+      }
+    ],
+    "non_transferable_findings": [
+      "faithful delta/DTE contract eligibility materially changed conclusions in the upstream research",
+      "causal IV-rank, low-IV/range regimes, and runner versus fixed-target behavior require independent paired-trading as-of reproduction",
+      "bid/ask evidence and the DD-line structural stop remain blockers"
+    ],
+    "performance_metrics_imported": false
+  },
   "bounds": {
     "decision_date_start": "2026-03-01",
     "decision_date_end": "2026-06-08",
@@ -114,12 +173,14 @@
     },
     "baseline": {
       "policy_id": "pa_feitian_m5_daily_long_option_stop_target",
-      "stop_fraction_of_entry": 0.5
+      "stop_fraction_of_entry": 0.5,
+      "research_role": "legacy_m5_integration_control_not_faithful_feitian"
     },
     "candidate": {
       "policy_id": "pa_feitian_m6_daily_long_option_stop_30pct",
       "stop_fraction_of_entry": 0.3,
-      "registration_mode": "retrospective_exploratory"
+      "registration_mode": "retrospective_exploratory",
+      "research_role": "legacy_m5_integration_control_sensitivity_not_faithful_feitian"
     },
     "identical_eligible_events_required": true
   },
