@@ -482,6 +482,20 @@ def test_m5_cli_is_deterministic_and_links_manifest_without_mutating_sources(tmp
         "2026-07-10T00:00:00Z",
         "--traversal-started-at-utc",
         "2026-07-10T00:01:00Z",
+        "--policy-id",
+        "pa_feitian_test_quarter_stop",
+        "--policy-version",
+        "v1.test",
+        "--slippage-ticks",
+        "1",
+        "--stop-fraction-of-entry",
+        "0.25",
+        "--target-multiple-of-entry",
+        "1.5",
+        "--target-multiple-of-entry",
+        "2.5",
+        "--max-holding-bars",
+        "4",
         "--source-commit",
         COMMIT,
     ]
@@ -518,6 +532,17 @@ def test_m5_cli_is_deterministic_and_links_manifest_without_mutating_sources(tmp
     assert f"--quant-data-root={quant_label}" in manifest.cli_args
     assert f"--quant-data-root={quant_label}" in sidecar.provenance.cli_args
     assert f"quant_data_root={quant_label}" in sidecar.provenance.notes
+    assert sidecar.outcomes[0].policy.policy_id == "pa_feitian_test_quarter_stop"
+    assert sidecar.outcomes[0].policy.policy_version == "v1.test"
+    assert sidecar.outcomes[0].policy.params.stop_fraction_of_entry == pytest.approx(0.25)
+    assert sidecar.outcomes[0].policy.params.target_multiples_of_entry == [1.5, 2.5]
+    assert sidecar.outcomes[0].policy.params.max_holding_bars == 4
+    assert manifest.run_config["policy_id"] == "pa_feitian_test_quarter_stop"
+    assert manifest.run_config["policy_version"] == "v1.test"
+    assert manifest.run_config["slippage_ticks"] == 1.0
+    assert manifest.run_config["stop_fraction_of_entry"] == 0.25
+    assert manifest.run_config["target_multiples_of_entry"] == [1.5, 2.5]
+    assert manifest.run_config["max_holding_bars"] == 4
     for key, digest in sidecar.provenance.input_hashes.items():
         assert manifest.input_hashes[key] == digest
 

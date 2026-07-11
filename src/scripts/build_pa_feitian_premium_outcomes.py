@@ -25,6 +25,12 @@ from engine.pa_feitian.premium_outcome import (  # noqa: E402
 )
 from engine.pa_feitian.premium_outcome_harness import (  # noqa: E402
     DEFAULT_GENERATED_AT_UTC,
+    DEFAULT_MAX_HOLDING_BARS,
+    DEFAULT_POLICY_ID,
+    DEFAULT_POLICY_VERSION,
+    DEFAULT_SLIPPAGE_TICKS,
+    DEFAULT_STOP_FRACTION_OF_ENTRY,
+    DEFAULT_TARGET_MULTIPLES_OF_ENTRY,
     PremiumOutcomeHarnessConfig,
     build_premium_outcome_sidecar_from_files,
 )
@@ -146,6 +152,7 @@ def _write_m5_manifest(
     recorded_quant_data_root: str,
     policy_declared_at_utc: datetime,
     traversal_started_at_utc: datetime,
+    policy_config: PremiumOutcomeHarnessConfig,
 ) -> None:
     source_m4_manifest = load_run_manifest(source_m4_manifest_path)
     outcome_sidecar = load_premium_outcome(premium_outcome_path)
@@ -165,8 +172,12 @@ def _write_m5_manifest(
             "producer": _repo_relative(SCRIPT_PATH),
             "source_m4_manifest": _repo_relative(source_m4_manifest_path),
             "quant_data_root": recorded_quant_data_root,
-            "policy_id": "pa_feitian_m5_daily_long_option_stop_target",
-            "policy_version": "v1.default",
+            "policy_id": policy_config.policy_id,
+            "policy_version": policy_config.policy_version,
+            "slippage_ticks": policy_config.slippage_ticks,
+            "stop_fraction_of_entry": policy_config.stop_fraction_of_entry,
+            "target_multiples_of_entry": list(policy_config.target_multiples_of_entry),
+            "max_holding_bars": policy_config.max_holding_bars,
             "policy_declared_at_utc": policy_declared_at_utc.isoformat().replace("+00:00", "Z"),
             "traversal_started_at_utc": traversal_started_at_utc.isoformat().replace(
                 "+00:00", "Z"
@@ -236,6 +247,20 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Fixed traversal timestamp. Defaults to policy-declared-at + one minute.",
     )
+    parser.add_argument("--policy-id", default=DEFAULT_POLICY_ID)
+    parser.add_argument("--policy-version", default=DEFAULT_POLICY_VERSION)
+    parser.add_argument("--slippage-ticks", type=float, default=DEFAULT_SLIPPAGE_TICKS)
+    parser.add_argument(
+        "--stop-fraction-of-entry", type=float, default=DEFAULT_STOP_FRACTION_OF_ENTRY
+    )
+    parser.add_argument(
+        "--target-multiple-of-entry",
+        type=float,
+        action="append",
+        default=None,
+        help="Repeatable entry-relative target multiple; defaults to the v1 policy target.",
+    )
+    parser.add_argument("--max-holding-bars", type=int, default=DEFAULT_MAX_HOLDING_BARS)
     parser.add_argument("--source-commit", default=None)
     args = parser.parse_args(raw_argv)
 
@@ -268,6 +293,14 @@ def main(argv: list[str] | None = None) -> int:
         generated_at_utc=generated_at_utc,
         policy_declared_at_utc=policy_declared_at_utc,
         traversal_started_at_utc=traversal_started_at_utc,
+        policy_id=args.policy_id,
+        policy_version=args.policy_version,
+        slippage_ticks=args.slippage_ticks,
+        stop_fraction_of_entry=args.stop_fraction_of_entry,
+        target_multiples_of_entry=tuple(
+            args.target_multiple_of_entry or DEFAULT_TARGET_MULTIPLES_OF_ENTRY
+        ),
+        max_holding_bars=args.max_holding_bars,
         cli_args=tuple(cli_args),
         recorded_quant_data_root=recorded_quant_data_root,
     )
@@ -298,6 +331,7 @@ def main(argv: list[str] | None = None) -> int:
         recorded_quant_data_root=recorded_quant_data_root,
         policy_declared_at_utc=policy_declared_at_utc,
         traversal_started_at_utc=traversal_started_at_utc,
+        policy_config=config,
     )
     print(
         json.dumps(
