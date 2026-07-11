@@ -1,0 +1,530 @@
+{
+  "schema_version": "pa_feitian_evaluation_aggregate_result_v1",
+  "generated_at_utc": "2026-07-11T12:05:00Z",
+  "provenance": {
+    "role": "m6_aggregate_result",
+    "source_manifest_path": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+    "source_manifest_sha256": "sha256:2a0b3bfdf2b1c605ba9f4d1817dbe74847d9b90c3786b51b96c69137c5d782a4",
+    "source_manifest_schema_version": "pa_feitian_run_manifest_v1",
+    "premium_outcome_artifact_path": "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_premium_outcome_v1.json",
+    "premium_outcome_artifact_sha256": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+    "premium_outcome_schema_version": "pa_feitian_premium_outcome_v1",
+    "source_commit": "5c74dd4964c814f1daefa09dc9f45ac3bfcc5788",
+    "producer": "engine.pa_feitian.baseline_evaluator.v1",
+    "cli_args": [
+      "src/scripts/evaluate_pa_feitian_m6_baseline.py",
+      "--m5-manifest",
+      "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_run_manifest_with_premium_outcome_v1.json",
+      "--premium-outcome",
+      "doc/repro/pa-feitian-m5-data-real-premium-outcomes-2026-07-10/source/pa_feitian_premium_outcome_v1.json",
+      "--decision-intent",
+      "doc/repro/pa-feitian-m4b-real-data-artifacts-2026-07-10/source/pa_feitian_decision_intent_v1.json",
+      "--dataset-out",
+      "doc/repro/pa-feitian-m6-candidate-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_baseline_v1.json",
+      "--aggregate-out",
+      "doc/repro/pa-feitian-m6-candidate-recovery-2026-07-11/source/pa_feitian_evaluation_aggregate_result_baseline_v1.json",
+      "--manifest-out",
+      "doc/repro/pa-feitian-m6-candidate-recovery-2026-07-11/source/pa_feitian_run_manifest_baseline_evaluation_v1.json",
+      "--generated-at-utc",
+      "2026-07-11T12:05:00Z",
+      "--seed",
+      "7",
+      "--bootstrap-replicates",
+      "1000",
+      "--lower-quantile",
+      "0.05",
+      "--minimum-effective-samples",
+      "3",
+      "--folds",
+      "2",
+      "--minimum-train-events",
+      "1",
+      "--timezone",
+      "UTC",
+      "--trading-calendar",
+      "XSGE"
+    ],
+    "policy_config_sha256": "sha256:f278a4dbe13d3899ff8043d3ff0a704364e01dbf2f4dbc2b1842b3e2fa4ee71f",
+    "data_access_status": "real_data_available",
+    "fixture_fallback": false,
+    "random_seed": 7,
+    "input_hashes": {
+      "source_manifest": "sha256:2a0b3bfdf2b1c605ba9f4d1817dbe74847d9b90c3786b51b96c69137c5d782a4",
+      "premium_outcome_artifact": "sha256:addc74e48d19b9e437f639ff336f9fa0c1c1c0b5a1bdea9511be88087fe8149e",
+      "decision_intent_artifact": "sha256:340611f099007d06754a205b99c0cd7c7de989360e428a8036528486fcd711f0",
+      "policy_config": "sha256:f278a4dbe13d3899ff8043d3ff0a704364e01dbf2f4dbc2b1842b3e2fa4ee71f",
+      "evaluation_dataset": "sha256:6ebcef341f7cea43036c3e2b9b609661c9a828f0992ce5793221d5a8ae6c1fba"
+    },
+    "output_hashes": {},
+    "notes": [
+      "M6-B consumed explicit M5 manifest, premium-outcome, and decision-intent artifacts only",
+      "no score_today rerun, market scan, contract reselection, live trading, or execution occurred"
+    ]
+  },
+  "evaluation_dataset": {
+    "kind": "evaluation_dataset",
+    "path": "doc/repro/pa-feitian-m6-candidate-recovery-2026-07-11/source/pa_feitian_evaluation_dataset_baseline_v1.json",
+    "sha256": "sha256:6ebcef341f7cea43036c3e2b9b609661c9a828f0992ce5793221d5a8ae6c1fba",
+    "schema_version": "pa_feitian_evaluation_dataset_v1",
+    "content_type": "application/json"
+  },
+  "groups": [
+    {
+      "group_id": "pooled",
+      "dimension": "pooled",
+      "value": "all",
+      "result_status": "generated",
+      "sample_count": 4,
+      "effective_sample_count": 4,
+      "status_counts": {
+        "observed": 4,
+        "ambiguous": 0,
+        "data_blocked": 0,
+        "not_evaluable": 0
+      },
+      "premium_r": {
+        "mean": -1.0009036144499999,
+        "median": -1.0,
+        "standard_deviation": 0.0018072288999999575,
+        "median_absolute_deviation": 0.0,
+        "lower_quantile": -1.00307228913,
+        "worst_case": -1.0036144578,
+        "win_rate": 0.0,
+        "win_definition": "premium_r_gt_zero",
+        "bootstrap_95_ci": {
+          "confidence_level": 0.95,
+          "lower": -1.00271084335,
+          "upper": -1.0,
+          "method": "seeded_cluster_bootstrap_mean_v1",
+          "cluster_unit": "event"
+        }
+      },
+      "underlying_r_correlation": null,
+      "underlying_r_difference_mean": null,
+      "notes": [
+        "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+        "bootstrap confidence intervals cluster dependent rows by event_id"
+      ]
+    },
+    {
+      "group_id": "pool:unknown",
+      "dimension": "pool",
+      "value": "unknown",
+      "result_status": "generated",
+      "sample_count": 4,
+      "effective_sample_count": 4,
+      "status_counts": {
+        "observed": 4,
+        "ambiguous": 0,
+        "data_blocked": 0,
+        "not_evaluable": 0
+      },
+      "premium_r": {
+        "mean": -1.0009036144499999,
+        "median": -1.0,
+        "standard_deviation": 0.0018072288999999575,
+        "median_absolute_deviation": 0.0,
+        "lower_quantile": -1.00307228913,
+        "worst_case": -1.0036144578,
+        "win_rate": 0.0,
+        "win_definition": "premium_r_gt_zero",
+        "bootstrap_95_ci": {
+          "confidence_level": 0.95,
+          "lower": -1.00271084335,
+          "upper": -1.0,
+          "method": "seeded_cluster_bootstrap_mean_v1",
+          "cluster_unit": "event"
+        }
+      },
+      "underlying_r_correlation": null,
+      "underlying_r_difference_mean": null,
+      "notes": [
+        "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+        "bootstrap confidence intervals cluster dependent rows by event_id"
+      ]
+    },
+    {
+      "group_id": "underlying:SHFE.ag",
+      "dimension": "underlying",
+      "value": "SHFE.ag",
+      "result_status": "insufficient_sample",
+      "sample_count": 2,
+      "effective_sample_count": 2,
+      "status_counts": {
+        "observed": 2,
+        "ambiguous": 0,
+        "data_blocked": 0,
+        "not_evaluable": 0
+      },
+      "premium_r": {
+        "mean": -1.0,
+        "median": -1.0,
+        "standard_deviation": 0.0,
+        "median_absolute_deviation": 0.0,
+        "lower_quantile": -1.0,
+        "worst_case": -1.0,
+        "win_rate": 0.0,
+        "win_definition": "premium_r_gt_zero",
+        "bootstrap_95_ci": {
+          "confidence_level": 0.95,
+          "lower": -1.0,
+          "upper": -1.0,
+          "method": "seeded_cluster_bootstrap_mean_v1",
+          "cluster_unit": "event"
+        }
+      },
+      "underlying_r_correlation": null,
+      "underlying_r_difference_mean": null,
+      "notes": [
+        "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+        "bootstrap confidence intervals cluster dependent rows by event_id",
+        "insufficient or non-evaluable evidence is retained, not imputed"
+      ]
+    },
+    {
+      "group_id": "underlying:SHFE.au",
+      "dimension": "underlying",
+      "value": "SHFE.au",
+      "result_status": "insufficient_sample",
+      "sample_count": 2,
+      "effective_sample_count": 2,
+      "status_counts": {
+        "observed": 2,
+        "ambiguous": 0,
+        "data_blocked": 0,
+        "not_evaluable": 0
+      },
+      "premium_r": {
+        "mean": -1.0018072289,
+        "median": -1.0018072289,
+        "standard_deviation": 0.0025558076206925497,
+        "median_absolute_deviation": 0.0018072288999999575,
+        "lower_quantile": -1.00343373491,
+        "worst_case": -1.0036144578,
+        "win_rate": 0.0,
+        "win_definition": "premium_r_gt_zero",
+        "bootstrap_95_ci": {
+          "confidence_level": 0.95,
+          "lower": -1.0036144578,
+          "upper": -1.0,
+          "method": "seeded_cluster_bootstrap_mean_v1",
+          "cluster_unit": "event"
+        }
+      },
+      "underlying_r_correlation": null,
+      "underlying_r_difference_mean": null,
+      "notes": [
+        "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+        "bootstrap confidence intervals cluster dependent rows by event_id",
+        "insufficient or non-evaluable evidence is retained, not imputed"
+      ]
+    },
+    {
+      "group_id": "time_window:2026-03",
+      "dimension": "time_window",
+      "value": "2026-03",
+      "result_status": "insufficient_sample",
+      "sample_count": 2,
+      "effective_sample_count": 2,
+      "status_counts": {
+        "observed": 2,
+        "ambiguous": 0,
+        "data_blocked": 0,
+        "not_evaluable": 0
+      },
+      "premium_r": {
+        "mean": -1.0018072289,
+        "median": -1.0018072289,
+        "standard_deviation": 0.0025558076206925497,
+        "median_absolute_deviation": 0.0018072288999999575,
+        "lower_quantile": -1.00343373491,
+        "worst_case": -1.0036144578,
+        "win_rate": 0.0,
+        "win_definition": "premium_r_gt_zero",
+        "bootstrap_95_ci": {
+          "confidence_level": 0.95,
+          "lower": -1.0036144578,
+          "upper": -1.0,
+          "method": "seeded_cluster_bootstrap_mean_v1",
+          "cluster_unit": "event"
+        }
+      },
+      "underlying_r_correlation": null,
+      "underlying_r_difference_mean": null,
+      "notes": [
+        "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+        "bootstrap confidence intervals cluster dependent rows by event_id",
+        "insufficient or non-evaluable evidence is retained, not imputed"
+      ]
+    },
+    {
+      "group_id": "time_window:2026-05",
+      "dimension": "time_window",
+      "value": "2026-05",
+      "result_status": "insufficient_sample",
+      "sample_count": 1,
+      "effective_sample_count": 1,
+      "status_counts": {
+        "observed": 1,
+        "ambiguous": 0,
+        "data_blocked": 0,
+        "not_evaluable": 0
+      },
+      "premium_r": {
+        "mean": -1.0,
+        "median": -1.0,
+        "standard_deviation": 0.0,
+        "median_absolute_deviation": 0.0,
+        "lower_quantile": -1.0,
+        "worst_case": -1.0,
+        "win_rate": 0.0,
+        "win_definition": "premium_r_gt_zero",
+        "bootstrap_95_ci": {
+          "confidence_level": 0.95,
+          "lower": -1.0,
+          "upper": -1.0,
+          "method": "seeded_cluster_bootstrap_mean_v1",
+          "cluster_unit": "event"
+        }
+      },
+      "underlying_r_correlation": null,
+      "underlying_r_difference_mean": null,
+      "notes": [
+        "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+        "bootstrap confidence intervals cluster dependent rows by event_id",
+        "insufficient or non-evaluable evidence is retained, not imputed"
+      ]
+    },
+    {
+      "group_id": "time_window:2026-06",
+      "dimension": "time_window",
+      "value": "2026-06",
+      "result_status": "insufficient_sample",
+      "sample_count": 1,
+      "effective_sample_count": 1,
+      "status_counts": {
+        "observed": 1,
+        "ambiguous": 0,
+        "data_blocked": 0,
+        "not_evaluable": 0
+      },
+      "premium_r": {
+        "mean": -1.0,
+        "median": -1.0,
+        "standard_deviation": 0.0,
+        "median_absolute_deviation": 0.0,
+        "lower_quantile": -1.0,
+        "worst_case": -1.0,
+        "win_rate": 0.0,
+        "win_definition": "premium_r_gt_zero",
+        "bootstrap_95_ci": {
+          "confidence_level": 0.95,
+          "lower": -1.0,
+          "upper": -1.0,
+          "method": "seeded_cluster_bootstrap_mean_v1",
+          "cluster_unit": "event"
+        }
+      },
+      "underlying_r_correlation": null,
+      "underlying_r_difference_mean": null,
+      "notes": [
+        "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+        "bootstrap confidence intervals cluster dependent rows by event_id",
+        "insufficient or non-evaluable evidence is retained, not imputed"
+      ]
+    }
+  ],
+  "walk_forward_folds": [
+    {
+      "fold_id": "wf_1",
+      "train_start_utc": "2026-03-13T00:00:00Z",
+      "train_end_utc": "2026-03-13T00:00:00Z",
+      "test_start_utc": "2026-03-18T00:00:00Z",
+      "test_end_utc": "2026-03-18T00:00:00Z",
+      "train_event_ids": [
+        "event:paft_scorecard_0001_kq_m_shfe_au_20260313000000"
+      ],
+      "test_event_ids": [
+        "event:paft_scorecard_0002_kq_m_shfe_au_20260318000000"
+      ],
+      "train_result": {
+        "group_id": "fold:wf_1:train",
+        "dimension": "pooled",
+        "value": "wf_1:train",
+        "result_status": "insufficient_sample",
+        "sample_count": 1,
+        "effective_sample_count": 1,
+        "status_counts": {
+          "observed": 1,
+          "ambiguous": 0,
+          "data_blocked": 0,
+          "not_evaluable": 0
+        },
+        "premium_r": {
+          "mean": -1.0,
+          "median": -1.0,
+          "standard_deviation": 0.0,
+          "median_absolute_deviation": 0.0,
+          "lower_quantile": -1.0,
+          "worst_case": -1.0,
+          "win_rate": 0.0,
+          "win_definition": "premium_r_gt_zero",
+          "bootstrap_95_ci": {
+            "confidence_level": 0.95,
+            "lower": -1.0,
+            "upper": -1.0,
+            "method": "seeded_cluster_bootstrap_mean_v1",
+            "cluster_unit": "event"
+          }
+        },
+        "underlying_r_correlation": null,
+        "underlying_r_difference_mean": null,
+        "notes": [
+          "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+          "bootstrap confidence intervals cluster dependent rows by event_id",
+          "insufficient or non-evaluable evidence is retained, not imputed"
+        ]
+      },
+      "test_result": {
+        "group_id": "fold:wf_1:test",
+        "dimension": "pooled",
+        "value": "wf_1:test",
+        "result_status": "insufficient_sample",
+        "sample_count": 1,
+        "effective_sample_count": 1,
+        "status_counts": {
+          "observed": 1,
+          "ambiguous": 0,
+          "data_blocked": 0,
+          "not_evaluable": 0
+        },
+        "premium_r": {
+          "mean": -1.0036144578,
+          "median": -1.0036144578,
+          "standard_deviation": 0.0,
+          "median_absolute_deviation": 0.0,
+          "lower_quantile": -1.0036144578,
+          "worst_case": -1.0036144578,
+          "win_rate": 0.0,
+          "win_definition": "premium_r_gt_zero",
+          "bootstrap_95_ci": {
+            "confidence_level": 0.95,
+            "lower": -1.0036144578,
+            "upper": -1.0036144578,
+            "method": "seeded_cluster_bootstrap_mean_v1",
+            "cluster_unit": "event"
+          }
+        },
+        "underlying_r_correlation": null,
+        "underlying_r_difference_mean": null,
+        "notes": [
+          "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+          "bootstrap confidence intervals cluster dependent rows by event_id",
+          "insufficient or non-evaluable evidence is retained, not imputed"
+        ]
+      },
+      "no_lookahead_verified": true,
+      "notes": [
+        "event IDs are assigned wholly to one chronological side of the fold"
+      ]
+    },
+    {
+      "fold_id": "wf_2",
+      "train_start_utc": "2026-03-13T00:00:00Z",
+      "train_end_utc": "2026-03-18T00:00:00Z",
+      "test_start_utc": "2026-05-15T00:00:00Z",
+      "test_end_utc": "2026-06-02T00:00:00Z",
+      "train_event_ids": [
+        "event:paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+        "event:paft_scorecard_0002_kq_m_shfe_au_20260318000000"
+      ],
+      "test_event_ids": [
+        "event:paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+        "event:paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+      ],
+      "train_result": {
+        "group_id": "fold:wf_2:train",
+        "dimension": "pooled",
+        "value": "wf_2:train",
+        "result_status": "insufficient_sample",
+        "sample_count": 2,
+        "effective_sample_count": 2,
+        "status_counts": {
+          "observed": 2,
+          "ambiguous": 0,
+          "data_blocked": 0,
+          "not_evaluable": 0
+        },
+        "premium_r": {
+          "mean": -1.0018072289,
+          "median": -1.0018072289,
+          "standard_deviation": 0.0025558076206925497,
+          "median_absolute_deviation": 0.0018072288999999575,
+          "lower_quantile": -1.00343373491,
+          "worst_case": -1.0036144578,
+          "win_rate": 0.0,
+          "win_definition": "premium_r_gt_zero",
+          "bootstrap_95_ci": {
+            "confidence_level": 0.95,
+            "lower": -1.0036144578,
+            "upper": -1.0,
+            "method": "seeded_cluster_bootstrap_mean_v1",
+            "cluster_unit": "event"
+          }
+        },
+        "underlying_r_correlation": null,
+        "underlying_r_difference_mean": null,
+        "notes": [
+          "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+          "bootstrap confidence intervals cluster dependent rows by event_id",
+          "insufficient or non-evaluable evidence is retained, not imputed"
+        ]
+      },
+      "test_result": {
+        "group_id": "fold:wf_2:test",
+        "dimension": "pooled",
+        "value": "wf_2:test",
+        "result_status": "insufficient_sample",
+        "sample_count": 2,
+        "effective_sample_count": 2,
+        "status_counts": {
+          "observed": 2,
+          "ambiguous": 0,
+          "data_blocked": 0,
+          "not_evaluable": 0
+        },
+        "premium_r": {
+          "mean": -1.0,
+          "median": -1.0,
+          "standard_deviation": 0.0,
+          "median_absolute_deviation": 0.0,
+          "lower_quantile": -1.0,
+          "worst_case": -1.0,
+          "win_rate": 0.0,
+          "win_definition": "premium_r_gt_zero",
+          "bootstrap_95_ci": {
+            "confidence_level": 0.95,
+            "lower": -1.0,
+            "upper": -1.0,
+            "method": "seeded_cluster_bootstrap_mean_v1",
+            "cluster_unit": "event"
+          }
+        },
+        "underlying_r_correlation": null,
+        "underlying_r_difference_mean": null,
+        "notes": [
+          "premium-R metrics retain observed rows; effective samples and thresholds count distinct event_id values",
+          "bootstrap confidence intervals cluster dependent rows by event_id",
+          "insufficient or non-evaluable evidence is retained, not imputed"
+        ]
+      },
+      "no_lookahead_verified": true,
+      "notes": [
+        "event IDs are assigned wholly to one chronological side of the fold"
+      ]
+    }
+  ],
+  "warnings": [
+    "baseline-only M6-B: no policy comparison, screening, failure-mode report, frontend, or execution is emitted"
+  ]
+}

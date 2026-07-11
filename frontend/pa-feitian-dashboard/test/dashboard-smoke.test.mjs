@@ -66,6 +66,10 @@ const defensiveManifestFixtureUrl = new URL(
   "../../../src/tests/fixtures/pa_feitian_run_manifest_with_premium_outcome_v1.json",
   import.meta.url,
 );
+const recoveryDashboardUrl = new URL(
+  "../../../doc/repro/pa-feitian-m6-candidate-recovery-2026-07-11/dashboard/",
+  import.meta.url,
+);
 const appFiles = [
   new URL("../index.html", import.meta.url),
   new URL("../app.mjs", import.meta.url),
@@ -166,6 +170,40 @@ test("renders copied M6 evaluation artifacts as insufficient fixture evidence wi
   assert.match(html, /premium_stop_target_daily/);
   assert.match(html, /data-testid="evaluation-provenance"/);
   assert.match(html, /insufficient evidence/);
+});
+
+test("renders the M6 recovery screening from its baseline dashboard manifest", async () => {
+  const loadRecovery = (name) => loadFixture(new URL(name, recoveryDashboardUrl));
+  const [snapshot, manifest, decisionIntent, premiumOutcome, dataset, aggregate, screening] =
+    await Promise.all([
+      loadRecovery("pa_feitian_snapshot_v1.json"),
+      loadRecovery("pa_feitian_run_manifest_baseline_screening_v1.json"),
+      loadRecovery("pa_feitian_decision_intent_v1.json"),
+      loadRecovery("pa_feitian_premium_outcome_v1.json"),
+      loadRecovery("pa_feitian_evaluation_dataset_baseline_v1.json"),
+      loadRecovery("pa_feitian_evaluation_aggregate_result_baseline_v1.json"),
+      loadRecovery("pa_feitian_evaluation_screening_report_v1.json"),
+    ]);
+  const options = {
+    manifest,
+    decisionIntent,
+    premiumOutcome,
+    evaluationDataset: dataset,
+    evaluationAggregate: aggregate,
+    evaluationScreening: screening,
+  };
+  const model = buildDashboardModel(snapshot, options);
+  const html = renderDashboard(snapshot, options);
+
+  assert.equal(model.evaluation.screening.status, "loaded");
+  assert.equal(model.evaluation.screening.payload.candidates[0].classification, "blocked");
+  assert.ok(
+    model.evaluation.linkRows
+      .filter((row) => row.label.startsWith("Screening"))
+      .every((row) => row.hashStatus === "match"),
+  );
+  assert.match(html, /pa_feitian_m6_daily_long_option_stop_30pct/);
+  assert.match(html, /blocked/);
 });
 
 test("keeps M6 artifacts optional and can show generated or review evidence states", async () => {

@@ -53,20 +53,19 @@ def _load_artifacts(dataset_path: Path, aggregate_path: Path) -> CandidateArtifa
 
 
 def _resolve_args(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
-    args.baseline_dataset = args.baseline_dataset.resolve()
-    args.baseline_aggregate = args.baseline_aggregate.resolve()
-    args.comparison_config = args.comparison_config.resolve()
-    args.screening_out = args.screening_out.resolve()
-    args.failure_report_dir = args.failure_report_dir.resolve()
-    inputs = {args.baseline_dataset, args.baseline_aggregate, args.comparison_config}
+    inputs = {
+        args.baseline_dataset.resolve(),
+        args.baseline_aggregate.resolve(),
+        args.comparison_config.resolve(),
+    }
     candidates: dict[str, tuple[Path, Path]] = {}
     for candidate_id, dataset, aggregate in args.candidate_input:
         if candidate_id in candidates:
             parser.error(f"--candidate-input repeats candidate_id {candidate_id!r}")
-        dataset_path, aggregate_path = Path(dataset).resolve(), Path(aggregate).resolve()
+        dataset_path, aggregate_path = Path(dataset), Path(aggregate)
         candidates[candidate_id] = (dataset_path, aggregate_path)
-        inputs.update({dataset_path, aggregate_path})
-    if args.screening_out in inputs:
+        inputs.update({dataset_path.resolve(), aggregate_path.resolve()})
+    if args.screening_out.resolve() in inputs:
         parser.error("--screening-out must not collide with an input artifact")
     args.candidate_input = candidates
 
@@ -100,7 +99,7 @@ def main(argv: list[str] | None = None) -> int:
         config=config,
         config_path=args.comparison_config,
         generated_at_utc=args.generated_at_utc,
-        cli_args=[str(Path(__file__).resolve()), *raw_argv],
+        cli_args=["src/scripts/compare_pa_feitian_m6_policies.py", *raw_argv],
     )
     write_evaluation_screening_report(screening, args.screening_out)
     validate_pa_feitian_evaluation_screening_report_schema(

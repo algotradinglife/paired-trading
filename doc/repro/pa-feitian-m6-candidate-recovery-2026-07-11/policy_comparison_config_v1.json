@@ -1,0 +1,38 @@
+{
+  "schema_version": "pa_feitian_m6_policy_comparison_config_v1",
+  "registration_id": "pa-feitian-m6-candidate-stop-30pct-retro-20260711",
+  "registered_at_utc": "2026-07-11T11:59:00Z",
+  "baseline": {
+    "policy_id": "pa_feitian_m5_daily_long_option_stop_target",
+    "policy_version": "v1.default",
+    "policy_sha256s": [
+      "sha256:5c6492207c2e717303fe415f32156ef4baf2a4192369faf8b8ceff81b0747046",
+      "sha256:856101f0b80f66b6118aa21db8cfb650e6a551fae80d051d71359a0d5358b9ca"
+    ]
+  },
+  "candidates": [
+    {
+      "candidate_id": "candidate_stop_30pct",
+      "policy_id": "pa_feitian_m6_daily_long_option_stop_30pct",
+      "policy_version": "v1.retro_20260711",
+      "policy_sha256s": [
+        "sha256:2a2de67bcfab7841606fdf5c98a79f623e93b988a20414ee68904a48b2bebdce",
+        "sha256:beae5088d473c8d0e61a1c0c5954e1ff4547962035be0ff961ae16d3894d8db8"
+      ],
+      "dimensions": ["exit_policy"],
+      "notes": [
+        "Single recovery candidate: entry-relative 30% premium stop, 2x target, ten daily bars, and the baseline daily-OHLC ambiguity/gap/slippage semantics.",
+        "This is a retrospective exploratory declaration, not prospective preregistration or a production-policy change."
+      ]
+    }
+  ],
+  "minimum_effective_events": 3,
+  "minimum_comparable_oos_windows": 2,
+  "alpha": 0.05,
+  "bootstrap_replicates": 1000,
+  "random_seed": 7,
+  "notes": [
+    "The historical source decisions predate this recovery declaration; any resulting comparison must remain blocked rather than claim prospective or OOS candidate selection.",
+    "The original M5 and M6 baseline packets remain immutable."
+  ]
+}
