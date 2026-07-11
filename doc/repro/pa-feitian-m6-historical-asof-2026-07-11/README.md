@@ -109,7 +109,7 @@ trade-philosopher was not modified and no upstream performance metric was used.
 
 ```bash
 QUANT_DATA_ROOT=/path/to/quant_data \
-PA_FEITIAN_PYTHON=/tmp/paired-trading-m6-venv/bin/python \
+PA_FEITIAN_PYTHON=/path/to/python \
   node doc/repro/pa-feitian-m6-historical-asof-2026-07-11/verify.mjs
 ```
 
