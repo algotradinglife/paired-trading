@@ -73,17 +73,17 @@ are zero. This is a bounded diagnostic, not evidence for a policy change.
 | Baseline 50% outcome | `sha256:71e34e7fa1844f9138e38c19bd5f668b5ee293b25fdef8505861f2a44accf598` |
 | Candidate 30% outcome | `sha256:5114c9b3ddc256907fd18738baa0acb82fe11f058861f3dc1856b1c7d32c04e4` |
 | Cohort report | `sha256:f48952da3046161b2c21249c164c2caae206c66cbcac0662324cc9d210bf9e46` |
-| Verifier | `sha256:1c37c416862de535213dc412243be7be21632e23c91e5ea51ac6fce97c70c93f` |
+| Verifier | `sha256:06152eda96e77d54694787cc3f3f23eaa438f7f9c3dc4b467c3cd21a44b03d19` |
 
 ## Rebuild and verify
 
 ```bash
-QUANT_DATA_ROOT=/mnt/c/Users/hhusl/quant_data \
-PA_FEITIAN_PYTHON=/tmp/paired-trading-m6-venv/bin/python \
+export QUANT_DATA_ROOT=/path/to/quant_data
+export PA_FEITIAN_PYTHON=/path/to/python
 node doc/repro/pa-feitian-m6-historical-cohort-2026-07-11/verify.mjs
 ```
 
-The verifier enforces the exact runtime root, checks pinned hashes and public
+The verifier requires an explicit runtime root, checks pinned hashes and public
 path hygiene, rebuilds all four JSON outputs into a temporary directory,
 compares them byte-for-byte, loads both M5 premium-outcome contracts, and
 asserts the exclusion, sample, grouped/OOS, and no-M7 gates.

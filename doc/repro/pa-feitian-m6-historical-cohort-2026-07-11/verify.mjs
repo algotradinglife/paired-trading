@@ -11,11 +11,7 @@ const repoRoot = resolve(packetDir, "../../..");
 const python = process.env.PA_FEITIAN_PYTHON;
 const quantDataRoot = process.env.QUANT_DATA_ROOT;
 assert.ok(python, "PA_FEITIAN_PYTHON is required");
-assert.equal(
-  quantDataRoot,
-  "/mnt/c/Users/hhusl/quant_data",
-  "QUANT_DATA_ROOT must use the frozen runtime root",
-);
+assert.ok(quantDataRoot?.trim(), "QUANT_DATA_ROOT is required");
 
 const protocol = "docs/research/pa-feitian-m6-historical-cohort-protocol-v1.json";
 const packet = "doc/repro/pa-feitian-m6-historical-cohort-2026-07-11";
