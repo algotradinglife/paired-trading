@@ -1,0 +1,104 @@
+{
+  "schema_version": "pa_feitian_m6_bare_k_protocol_evidence_v1",
+  "hermes_task": "t_49902c76",
+  "research_mode": "retrospective_finalized_protocol_only",
+  "contract": {
+    "alias": "public://paired-trading/docs/research/pa-feitian-m6-bare-k-premium-path-protocol-v1.json",
+    "sha256": "sha256:8934b1c301a9e25adf6e00c9f2328c542e2f02e24efdb8b87d48b3c65f8d6dc8",
+    "freeze_commit": "eb29562d9b04bdd512616770dca00cbde5b92dc6",
+    "frozen_before_external_research_or_data_inspection": true
+  },
+  "bound_input_verification": [
+    {
+      "alias": "public://paired-trading/m6/underlying-signal-corpus-v1",
+      "expected_sha256": "sha256:cb3407910dd15f4327a2465da3a00d6797f81fd9124066695887ddb53d3bf080",
+      "observed_sha256": "sha256:cb3407910dd15f4327a2465da3a00d6797f81fd9124066695887ddb53d3bf080",
+      "hash_verified": true,
+      "label_verified": "retrospective_finalized",
+      "capability_state": "blocked_missing_explicit_pa_alert",
+      "reason": "Records contain finalized descriptive D/W/60min/15min diagnostics but no explicit PA alert identity and alert direction. The protocol forbids deriving an alert from those diagnostics."
+    },
+    {
+      "alias": "public://paired-trading/m6/liquid-premium-eligibility-evidence-v1",
+      "expected_sha256": "sha256:4ac7519fafe713a6f74e079d80acb7e4c2cce885ae946ac8083df95e0a6e7ab4",
+      "observed_sha256": "sha256:4ac7519fafe713a6f74e079d80acb7e4c2cce885ae946ac8083df95e0a6e7ab4",
+      "hash_verified": true,
+      "label_verified": "retrospective_finalized",
+      "capability_state": "blocked_missing_unit_membership",
+      "reason": "The public-safe artifact contains product/cadence aggregates and inventory digests, not hash-pinned contract-date membership records or premium rows. Aggregate counts cannot prove a unit is eligible."
+    }
+  ],
+  "source_research_audit": {
+    "repository_alias": "public://trade-philosopher",
+    "revision": "5802d0ff5d99819ad01ba9f3550b6a2d504f1e81",
+    "access": "read_only_after_contract_freeze",
+    "sources": [
+      {
+        "alias": "public://trade-philosopher/doc/xiao-feitian-options-timing-system-2026-06-16.md",
+        "sha256": "sha256:67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb",
+        "locators": ["status legend", "signal-to-execution chain", "DD-line definition status", "unresolved definitions"],
+        "finding": "The document labels central Feitian chain elements as oral/design inference pending primary confirmation, describes the available DD-line implementation as an approximation, and leaves its defining parameters unresolved."
+      },
+      {
+        "alias": "public://trade-philosopher/doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md",
+        "sha256": "sha256:2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locators": ["entry paths", "quality definition", "structure helpers", "fidelity boundary"],
+        "finding": "The design calls for holistic discretionary quality assessment and proposed helpers, but does not supply a complete frozen set of machine-testable Feitian predicates, confirmation-window semantics and invalidation parameters."
+      },
+      {
+        "alias": "public://trade-philosopher/prompts/pa/candlestick-signal-dictionary.txt",
+        "sha256": "sha256:aa1b0a6dbb894c2dbf20f0e4430807d8e13ccdfed9dd7789a1fe9563ec916a2d",
+        "locators": ["generic signal bar", "generic confirmation bar"],
+        "finding": "Generic PA candlestick definitions are not explicitly identified as a Feitian bare-K or DD-line rule and therefore fail the frozen authenticity requirement. No content from this source is promoted into the protocol."
+      }
+    ],
+    "rule_recovery_state": "blocked_authentic_rule_unrecovered",
+    "rejected_substitutes": [
+      "generic PA signal-bar confirmation",
+      "approximate W-bottom or swing-low logic",
+      "fixed percent-distance rule",
+      "generic trend-line implementation",
+      "model-derived option price"
+    ]
+  },
+  "protocol_state_summary": {
+    "input_hashes": "verified",
+    "retrospective_finalized_label": "preserved",
+    "strict_decision_time_cutoff": "frozen",
+    "direction_side_mapping": "frozen_without_contract_ranking",
+    "observation_order_and_ties": "frozen",
+    "missing_bar_handling": "abstain_without_fill_or_substitution",
+    "explicit_pa_alert": "blocked_missing_explicit_pa_alert",
+    "per_unit_eligibility": "blocked_missing_unit_membership",
+    "authentic_feitian_rule": "blocked_authentic_rule_unrecovered",
+    "confirmed_bare_k_reachable": false
+  },
+  "no_lookahead_verification": {
+    "post_cutoff_rows_rejected": true,
+    "post_cutoff_append_invariance_fixture": true,
+    "aggregate_membership_rejected": true,
+    "descriptive_alert_inference_rejected": true,
+    "missing_bar_fill_rejected": true,
+    "strike_or_month_winner_rejected": true,
+    "confirmation_while_rule_blocked_rejected": true
+  },
+  "limitations": [
+    "Finalized current-vintage inputs can contain later corrections and do not establish historical operational observability.",
+    "No per-unit eligible membership or premium bars are present in the bound public-safe evidence.",
+    "No explicit PA alert identity/direction is present in the bound underlying corpus.",
+    "No authentic machine-testable Feitian bare-K or DD-line rule was recovered from the permitted source revision.",
+    "The evidence packet contains protocol and blocker findings only."
+  ],
+  "guardrails": {
+    "premium_rows_or_paths_read": false,
+    "performance_result": false,
+    "selection_artifact": false,
+    "proxy_or_imputation": false,
+    "model_pricing": false,
+    "m7": false,
+    "m8": false,
+    "execution": false,
+    "public_safe_aliases_and_hashes_only": true
+  },
+  "next_gate": "Create hash-pinned inputs that explicitly carry PA alert identity/direction and per-unit eligibility membership. Recover an authentic Feitian bare-K or DD-line definition with complete machine-testable predicates and timing semantics. Freeze a successor contract before any premium path is read."
+}
