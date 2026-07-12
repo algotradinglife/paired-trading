@@ -48,12 +48,18 @@ const fixtureDocument = await readJson("synthetic_bare_k_rule_fixtures_v0.json")
 assert.equal(contract.contract_version, RULE_ID);
 assert.equal(contract.status_label, STATUS_LABEL);
 assert.equal(contract.authentic_rule_recovery.status, "unresolved");
-assert.deepEqual(contract.source_policy.required_provenance, [
+assert.deepEqual(contract.source_policy.required_source_metadata, [
   "source_alias",
+  "repository_alias",
   "source_revision",
   "file_sha256",
   "public_safe_locator",
-  "paraphrased_support_statement"
+  "use"
+]);
+assert.deepEqual(contract.source_policy.required_behavior_attribution, [
+  "id",
+  "behavior",
+  "source_aliases"
 ]);
 for (const excluded of ["premium paths", "performance or outcome claims", "fitting or parameter optimisation", "execution instructions", "bid/ask data", "delta or Greeks", "DTE", "model pricing", "future-bar observations"]) {
   assert(contract.scope.forbidden_inputs_or_outputs.includes(excluded), `contract omits forbidden boundary: ${excluded}`);
@@ -76,6 +82,11 @@ for (const source of ledger.source_aliases) {
   assert.match(source.file_sha256, /^[a-f0-9]{64}$/, `source ${source.alias} has an invalid file_sha256`);
 }
 for (const behavior of ledger.source_supported_behaviors) {
+  for (const key of ["id", "behavior"]) {
+    assert.equal(typeof behavior[key], "string", `source-supported behavior is missing ${key}`);
+    assert(behavior[key].length > 0, `source-supported behavior has empty ${key}`);
+  }
+  assert(Array.isArray(behavior.source_aliases) && behavior.source_aliases.length > 0, `behavior ${behavior.id} has no source aliases`);
   assert(behavior.source_aliases.every((alias) => sourceAliases.has(alias)), `behavior ${behavior.id} has an unknown source alias`);
 }
 for (const assumption of ledger.provisional_assumptions) {

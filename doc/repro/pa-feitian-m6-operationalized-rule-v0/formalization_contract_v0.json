@@ -38,12 +38,18 @@
   "source_policy": {
     "read_order": "Commit this contract before opening source research.",
     "allowed_sources": "Read-only paired-trading and trade-philosopher research; source statements are recorded as paraphrased, public-safe claims rather than raw excerpts.",
-    "required_provenance": [
+    "required_source_metadata": [
       "source_alias",
+      "repository_alias",
       "source_revision",
       "file_sha256",
       "public_safe_locator",
-      "paraphrased_support_statement"
+      "use"
+    ],
+    "required_behavior_attribution": [
+      "id",
+      "behavior",
+      "source_aliases"
     ],
     "assumption_policy": "Any material behavior lacking exact support is recorded as a named provisional assumption with rationale, source gap, expected impact, and a testable alternative. Assumptions are never presented as authentic Feitian behavior."
   },
