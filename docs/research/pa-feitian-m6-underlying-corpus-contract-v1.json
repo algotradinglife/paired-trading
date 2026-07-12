@@ -1,0 +1,143 @@
+{
+  "schema_version": "pa_feitian_m6_underlying_corpus_contract_v1",
+  "hermes_task": "t_715f7397",
+  "research_mode": "retrospective_finalized",
+  "purpose": "Hash-pinned, finalized-vintage descriptive AU/AG underlying PA/Feitian diagnostics and signals with decision-time truncation.",
+  "predecessors": [
+    {
+      "name": "epistemic_replay_contract",
+      "path": "docs/research/pa-feitian-m6-epistemic-replay-contract-v1.json",
+      "sha256": "sha256:f6f3daa7a1dae99bc2e69a5a3471802173fad1f1333c814ec1152802592a0290"
+    },
+    {
+      "name": "continuous_provenance",
+      "path": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+      "sha256": "sha256:a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3"
+    }
+  ],
+  "source_bindings": [
+    {
+      "product": "au",
+      "source_id": "shfe_au0_underlying_5min",
+      "filename": "SHFE.au0.5min.parquet",
+      "sha256": "sha256:2217ea2a243188bc8ffd59ec48c3f6ab04f17e61e992429d17ad53d21796e50b",
+      "raw_input_set_sha256": "sha256:7c2b50b677871147e7e7ce7b62f252d2ddd918aba39706cdf5e17792d44f6ea9",
+      "causal_roll_records_sha256": "sha256:64ae4fc5a2e316e132c1b83c2c84ec14dcbd574d893cfd5729c7142042c69379"
+    },
+    {
+      "product": "ag",
+      "source_id": "shfe_ag0_underlying_5min",
+      "filename": "SHFE.ag0.5min.parquet",
+      "sha256": "sha256:0474a3ae5e86b8b2efe28a76b967d2fd2646459c464f1d2d27ad456de48b9a5d",
+      "raw_input_set_sha256": "sha256:d529da645b565206f6bedc28cad7dc39412372713fd62ab07c27c5454a985b0a",
+      "causal_roll_records_sha256": "sha256:d9fedf5f0ad38073eee95c6f14f1156d68341195d38425ba5095796353c7b561"
+    }
+  ],
+  "window": {
+    "first_trading_date": "2025-01-02",
+    "last_trading_date": "2026-06-08",
+    "lookback_calendar_days": 260,
+    "source_timezone": "Asia/Shanghai",
+    "timestamp_semantics": "naive_local_period_end"
+  },
+  "decision_cadence": {
+    "rule": "every trading date present in the declared causal roll schedule within the frozen window",
+    "local_time": "15:00:00",
+    "utc_time": "07:00:00Z",
+    "requires_source_bar_at_local_close": true,
+    "current_time_or_calendar_discovery": false
+  },
+  "causal_roll_rule": {
+    "selection": "prior_session_OI_when_all_active_positive_else_volume",
+    "confirmation_sessions": 3,
+    "effective_session": "next_session_after_third_confirmation",
+    "date_semantics": "exchange_trading_date",
+    "embedded_calendar_date_annotations_consumed": false
+  },
+  "aggregation": {
+    "filter_before_session_mapping_or_resample": true,
+    "source_cutoff": "timestamp <= decision_ts_utc",
+    "levels": ["D", "W", "60min", "15min"],
+    "D": "OHLCV/OI over the exchange trading date; timestamp is final included period end",
+    "W": "OHLCV/OI over ISO year/week of causal D bars, including the decision-time partial week",
+    "60min": "OHLCV/OI over consecutive 60-minute trading-session offsets anchored at night-session open",
+    "15min": "OHLCV/OI over consecutive 15-minute trading-session offsets anchored at night-session open",
+    "ohlcv_rules": {
+      "open": "first",
+      "high": "maximum",
+      "low": "minimum",
+      "close": "last",
+      "volume": "sum",
+      "open_interest": "last"
+    },
+    "minimum_aggregated_rows": 21,
+    "missing_data_policy": "exclude_level_without_proxy_or_imputation"
+  },
+  "signals": {
+    "bar_direction": "up when close > open, down when close < open, otherwise flat",
+    "bar_range": "high - low",
+    "body_fraction": "abs(close - open) / (high - low), null for zero range",
+    "close_location": "(close - low) / (high - low), null for zero range",
+    "prior_20_high": "maximum high of the 20 aggregated bars strictly before the current bar",
+    "prior_20_low": "minimum low of the 20 aggregated bars strictly before the current bar",
+    "prior_20_mean_range": "mean high-low of the 20 aggregated bars strictly before the current bar",
+    "range_over_prior_20_mean": "current range / prior_20_mean_range, null when the baseline is zero",
+    "breakout_20": "up when close > prior_20_high, down when close < prior_20_low, otherwise none",
+    "ema_5": "causal close EWM with span 5 and adjust=false through the current bar",
+    "ema_20": "causal close EWM with span 20 and adjust=false through the current bar",
+    "ema_alignment": "above when ema_5 > ema_20, below when ema_5 < ema_20, otherwise equal"
+  },
+  "output_schema": {
+    "schema_version": "pa_feitian_m6_underlying_signal_corpus_v1",
+    "top_level": [
+      "schema_version",
+      "hermes_task",
+      "research_mode",
+      "contract",
+      "predecessors",
+      "guardrails",
+      "limitations",
+      "coverage",
+      "records"
+    ],
+    "record_key": ["product", "trading_date"],
+    "level_order": ["D", "W", "60min", "15min"],
+    "numeric_rounding_decimal_places": 10,
+    "json_sort_keys": true
+  },
+  "guardrails": {
+    "explicit_hash_pinned_paths_only": true,
+    "directory_or_catalog_discovery": false,
+    "implicit_current_time": false,
+    "future_rows_allowed": false,
+    "contract_selection_or_reselection": false,
+    "proxy_or_imputation": false,
+    "deterministic_rerun_required": true,
+    "future_row_invariance_required": true,
+    "descriptive_underlying_only": true
+  },
+  "revision_and_observability_limitations": [
+    "Finalized current-vintage data may include corrections or revisions made after a historical decision.",
+    "The files do not prove which vendor response or dataset vintage was observable at a historical decision.",
+    "Historical survivorship, deletions, and restatements are not observable without append-only acquisition lineage.",
+    "Filesystem timestamps and maximum observation timestamps are not acquisition evidence."
+  ],
+  "excluded_capabilities": [
+    "date_only_iv_or_regime",
+    "options_or_option_premiums",
+    "delta_or_dte",
+    "dd_line",
+    "bid_or_ask",
+    "performance_or_outcomes",
+    "candidate_selection",
+    "m7",
+    "execution"
+  ],
+  "promotion": {
+    "score_today": false,
+    "option_evaluation": false,
+    "strategy_screening": false,
+    "m7": false,
+    "execution": false
+  }
+}
