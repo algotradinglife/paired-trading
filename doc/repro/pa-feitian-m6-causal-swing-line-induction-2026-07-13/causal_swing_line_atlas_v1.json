@@ -1,0 +1,1828 @@
+{
+  "coverage": {
+    "global_label_counts": {
+      "holdout": {
+        "by_label": {
+          "abstain": 169,
+          "conflict": 103,
+          "long_invalidation": 29,
+          "long_left_touch": 34,
+          "long_right_break": 78,
+          "short_invalidation": 6,
+          "short_left_touch": 9,
+          "short_right_break": 21
+        },
+        "sha256": "sha256:18411e4508b94a327cd880ecf0082566d56269ba0da19b77a046360c9d04374d",
+        "total": 449
+      },
+      "training": {
+        "by_label": {
+          "abstain": 194,
+          "conflict": 46,
+          "long_invalidation": 30,
+          "long_left_touch": 30,
+          "long_right_break": 83,
+          "short_invalidation": 16,
+          "short_left_touch": 5,
+          "short_right_break": 30
+        },
+        "sha256": "sha256:dd4d898f2b8a5ea245a1910763158d0edddffb1f1c1bb6fe0384ed48eff4c27f",
+        "total": 434
+      }
+    },
+    "global_label_counts_by_product_and_split": {
+      "AG": {
+        "holdout": {
+          "abstain": 87,
+          "conflict": 61,
+          "long_invalidation": 4,
+          "long_left_touch": 13,
+          "long_right_break": 29,
+          "short_invalidation": 6,
+          "short_left_touch": 5,
+          "short_right_break": 11
+        },
+        "training": {
+          "abstain": 106,
+          "conflict": 23,
+          "long_invalidation": 8,
+          "long_left_touch": 13,
+          "long_right_break": 34,
+          "short_invalidation": 16,
+          "short_left_touch": 5,
+          "short_right_break": 16
+        }
+      },
+      "AU": {
+        "holdout": {
+          "abstain": 82,
+          "conflict": 42,
+          "long_invalidation": 25,
+          "long_left_touch": 21,
+          "long_right_break": 49,
+          "short_left_touch": 4,
+          "short_right_break": 10
+        },
+        "training": {
+          "abstain": 88,
+          "conflict": 23,
+          "long_invalidation": 22,
+          "long_left_touch": 17,
+          "long_right_break": 49,
+          "short_right_break": 14
+        }
+      }
+    }
+  },
+  "holdout_result": {
+    "candidate_definition_frozen_before_holdout_application": true,
+    "outcome_fields_present": false,
+    "performance_metrics_present": false,
+    "role": "mechanical_structural_coverage_and_reproducibility_only"
+  },
+  "limitations": [
+    "This is not an authentic Feitian or DD-line reconstruction.",
+    "The fixed pivot, two-anchor, and tolerance conventions are empirical proxies only.",
+    "Structural labels have no signal, trade-direction, contract-selection, outcome, or execution meaning.",
+    "Holdout coverage does not establish economic value or fidelity to a manual chart-reading process."
+  ],
+  "m6_exp_011_atlas": {
+    "path": "doc/repro/pa-feitian-m6-historical-swing-induction-2026-07-12/historical_swing_atlas_v1.json",
+    "sha256": "sha256:f8f4d678625764accf8af65cf8198e8c33504b00f2b32488145ac83e79251df1"
+  },
+  "protocol": {
+    "path": "docs/research/pa-feitian-m6-causal-swing-line-induction-protocol-v1.json",
+    "sha256": "sha256:0b7bf0324cfa10627916ec009281a462c2aa23504fbd11b9038790c48156aa5f"
+  },
+  "proxy_definition": {
+    "clauses": [
+      {
+        "definition": "Strict three-bar pivots are unavailable until their immediate right confirmation bar is completed.",
+        "id": "LINE-IND-001",
+        "labels": [
+          "empirically_induced_not_authentic",
+          "training_only"
+        ]
+      },
+      {
+        "definition": "Two-anchor descending and ascending projections classify only structural touch, break, invalidation, abstain, or conflict states.",
+        "id": "LINE-IND-002",
+        "labels": [
+          "empirically_induced_not_authentic",
+          "training_only"
+        ]
+      },
+      {
+        "definition": "A unit-free tolerance is fixed at 0.25 times the median range of the 20 completed bars before the decision bar.",
+        "id": "LINE-IND-003",
+        "labels": [
+          "empirically_induced_not_authentic",
+          "training_only"
+        ]
+      },
+      {
+        "definition": "A second-touch proxy records only a prior causal same-side touch within 20 completed decision bars and has no action meaning.",
+        "id": "LINE-IND-004",
+        "labels": [
+          "empirically_induced_not_authentic",
+          "training_only"
+        ]
+      }
+    ],
+    "labels": [
+      "empirically_induced_not_authentic",
+      "training_only"
+    ],
+    "rule_id": "empirical_causal_swing_line_proxy_v1",
+    "shared_training_global_labels": [
+      "abstain",
+      "conflict",
+      "long_invalidation",
+      "long_left_touch",
+      "long_right_break",
+      "short_right_break"
+    ],
+    "shared_training_global_labels_sha256": "sha256:a68e6fd7868e2350c35e80f713ccf9cd2db1b3e8d3604dbb7370dd3160ee157f"
+  },
+  "representative_specimens": [
+    {
+      "decision_date": "2026-02-10",
+      "hashed_specimen_identity": "sha256:012e9ab872993aa4068c65b9690c16740dc08d153639b44f57741b0b5b18acab",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-04-28",
+      "hashed_specimen_identity": "sha256:0193e7667fc95a6e40cb09c83a1832b02f2e64f28d37c22c4488745556206b2c",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-04-10",
+      "hashed_specimen_identity": "sha256:0281c4b1f00160fcf72b17424254c637db5a71fbdc8a32501729e6d86c62947e",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-05",
+      "hashed_specimen_identity": "sha256:036590ca099cb8ac0f898a4b70b1e7dfa729fb7dd5218b4827f0d52091206771",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-02",
+      "hashed_specimen_identity": "sha256:0454f519ef38831f48719681fefeca1dada976bdc09040e3ed112e08a959fb65",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "short_left_touch",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_left_touch",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-06",
+      "hashed_specimen_identity": "sha256:04a96d83bb58e46eeba2d4f8a1b08910ccf5b9effa7f3374052eadad9d67b879",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-12",
+      "hashed_specimen_identity": "sha256:06a6058e59487b6006bb653fdbd7ad1def163553a30aa752357e8084a9f7b71f",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-09",
+      "hashed_specimen_identity": "sha256:06e1c3773600c5d3161dd8b33b8ffa1093acd531450fd64f56359152d1942491",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-10",
+      "hashed_specimen_identity": "sha256:0748956c2e6405107a3c26a6265698ec98bb2baa23732154c2cf056c7a7d9e7a",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-20",
+      "hashed_specimen_identity": "sha256:081a635681037aa6cd9361152ea575acecb30fef193ef5dc2ec70475ae865e38",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-04-20",
+      "hashed_specimen_identity": "sha256:0b28a54ce09854d8eefb45c4bdf5a596625da70b5aab5cc35b0cac1e810e9cc7",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-29",
+      "hashed_specimen_identity": "sha256:0ba3eb7eb9f7599da8c96a17a875b308867fac52e93b057be1eee0c25bf5b6ee",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-16",
+      "hashed_specimen_identity": "sha256:0c1c53b985b9817e6f304e2e6af671e675b31eed63ff33e52e58b31a00eeeb5f",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-11",
+      "hashed_specimen_identity": "sha256:0eb18573bde72185edf8abd8bf9f7f8d60c771bdddd84ace2d4f37357a782511",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-05",
+      "hashed_specimen_identity": "sha256:0eff8d46d86dc4572c74fc2a9bae2a769f2b09c0a3c759581798dfa2003ef993",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-13",
+      "hashed_specimen_identity": "sha256:0f957be4e0753a723ca22676bb016b177cc04c8c45621d6e85441b45fc37eb6e",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-03",
+      "hashed_specimen_identity": "sha256:0f99aba6c873ef83e6fdc68c5d04177b3b5bfdb08a76f044c2d5e2a631d27996",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-14",
+      "hashed_specimen_identity": "sha256:0fe98975a996705e3650739aa18908bf5ecd15281c30efcaa518d09b1c5b36f6",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-15",
+      "hashed_specimen_identity": "sha256:0ff0224fdc8395677d7ba5f32faa8f6d1d03bcf5387fa1c6018d3a1ea241284b",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_invalidation",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-28",
+      "hashed_specimen_identity": "sha256:0ffd3030c6eb3e580ba6842aa685fe15149db7da32e764d7e4abd4fee00207cd",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-10",
+      "hashed_specimen_identity": "sha256:1291d943cb0f094ffc37ebf2567993624c2a16b17689451e6853aa3199582bfd",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-04-13",
+      "hashed_specimen_identity": "sha256:141d31b45917f2fe81fade905da5a7fda8130c32f32013ef0df4ef721a60cf19",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-16",
+      "hashed_specimen_identity": "sha256:147f542310a43d7fd65649ef234497258877c8f7759fa0b1b8403ae176bf6728",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "short_right_break",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-04-29",
+      "hashed_specimen_identity": "sha256:15f3651fa264aedb0ce2a03fb4fb9170001c54327cbf796f59be18ca0e34f72e",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-08",
+      "hashed_specimen_identity": "sha256:17690d5c679e9bd2dec8f150494e407296c04a3e521a419eda08c64b2faea3f5",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "short_right_break",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-14",
+      "hashed_specimen_identity": "sha256:17ecaf30cb9e4d6ee3c312b477d1f1bb1514743d75ef751601f4891e9cfdcab7",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_invalidation",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-05-25",
+      "hashed_specimen_identity": "sha256:17effc05c2357a53020540649fff1e0134336b77632b24a5a495c036ce8bae69",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-26",
+      "hashed_specimen_identity": "sha256:19f9e737aec14303bf9321e12001eb95d10d7cb96138d4f233e6a8e17776560b",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_invalidation",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-13",
+      "hashed_specimen_identity": "sha256:1b5de03503d58383203e917374588b3d1da677b91ee15dd98e8ee33baa625f74",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-05",
+      "hashed_specimen_identity": "sha256:1b7516327c7a2f2652fb51448330c7486582addf59842bde9c8859308f6938b5",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-04-08",
+      "hashed_specimen_identity": "sha256:1b7e000347234355b1716bb3c88f31fcead6f5f27d63d17dd5308cb82d508596",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_left_touch",
+        "short_second_touch_proxy": true
+      }
+    },
+    {
+      "decision_date": "2026-01-08",
+      "hashed_specimen_identity": "sha256:1cf97672ca490cf5b3003ccc13d3ca3f91db07832f1d0916f9950677d19e4193",
+      "product": "AG",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-09-26",
+      "hashed_specimen_identity": "sha256:0013225073addaf9924f5cc7baf60d8b22506e312d6d0f78da7148636a9e9c32",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "short_invalidation",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_invalidation",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-08-26",
+      "hashed_specimen_identity": "sha256:02089d503d92f646366b30b6d3009f292fedaf17ce4713475945a78d5b23787b",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-15",
+      "hashed_specimen_identity": "sha256:0476d9a1190d8cfcf430de67830df432b635501951671c648aac2c210a9bc2a7",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-10-29",
+      "hashed_specimen_identity": "sha256:04af0133564d81171319b43143ec9e9274a4d407e3296e1769a6673d70bad434",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-11",
+      "hashed_specimen_identity": "sha256:0556f945ae9277b66d0e702676dd36a153a37a30351d3b5dec216bff35dcfae7",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-25",
+      "hashed_specimen_identity": "sha256:0559d329a64b1c1912ed0972e3be6268e5ec4c25985b6ba0d3d79c87e7025f8d",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-31",
+      "hashed_specimen_identity": "sha256:063235c706c67fa8e7ccb964dea86f4af74862f284b190fe29cb7b4922ff66ca",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-16",
+      "hashed_specimen_identity": "sha256:073083828a59e80f129972b44365f53f08e5e50bab88cbbf2db2dc8deb53ee10",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-25",
+      "hashed_specimen_identity": "sha256:091d554dedf2da9f5c20ce8de7cadbb010add3037c2c915432481326d68de11d",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_invalidation",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-24",
+      "hashed_specimen_identity": "sha256:09ae50458382b688e8ec98c1d7ccffb9b41d92c2a5305b7940d7f2ad4b0fa2c9",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "short_invalidation",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_invalidation",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-23",
+      "hashed_specimen_identity": "sha256:0a1561498e868d34c5487ae0b2a26af603cfcc92196543959fabfbd9238c79d1",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-09-02",
+      "hashed_specimen_identity": "sha256:0a7eec81979faa51dcf59645dd9cd4ff8a7dc8dee9f830c476bd43148efbd433",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_invalidation",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-27",
+      "hashed_specimen_identity": "sha256:0c1d0033fe6b172cec0dcb50681e480420f2c488b2d415ffaca3f8d53e6c39db",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-18",
+      "hashed_specimen_identity": "sha256:0c65f78d6670b25e71035d24ea97703d10ef4662642b1ff707a8a7c3bd426338",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-09-18",
+      "hashed_specimen_identity": "sha256:0d100d24ecba91f9f1ff091774fddbfeef8af60d3cac10b89cfcf8f356dd0577",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "short_right_break",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-19",
+      "hashed_specimen_identity": "sha256:0eca42d4311c8f5af2252038e76a8d80bcf161f9bf1082bc0bbdf87f12342e10",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "short_right_break",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-21",
+      "hashed_specimen_identity": "sha256:0f04770caa18101a419b5120e26b1c8cc0257d99c3b540e763ccab3794b28d84",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-11",
+      "hashed_specimen_identity": "sha256:1075deb2818481fbde147ace41e33d4e2902c6aa906167f9d354eea1ebd4b426",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_invalidation",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-16",
+      "hashed_specimen_identity": "sha256:116a147f31f8acbfd71e238e333a407ad999ceedcc70021de7d74677d55be471",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-18",
+      "hashed_specimen_identity": "sha256:11914f0d9d0dcd76ccbd352457e62fff88a004fd192338d70d98fe1c04d2c207",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-07",
+      "hashed_specimen_identity": "sha256:1316c457a2525d39a1e9b24939779ef21010e74d9091082788b9b88c6cc61dd1",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-10-21",
+      "hashed_specimen_identity": "sha256:18b72dc8688932aa37cb83b9d6b2eb4c619402782566945817c04b11b6bbc49c",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-27",
+      "hashed_specimen_identity": "sha256:1b05000a92559f760c0164d6e9c732ba73a1b5a4f3f458734a6e2cf017758ab8",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-03",
+      "hashed_specimen_identity": "sha256:1bfbfc73ea1f03bae2d5a93abc40a9ea9fbb62896483091cadb6d1d26cda0d0d",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-13",
+      "hashed_specimen_identity": "sha256:1c257435b0f6c25d1c2fce948195cd6eded786730dbeab5489ac7081442b9bc9",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-09-24",
+      "hashed_specimen_identity": "sha256:1c2b1e9b12828861e085210bde6f2ac5d40385f6056160413f13c92421cb0dca",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "short_left_touch",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_left_touch",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-03",
+      "hashed_specimen_identity": "sha256:1c37f5d2334f288f411f78a072dbcb2ef4dc9df7af873110f8de808d046eac13",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-26",
+      "hashed_specimen_identity": "sha256:1e542dcf9aa68e6e4c94374118abd0af7a42d4cbded13c47dd7dc7bfac8b6c73",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-25",
+      "hashed_specimen_identity": "sha256:1e610ca553f3d0be41685b26222571dd7ef5ce48d2267fd65207044ddd85594b",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-10-09",
+      "hashed_specimen_identity": "sha256:1f1310f96829fd304a3a1e3f21269cb02166d629f184d424350a6ba9adab7570",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "short_invalidation",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_invalidation",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-02",
+      "hashed_specimen_identity": "sha256:2069ca8dd9dab8bb0647c8ce7c481da3c71837a7e93b4359813a72acaa7e1db5",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-10-30",
+      "hashed_specimen_identity": "sha256:20f4b71d2c329a632018d9a96d0636408b40a2c0e31212ad1899dcbb2ae9c577",
+      "product": "AG",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-26",
+      "hashed_specimen_identity": "sha256:0021926511e2d912f59514c53ad59f75f132de317bf089aa67e6f42cf1176ac2",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-12",
+      "hashed_specimen_identity": "sha256:023b2dcfa499b1755a185d3ba5a3e4ef5ded0382c53daf84954a8c0844166352",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-06",
+      "hashed_specimen_identity": "sha256:02937dddb9985a62c0961065c4f699482bf891331e453585a29c8a76f840877a",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-11",
+      "hashed_specimen_identity": "sha256:045e6bd6fdeb0ba3bd3c99827878fb6273b63a45a46e980db6b1b4f68dca9035",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-05-11",
+      "hashed_specimen_identity": "sha256:048f93935aa995408c4fd23da552df73b3d72b494abf4d5af2341e5964596710",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_invalidation",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-07",
+      "hashed_specimen_identity": "sha256:0741d9c9e12f9a6b38a517c45939fe341547f00a1b1bcc00abc4a45b6685ef7c",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-27",
+      "hashed_specimen_identity": "sha256:078b9cea0ef5c5a11e0a25ac18e4bed1bd1ffef1b2dad1bfda41e6ad4eea54e8",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_left_touch",
+        "short_second_touch_proxy": true
+      }
+    },
+    {
+      "decision_date": "2026-01-29",
+      "hashed_specimen_identity": "sha256:07e47ad588ad88890fb6f67be1d2b070a2cbb2e1d4a52d044b381a2e92216925",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-23",
+      "hashed_specimen_identity": "sha256:08163da81fa76a6dd5b63c8c40d51b53a5593d1dfb9276601193abd549f2b353",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "short_left_touch",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_left_touch",
+        "short_second_touch_proxy": true
+      }
+    },
+    {
+      "decision_date": "2026-01-19",
+      "hashed_specimen_identity": "sha256:0a71506dba58dca9292a9066d2b92e168df3dfe6f3e3ac7907cdb161a317722e",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-20",
+      "hashed_specimen_identity": "sha256:0def7e671387635728718f007d19a2f54438925d31b64db0a2d461ef6da1259e",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-12",
+      "hashed_specimen_identity": "sha256:0f3b83f7e3c3910a0283bc3ad65372a4ba653a8c928b1097ee7212d0b1969cd8",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-06",
+      "hashed_specimen_identity": "sha256:10064b7612280449493e4c7e6e9fa4155dc460877ce7349d0c8cf5d858f7d740",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-11",
+      "hashed_specimen_identity": "sha256:1097c70e993dc02cfc06642d1f21fa8e26d91b287ec7a0f715c9a065e06bb8f3",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-06",
+      "hashed_specimen_identity": "sha256:112464d911d08e1b9e662a3f15c4e5cb694d7fb95d2a8b76122d1c9960bc22d8",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "short_left_touch",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_left_touch",
+        "short_second_touch_proxy": true
+      }
+    },
+    {
+      "decision_date": "2026-02-04",
+      "hashed_specimen_identity": "sha256:11ce44e887ccdb82a194959e2eacd6219f72be6a5e58aa5ea3b1eb8d670c3efb",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-16",
+      "hashed_specimen_identity": "sha256:12438e5c4afeb592359c3fbb46bcf34c312f6365145a04208a0d2e50e339b389",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-12",
+      "hashed_specimen_identity": "sha256:127568fcef473c76525a75cbb233d6e1ab64638f6151938f86f79df6a0094d0f",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-24",
+      "hashed_specimen_identity": "sha256:1288a8c33d737e59cccfede8739292b82a076cddd9844760fdcaeb0ccb9f28f5",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-20",
+      "hashed_specimen_identity": "sha256:1294343adc012bdaf93125b897aad12dda47e2a02ce8c05329061b0386d1c87f",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_invalidation",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-27",
+      "hashed_specimen_identity": "sha256:12fbc79af28ec53aa35e3c05f3890da9d529c6cc029ff3e76fc3a3cf10a794af",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_invalidation",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-20",
+      "hashed_specimen_identity": "sha256:13a9a6f8e9ff126653b9d57a9e76e6c737dc7ab29eb4cefab8bfefc64e902b78",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-01-21",
+      "hashed_specimen_identity": "sha256:13ad6ed347ec25f47893788f0d5b450d93091972a76f22a3221737257286b09b",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_invalidation",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-18",
+      "hashed_specimen_identity": "sha256:13cf9fd0d3f1cb5de7f2317b8d7d8c0c72f9c98841059b14759bea3fe3bb1b77",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-04-09",
+      "hashed_specimen_identity": "sha256:13d145bb677ffaf702ff95b8637c28b2cb0b958fa6ebe42c1f5a90f4ed98e9e2",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-10",
+      "hashed_specimen_identity": "sha256:13e06d05fbad43bdda551886eb8ed1b474844d4a357b51ddb2902847aff99f47",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-25",
+      "hashed_specimen_identity": "sha256:1404f0fa3b5eb43fa94d54fb147bc0c5b468c3a660cafa4aec96a07e502ed036",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-05",
+      "hashed_specimen_identity": "sha256:144c98f0cc9a21b6053c4ec04913172ce44b2003ef32e72025809d66871e98ce",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-06",
+      "hashed_specimen_identity": "sha256:149583757f129599f2d339193d64e252262e4d7b9d821c3cab27cd8f1f04b0de",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-04-07",
+      "hashed_specimen_identity": "sha256:15382e0f99455890e564a766cd6b0a915349122d2b7a5cad31f174f3d260d16b",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-02-12",
+      "hashed_specimen_identity": "sha256:16c76d6bfa515bc2fda7b2b2d62397eeb8dd16f05061130597413beedd978ac4",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2026-03-24",
+      "hashed_specimen_identity": "sha256:17e13699f86fae1214e5d7960da2ecc011b0e2c14ff4d22c5b111b775be82cfd",
+      "product": "AU",
+      "split": "holdout",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-09-09",
+      "hashed_specimen_identity": "sha256:00ab597773e17ef24cb3c51e71942360c15a2231c3db5a3410bd590831307fce",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-05",
+      "hashed_specimen_identity": "sha256:0330eafa4399d024474a9f6366dad56d4571a7f2f176ac3b9b2a5b0a4b3ab661",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-24",
+      "hashed_specimen_identity": "sha256:033e37356259d4ccc42e7240146369659b615737d3087c3f994579effc7afd1e",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-10-10",
+      "hashed_specimen_identity": "sha256:080f4443f98f97d06a3b8eb40e709e915156e1c2cb35faff7a70f877e6d66aa0",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_invalidation",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-03",
+      "hashed_specimen_identity": "sha256:084c97704389b6548dce9eda5fc7a350d577efb44002418cfe53be65ce5264ba",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-03",
+      "hashed_specimen_identity": "sha256:095c22ed44ca81f4b0e2c1cffda32a6e13b3cc835a1eb5a9e6a346568c7ce5e7",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-10",
+      "hashed_specimen_identity": "sha256:0971781057dc176871ea417be3aaf00b1c5e5fd867441bd0d3779a2d597850b2",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-28",
+      "hashed_specimen_identity": "sha256:0b3654053998ddd9d7d4edd0abf80ef70a48fbddb613694b377b23c3254f7e9e",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-10-21",
+      "hashed_specimen_identity": "sha256:0d4998b2acd4bb5d552df6a8499d462a70ab14ed78531e54838515b218085caa",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-29",
+      "hashed_specimen_identity": "sha256:0dfebf93e33165c191d020106e5e899e29834a8d5414563855104cf7b2b9637b",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-18",
+      "hashed_specimen_identity": "sha256:0e9b18587f91962ec458686e76f91859aded51efed974ff49e54a76485e56862",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-12",
+      "hashed_specimen_identity": "sha256:10208215670d6bc4e5136c7847f1452d0ea05ccca1e8a8fe314394158c493b18",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-04",
+      "hashed_specimen_identity": "sha256:10636256b93eca68c5cdaf6c4290138758a13ebda19c5b22970f623f7547a8a4",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-30",
+      "hashed_specimen_identity": "sha256:13bb2f349b13983eb17324a1b8c29a03b5a0721a57fdbf0f55aa90adbc968f04",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-11",
+      "hashed_specimen_identity": "sha256:17dffcb411a91cccaa56342bfc60daa3e94c8dbfb8499e0bb871998119235f13",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-20",
+      "hashed_specimen_identity": "sha256:1911817110246ab9fe0da745c828723f00e27fb29c7a3594f88cbf3b0b349ad4",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-13",
+      "hashed_specimen_identity": "sha256:1c434c54ce2cd065195d55d089f5b455b1ad2bc2aa8fe63243255ca8353124e6",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-27",
+      "hashed_specimen_identity": "sha256:1f555fd0a06ecbfc7b9a9d14c8ec302952d2d88ecd369e70551ece8485acecb0",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-10-27",
+      "hashed_specimen_identity": "sha256:1f72f38118c6b80c57dce505fcc069aab9c6208ce50dcf4b755f7f971e8a692a",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-31",
+      "hashed_specimen_identity": "sha256:20132e201593234a0eb6c1edc8417c38b07a5f15c1fe142f9f3be4089650a532",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-22",
+      "hashed_specimen_identity": "sha256:21872bc1ddb77cea473b5de88ebdda5bf4681b17e44104edef83168f2e2c96da",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-01",
+      "hashed_specimen_identity": "sha256:252ae9bb8f8f99df7143fa20c3ac7635ca4e747e3527f003ac91236a9dff8ca7",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-10",
+      "hashed_specimen_identity": "sha256:25ccab97cf0e571529dee854b62117a7ed27241ab3e196900e4147c6fb81e6ef",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-18",
+      "hashed_specimen_identity": "sha256:286d3774d6090dafd98a898964f06d72ec4f4afb85b1b597bac634f7378efbbf",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-12-22",
+      "hashed_specimen_identity": "sha256:2c146837f0c1f754f880db76a50683604d836762e4c1ab27dd35a82da8ca6a7e",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_invalidation",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-26",
+      "hashed_specimen_identity": "sha256:2d3bd94f1cb1c94f40716670ec5094c8ea9ce9f8fe25f453679f9eca97cf1a0f",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "conflict",
+        "long_label": "long_invalidation",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-10-14",
+      "hashed_specimen_identity": "sha256:2e00feaf71144bd7a9a6cf38d8236745554583a89911b625e49b12d2b91b8191",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-09-26",
+      "hashed_specimen_identity": "sha256:2e873fcda89ebb6b6c1fbe98008b30595f28b4f38f471ca25cdc0cceb992f4e6",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-17",
+      "hashed_specimen_identity": "sha256:2eb0cfff011eb991c81c1115e76468fc32639d1b041cdb12bde490838aebc844",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_right_break",
+        "long_label": "long_right_break",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-13",
+      "hashed_specimen_identity": "sha256:31846ed56287fdfd89d354f5a05f42b0be5155510cd103fbc55cf6262b9a88ba",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "short_right_break",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_right_break",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-21",
+      "hashed_specimen_identity": "sha256:336f7380a12e03a1deec13f648aff4805d361eaa4058cdebb1b6599b8f5460c1",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "abstain",
+        "long_label": "long_abstain",
+        "long_second_touch_proxy": false,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    },
+    {
+      "decision_date": "2025-11-14",
+      "hashed_specimen_identity": "sha256:346fecbd07ce8c966c740cbe4268b3ba0615b65c520c87987eb386f24a975d96",
+      "product": "AU",
+      "split": "training",
+      "structural_classification": {
+        "global_label": "long_left_touch",
+        "long_label": "long_left_touch",
+        "long_second_touch_proxy": true,
+        "short_label": "short_abstain",
+        "short_second_touch_proxy": false
+      }
+    }
+  ],
+  "schema_version": "pa_feitian_m6_causal_swing_line_atlas_v1",
+  "source_inventory": {
+    "discovery_inventory_digest": "sha256:6ac907adc50eb23d946e063944166da94c7599484c95a9622d5d0e700620cfda",
+    "files_scanned_by_product": {
+      "AG": 682,
+      "AU": 84
+    },
+    "public_source_alias": "external://quant-data/daily/SHFE.au-ag-option-ohlc",
+    "selected_series_by_product": {
+      "AG": 4,
+      "AU": 4
+    },
+    "selection_uses_outcomes_or_performance": false
+  },
+  "study_label": "empirical_operationalization_exploratory_only"
+}
