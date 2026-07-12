@@ -6,21 +6,24 @@
     {
       "alias": "SRC-PT-TREE-2026-06-17",
       "repository_alias": "trade-philosopher",
-      "revision_or_hash": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a",
+      "source_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a",
+      "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
       "public_safe_locator": "doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md",
       "use": "Primary narrative for daily-bar timing, left/right structural paths, DD low-line versus descending-high-line roles, strict structural invalidation, and the incomplete 1B/2B quality concept."
     },
     {
       "alias": "SRC-PT-XIAO-2026-06-16",
       "repository_alias": "trade-philosopher",
-      "revision_or_hash": "900f8146be61e5235d7e754cd475733aed770fa8",
+      "source_revision": "900f8146be61e5235d7e754cd475733aed770fa8",
+      "file_sha256": "67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb",
       "public_safe_locator": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
       "use": "Corroborating narrative that separates a directional source from timing geometry and names DD/trend-line details as unresolved."
     },
     {
       "alias": "SRC-PAIRED-XIAO-2026-06-16",
       "repository_alias": "paired-trading",
-      "revision_or_hash": "ac7e5bb882c533d213cfc2e5a06d261ed1918fce",
+      "source_revision": "ac7e5bb882c533d213cfc2e5a06d261ed1918fce",
+      "file_sha256": "67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb",
       "public_safe_locator": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
       "use": "Corroborating inventory of known, inferred, and black-box stages; used only for provenance and boundary checks."
     }

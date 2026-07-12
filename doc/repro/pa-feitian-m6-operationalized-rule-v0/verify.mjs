@@ -61,10 +61,12 @@ assertNoForbiddenFixtureFields(fixtureDocument.fixtures, spec.input_contract.for
 
 const sourceAliases = new Set(ledger.source_aliases.map((source) => source.alias));
 for (const source of ledger.source_aliases) {
-  for (const key of ["repository_alias", "revision_or_hash", "public_safe_locator", "use"]) {
+  for (const key of ["repository_alias", "source_revision", "file_sha256", "public_safe_locator", "use"]) {
     assert.equal(typeof source[key], "string", `source ${source.alias} misses ${key}`);
     assert(source[key].length > 0, `source ${source.alias} has empty ${key}`);
   }
+  assert.equal(source.revision_or_hash, undefined, `source ${source.alias} uses an ambiguous revision_or_hash field`);
+  assert.match(source.file_sha256, /^[a-f0-9]{64}$/, `source ${source.alias} has an invalid file_sha256`);
 }
 for (const behavior of ledger.source_supported_behaviors) {
   assert(behavior.source_aliases.every((alias) => sourceAliases.has(alias)), `behavior ${behavior.id} has an unknown source alias`);
