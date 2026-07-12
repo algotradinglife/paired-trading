@@ -1,0 +1,138 @@
+{
+  "artifact_type": "source_and_assumption_ledger",
+  "ledger_version": "operationalized_bare_k_v0",
+  "status_label": "operationalized_hypothesis_not_authentic",
+  "source_aliases": [
+    {
+      "alias": "SRC-PT-TREE-2026-06-17",
+      "repository_alias": "trade-philosopher",
+      "revision_or_hash": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a",
+      "public_safe_locator": "doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md",
+      "use": "Primary narrative for daily-bar timing, left/right structural paths, DD low-line versus descending-high-line roles, strict structural invalidation, and the incomplete 1B/2B quality concept."
+    },
+    {
+      "alias": "SRC-PT-XIAO-2026-06-16",
+      "repository_alias": "trade-philosopher",
+      "revision_or_hash": "900f8146be61e5235d7e754cd475733aed770fa8",
+      "public_safe_locator": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
+      "use": "Corroborating narrative that separates a directional source from timing geometry and names DD/trend-line details as unresolved."
+    },
+    {
+      "alias": "SRC-PAIRED-XIAO-2026-06-16",
+      "repository_alias": "paired-trading",
+      "revision_or_hash": "ac7e5bb882c533d213cfc2e5a06d261ed1918fce",
+      "public_safe_locator": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
+      "use": "Corroborating inventory of known, inferred, and black-box stages; used only for provenance and boundary checks."
+    }
+  ],
+  "source_supported_behaviors": [
+    {
+      "id": "S-TIME-001",
+      "behavior": "Use completed daily K-bars as the operating cadence for the described structure reading.",
+      "source_aliases": ["SRC-PT-TREE-2026-06-17"],
+      "implementation_reference": "timing_and_window.decision_timing"
+    },
+    {
+      "id": "S-PATH-001",
+      "behavior": "Treat a low-point extension as the left-side target path and a descending-high extension break as the alternate right-side confirmation path.",
+      "source_aliases": ["SRC-PT-TREE-2026-06-17"],
+      "implementation_reference": "decision_surface.setup_or_candidate; decision_surface.confirmation"
+    },
+    {
+      "id": "S-PREF-001",
+      "behavior": "Give the left-side path priority over the right-side path when both appear available.",
+      "source_aliases": ["SRC-PT-TREE-2026-06-17"],
+      "implementation_reference": "decision_surface.conflict_precedence"
+    },
+    {
+      "id": "S-INVALIDATE-001",
+      "behavior": "Represent a strict structural failure beyond the DD structure as an invalidation state.",
+      "source_aliases": ["SRC-PT-TREE-2026-06-17"],
+      "implementation_reference": "decision_surface.invalidation"
+    },
+    {
+      "id": "S-QUALITY-GAP-001",
+      "behavior": "Recognize that 2B is described as higher quality than 1B and that K-bar context is holistic, while the source does not provide a complete deterministic definition.",
+      "source_aliases": ["SRC-PT-TREE-2026-06-17", "SRC-PT-XIAO-2026-06-16", "SRC-PAIRED-XIAO-2026-06-16"],
+      "implementation_reference": "A-QUALITY-001"
+    },
+    {
+      "id": "S-RECOVERY-001",
+      "behavior": "The source material itself marks several rule details as unresolved or subject to later calibration; it does not license an authenticity claim.",
+      "source_aliases": ["SRC-PT-TREE-2026-06-17", "SRC-PT-XIAO-2026-06-16", "SRC-PAIRED-XIAO-2026-06-16"],
+      "implementation_reference": "formalization_contract_v0.json.authentic_rule_recovery"
+    }
+  ],
+  "provisional_assumptions": [
+    {
+      "id": "A-INPUT-001",
+      "behavior": "Interpret bare-K as generic completed OHLC bars, without selecting an instrument or an option contract.",
+      "rationale": "The required v0 scope excludes option inputs and execution while retaining the source's K-bar geometry at a research level.",
+      "source_gap": "The narrative discusses timing on a particular chart context rather than a generic instrument-free OHLC interface.",
+      "expected_impact": "This broadens the interface while intentionally reducing fidelity to any original chart or contract convention.",
+      "testable_alternative": "Bind the same geometry to an independently recovered, source-authorized chart definition and compare traces without claiming equivalence."
+    },
+    {
+      "id": "A-PIVOT-001",
+      "behavior": "Define a pivot with strict three-bar local extrema and use the latest two qualifying pivots.",
+      "rationale": "A causal finite rule is necessary to make line construction auditable.",
+      "source_gap": "The source names extrema and trend lines but does not define an algorithmic pivot detector, tie policy, or anchor-selection rule.",
+      "expected_impact": "Candidate timing can change materially versus hand-drawn or differently anchored lines.",
+      "testable_alternative": "Replace with a recovered anchor annotation set or a source-authorized pivot definition and replay the synthetic fixtures."
+    },
+    {
+      "id": "A-LINE-001",
+      "behavior": "Project each structural line as a straight line through its two selected pivots.",
+      "rationale": "It is the smallest deterministic interpretation of an extremum extension.",
+      "source_gap": "No line-fitting, touch-count, tolerance, or projection convention is specified.",
+      "expected_impact": "Boundary values and therefore touch/break classifications are sensitive to this choice.",
+      "testable_alternative": "Use a recovered multi-touch or tolerance-based line definition and retain the same trace schema."
+    },
+    {
+      "id": "A-CANDIDATE-001",
+      "behavior": "Require a bullish close for a long touch and a bearish close for a short mirrored touch.",
+      "rationale": "The source refers to a reversal/spike context but does not formalize its bar shape.",
+      "source_gap": "No exact reversal-bar predicate is given.",
+      "expected_impact": "This can exclude or admit edge cases near the structural line.",
+      "testable_alternative": "Leave the touch ungated or substitute a recovered bar-context classifier, then compare fixture traces."
+    },
+    {
+      "id": "A-INVALIDATION-001",
+      "behavior": "Use a completed close beyond the projected structural line as invalidation, with no added distance buffer.",
+      "rationale": "The source describes a strict stop beyond structure, but the v0 contract forbids tick, price, and execution parameters.",
+      "source_gap": "The exact buffer and its evaluation convention are unspecified for this bare-K scope.",
+      "expected_impact": "This is stricter or looser than any unrecovered buffered convention depending on the bar path.",
+      "testable_alternative": "Add an explicitly sourced, unit-free structural buffer only after its definition is recovered."
+    },
+    {
+      "id": "A-SHORT-001",
+      "behavior": "Mirror the long geometry to emit a provisional short structural-reversal label.",
+      "rationale": "The source acknowledges two directional orientations, while v0 must state direction semantics without using an external directional input.",
+      "source_gap": "The exact bearish mirror, its anchors, and its relationship to the original process are not defined.",
+      "expected_impact": "Short classifications have lower fidelity confidence than the explicitly described long/bottom geometry.",
+      "testable_alternative": "Disable short output until a separately sourced bearish decision chain is recovered."
+    },
+    {
+      "id": "A-QUALITY-001",
+      "behavior": "Do not implement 1B/2B or a holistic K-bar-strength score as a v0 gate.",
+      "rationale": "A deterministic threshold would invent the unresolved black-box behavior; abstention is more honest than fitting one.",
+      "source_gap": "The source expressly lacks the complete 1B/2B and holistic-quality definition.",
+      "expected_impact": "v0 is a deliberately incomplete structural screen and may be less selective than the intended process.",
+      "testable_alternative": "Introduce a separately versioned quality gate only with recovered labels or a source-authorized deterministic specification."
+    },
+    {
+      "id": "A-CONFLICT-001",
+      "behavior": "Apply invalidation before positive states, then conflicts, then left candidate before right confirmation.",
+      "rationale": "The left-path preference is sourced; the full ordering is needed to make simultaneous synthetic cases deterministic.",
+      "source_gap": "The complete ordering for all simultaneous states is not specified.",
+      "expected_impact": "Only simultaneous or degenerate geometries are affected.",
+      "testable_alternative": "Return an abstention for every simultaneous positive/negative state and compare trace completeness."
+    }
+  ],
+  "fidelity_limitations": [
+    "Authentic-rule recovery is unresolved.",
+    "No 1B/2B, holistic quality score, original anchors, tolerance, buffer, or chart convention has been recovered.",
+    "The short branch is provisional and is not evidence of original directional symmetry.",
+    "No market, option, premium, execution, or performance claim is present."
+  ]
+}

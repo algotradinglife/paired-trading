@@ -1,0 +1,74 @@
+{
+  "artifact_type": "bare_k_decision_specification",
+  "rule_id": "operationalized_bare_k_v0",
+  "status_label": "operationalized_hypothesis_not_authentic",
+  "authentic_rule_recovery": {
+    "status": "unresolved",
+    "excluded_claims": [
+      "authenticity",
+      "completeness",
+      "original parameter recovery",
+      "economic or trading validity"
+    ]
+  },
+  "input_contract": {
+    "bar_order": "oldest_to_newest",
+    "required_fields": ["id", "open", "high", "low", "close"],
+    "forbidden_fields": ["volume", "premium", "bid", "ask", "delta", "greeks", "dte", "model_price", "outcome"],
+    "bar_validity": "Each field is finite; low is not above open or close; high is not below open or close; high is not below low."
+  },
+  "timing_and_window": {
+    "decision_timing": "Evaluate only after bar t is closed.",
+    "observation_window_bars": 9,
+    "causality": "The evaluator observes bars from t-8 through t. A pivot at p requires p-1 and p+1, so a pivot is used only when p+1 is no later than t.",
+    "future_bars": "forbidden"
+  },
+  "structural_definitions": {
+    "confirmed_low_pivot": "low[p] is strictly below low[p-1] and low[p+1]",
+    "confirmed_high_pivot": "high[p] is strictly above high[p-1] and high[p+1]",
+    "line": "The last two same-type pivots with the required strict slope define a straight projected line.",
+    "long_dd_line": "last two descending confirmed low pivots",
+    "long_break_line": "last two descending confirmed high pivots",
+    "short_dd_line_mirror": "last two ascending confirmed high pivots",
+    "short_break_line_mirror": "last two ascending confirmed low pivots"
+  },
+  "decision_surface": {
+    "context_inputs": ["completed OHLC bars", "confirmed pivots", "projected structural lines"],
+    "setup_or_candidate": {
+      "long": "A completed bullish bar touches or crosses below the projected descending-low line and closes at or above it.",
+      "short": "A completed bearish bar touches or crosses above the projected ascending-high mirror and closes at or below it."
+    },
+    "confirmation": {
+      "long": "A completed close is above the projected descending-high line when no left candidate is present.",
+      "short": "A completed close is below the projected ascending-low mirror when no left candidate is present."
+    },
+    "invalidation": {
+      "long": "A completed close below the projected descending-low line.",
+      "short": "A completed close above the projected ascending-high mirror."
+    },
+    "direction_semantics": {
+      "long_structural_reversal": "A research label for a bottom/reversal geometry. It is not an instruction to buy any underlying or option.",
+      "short_structural_reversal": "A provisional mirrored research label for a top/reversal geometry. It is not an instruction to sell, short, or select an option.",
+      "none": "No structural direction is available."
+    },
+    "abstain_or_missing_states": [
+      "abstain_invalid_input",
+      "abstain_invalid_bar",
+      "abstain_missing_window",
+      "abstain_insufficient_structure",
+      "abstain_no_setup",
+      "abstain_conflicting_invalidations",
+      "abstain_conflicting_candidates",
+      "abstain_conflicting_confirmations"
+    ],
+    "conflict_precedence": [
+      "invalidations",
+      "candidate conflicts",
+      "left-side candidate",
+      "confirmation conflicts",
+      "right-side confirmation",
+      "abstain"
+    ]
+  },
+  "non_execution_boundary": "Every output is a deterministic research classification only; no execution, sizing, option selection, risk calculation, price, premium, performance, or outcome is represented."
+}

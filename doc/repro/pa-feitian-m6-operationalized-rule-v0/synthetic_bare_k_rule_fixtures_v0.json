@@ -1,0 +1,139 @@
+{
+  "artifact_type": "synthetic_bare_k_rule_fixtures",
+  "fixture_version": "operationalized_bare_k_v0",
+  "data_notice": "All bars are invented test values. They are not market, option, premium, execution, or outcome data.",
+  "fixtures": [
+    {
+      "id": "missing_window",
+      "purpose": "Requires a full causal observation window.",
+      "bars": [
+        {"id":"MW0","open":10,"high":11,"low":9,"close":10},
+        {"id":"MW1","open":10,"high":11,"low":9,"close":10},
+        {"id":"MW2","open":10,"high":11,"low":9,"close":10},
+        {"id":"MW3","open":10,"high":11,"low":9,"close":10},
+        {"id":"MW4","open":10,"high":11,"low":9,"close":10},
+        {"id":"MW5","open":10,"high":11,"low":9,"close":10},
+        {"id":"MW6","open":10,"high":11,"low":9,"close":10},
+        {"id":"MW7","open":10,"high":11,"low":9,"close":10}
+      ],
+      "expected": {"decision":"abstain","direction":"none","state":"abstain_missing_window"}
+    },
+    {
+      "id": "invalid_bar",
+      "purpose": "Rejects malformed OHLC input before geometry.",
+      "bars": [
+        {"id":"IB0","open":10,"high":11,"low":9,"close":10},
+        {"id":"IB1","open":10,"high":11,"low":9,"close":10},
+        {"id":"IB2","open":10,"high":11,"low":9,"close":10},
+        {"id":"IB3","open":10,"high":11,"low":9,"close":10},
+        {"id":"IB4","open":10,"high":11,"low":9,"close":10},
+        {"id":"IB5","open":10,"high":11,"low":9,"close":10},
+        {"id":"IB6","open":10,"high":11,"low":9,"close":10},
+        {"id":"IB7","open":10,"high":11,"low":9,"close":10},
+        {"id":"IB8","open":10,"high":9,"low":8,"close":10}
+      ],
+      "expected": {"decision":"abstain","direction":"none","state":"abstain_invalid_bar"}
+    },
+    {
+      "id": "insufficient_structure",
+      "purpose": "Abstains when no strict pivots can define a line.",
+      "bars": [
+        {"id":"IS0","open":10,"high":11,"low":9,"close":10},
+        {"id":"IS1","open":10,"high":11,"low":9,"close":10},
+        {"id":"IS2","open":10,"high":11,"low":9,"close":10},
+        {"id":"IS3","open":10,"high":11,"low":9,"close":10},
+        {"id":"IS4","open":10,"high":11,"low":9,"close":10},
+        {"id":"IS5","open":10,"high":11,"low":9,"close":10},
+        {"id":"IS6","open":10,"high":11,"low":9,"close":10},
+        {"id":"IS7","open":10,"high":11,"low":9,"close":10},
+        {"id":"IS8","open":10,"high":11,"low":9,"close":10}
+      ],
+      "expected": {"decision":"abstain","direction":"none","state":"abstain_insufficient_structure"}
+    },
+    {
+      "id": "left_candidate_long",
+      "purpose": "Classifies a synthetic touch-and-reversal at a descending low line.",
+      "bars": [
+        {"id":"LC0","open":11,"high":12,"low":10,"close":11},
+        {"id":"LC1","open":10,"high":11,"low":9,"close":10},
+        {"id":"LC2","open":8,"high":9,"low":7,"close":8},
+        {"id":"LC3","open":9,"high":10,"low":8,"close":9},
+        {"id":"LC4","open":10,"high":11,"low":9,"close":10},
+        {"id":"LC5","open":7,"high":8,"low":6,"close":7},
+        {"id":"LC6","open":8,"high":9,"low":7,"close":8},
+        {"id":"LC7","open":9,"high":10,"low":8,"close":9},
+        {"id":"LC8","open":5,"high":7,"low":4,"close":6}
+      ],
+      "expected": {"decision":"candidate","direction":"long_structural_reversal","state":"left_candidate_long"}
+    },
+    {
+      "id": "invalidation_long",
+      "purpose": "Invalidation has priority when the close is below the descending low line.",
+      "bars": [
+        {"id":"IL0","open":11,"high":12,"low":10,"close":11},
+        {"id":"IL1","open":10,"high":11,"low":9,"close":10},
+        {"id":"IL2","open":8,"high":9,"low":7,"close":8},
+        {"id":"IL3","open":9,"high":10,"low":8,"close":9},
+        {"id":"IL4","open":10,"high":11,"low":9,"close":10},
+        {"id":"IL5","open":7,"high":8,"low":6,"close":7},
+        {"id":"IL6","open":8,"high":9,"low":7,"close":8},
+        {"id":"IL7","open":9,"high":10,"low":8,"close":9},
+        {"id":"IL8","open":5,"high":6,"low":3,"close":4}
+      ],
+      "expected": {"decision":"invalidate","direction":"long_structural_reversal","state":"invalidated_long"}
+    },
+    {
+      "id": "right_confirmation_long",
+      "purpose": "Classifies a right-side break of a descending high line without a left candidate.",
+      "bars": [
+        {"id":"RC0","open":9,"high":10,"low":7,"close":9},
+        {"id":"RC1","open":10,"high":11,"low":8,"close":10},
+        {"id":"RC2","open":12,"high":13,"low":9,"close":12},
+        {"id":"RC3","open":11,"high":12,"low":10,"close":11},
+        {"id":"RC4","open":9,"high":10,"low":9,"close":9},
+        {"id":"RC5","open":10,"high":11,"low":8,"close":10},
+        {"id":"RC6","open":8,"high":9,"low":7,"close":8},
+        {"id":"RC7","open":9,"high":10,"low":8,"close":9},
+        {"id":"RC8","open":11,"high":13,"low":9,"close":12}
+      ],
+      "expected": {"decision":"confirm","direction":"long_structural_reversal","state":"right_confirmation_long"}
+    },
+    {
+      "id": "left_candidate_short_mirror",
+      "purpose": "Exercises the explicitly provisional short mirror.",
+      "bars": [
+        {"id":"SC0","open":10,"high":11,"low":9,"close":10},
+        {"id":"SC1","open":11,"high":12,"low":10,"close":11},
+        {"id":"SC2","open":12,"high":13,"low":11,"close":12},
+        {"id":"SC3","open":11,"high":12,"low":10,"close":11},
+        {"id":"SC4","open":12,"high":13,"low":11,"close":12},
+        {"id":"SC5","open":13,"high":14,"low":12,"close":13},
+        {"id":"SC6","open":12,"high":13,"low":11,"close":12},
+        {"id":"SC7","open":13,"high":14,"low":12,"close":13},
+        {"id":"SC8","open":16,"high":17,"low":13,"close":14}
+      ],
+      "expected": {"decision":"candidate","direction":"short_structural_reversal","state":"left_candidate_short"}
+    },
+    {
+      "id": "candidate_precedes_confirmation",
+      "purpose": "Enforces left-side candidate precedence when a right-side break is also true on the same completed bar.",
+      "bars": [
+        {"id":"CP0","open":11,"high":12,"low":10,"close":11},
+        {"id":"CP1","open":12,"high":13,"low":9,"close":12},
+        {"id":"CP2","open":8,"high":14,"low":7,"close":8},
+        {"id":"CP3","open":9,"high":10,"low":8,"close":9},
+        {"id":"CP4","open":10,"high":11,"low":9,"close":10},
+        {"id":"CP5","open":7,"high":12,"low":6,"close":7},
+        {"id":"CP6","open":8,"high":9,"low":7,"close":8},
+        {"id":"CP7","open":9,"high":10,"low":8,"close":9},
+        {"id":"CP8","open":5,"high":12,"low":4,"close":11}
+      ],
+      "expected": {
+        "decision":"candidate",
+        "direction":"long_structural_reversal",
+        "state":"left_candidate_long",
+        "trace_predicates":{"long_candidate":true,"long_confirmed":true}
+      }
+    }
+  ]
+}
