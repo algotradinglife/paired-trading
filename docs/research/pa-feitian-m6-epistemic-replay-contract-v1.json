@@ -1,0 +1,99 @@
+{
+  "schema_version": "pa_feitian_m6_epistemic_replay_contract_v1",
+  "hermes_task": "t_23c01908",
+  "purpose": "Separate finalized-vintage historical research replay from claims of point-in-time operational observability.",
+  "claim_modes": {
+    "retrospective_finalized": {
+      "status": "eligible_with_explicit_limitations",
+      "finalized_vintage_required": true,
+      "decision_timestamp_truncation_required": true,
+      "causal_roll_schedule_allowed": true,
+      "missing_acquisition_metadata_blocks_claim": false,
+      "permitted_claim": "A current finalized vintage can be reconstructed under declared rules and truncated at each frozen decision timestamp; this is not evidence of the vintage visible to an operator then."
+    },
+    "operational_observability": {
+      "status": "blocked_in_m6",
+      "append_only_acquisition_manifest_required": true,
+      "requirement_owner": "M8",
+      "causal_roll_schedule_allowed": false,
+      "missing_acquisition_metadata_blocks_claim": true,
+      "permitted_claim": "none"
+    }
+  },
+  "scope": {
+    "source_ids": [
+      "shfe_au0_underlying_5min",
+      "shfe_ag0_underlying_5min"
+    ],
+    "decision_ids": [
+      "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "paft_scorecard_0004_kq_m_shfe_ag_20260602000000"
+    ],
+    "derived_levels": [
+      "D",
+      "W",
+      "60min",
+      "15min"
+    ],
+    "use": "descriptive coverage and reconstruction research only"
+  },
+  "replay_rules": {
+    "filter_before_calendar_or_resample": true,
+    "future_rows_allowed": false,
+    "explicit_hash_pinned_sources_only": true,
+    "declared_roll_rule_only": true,
+    "contract_selection": "none",
+    "contract_reselection": false,
+    "directory_discovery": false,
+    "proxy_or_imputation": false
+  },
+  "declared_roll_rule": {
+    "selection": "prior_session_OI_when_all_active_positive_else_volume",
+    "confirmation_sessions": 3,
+    "effective_session": "next_session_after_third_confirmation",
+    "date_semantics": "exchange_trading_date",
+    "embedded_calendar_date_annotations_consumed": false,
+    "mode": "retrospective_finalized_only"
+  },
+  "source_artifacts": [
+    {
+      "name": "historical_asof_protocol",
+      "path": "docs/research/pa-feitian-m6-historical-asof-protocol-v1.json",
+      "sha256": "sha256:1ee6e334ada94fa928d311f3d7992d1708e4334c5b16e8e39b51ffedafcd7a1d"
+    },
+    {
+      "name": "historical_asof_source_audit",
+      "path": "doc/repro/pa-feitian-m6-historical-asof-2026-07-11/coverage_feasibility_audit_v1.json",
+      "sha256": "sha256:3639f224e41e5fe205184088a0a0724529b2a6fc005d8e2d5410dbb5d20c07f8"
+    },
+    {
+      "name": "continuous_provenance",
+      "path": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+      "sha256": "sha256:a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3"
+    },
+    {
+      "name": "raw_availability_audit",
+      "path": "doc/repro/pa-feitian-m6-raw-availability-2026-07-12/raw_availability_blocker_v1.json",
+      "sha256": "sha256:a0f9b91b86b33bfdf97d9fc325435a8b8f6cdf8925eb5464edbea9c3494939ee"
+    }
+  ],
+  "revision_and_observability_limitations": [
+    "Finalized current-vintage data may include corrections or revisions made after a historical decision.",
+    "The files do not prove which vendor response or dataset vintage was observable at a historical decision.",
+    "Historical survivorship, deletions, and restatements are not observable without append-only acquisition lineage.",
+    "Filesystem timestamps and maximum observation timestamps are not acquisition evidence."
+  ],
+  "excluded_capabilities": [
+    "date_only_iv_or_regime",
+    "options_or_option_premiums",
+    "delta_or_dte",
+    "dd_line",
+    "bid_or_ask",
+    "performance_or_strategy_screening",
+    "m7",
+    "execution"
+  ],
+  "narrowest_enabled_capability": "Finalized-vintage, decision-time-truncated descriptive D/W/60/15 underlying replay for the four frozen au/ag decisions using only the hash-pinned continuous reconstruction and declared causal roll schedule."
+}

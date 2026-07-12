@@ -1,0 +1,145 @@
+{
+  "acquisition_metadata": {
+    "append_only_manifest_milestone": "M8",
+    "complete_inputs": 0,
+    "inputs_with_gaps": 210,
+    "required_for_operational_observability": true,
+    "required_for_retrospective_finalized": false
+  },
+  "contract": {
+    "path": "docs/research/pa-feitian-m6-epistemic-replay-contract-v1.json",
+    "sha256": "sha256:f6f3daa7a1dae99bc2e69a5a3471802173fad1f1333c814ec1152802592a0290"
+  },
+  "decision_gates": [
+    {
+      "causal_roll_records_sha256": "sha256:64ae4fc5a2e316e132c1b83c2c84ec14dcbd574d893cfd5729c7142042c69379",
+      "contract_reselection": false,
+      "contract_selection": "none",
+      "cutoff_rule": "timestamp <= decision_ts_utc before calendar assignment or resampling",
+      "decision_id": "paft_scorecard_0001_kq_m_shfe_au_20260313000000",
+      "decision_ts_utc": "2026-03-13T07:00:00Z",
+      "limitations": [
+        "finalized current-vintage bytes may contain later vendor corrections or revisions",
+        "historical acquisition time and point-in-time vendor visibility are unproven",
+        "survivorship and deletion history of the vendor dataset are unobservable",
+        "embedded calendar-date main_month/is_roll annotations are not consumed"
+      ],
+      "operational_observability_claim": "blocked_missing_acquisition_metadata",
+      "raw_input_set_sha256": "sha256:7c2b50b677871147e7e7ce7b62f252d2ddd918aba39706cdf5e17792d44f6ea9",
+      "retrospective_finalized_claim": "allowed_with_limitations",
+      "source_id": "shfe_au0_underlying_5min",
+      "source_sha256": "sha256:2217ea2a243188bc8ffd59ec48c3f6ab04f17e61e992429d17ad53d21796e50b"
+    },
+    {
+      "causal_roll_records_sha256": "sha256:64ae4fc5a2e316e132c1b83c2c84ec14dcbd574d893cfd5729c7142042c69379",
+      "contract_reselection": false,
+      "contract_selection": "none",
+      "cutoff_rule": "timestamp <= decision_ts_utc before calendar assignment or resampling",
+      "decision_id": "paft_scorecard_0002_kq_m_shfe_au_20260318000000",
+      "decision_ts_utc": "2026-03-18T07:00:00Z",
+      "limitations": [
+        "finalized current-vintage bytes may contain later vendor corrections or revisions",
+        "historical acquisition time and point-in-time vendor visibility are unproven",
+        "survivorship and deletion history of the vendor dataset are unobservable",
+        "embedded calendar-date main_month/is_roll annotations are not consumed"
+      ],
+      "operational_observability_claim": "blocked_missing_acquisition_metadata",
+      "raw_input_set_sha256": "sha256:7c2b50b677871147e7e7ce7b62f252d2ddd918aba39706cdf5e17792d44f6ea9",
+      "retrospective_finalized_claim": "allowed_with_limitations",
+      "source_id": "shfe_au0_underlying_5min",
+      "source_sha256": "sha256:2217ea2a243188bc8ffd59ec48c3f6ab04f17e61e992429d17ad53d21796e50b"
+    },
+    {
+      "causal_roll_records_sha256": "sha256:d9fedf5f0ad38073eee95c6f14f1156d68341195d38425ba5095796353c7b561",
+      "contract_reselection": false,
+      "contract_selection": "none",
+      "cutoff_rule": "timestamp <= decision_ts_utc before calendar assignment or resampling",
+      "decision_id": "paft_scorecard_0003_kq_m_shfe_ag_20260515000000",
+      "decision_ts_utc": "2026-05-15T07:00:00Z",
+      "limitations": [
+        "finalized current-vintage bytes may contain later vendor corrections or revisions",
+        "historical acquisition time and point-in-time vendor visibility are unproven",
+        "survivorship and deletion history of the vendor dataset are unobservable",
+        "embedded calendar-date main_month/is_roll annotations are not consumed"
+      ],
+      "operational_observability_claim": "blocked_missing_acquisition_metadata",
+      "raw_input_set_sha256": "sha256:d529da645b565206f6bedc28cad7dc39412372713fd62ab07c27c5454a985b0a",
+      "retrospective_finalized_claim": "allowed_with_limitations",
+      "source_id": "shfe_ag0_underlying_5min",
+      "source_sha256": "sha256:0474a3ae5e86b8b2efe28a76b967d2fd2646459c464f1d2d27ad456de48b9a5d"
+    },
+    {
+      "causal_roll_records_sha256": "sha256:d9fedf5f0ad38073eee95c6f14f1156d68341195d38425ba5095796353c7b561",
+      "contract_reselection": false,
+      "contract_selection": "none",
+      "cutoff_rule": "timestamp <= decision_ts_utc before calendar assignment or resampling",
+      "decision_id": "paft_scorecard_0004_kq_m_shfe_ag_20260602000000",
+      "decision_ts_utc": "2026-06-02T07:00:00Z",
+      "limitations": [
+        "finalized current-vintage bytes may contain later vendor corrections or revisions",
+        "historical acquisition time and point-in-time vendor visibility are unproven",
+        "survivorship and deletion history of the vendor dataset are unobservable",
+        "embedded calendar-date main_month/is_roll annotations are not consumed"
+      ],
+      "operational_observability_claim": "blocked_missing_acquisition_metadata",
+      "raw_input_set_sha256": "sha256:d529da645b565206f6bedc28cad7dc39412372713fd62ab07c27c5454a985b0a",
+      "retrospective_finalized_claim": "allowed_with_limitations",
+      "source_id": "shfe_ag0_underlying_5min",
+      "source_sha256": "sha256:0474a3ae5e86b8b2efe28a76b967d2fd2646459c464f1d2d27ad456de48b9a5d"
+    }
+  ],
+  "evidence_identity_sha256": "sha256:4f7059e9a0ef7526f6edbcf4770c4812d2d35440674185418e307dd410e4aaf9",
+  "excluded_capabilities": [
+    "date_only_iv_or_regime",
+    "options_or_option_premiums",
+    "delta_or_dte",
+    "dd_line",
+    "bid_or_ask",
+    "performance_or_strategy_screening",
+    "m7",
+    "execution"
+  ],
+  "hermes_task": "t_23c01908",
+  "mode_results": {
+    "operational_observability": {
+      "causal_roll_schedule_reuse": false,
+      "missing_acquisition_metadata_is_blocker": true,
+      "status": "blocked"
+    },
+    "retrospective_finalized": {
+      "causal_roll_schedule_reuse": true,
+      "missing_acquisition_metadata_is_blocker": false,
+      "status": "enabled_with_explicit_limitations"
+    }
+  },
+  "narrowest_enabled_capability": "finalized-vintage, decision-time-truncated descriptive D/W/60/15 underlying replay for the four frozen au/ag decisions using only the hash-pinned continuous reconstruction and declared causal roll schedule",
+  "promotion": {
+    "execution": false,
+    "m7": false,
+    "performance_or_strategy_screening": false,
+    "score_today": false
+  },
+  "schema_version": "pa_feitian_m6_retrospective_replay_evidence_v1",
+  "source_artifacts": [
+    {
+      "name": "historical_asof_protocol",
+      "path": "docs/research/pa-feitian-m6-historical-asof-protocol-v1.json",
+      "sha256": "sha256:1ee6e334ada94fa928d311f3d7992d1708e4334c5b16e8e39b51ffedafcd7a1d"
+    },
+    {
+      "name": "historical_asof_source_audit",
+      "path": "doc/repro/pa-feitian-m6-historical-asof-2026-07-11/coverage_feasibility_audit_v1.json",
+      "sha256": "sha256:3639f224e41e5fe205184088a0a0724529b2a6fc005d8e2d5410dbb5d20c07f8"
+    },
+    {
+      "name": "continuous_provenance",
+      "path": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+      "sha256": "sha256:a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3"
+    },
+    {
+      "name": "raw_availability_audit",
+      "path": "doc/repro/pa-feitian-m6-raw-availability-2026-07-12/raw_availability_blocker_v1.json",
+      "sha256": "sha256:a0f9b91b86b33bfdf97d9fc325435a8b8f6cdf8925eb5464edbea9c3494939ee"
+    }
+  ]
+}
