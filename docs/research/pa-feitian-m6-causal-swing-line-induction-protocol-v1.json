@@ -1,0 +1,134 @@
+{
+  "schema_version": "pa_feitian_m6_causal_swing_line_induction_protocol_v1",
+  "hermes_task": "t_c848ea24",
+  "protocol_status": "frozen_before_external_data_access",
+  "study_label": "empirical_operationalization_exploratory_only",
+  "purpose": "Construct a separately labelled, causal, outcome-free swing-line structural atlas from the M6-EXP-011 corpus. This is an exploratory proxy study only and cannot authenticate Feitian behavior.",
+  "m6_exp_011_bindings": {
+    "binding_rule": "The exact merged protocol and atlas below are read-only inputs to this study. Their paths and SHA-256 digests are fixed before any external-data access.",
+    "protocol": {
+      "path": "docs/research/pa-feitian-m6-historical-swing-induction-protocol-v1.json",
+      "sha256": "sha256:ee36ca7b701c403a7a1d79fcc6877913fdb24119f878043bad4cf70b9f9c0c3d"
+    },
+    "atlas": {
+      "path": "doc/repro/pa-feitian-m6-historical-swing-induction-2026-07-12/historical_swing_atlas_v1.json",
+      "sha256": "sha256:f8f4d678625764accf8af65cf8198e8c33504b00f2b32488145ac83e79251df1"
+    }
+  },
+  "source_boundary": {
+    "data_root": "caller_provided_transient_data_root",
+    "data_root_serialization": "forbidden",
+    "access": "read_only",
+    "allowed_input": "the same direct daily AU and AG option OHLC corpus permitted by M6-EXP-011",
+    "products": ["AU", "AG"],
+    "input_types": ["daily_option_ohlc"],
+    "other_products_or_input_types": "forbidden",
+    "public_source_identity": "public-safe aliases and hashes only; local paths, filenames, contract text, source excerpts, usernames, and credentials are forbidden"
+  },
+  "corpus_selection": {
+    "rule": "For each product independently, select the first four public file aliases in deterministic alias-ascending order that have at least 60 valid bars dated through 2025-12-31 and at least 20 valid bars dated from 2026-01-01 through 2026-06-30.",
+    "valid_bar": "A row has finite positive open, high, low, close, and volume values; high is no lower than open and close; low is no higher than open and close; and valid rows are strictly chronological.",
+    "selection_uses_outcomes_or_performance": false,
+    "series_per_product": 4,
+    "minimum_training_valid_bars": 60,
+    "minimum_holdout_valid_bars": 20,
+    "insufficient_coverage_action": "fail_closed"
+  },
+  "chronological_split": {
+    "timezone": "Asia/Shanghai",
+    "training_end_inclusive": "2025-12-31",
+    "holdout_start_inclusive": "2026-01-01",
+    "holdout_end_inclusive": "2026-06-30",
+    "holdout_uses": "mechanical structural coverage and reproducibility only",
+    "holdout_for_induction": false
+  },
+  "causal_proxy_semantics": {
+    "decision_time": "close of the completed daily decision bar",
+    "strict_three_bar_pivots": {
+      "high": "Index p is a high pivot only when high[p-1] < high[p] and high[p] > high[p+1].",
+      "low": "Index p is a low pivot only when low[p-1] > low[p] and low[p] < low[p+1].",
+      "publication_lag": "A pivot at p may be used only at decisions whose completed prefix includes p+1."
+    },
+    "two_anchor_projections": {
+      "anchor_choice": "For each named pivot type, use the two most recent causally available pivots whose value is strictly descending for the long proxy or strictly ascending for the short proxy. If no such latest pair exists, that projection is unavailable.",
+      "long": {
+        "low_projection": "two strictly descending low-pivot values",
+        "high_projection": "two strictly descending high-pivot values"
+      },
+      "short": {
+        "low_projection": "two strictly ascending low-pivot values",
+        "high_projection": "two strictly ascending high-pivot values"
+      },
+      "projection_formula": "For older anchor a and newer anchor b, projected_value(d) = value[a] + (value[b] - value[a]) * (d - a) / (b - a)."
+    },
+    "tolerance": {
+      "formula": "0.25 times the median of high-low ranges of exactly the 20 completed bars before the decision bar",
+      "minimum_prior_completed_bars": 20,
+      "unit_free": true,
+      "unavailable_action": "abstain"
+    },
+    "structural_labels": {
+      "labels_are_structural_only": true,
+      "long_side": {
+        "left_touch": "The decision-bar range intersects the tolerance neighbourhood of the descending low projection.",
+        "right_break": "The decision close is above the descending high projection by more than the fixed tolerance.",
+        "invalidation": "The decision close is below the descending low projection by more than the fixed tolerance."
+      },
+      "short_side": {
+        "left_touch": "The decision-bar range intersects the tolerance neighbourhood of the ascending high projection.",
+        "right_break": "The decision close is below the ascending low projection by more than the fixed tolerance.",
+        "invalidation": "The decision close is above the ascending high projection by more than the fixed tolerance."
+      },
+      "side_precedence": ["invalidation", "right_break", "left_touch", "abstain"],
+      "abstain": "A side abstains when either required projection or its fixed tolerance is unavailable, or when no higher-precedence side label applies.",
+      "conflict": "The global label is conflict when both long and short side labels are not abstain; otherwise it is the one non-abstain side label or abstain.",
+      "second_touch_proxy": "A current left-touch side may receive this additional structural label only if an already-emitted causal left-touch label for that same side occurs in one of the preceding 20 completed decision bars. It has no action or trade-direction meaning."
+    }
+  },
+  "training_candidate_definition": {
+    "method": "After applying the frozen proxy semantics to training only, retain the sorted set of global structural labels observed in both AU and AG training coverage as the exploratory candidate definition.",
+    "selection_by_outcome_or_performance": false,
+    "candidate_labels": ["empirically_induced_not_authentic", "training_only"],
+    "holdout_application": "Apply that frozen training candidate mechanically to holdout structural classifications without modifying it."
+  },
+  "forbidden_capabilities": [
+    "outcomes",
+    "future returns",
+    "PnL",
+    "performance selection",
+    "contract ranking",
+    "execution",
+    "bid ask",
+    "delta",
+    "Greeks",
+    "DTE",
+    "model pricing",
+    "live work",
+    "authentic Feitian recovery",
+    "promotion of authentic_rule_recovery",
+    "promotion of operationalized_bare_k_v0",
+    "promotion of empirical_bare_k_trace_family_v1"
+  ],
+  "public_safety": {
+    "local_data_paths": false,
+    "filenames": false,
+    "raw_ohlc_values": false,
+    "charts": false,
+    "contract_fields": false,
+    "usernames": false,
+    "credentials": false,
+    "source_excerpts": false
+  },
+  "required_verification": [
+    "source-binding hashes",
+    "pivot causality",
+    "future-bar invariance",
+    "fixed tolerance",
+    "train holdout separation",
+    "conflict abstain behavior",
+    "forbidden-field rejection",
+    "public-safety rejection",
+    "byte-identical regeneration"
+  ],
+  "conclusion_boundary": "The resulting atlas is an exploratory causal structural proxy. It is not an authentic Feitian rule, a signal, a direction, a trading recommendation, performance evidence, or execution evidence."
+}
