@@ -48,6 +48,13 @@ const fixtureDocument = await readJson("synthetic_bare_k_rule_fixtures_v0.json")
 assert.equal(contract.contract_version, RULE_ID);
 assert.equal(contract.status_label, STATUS_LABEL);
 assert.equal(contract.authentic_rule_recovery.status, "unresolved");
+assert.deepEqual(contract.source_policy.required_provenance, [
+  "source_alias",
+  "source_revision",
+  "file_sha256",
+  "public_safe_locator",
+  "paraphrased_support_statement"
+]);
 for (const excluded of ["premium paths", "performance or outcome claims", "fitting or parameter optimisation", "execution instructions", "bid/ask data", "delta or Greeks", "DTE", "model pricing", "future-bar observations"]) {
   assert(contract.scope.forbidden_inputs_or_outputs.includes(excluded), `contract omits forbidden boundary: ${excluded}`);
 }

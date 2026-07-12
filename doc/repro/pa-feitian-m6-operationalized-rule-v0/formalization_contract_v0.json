@@ -40,7 +40,8 @@
     "allowed_sources": "Read-only paired-trading and trade-philosopher research; source statements are recorded as paraphrased, public-safe claims rather than raw excerpts.",
     "required_provenance": [
       "source_alias",
-      "source_revision_or_hash",
+      "source_revision",
+      "file_sha256",
       "public_safe_locator",
       "paraphrased_support_statement"
     ],
