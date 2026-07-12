@@ -1,0 +1,228 @@
+{
+  "alerts": [
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:ag:20250410T070000Z",
+      "bar_timestamp_utc": "2025-04-10T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2025-04-10T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "ag",
+      "source_record_id": "retfin_ag_20250410_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2025-04-10"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:au:20250513T070000Z",
+      "bar_timestamp_utc": "2025-05-13T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2025-05-13T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "au",
+      "source_record_id": "retfin_au_20250513_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2025-05-13"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:au:20250625T070000Z",
+      "bar_timestamp_utc": "2025-06-25T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2025-06-25T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "au",
+      "source_record_id": "retfin_au_20250625_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2025-06-25"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:au:20250710T070000Z",
+      "bar_timestamp_utc": "2025-07-10T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2025-07-10T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "au",
+      "source_record_id": "retfin_au_20250710_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2025-07-10"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:au:20250725T070000Z",
+      "bar_timestamp_utc": "2025-07-25T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2025-07-25T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "au",
+      "source_record_id": "retfin_au_20250725_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2025-07-25"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:au:20250818T070000Z",
+      "bar_timestamp_utc": "2025-08-18T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2025-08-18T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "au",
+      "source_record_id": "retfin_au_20250818_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2025-08-18"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:au:20251029T070000Z",
+      "bar_timestamp_utc": "2025-10-29T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2025-10-29T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "au",
+      "source_record_id": "retfin_au_20251029_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2025-10-29"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:ag:20260204T070000Z",
+      "bar_timestamp_utc": "2026-02-04T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2026-02-04T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "ag",
+      "source_record_id": "retfin_ag_20260204_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2026-02-04"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:ag:20260304T070000Z",
+      "bar_timestamp_utc": "2026-03-04T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2026-03-04T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "ag",
+      "source_record_id": "retfin_ag_20260304_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2026-03-04"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:ag:20260401T070000Z",
+      "bar_timestamp_utc": "2026-04-01T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2026-04-01T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "ag",
+      "source_record_id": "retfin_ag_20260401_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2026-04-01"
+    },
+    {
+      "alert_id": "pa_h2_bottom_daily_v1:au:20260401T070000Z",
+      "bar_timestamp_utc": "2026-04-01T07:00:00Z",
+      "cadence": "D",
+      "decision_ts_utc": "2026-04-01T07:00:00Z",
+      "pa_direction": "bottom",
+      "pattern": "h2_bottom",
+      "product": "au",
+      "source_record_id": "retfin_au_20260401_1500_cst",
+      "strategy_direction": "long",
+      "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+      "trading_date": "2026-04-01"
+    }
+  ],
+  "contract": {
+    "path": "docs/research/pa-feitian-m6-explicit-pa-alert-materialization-contract-v1.json",
+    "sha256": "sha256:e4ba463a12d96a2e23843d7d8e44be35a7758a3f034c353ea72495d8c8a6382e"
+  },
+  "coverage": {
+    "alerts": 11,
+    "alerts_by_product": {
+      "ag": 4,
+      "au": 7
+    },
+    "cadence": "D",
+    "first_trading_date": "2025-01-02",
+    "input_records": 670,
+    "input_records_by_product": {
+      "ag": 337,
+      "au": 333
+    },
+    "last_trading_date": "2026-06-08"
+  },
+  "guardrails": {
+    "bid_or_ask": false,
+    "contract_membership": false,
+    "deterministic_rerun_required": true,
+    "diagnostic_inference": false,
+    "execution": false,
+    "expiry_or_dte": false,
+    "explicit_strategy_emission_only": true,
+    "feitian_or_dd_line_confirmation": false,
+    "future_row_invariance_required": true,
+    "greeks_or_delta": false,
+    "m7": false,
+    "m8": false,
+    "modeled_prices": false,
+    "option_or_premium_path_reading": false,
+    "outcomes_or_performance": false,
+    "proxy_or_imputation": false,
+    "retrospective_finalized_label_preserved": true,
+    "strict_decision_time_cutoff": true,
+    "threshold_tuning": false
+  },
+  "hermes_task": "t_1bf2484e",
+  "input": {
+    "path": "doc/repro/pa-feitian-m6-underlying-corpus-2026-07-12/underlying_signal_corpus_v1.json",
+    "schema_version": "pa_feitian_m6_underlying_signal_corpus_v1",
+    "sha256": "sha256:cb3407910dd15f4327a2465da3a00d6797f81fd9124066695887ddb53d3bf080"
+  },
+  "limitations": [
+    "The source corpus is retrospective_finalized and does not prove the bytes observable at each historical decision.",
+    "Missing source decisions remain missing; no raw data is reopened to repair them.",
+    "The corpus contains only explicit daily H2-bottom PA alerts for AU and AG; it does not claim complete PA, top/bearish, divergence, bare-K, DD-line, or Feitian coverage.",
+    "An alert starts observation only and does not authorize option selection, confirmation, evaluation, performance inference, or execution."
+  ],
+  "research_mode": "retrospective_finalized",
+  "schema_version": "pa_feitian_m6_explicit_pa_alert_corpus_v1",
+  "strategy": {
+    "constructor": {
+      "climax_lookback": 5,
+      "climax_threshold": 0.4,
+      "ema_threshold": 0.0,
+      "h_lookback": 8,
+      "min_gap": 10,
+      "min_h_legs": 2,
+      "min_quality": 0.3,
+      "require_climax": false,
+      "require_trend": null
+    },
+    "repository_revision": "792cb9a0c47cd6cb20c5da4340008481e7a7bd1f",
+    "rule_identifier": "pa_h2_bottom_daily_au_ag_v1",
+    "source_files": [
+      {
+        "git_blob": "797f8b9e8a62e3d24e3907703993b2ec6c4e92ee",
+        "path": "src/engine/divergence/pa_detector.py",
+        "sha256": "sha256:9e234a39c4f3eb7239066460ad8d0ccb28d3bb06bfd9e82b9af4792d0b004717"
+      },
+      {
+        "git_blob": "d36be8eec177faff9471ba1521a2b58693ffe8a8",
+        "path": "src/engine/features/pa_features.py",
+        "sha256": "sha256:e9af8e9ddd9e3e36f28ecbf2ce995d487395d779cf99edda21c4d260b07b3585"
+      }
+    ]
+  }
+}

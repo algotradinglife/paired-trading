@@ -1,0 +1,192 @@
+{
+  "schema_version": "pa_feitian_m6_explicit_pa_alert_materialization_contract_v1",
+  "hermes_task": "t_1bf2484e",
+  "frozen_before_historical_scan": true,
+  "research_mode": "retrospective_finalized",
+  "purpose": "Materialize only explicit strategy-emitted PA alerts from the hash-pinned finalized-vintage underlying corpus; never infer alerts from descriptive diagnostics.",
+  "authoritative_strategy": {
+    "repository": "paired-trading",
+    "revision": "792cb9a0c47cd6cb20c5da4340008481e7a7bd1f",
+    "strategy_class": "engine.divergence.pa_detector.PABottomDetector",
+    "emitted_type": "engine.divergence.pa_detector.PASignal",
+    "rule_identifier": "pa_h2_bottom_daily_au_ag_v1",
+    "source_files": [
+      {
+        "path": "src/engine/divergence/pa_detector.py",
+        "sha256": "sha256:9e234a39c4f3eb7239066460ad8d0ccb28d3bb06bfd9e82b9af4792d0b004717",
+        "git_blob": "797f8b9e8a62e3d24e3907703993b2ec6c4e92ee"
+      },
+      {
+        "path": "src/engine/features/pa_features.py",
+        "sha256": "sha256:e9af8e9ddd9e3e36f28ecbf2ce995d487395d779cf99edda21c4d260b07b3585",
+        "git_blob": "d36be8eec177faff9471ba1521a2b58693ffe8a8"
+      }
+    ],
+    "constructor": {
+      "min_h_legs": 2,
+      "min_quality": 0.3,
+      "ema_threshold": 0.0,
+      "min_gap": 10,
+      "h_lookback": 8,
+      "require_climax": false,
+      "climax_lookback": 5,
+      "climax_threshold": 0.4,
+      "require_trend": null
+    },
+    "scan_arguments": {
+      "bars": "ordered daily OHLCV assembled only from bound corpus records",
+      "h_bars": null,
+      "swing_context": null
+    },
+    "exact_emission_predicates": [
+      "scan position is at least 30",
+      "at least min_gap observed input bars have elapsed since the preceding emitted alert",
+      "h_leg_count over the strict-prior h_lookback window is at least min_h_legs",
+      "bar_quality_bull is at least min_quality",
+      "ema_distance_norm is strictly less than ema_threshold"
+    ],
+    "explicitness_rule": "A corpus row is an alert if and only if the authoritative scan returns a PASignal at that row's exact bar position. No other field or rule may create an alert."
+  },
+  "research_source_assessment": {
+    "repository": "trade-philosopher",
+    "revision": "5802d0ff5d99819ad01ba9f3550b6a2d504f1e81",
+    "public_safe_documents": [
+      {
+        "path": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
+        "sha256": "sha256:67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb"
+      },
+      {
+        "path": "doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md",
+        "sha256": "sha256:2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263"
+      }
+    ],
+    "role": "read_only_context_only",
+    "finding": "The research identifies the underlying signal layer as an alert rather than an execution signal, but it is not used to infer or modify the authoritative H2-bottom predicates.",
+    "performance_metrics_imported": false
+  },
+  "input_binding": {
+    "path": "doc/repro/pa-feitian-m6-underlying-corpus-2026-07-12/underlying_signal_corpus_v1.json",
+    "schema_version": "pa_feitian_m6_underlying_signal_corpus_v1",
+    "sha256": "sha256:cb3407910dd15f4327a2465da3a00d6797f81fd9124066695887ddb53d3bf080",
+    "contract": {
+      "path": "docs/research/pa-feitian-m6-underlying-corpus-contract-v1.json",
+      "sha256": "sha256:e35d4567792a386270989b47af31d4e2e23d76b632eff92cabc6188f8ba37c34"
+    },
+    "required_research_mode": "retrospective_finalized",
+    "allowed_record_fields": [
+      "record_id",
+      "product",
+      "trading_date",
+      "decision_ts_utc",
+      "source_id",
+      "source_sha256",
+      "raw_input_set_sha256",
+      "causal_roll_records_sha256",
+      "levels.D.last_bar_timestamp_utc",
+      "levels.D.bar.open",
+      "levels.D.bar.high",
+      "levels.D.bar.low",
+      "levels.D.bar.close",
+      "levels.D.bar.volume"
+    ],
+    "forbidden_as_alert_inputs": [
+      "levels.*.diagnostics",
+      "levels.*.signals",
+      "levels.W",
+      "levels.60min",
+      "levels.15min",
+      "score_today direction votes or direction verdicts",
+      "option or premium fields",
+      "later outcomes"
+    ]
+  },
+  "universe_and_cadence": {
+    "products": ["au", "ag"],
+    "instrument": "SHFE continuous underlying",
+    "cadence": "D",
+    "source_timezone": "Asia/Shanghai",
+    "decision_time_local_inclusive": "15:00:00",
+    "decision_time_utc": "07:00:00Z",
+    "first_trading_date": "2025-01-02",
+    "last_trading_date": "2026-06-08"
+  },
+  "bar_materialization": {
+    "order": ["product ascending", "decision_ts_utc ascending"],
+    "one_bar_per_key": ["product", "decision_ts_utc"],
+    "bar_timestamp": "levels.D.last_bar_timestamp_utc",
+    "bar_fields": ["open", "high", "low", "close", "volume"],
+    "cutoff_rule": "The daily bar timestamp and every contributing source timestamp must be less than or equal to decision_ts_utc.",
+    "missing_data": "Omit a missing corpus decision without fill, proxy, interpolation, resampling, cadence substitution, or raw-source recovery. min_gap counts observed bound daily bars. A product with fewer than 31 valid bars emits no alerts.",
+    "duplicate_or_non_monotonic_key": "reject the complete input",
+    "non_finite_or_invalid_ohlcv": "reject the complete input",
+    "future_row": "reject the complete input before strategy scan"
+  },
+  "alert_identity_and_direction": {
+    "alert_id_format": "pa_h2_bottom_daily_v1:{product}:{decision_ts_utc_compact}",
+    "identity_fields": ["strategy_rule_id", "product", "decision_ts_utc"],
+    "strategy_rule_id": "pa_h2_bottom_daily_au_ag_v1",
+    "pattern": "h2_bottom",
+    "pa_direction": "bottom",
+    "strategy_direction": "long",
+    "direction_semantics": "The literal PASignal pattern and direction emitted by the authoritative strategy. It is an underlying PA alert only, not an option-side instruction or trade decision.",
+    "deduplication": "Any duplicate alert identity rejects the complete output."
+  },
+  "output_contract": {
+    "schema_version": "pa_feitian_m6_explicit_pa_alert_corpus_v1",
+    "top_level_fields": ["schema_version", "hermes_task", "research_mode", "contract", "input", "strategy", "guardrails", "limitations", "coverage", "alerts"],
+    "alert_fields": ["alert_id", "strategy_rule_id", "source_record_id", "product", "trading_date", "decision_ts_utc", "bar_timestamp_utc", "cadence", "pattern", "pa_direction", "strategy_direction"],
+    "order": ["decision_ts_utc ascending", "product ascending", "alert_id ascending"],
+    "json_sort_keys": true,
+    "public_safe": true,
+    "raw_market_rows": false,
+    "diagnostic_fields": false,
+    "performance_fields": false
+  },
+  "no_lookahead_rejection_tests": [
+    "Reject a changed byte in the input corpus, its contract, or either authoritative source file.",
+    "Reject an input record, daily bar, or contributing maximum source timestamp after decision_ts_utc.",
+    "Prove that appending any post-cutoff record cannot change alerts at or before the cutoff.",
+    "Prove expanding-prefix equivalence: each emitted alert through a cutoff equals a scan of only the prefix through that cutoff.",
+    "Reject duplicate or non-monotonic product/decision keys.",
+    "Reject any attempt to use descriptive D/W/60/15 diagnostics or signals as an alert predicate.",
+    "Reject any strategy output whose pattern or direction is not the literal h2_bottom/long pair.",
+    "Reject option, premium, Feitian/DD-line, Greeks, DTE, bid/ask, modeled-price, outcome, performance, tuning, M7, M8, or execution fields."
+  ],
+  "guardrails": {
+    "explicit_strategy_emission_only": true,
+    "diagnostic_inference": false,
+    "strict_decision_time_cutoff": true,
+    "retrospective_finalized_label_preserved": true,
+    "deterministic_rerun_required": true,
+    "future_row_invariance_required": true,
+    "proxy_or_imputation": false,
+    "option_or_premium_path_reading": false,
+    "contract_membership": false,
+    "feitian_or_dd_line_confirmation": false,
+    "greeks_or_delta": false,
+    "expiry_or_dte": false,
+    "bid_or_ask": false,
+    "modeled_prices": false,
+    "outcomes_or_performance": false,
+    "threshold_tuning": false,
+    "m7": false,
+    "m8": false,
+    "execution": false
+  },
+  "limitations": [
+    "The source corpus is retrospective_finalized and does not prove the bytes observable at each historical decision.",
+    "Missing source decisions remain missing; no raw data is reopened to repair them.",
+    "The corpus contains only explicit daily H2-bottom PA alerts for AU and AG; it does not claim complete PA, top/bearish, divergence, bare-K, DD-line, or Feitian coverage.",
+    "An alert starts observation only and does not authorize option selection, confirmation, evaluation, performance inference, or execution."
+  ],
+  "promotion": {
+    "explicit_pa_alert_input": true,
+    "bare_k_confirmation": false,
+    "option_evaluation": false,
+    "strategy_inference": false,
+    "m7": false,
+    "m8": false,
+    "execution": false,
+    "next_gate": "Verify and consume this hash-pinned explicit alert corpus only as the alert input to a separately frozen bare-K protocol; per-unit membership and an authentic bare-K or DD-line definition remain separate blockers."
+  }
+}
