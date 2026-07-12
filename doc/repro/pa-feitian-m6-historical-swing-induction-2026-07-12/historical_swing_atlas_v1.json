@@ -1,0 +1,1777 @@
+{
+  "coverage": {
+    "candidate_windows_by_product_and_split": {
+      "AG": {
+        "holdout": 216,
+        "training": 65
+      },
+      "AU": {
+        "holdout": 233,
+        "training": 57
+      }
+    },
+    "trace_class_counts": {
+      "holdout": {
+        "distinct": 132,
+        "sha256": "sha256:196049ec592cc713b06dba76e65d201f06939073b8b9c744e54dce5262be43e3",
+        "total": 449
+      },
+      "training": {
+        "distinct": 54,
+        "sha256": "sha256:822a21056aa87a06d360b33b63727e2b23484b2989ab44700ab15fc8babf1b2b",
+        "total": 122
+      }
+    }
+  },
+  "holdout_result": {
+    "candidate_definition_frozen_before_holdout_application": true,
+    "outcome_fields_present": false,
+    "performance_metrics_present": false,
+    "role": "structural_trace_coverage_and_reproducibility_only"
+  },
+  "induced_definition": {
+    "clauses": [
+      {
+        "definition": "A trace is evaluated only at the close of a valid daily bar with at least 60 valid completed same-file bars in its causal prefix.",
+        "id": "IND-001",
+        "labels": [
+          "empirically_induced_not_authentic",
+          "training_only"
+        ]
+      },
+      {
+        "definition": "A trace classification is the fixed tuple of bar direction, body position, range bucket relative to the completed-prefix median, causal two-bar turn, and three-bar directional shape.",
+        "id": "IND-002",
+        "labels": [
+          "empirically_induced_not_authentic",
+          "training_only"
+        ]
+      },
+      {
+        "definition": "The candidate structural family is the set of fixed trace classes observed in both AU and AG training coverage; it has no action, prediction, or outcome meaning.",
+        "id": "IND-003",
+        "labels": [
+          "empirically_induced_not_authentic",
+          "training_only"
+        ]
+      }
+    ],
+    "labels": [
+      "empirically_induced_not_authentic",
+      "training_only"
+    ],
+    "rule_id": "empirical_bare_k_trace_family_v1",
+    "shared_training_trace_class_count": 13,
+    "shared_training_trace_class_sha256": "sha256:8b99760ef344d660de0e5268eff90c58f6a62ca38c302e88b1c24e4ab46e3826"
+  },
+  "limitations": [
+    "This atlas does not recover an authentic Feitian or DD-line rule.",
+    "Trace families are empirical K-bar descriptions, not trade signals.",
+    "No future-return, outcome, PnL, contract ranking, or execution evidence is used.",
+    "A structural trace class may be present without carrying any economic meaning."
+  ],
+  "protocol": {
+    "path": "docs/research/pa-feitian-m6-historical-swing-induction-protocol-v1.json",
+    "sha256": "sha256:ee36ca7b701c403a7a1d79fcc6877913fdb24119f878043bad4cf70b9f9c0c3d"
+  },
+  "representative_specimens": [
+    {
+      "decision_date": "2026-01-30",
+      "hashed_specimen_identity": "sha256:0057465fda930ddb4c68ceb481247e84afbd30b9aaa7f11642948d59938e9cfd",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2026-03-02",
+      "hashed_specimen_identity": "sha256:01b1fbcf4f524d7a77a8b27d3566db8be8f6d88e6e3f0a3a17bb88a12a65ea16",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2026-02-09",
+      "hashed_specimen_identity": "sha256:0550dc9434fd8aac8e0054f32867a208c58c7c9f5cc91d732f8b406cd64d32f2",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "reversal_down"
+      }
+    },
+    {
+      "decision_date": "2026-01-05",
+      "hashed_specimen_identity": "sha256:0a8906b9ecd65fd1d98c7a3581b1dbf946693971414145c3b49dd7024c12a805",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "upper",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-03-19",
+      "hashed_specimen_identity": "sha256:0b97bd6c9202f79bca7e86f0a7466039487d3e38178474d57d150f35d2f22d1c",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-22",
+      "hashed_specimen_identity": "sha256:0c8f1db7760fa1e4b95ac25f3ec477e65a0aec1ed91c92c572c249d85103bff8",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "middle",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-05",
+      "hashed_specimen_identity": "sha256:0d192ac87aa8703a10e586e3c76392eba60a203898ce5cfc867fc1ae7c7860e1",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2026-03-02",
+      "hashed_specimen_identity": "sha256:0edb04007477a9f810712a3f19fea26c3dba1dafbf93e07af2f8d56f2b9b3107",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-03-16",
+      "hashed_specimen_identity": "sha256:0fe120bdeeddb9074fba057cf4a0998ae35259e84839888e787e36d07b7de23f",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2026-01-23",
+      "hashed_specimen_identity": "sha256:12e6a798916c4cdf828f5e5e96ac47ffda62a028ef45529d44a2424be566b6ed",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-20",
+      "hashed_specimen_identity": "sha256:1462e54876656d7a3bd85271316cb72bb67f03d9933d91b2de426afa1002927a",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-26",
+      "hashed_specimen_identity": "sha256:1bfed1093f470d3b0326de1c461f2465f74d0a72ef18b05dc2214743ae8444db",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-10",
+      "hashed_specimen_identity": "sha256:1ddca9d9d908f2d65cab482a28458597870f28224f25a1f4e61e75788bf27160",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-04-29",
+      "hashed_specimen_identity": "sha256:1fef49a3044e983685a3d6fa1b256062ff65beb06aedad82d531636fdcd5dd6a",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-22",
+      "hashed_specimen_identity": "sha256:2154833958bae0dad32f485cbee6826072e400240187edfd9255b7f554a527df",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-03",
+      "hashed_specimen_identity": "sha256:219371f5dca4d85e369aa5d9d3df06d7b5a7420f1ea2ab5e5193a77b4e530928",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "reversal_down"
+      }
+    },
+    {
+      "decision_date": "2026-03-23",
+      "hashed_specimen_identity": "sha256:22ecd1821133d95a231cc7ebfc41b31f1ceecdf5a70aebf4b6d720c96e4978c4",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-04-07",
+      "hashed_specimen_identity": "sha256:22faa6ed935caa366c9f3d467c43e512ee7c6caf7b4cafda68a645fabe66d98c",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-29",
+      "hashed_specimen_identity": "sha256:24dc4694515e95cb94fceffd797be24beb0011925fe7a85ef40be71ab478e084",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-03-20",
+      "hashed_specimen_identity": "sha256:2664d68196243b197c30906a32a2a83703f5211656a05840bfd6901d4c2d6df5",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-27",
+      "hashed_specimen_identity": "sha256:26e0afd42ac66c2e3481bdead0ca934bb2d0c593a20eb87c254e3b15a60712d7",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2026-03-09",
+      "hashed_specimen_identity": "sha256:2c1b1ed60eac73a7f635a0655d85b65577cd101b24ee2d4a9fed436c805a08ac",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-03-18",
+      "hashed_specimen_identity": "sha256:2eb84b685802102c79bc629f61065a34d9d32c4e0c60b2cd20d7b9a0aef454d4",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-03-04",
+      "hashed_specimen_identity": "sha256:325426b5a955264ce9af9902cee2f5511aa5a286c6179949c762d32d32baf225",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-05-25",
+      "hashed_specimen_identity": "sha256:326302e6bfd040b9d790c001df2e8ccd4dd03e65a00eb4f20d3138d66d2145c6",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-05-14",
+      "hashed_specimen_identity": "sha256:326ed6d429031554fede6c80a1b381cd5f5d8da1fceb469a49acc0f512bc63bc",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-04",
+      "hashed_specimen_identity": "sha256:356ee45819f0a2ad056f77f2383e8dde2a21f369c685612140a5649b37d8d5ad",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-13",
+      "hashed_specimen_identity": "sha256:364630fe27c782fca076a3c7359045ad95008741d85f6b7dc58eef110e43ed9e",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-27",
+      "hashed_specimen_identity": "sha256:36a462c4626bd122d0d8997494d774ec298f086bee987ff716949e262935192a",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-13",
+      "hashed_specimen_identity": "sha256:37948f70fb11df27d8d4c1de9e6064d963a8f641285be6a2d83db76b01c4325b",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "middle",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2026-03-03",
+      "hashed_specimen_identity": "sha256:37f4b15b498efc3b7dac17f06d0d8179303e819d49339a1aee58e2c6783cd0de",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "middle",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "reversal_up"
+      }
+    },
+    {
+      "decision_date": "2026-01-23",
+      "hashed_specimen_identity": "sha256:38df26ba94cd04f1c065253bc8224ce6f0111b36960700b17f9dbedde7c1e64a",
+      "product": "AG",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "middle",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2025-12-12",
+      "hashed_specimen_identity": "sha256:065aea042190b83ff219d48bfffcf840169a9e06adb8a9c0ee53d053a163da3d",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-17",
+      "hashed_specimen_identity": "sha256:067f9c9f0d43d1de5f56294790852f529bb058590a066a127ca86a31491e2fec",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "reversal_down"
+      }
+    },
+    {
+      "decision_date": "2025-12-19",
+      "hashed_specimen_identity": "sha256:071ee8a6e79f15b00cfa510f6fd7dcde1997343ad20d089ce317a9aeaeed67b7",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-29",
+      "hashed_specimen_identity": "sha256:0a5ace28157cd2f81dd2a2ac3717945e761b805dc2aaa33d3c3ae03559c13ca7",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2025-11-27",
+      "hashed_specimen_identity": "sha256:0b7967e05e755b96958fb2547ff89dfaec662d484aedd0d29989df3ceb419941",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-25",
+      "hashed_specimen_identity": "sha256:0e5b4c674f8ceb57cef5043430a4e05d1e3d4ebc13a33364040ad70c88a5b9a6",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-26",
+      "hashed_specimen_identity": "sha256:1e89688c94524ac3ceb48760a10151a6d5126673a73fe2062df43ec2332a1ac6",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2025-12-30",
+      "hashed_specimen_identity": "sha256:27ba348e34561bc003c8cb3394bd3a5c0802baad521c8b24db78743fd7040014",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "reversal_down"
+      }
+    },
+    {
+      "decision_date": "2025-12-24",
+      "hashed_specimen_identity": "sha256:2a1a9e8a128e71a43ba9207d7dd9539a7401f2b4cfa6d4c9afad79b1be7b5547",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2025-11-14",
+      "hashed_specimen_identity": "sha256:2e5131b03b97fe14696ff4d6df7a0bf7741a59a4fd79745241def4b1b51dedf8",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "middle",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2025-12-08",
+      "hashed_specimen_identity": "sha256:33bd8e6a83a2510940cbbc040078a6e7cca492c2e589ea282585ab308a6af97c",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-24",
+      "hashed_specimen_identity": "sha256:345fe7e2b54baf2410111e2c19b964d12faf63d91de6bb245fabf6589b870704",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "lower",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-10",
+      "hashed_specimen_identity": "sha256:37609cca1c0795abfa37f9a107f8a26c701d12c4207baac41869f7166806436c",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-23",
+      "hashed_specimen_identity": "sha256:3994bd7e35015b1213220e7b6aee92deb43a78ac5a59e4b9485e5cd49c126287",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-30",
+      "hashed_specimen_identity": "sha256:3a7abf044502e6ff671fc5ff85b8844944cc933c4ad39b420590f60d1fecdda3",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-31",
+      "hashed_specimen_identity": "sha256:3b6292f759a425d60b072a40185480b252694881b73b4d5f99ec74a9b8fae491",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-16",
+      "hashed_specimen_identity": "sha256:3d244c3e6b35d0878d55f58b3c883c3af94f7c3d8905031982a18fba069d3301",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-31",
+      "hashed_specimen_identity": "sha256:40e1fc1e819a813c8ee73f48b29e311416c96a56141e8076daf959df5700fef1",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-23",
+      "hashed_specimen_identity": "sha256:45e98d642f54a2b9fcfd985b80100f2e8ae0b2edca35f1c471612f1d7cf56696",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "middle",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-03",
+      "hashed_specimen_identity": "sha256:49bb17e79b3e42ef0754c19912f8a6b8e581f1e9be69fc0cc3c33d8e340187cd",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2025-11-26",
+      "hashed_specimen_identity": "sha256:50b71437097d45f20508a27fd165b42e8531e8a1a99f7ea77759ec27594a9204",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-22",
+      "hashed_specimen_identity": "sha256:54d1d1ee971e9efc7c8340c3c7d8becde47ba720b2997d9c30692b44140ed4f2",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-18",
+      "hashed_specimen_identity": "sha256:55fcdd9d6116c79bfe651049f3338f8b1f1678281d48723913207301543fef03",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2025-11-20",
+      "hashed_specimen_identity": "sha256:66fd4c276b7a49f99dbf4e7c58e8f5d36d1f32234711e52d32cb4c4ba910645c",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-26",
+      "hashed_specimen_identity": "sha256:69697d3acdc084af0c72c543f12f18dd017ce7be7c3fc1f7978cf326a5a705c7",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-17",
+      "hashed_specimen_identity": "sha256:6f501f5e5c80c0d68dc34a3022f571ed1afd1c818b5cf1526703f8db883d3c2e",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2025-12-23",
+      "hashed_specimen_identity": "sha256:6fb81732fe5ae573847cf077fd4c5adecd8587ee4dd549d688fa4b257a4fbf00",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-25",
+      "hashed_specimen_identity": "sha256:71b434db43413859ddee6197ee2e0e1069afb0ea97224f773974072b7fe65c42",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "reversal_down"
+      }
+    },
+    {
+      "decision_date": "2025-12-15",
+      "hashed_specimen_identity": "sha256:74a38d1aa38e2e4e764d750cc71e8d83dd43a1db868bbc19c6c8db3934d495e7",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-19",
+      "hashed_specimen_identity": "sha256:7ade8a4eb6ac3070f8eac0c1abc9162460a98618740dcce1617b299804ad7032",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-05",
+      "hashed_specimen_identity": "sha256:7f13ada36cb687eddfdbdd38ebc1c9419c724e54f3c63b55fde47c2e142b3e6f",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-25",
+      "hashed_specimen_identity": "sha256:8079a3b46c68e605405ff612f265210f5ea55575ffb5f3416e6ca5272f01c5fa",
+      "product": "AG",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2026-03-03",
+      "hashed_specimen_identity": "sha256:01660cff96c1bec041918ea638d392f2d0adbe37d20b706c901168e0da06e7d5",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-29",
+      "hashed_specimen_identity": "sha256:03c21a852f268c0da93673c6ad5073c4749843d813c7b051e8b50e6e89300576",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2026-01-06",
+      "hashed_specimen_identity": "sha256:0653692192a9978f288fc2752409a17d70c8490ab998895d427187e9c98545c7",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-02",
+      "hashed_specimen_identity": "sha256:079929bdfe0d084f6c81305716a4e4c79de0bf11746da2072a22769d7f0631ce",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2026-02-06",
+      "hashed_specimen_identity": "sha256:07c2ecdcb756163221f58b5b91063c5ded3c70c7c296cfc8f825069cd9a57564",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-03-06",
+      "hashed_specimen_identity": "sha256:07f69aa865033f1f43bd19776ccd875226d4a73dd37ec434b54c814c36de7ca0",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "reversal_down"
+      }
+    },
+    {
+      "decision_date": "2026-03-17",
+      "hashed_specimen_identity": "sha256:0818922c718c0211bda487bd00602b67cf083f1a18edd866a91a186ed6532364",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-25",
+      "hashed_specimen_identity": "sha256:0a1f8455e21bbed7f3741b49df49d1c33aee14e23a93c8ae6b445a76d7e6a50b",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "reversal_down"
+      }
+    },
+    {
+      "decision_date": "2026-03-02",
+      "hashed_specimen_identity": "sha256:0bdbdc4f75a424f30fc316787bace90819c6e1e4a8c3a328eec16991b67c7754",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-29",
+      "hashed_specimen_identity": "sha256:0c599ebcdbb30990c441486d4de259fefc4e3e697b9150bbf14bf3660d1c6a40",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-30",
+      "hashed_specimen_identity": "sha256:0d2fcff5ce92e75672a98fd266c2017a2ca01c84ce0d46eda5135166293fb975",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-06",
+      "hashed_specimen_identity": "sha256:0d6c5e3b3f191429d04c879ce78f699f8817b70bbcb5e241faff1e6384b7efea",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-13",
+      "hashed_specimen_identity": "sha256:0da84253b02a7f0ca010895efdc0a7e9ca1ea7061ce4d23e17278d4b8df0c7f5",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-26",
+      "hashed_specimen_identity": "sha256:0fabaaac53742d33ea4778eb41d5609c193ad5cfbe6a3c1445fc725797680d31",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-05-07",
+      "hashed_specimen_identity": "sha256:0fc0ee0464b94859a7983803ae2a9510b6a82a5ede94f30b64eba6b1706c02ab",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2026-01-22",
+      "hashed_specimen_identity": "sha256:11287f5e7616aea587224991fb411c42160bd319db380e37a3b51d6a81e6f6be",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2026-03-03",
+      "hashed_specimen_identity": "sha256:120f7854c3db28261a37b96f9d4f3571b43d5f9cd3cb86ded7ea70616f0f7c6c",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-08",
+      "hashed_specimen_identity": "sha256:1296a20329f330210b06fe61a2fba08a595ccb47b013cfd8cfcd4155be9aa7bf",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-28",
+      "hashed_specimen_identity": "sha256:12d80e3c13f9739ea560f0eb947cadee3c1753e34d23fb9867954a3da06146db",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-27",
+      "hashed_specimen_identity": "sha256:16ede2a79b6b163a59f3a511ff1787dec7c9c8186878b99abe802b4273879dd0",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-03-10",
+      "hashed_specimen_identity": "sha256:171b45e16082cbf650a91901a882db2007cf39cf7a6813857ee0f992fffff8b3",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-27",
+      "hashed_specimen_identity": "sha256:17c48bbbc8afc89019d52bfa3297fc15525b6916c078226de5fcd8f3106f8610",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2026-03-09",
+      "hashed_specimen_identity": "sha256:1a0bfe07b425fff1a421cfe296a4671821c6ac07b149ade8cc063147476c1136",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-24",
+      "hashed_specimen_identity": "sha256:1a706fae134fc9804c96ed3cf5028e75dbc5e1477328019851ff7089e925cfe1",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2026-03-19",
+      "hashed_specimen_identity": "sha256:1ad86d4329d23786d09a4f80820493bf69ff16300143d153d20c4c679e6fc51f",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "reversal_up"
+      }
+    },
+    {
+      "decision_date": "2026-01-26",
+      "hashed_specimen_identity": "sha256:1dc879bd17a2239aa2a6821eeed447c67458e88daa94fc238f79095f3fc5cb7f",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "reversal_up"
+      }
+    },
+    {
+      "decision_date": "2026-02-02",
+      "hashed_specimen_identity": "sha256:1ea18a5331776fdb4b5afad112cf136778ebbcd67878998c0386a541816f6f56",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-02-12",
+      "hashed_specimen_identity": "sha256:20fe9af8b453c235e4ebc4651e1d4710569491f2aaca98ec8bb98f0448e778e9",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2026-01-14",
+      "hashed_specimen_identity": "sha256:21b9541da0e03e03320631af34c79cc376e4d0e33948b4128ddaa0e2e7f685d0",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-04-03",
+      "hashed_specimen_identity": "sha256:237cbdef009d0a8f9f5d55e17a3ffaaae50edae5322ca6c56e7b2273877270a0",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "middle",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2026-01-08",
+      "hashed_specimen_identity": "sha256:267cb0029335bf97151d809cb31c0a2702dee2beb14c66c7f3e219bb2e127c30",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "reversal_down"
+      }
+    },
+    {
+      "decision_date": "2026-03-11",
+      "hashed_specimen_identity": "sha256:27e770939c3a5d710b7f0a0cf481fde61391831f2640bd17dde88d4f4a35d12b",
+      "product": "AU",
+      "split": "holdout",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2025-12-30",
+      "hashed_specimen_identity": "sha256:026833d14134deca081a9dedf9e458e77dc0526dccd8e5850dc0ef617a22d724",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-08",
+      "hashed_specimen_identity": "sha256:06f1c2014201e85587363d6704ed64ea7c27b68c4e94ded1ddde56a5928a2c0c",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-05",
+      "hashed_specimen_identity": "sha256:0b3d2d604f39e2bcc7c916e77efc7a75961202250899968794df2167bab36d78",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-19",
+      "hashed_specimen_identity": "sha256:0c4ce12e4d86aea1b595007eac3d87f9c650656ea5c39c100a8d05095e18be3a",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-30",
+      "hashed_specimen_identity": "sha256:0c96d34564b765a63e17a0c9c71e2ffa580479eab4377fe73eb9f9700fa77a0c",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-22",
+      "hashed_specimen_identity": "sha256:0e893aed41c8abb8ed5365b778d8bbabe39c383e9b59ba0e3ff6ef7bb31898a9",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-16",
+      "hashed_specimen_identity": "sha256:126e9b8a5eb5c1dd2b720e163bc993176a06bd64164957213d7e43a0d5705d0c",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-01",
+      "hashed_specimen_identity": "sha256:142470aea05d540324863c47612d15a716d0b76ba4ef28ee9008b54d13f791bf",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-22",
+      "hashed_specimen_identity": "sha256:163e082e01fad146dbae0af2fdfa10b262c058b09cc0024b7ad30e389ef91e8d",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-17",
+      "hashed_specimen_identity": "sha256:1719c61cf42e0c3acbaf10d08f93176f04d063fb44348657568386116a1cbbeb",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-28",
+      "hashed_specimen_identity": "sha256:18379dc238fce4d11768b749603135895a451f4c068e4d8b317c676214d0b501",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-02",
+      "hashed_specimen_identity": "sha256:28cf2d5d8fddc128c4804b1d40daa4233dec086e0a49c5d1cc5e61ee98684afb",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2025-12-19",
+      "hashed_specimen_identity": "sha256:2a0fb6d0eb4b65a5e5b035e201ff6824e7d52c20c7c8f64d7cf7b4866ad057c5",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-18",
+      "hashed_specimen_identity": "sha256:35dc1aaada26c7a4a50fc55b406fb5740c5f2f155e47f52d27221905422ee58e",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-26",
+      "hashed_specimen_identity": "sha256:3ca79c036b303ecd2cac0c32a113b62cf757ca3a543b8c806595323505d897b6",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "falling"
+      }
+    },
+    {
+      "decision_date": "2025-12-31",
+      "hashed_specimen_identity": "sha256:3e34bd64f71715540029cad03ca43de55ecbbcf09795c5d5eabfe8e166db646c",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2025-11-28",
+      "hashed_specimen_identity": "sha256:3e5e4b43ef705734bda7b3635e9c18581102600bae3417eb095af583fddd9309",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "reversal_up"
+      }
+    },
+    {
+      "decision_date": "2025-12-05",
+      "hashed_specimen_identity": "sha256:4261162efe660c91c323be4254eecce25dc6f587dcf48d931ffad768b2202e5a",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-25",
+      "hashed_specimen_identity": "sha256:44639fc6f82cdc646321d5552a629d9d2b85c8ecf5171e7db42b626ffb9ed24d",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-08",
+      "hashed_specimen_identity": "sha256:4c7c62cf0e86ace32cab4c59249cdfb3ad18c97a6a187fe7d675930f7081096d",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-24",
+      "hashed_specimen_identity": "sha256:546292b7483b04d2020a8b550d9794e0a9beb7309da3fb579193d943e0625c90",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-18",
+      "hashed_specimen_identity": "sha256:5912cefdd0306f86c3a347162e549361f615d069ecd2f624c12aa2d2a7fcacdf",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "typical",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-24",
+      "hashed_specimen_identity": "sha256:5fecf6f6061a45266c5d61e23077fb0e16aa01ef5cf6b1c287b74ac64e8c904e",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-12",
+      "hashed_specimen_identity": "sha256:657678833b3169607e7f7d3d7da7e9e592d77723f7f29baa4f66c6253ad4a6a4",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "rising"
+      }
+    },
+    {
+      "decision_date": "2025-12-29",
+      "hashed_specimen_identity": "sha256:6f37b1d6972f089759be25058b37bb894c4ba6c50e9efec6271004714ac46dce",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-31",
+      "hashed_specimen_identity": "sha256:70dfa5083d8e281472e9e3c13872d1f827024e58422f4945de6ca6637c75b145",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "upper",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "reversal_down"
+      }
+    },
+    {
+      "decision_date": "2025-12-09",
+      "hashed_specimen_identity": "sha256:736cef70e8684f570b2fb7d6c5ce16f404ac4a53ed03ae85e6a0f6de1bb8807f",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-11",
+      "hashed_specimen_identity": "sha256:76e54c295a8f02c331144596ea94b66003d573235c5d1b5f367bcb09f60ace69",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "up",
+        "body_position": "upper",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-21",
+      "hashed_specimen_identity": "sha256:792d503d312cf2f4993ce3925f91d22ff84686f3fde43711bd7b5559897b25f3",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "higher_high",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-24",
+      "hashed_specimen_identity": "sha256:79a82def19818f53dbbd99eb084952e39199be10e4977a839141ee456c6a8b0a",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "flat",
+        "body_position": "doji",
+        "causal_turn": "inside",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-12-17",
+      "hashed_specimen_identity": "sha256:7e0e2ec2a1b79e8b4020e7b7c2b8425625cd6c6c19ca4e55d43150f65fd74d6b",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "outside",
+        "range_bucket_relative_to_prefix_median": "expanded",
+        "three_bar_directional_shape": "mixed"
+      }
+    },
+    {
+      "decision_date": "2025-11-26",
+      "hashed_specimen_identity": "sha256:849a4350bd054144f7dbc917e272ac8cd6e3c5b9b7c1f0957bbff757ecd1e578",
+      "product": "AU",
+      "split": "training",
+      "trace_classification": {
+        "bar_direction": "down",
+        "body_position": "lower",
+        "causal_turn": "lower_low",
+        "range_bucket_relative_to_prefix_median": "compressed",
+        "three_bar_directional_shape": "mixed"
+      }
+    }
+  ],
+  "schema_version": "pa_feitian_m6_historical_swing_atlas_v1",
+  "source_inventory": {
+    "discovered_files_by_product": {
+      "AG": 3170,
+      "AU": 1768
+    },
+    "discovery_inventory_digest": "sha256:6ac907adc50eb23d946e063944166da94c7599484c95a9622d5d0e700620cfda",
+    "inventory_alias_digest": "sha256:697c0f20bd00b644cf42d36f17fcedebdb519d7061c8e6905f93266935f863db",
+    "public_source_alias": "external://quant-data/daily/SHFE.au-ag-option-ohlc",
+    "selected_series_by_product": {
+      "AG": 4,
+      "AU": 4
+    },
+    "series_selection": {
+      "files_scanned_by_product": {
+        "AG": 682,
+        "AU": 84
+      },
+      "max_series_per_product": 4,
+      "method": "first_public_file_aliases_per_product_with_non_outcome_coverage",
+      "minimum_holdout_valid_bars": 20,
+      "minimum_training_valid_bars": 60,
+      "selected_files_by_product": {
+        "AG": 4,
+        "AU": 4
+      },
+      "selection_uses_outcomes_or_performance": false
+    },
+    "valid_prefix_files_by_product": {
+      "AG": 4,
+      "AU": 4
+    }
+  },
+  "study_label": "empirical_operationalization_exploratory_only"
+}

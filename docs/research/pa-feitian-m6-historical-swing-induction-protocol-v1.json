@@ -1,0 +1,128 @@
+{
+  "schema_version": "pa_feitian_m6_historical_swing_induction_protocol_v1",
+  "hermes_task": "t_b622ea3d",
+  "protocol_status": "frozen_before_external_data_access",
+  "study_label": "empirical_operationalization_exploratory_only",
+  "purpose": "Create a separately labelled, deterministic structural atlas of daily option OHLC swing traces and an empirically induced, training-only bare-K hypothesis candidate. This study is not authentic Feitian recovery.",
+  "source_boundary": {
+    "data_root": "caller_provided_transient_data_root",
+    "data_root_serialization": "forbidden",
+    "access": "read_only",
+    "products": ["AU", "AG"],
+    "allowed_input": "direct daily option OHLC files for AU and AG only",
+    "directory_or_catalog_discovery": "forbidden",
+    "other_products_or_input_types": "forbidden",
+    "public_source_identity": "hashes and public-safe aliases only"
+  },
+  "chronological_split": {
+    "timezone": "Asia/Shanghai",
+    "training": {
+      "start": null,
+      "end_inclusive": "2025-12-31"
+    },
+    "holdout": {
+      "start_inclusive": "2026-01-01",
+      "end_inclusive": "2026-06-30",
+      "untouched_for_induction": true
+    },
+    "split_frozen_before_data_access": true,
+    "insufficient_coverage_action": "fail_closed_no_induced_definition"
+  },
+  "prefix_only_candidate_windows": {
+    "decision_time": "the close of the completed daily OHLC bar whose trading date is the decision date",
+    "minimum_completed_prefix_bars": 60,
+    "window_completed_bars": 20,
+    "candidate_rule": "For every valid decision date with at least 60 completed bars in its same-file chronological prefix, emit the final 20 completed bars of that prefix as one candidate window.",
+    "allowed_read_set": "only same-file rows dated less than or equal to the decision date",
+    "post_decision_rows": "never read by the candidate generator",
+    "selection_by_later_path_or_outcome": "forbidden",
+    "selection_by_performance_or_contract_ranking": "forbidden",
+    "deterministic_order": [
+      "product ascending",
+      "public-safe file alias ascending",
+      "decision date ascending"
+    ]
+  },
+  "structural_trace": {
+    "raw_values_in_public_artifacts": false,
+    "trace_tokens": [
+      "bar_direction: up_down_flat",
+      "body_position: upper_lower_middle_doji",
+      "range_bucket_relative_to_prefix_median: compressed_typical_expanded",
+      "causal_turn: higher_high_lower_low_inside_outside_none",
+      "three_bar_directional_shape: rising_falling_reversal_up_reversal_down_mixed"
+    ],
+    "causality": "Every token at decision date d is computed only from the completed OHLC prefix through d.",
+    "specimen_identity": "sha256 of canonical product, public-safe file alias, and decision date; no raw path or contract text is published",
+    "allowed_atlas_fields": [
+      "hashed_specimen_identity",
+      "product",
+      "decision_date",
+      "split",
+      "trace_classification"
+    ],
+    "forbidden_atlas_fields": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "raw_bar",
+      "price",
+      "chart",
+      "future_return",
+      "outcome",
+      "pnl"
+    ]
+  },
+  "induction": {
+    "training_only": true,
+    "input": "training structural trace classifications and aggregate counts only",
+    "method": "Enumerate the fixed causal trace classes, retain every class observed in both AU and AG training coverage, and state those classes as an empirical structural candidate family without scoring, ranking, or outcome labels.",
+    "candidate_clause_labels": [
+      "empirically_induced_not_authentic",
+      "training_only"
+    ],
+    "authentic_rule_recovery": false,
+    "authentic_rule_artifacts_mutable": false,
+    "operationalized_bare_k_v0_mutable": false,
+    "faithful_definition_emission": false,
+    "holdout_role": "apply the frozen training-only candidate mechanically for structural trace coverage and reproducibility only"
+  },
+  "forbidden_capabilities": [
+    "premium outcome evaluation",
+    "PnL evaluation",
+    "future-return labels",
+    "performance selection",
+    "option-leg ranking",
+    "contract ranking",
+    "execution",
+    "bid ask",
+    "delta",
+    "Greeks",
+    "DTE",
+    "model pricing",
+    "live work",
+    "authentic recovery",
+    "performance or execution readiness"
+  ],
+  "public_safety": {
+    "absolute_or_local_data_root_paths": false,
+    "raw_ohlc_values": false,
+    "charts": false,
+    "usernames": false,
+    "credentials": false,
+    "proprietary_source_excerpts": false,
+    "private_visual_inspection": "permitted only for preselected training windows and never committed"
+  },
+  "required_verification": [
+    "protocol commit precedes any artifact data access",
+    "AU and AG corpus coverage is explicit",
+    "train holdout separation",
+    "candidate generator post-decision invariance",
+    "forbidden-field rejection",
+    "public-safety rejection",
+    "deterministic rerun",
+    "holdout structural trace reproducibility"
+  ],
+  "conclusion_boundary": "Any resulting definition is exploratory and separately operationalized. It may be tested as a hypothesis only; it cannot authenticate Feitian bare-K, unblock authentic recovery, establish performance, or establish execution readiness."
+}
