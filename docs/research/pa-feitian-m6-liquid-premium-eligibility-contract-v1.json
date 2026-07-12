@@ -1,0 +1,167 @@
+{
+  "schema_version": "pa_feitian_m6_liquid_premium_eligibility_contract_v1",
+  "hermes_task": "t_3bf64f0c",
+  "frozen_before_external_data_inspection": true,
+  "research_mode": "retrospective_finalized_liquid_premium_ohlc",
+  "purpose": "Classify AU/AG option K-line contract-days by pre-outcome OHLCV, turnover, open-interest, timestamp-continuity and contract-identity evidence only.",
+  "boundary_correction": {
+    "historical_bid_ask_required": false,
+    "contract_delta_required": false,
+    "exact_expiry_or_dte_required": false,
+    "append_only_acquisition_lineage_required_for_m6_replay": false,
+    "append_only_acquisition_lineage_required_for_operational_observability": true,
+    "rationale": "The bare-K PA/Feitian research lane consumes naked option premium K-lines. Bid/ask and contract delta are absent rather than proxied. Exact expiry/DTE may be recorded only when explicit and is not an eligibility gate.",
+    "non_claims": [
+      "bid_ask_spread",
+      "market_impact",
+      "slippage",
+      "executable_fill",
+      "execution_readiness",
+      "contemporaneous_operational_observability",
+      "faithful_feitian_replication"
+    ]
+  },
+  "source_context": {
+    "repository_owned": [
+      "doc/design/xiao_modules_interface_2026-06-08.md",
+      "doc/data_gaps_for_pipeline_2026-06-11.md",
+      "src/data/option_store.py",
+      "docs/research/pa-feitian-m6-option-input-audit-contract-v1.json"
+    ],
+    "external_read_only_after_freeze": [
+      "committed strategy data-access guide",
+      "committed instrument-quality framework"
+    ],
+    "external_context_role": "Interpret source layout and quality vocabulary only; it may not alter this contract's frozen thresholds.",
+    "threshold_basis": "Predeclared Xiao bare-K liquidity floors of session volume 100 and open interest 500, augmented with deterministic turnover and timestamp-continuity integrity gates; no outcomes were inspected."
+  },
+  "window": {
+    "first_local_date": "2025-01-02",
+    "last_local_date": "2026-06-08",
+    "products": ["au", "ag"],
+    "cadences": ["min5", "min15"],
+    "source_timezone": "Asia/Shanghai",
+    "source_timestamp_interpretation": "timezone-naive Asia/Shanghai period-end labels, as declared by the committed strategy migration note",
+    "eligibility_cutoff_local_time_inclusive": "15:00:00",
+    "event_time_rule": "For a contract-local-date unit, read only source rows whose interpreted local timestamp is less than or equal to that unit's 15:00:00 cutoff. Rows after the cutoff and rows after the frozen last date are forbidden.",
+    "current_time_discovery": false
+  },
+  "unit": {
+    "name": "contract_local_date_cadence",
+    "identity_regex": "^SHFE\\.(au|ag)([0-9]{4})([CP])([0-9]+(?:\\.[0-9]+)?)\\.parquet$",
+    "identity_fields": ["product", "underlying_month", "option_type", "strike"],
+    "deduplication_key": ["cadence", "relative_path", "local_date"],
+    "eligible_population": "Every parsed AU/AG option contract file with at least one row on a local date in the frozen window; no contract, strike, month or side may be selected using later premium paths or outcomes."
+  },
+  "quality_contract": {
+    "required_columns": ["datetime", "open", "high", "low", "close", "volume", "turnover", "open_interest"],
+    "ordered_unique_timestamps": true,
+    "finite_nonnegative_fields": ["open", "high", "low", "close", "volume", "turnover", "open_interest"],
+    "coherent_ohlc": "high >= max(open, close, low) and low <= min(open, close, high)",
+    "exact_cutoff_bar_required": true,
+    "continuity_window": {
+      "start_local_time_inclusive": "14:00:00",
+      "end_local_time_inclusive": "15:00:00",
+      "expected_grid": "cadence-aligned period-end labels including both endpoints",
+      "minimum_grid_coverage_ratio": 0.8,
+      "maximum_adjacent_gap_in_cadence_units": 2,
+      "min5_minimum_observed_grid_points": 11,
+      "min15_minimum_observed_grid_points": 4
+    },
+    "liquidity_floors_at_cutoff": {
+      "cumulative_session_volume_minimum": 100,
+      "cumulative_session_turnover_strictly_positive": true,
+      "latest_open_interest_minimum": 500,
+      "session_definition": "same local calendar date, timestamp <= inclusive cutoff",
+      "zero_activity_rows_are_not_dropped": true
+    },
+    "eligibility_rule": "A unit is eligible if and only if identity, schema, timestamp, OHLC, exact-cutoff, continuity, volume, turnover and open-interest requirements all pass.",
+    "failure_reason_order": [
+      "invalid_contract_identity",
+      "missing_required_column",
+      "timestamp_not_ordered_unique",
+      "invalid_numeric_or_ohlc",
+      "missing_exact_cutoff_bar",
+      "insufficient_final_hour_grid_coverage",
+      "excessive_final_hour_gap",
+      "session_volume_below_100",
+      "session_turnover_not_positive",
+      "open_interest_below_500"
+    ]
+  },
+  "evidence_output": {
+    "schema_version": "pa_feitian_m6_liquid_premium_evidence_v1",
+    "artifact_path": "doc/repro/pa-feitian-m6-liquid-premium-2026-07-12/liquid_premium_evidence_v1.json",
+    "aggregate_dimensions": ["product", "cadence"],
+    "required_counts": [
+      "source_files",
+      "contract_date_units",
+      "eligible_units",
+      "ineligible_units",
+      "failure_reason_counts",
+      "source_rows_at_or_before_cutoff",
+      "source_rows_after_cutoff_excluded"
+    ],
+    "json_sort_keys": true,
+    "public_safe": true,
+    "absolute_paths_forbidden": true,
+    "local_usernames_forbidden": true,
+    "credentials_forbidden": true,
+    "raw_source_bytes_committed": false,
+    "per_contract_results_committed": false,
+    "source_references": "relative public-safe aliases and SHA-256 aggregate digests only"
+  },
+  "guardrails": {
+    "external_access_read_only": true,
+    "strict_event_time_truncation": true,
+    "future_row_invariance_required": true,
+    "deterministic_rerun_required": true,
+    "outcome_or_performance_fields_forbidden": true,
+    "outcome_optimized_thresholds": false,
+    "bid_ask_or_spread_fields_forbidden": true,
+    "delta_or_greeks_fields_forbidden": true,
+    "expiry_or_dte_gate_forbidden": true,
+    "proxy_or_imputation": false,
+    "candidate_screening": false,
+    "premium_path_evaluation": false,
+    "strategy_performance_evaluation": false,
+    "m7": false,
+    "m8": false,
+    "execution": false
+  },
+  "forbidden_field_tokens": [
+    "ask",
+    "bid",
+    "candidate",
+    "delta",
+    "entry",
+    "exit",
+    "fill",
+    "gamma",
+    "m7",
+    "pnl",
+    "profit",
+    "recommendation",
+    "return",
+    "selected_contract",
+    "selection",
+    "slippage",
+    "spread",
+    "strategy_performance",
+    "theta",
+    "trade",
+    "vega",
+    "win_rate"
+  ],
+  "promotion": {
+    "exploratory_liquid_premium_ohlc_lane": true,
+    "faithful_feitian": false,
+    "option_candidate_selection": false,
+    "premium_path_research": false,
+    "strategy_evaluation": false,
+    "m7": false,
+    "m8": false,
+    "execution": false,
+    "next_gate": "After this eligibility evidence is verified, separately freeze a premium-path research protocol using only eligible bare-K units; a faithful frozen DD-line remains required for faithful Feitian claims."
+  }
+}
