@@ -1,0 +1,192 @@
+{
+  "schema_version": "pa_feitian_m6_liquid_premium_membership_contract_v1",
+  "hermes_task": "t_02ba3dea",
+  "frozen_before_external_option_data_inspection": true,
+  "research_mode": "retrospective_finalized_liquid_premium_membership_only",
+  "purpose": "Materialize deterministic public-safe identities for every eligible AU/AG contract-local-date-cadence unit under the already-frozen liquid-premium rules, without reading or publishing a premium path or outcome.",
+  "bound_inputs": [
+    {
+      "alias": "public://paired-trading/docs/research/pa-feitian-m6-liquid-premium-eligibility-contract-v1.json",
+      "schema_version": "pa_feitian_m6_liquid_premium_eligibility_contract_v1",
+      "sha256": "sha256:abf2c9148a9dcc3e60e24d64721c5e24fd9bf8cd732b476658afaff109452ab0"
+    },
+    {
+      "alias": "public://paired-trading/doc/repro/pa-feitian-m6-liquid-premium-2026-07-12/liquid_premium_evidence_v1.json",
+      "schema_version": "pa_feitian_m6_liquid_premium_evidence_v1",
+      "sha256": "sha256:4ac7519fafe713a6f74e079d80acb7e4c2cce885ae946ac8083df95e0a6e7ab4",
+      "required_label": "retrospective_finalized"
+    }
+  ],
+  "frozen_boundary": {
+    "products": ["au", "ag"],
+    "cadences": ["min5", "min15"],
+    "first_local_date": "2025-01-02",
+    "last_local_date": "2026-06-08",
+    "source_timezone": "Asia/Shanghai",
+    "decision_time_local_inclusive": "15:00:00",
+    "finalized_vintage": true,
+    "historical_bid_ask_required": false,
+    "contract_delta_required": false,
+    "exact_expiry_or_dte_required": false,
+    "eligibility_rule_source": "Apply the bound eligibility contract literally; thresholds, predicates, failure ordering and timestamp semantics may not be changed.",
+    "post_cutoff_rule": "Rows after the unit's inclusive 15:00:00 local cutoff are excluded before every eligibility statistic and cannot affect membership.",
+    "current_time_discovery": false
+  },
+  "data_access_policy": {
+    "external_access": "read_only_after_this_contract_commit",
+    "data_root": "An explicit caller-supplied root; it is never inferred, searched for, or serialized.",
+    "allowed_relative_roots": ["min5", "min15"],
+    "inventory_enumeration": "For each allowed cadence and product, enumerate only direct children of <data_root>/<cadence> matching SHFE.<product>*.parquet, retain only filenames matching the bound identity regex, and bytewise-sort relative POSIX paths.",
+    "recursive_discovery": false,
+    "parent_or_sibling_discovery": false,
+    "symlink_escape": false,
+    "inventory_digest_algorithm": "sha256 of canonical compact JSON plus LF for the sorted paths relative to data_root, identical to the bound evidence builder",
+    "expected_inventories": [
+      {
+        "product": "au",
+        "cadence": "min5",
+        "source_alias": "external://quant-data/min5/SHFE.au-options",
+        "source_files": 1768,
+        "source_inventory_sha256": "sha256:a70915067a34ca9c30fb295ad9a57c992fe30b0d655ab42b1375e65c029fd633",
+        "expected_eligible_units": 10779
+      },
+      {
+        "product": "ag",
+        "cadence": "min5",
+        "source_alias": "external://quant-data/min5/SHFE.ag-options",
+        "source_files": 3167,
+        "source_inventory_sha256": "sha256:6b8e399a4167ef253b4a67c4f5a9ec47a5014027e7f7340fac0f73b84df383e8",
+        "expected_eligible_units": 14975
+      },
+      {
+        "product": "au",
+        "cadence": "min15",
+        "source_alias": "external://quant-data/min15/SHFE.au-options",
+        "source_files": 1768,
+        "source_inventory_sha256": "sha256:68ed0dbf2d9007aa690f3cbf7b61afb359c0244c1703ab27bc2a392089816c01",
+        "expected_eligible_units": 8804
+      },
+      {
+        "product": "ag",
+        "cadence": "min15",
+        "source_alias": "external://quant-data/min15/SHFE.ag-options",
+        "source_files": 3167,
+        "source_inventory_sha256": "sha256:bb01d51790165df74da880ceffea457e77a47b896f374424de81dda66f6683b8",
+        "expected_eligible_units": 12521
+      }
+    ]
+  },
+  "coverage_and_missing_semantics": {
+    "inventory_states": [
+      "verified_complete",
+      "missing_expected_file",
+      "unexpected_inventory_file",
+      "unreadable_expected_file",
+      "missing_required_schema"
+    ],
+    "verified_complete": "Observed source-file count and inventory digest equal the bound values, and every expected file is readable with the bound required schema.",
+    "missing_expected_file": "The observed count or inventory digest shows an expected path is absent. Abort without writing a membership artifact.",
+    "unexpected_inventory_file": "The observed count or inventory digest shows inventory drift. Abort without writing a membership artifact.",
+    "unreadable_expected_file": "Any expected file cannot be opened or read. Abort without writing a membership artifact.",
+    "missing_required_schema": "Any expected file lacks a column required by the bound eligibility contract. Abort without writing a membership artifact.",
+    "no_rows_in_frozen_window": "A verified readable file with no qualifying local date contributes zero units; it is not imputed or substituted.",
+    "ineligible_unit": "A present contract-date-cadence unit failing any bound eligibility predicate is omitted from members and counted only in aggregate reconciliation.",
+    "eligible_count_reconciliation": "Each product-cadence member count must exactly equal expected_eligible_units; any difference aborts without writing.",
+    "partial_output": false,
+    "imputation": false,
+    "cadence_substitution": false,
+    "contract_substitution": false
+  },
+  "membership_output": {
+    "schema_version": "pa_feitian_m6_liquid_premium_membership_v1",
+    "artifact_path": "doc/repro/pa-feitian-m6-unit-membership-2026-07-12/liquid_premium_membership_v1.json",
+    "member_fields_exactly": [
+      "product",
+      "local_date",
+      "underlying_month",
+      "option_type",
+      "strike",
+      "cadence",
+      "source_alias"
+    ],
+    "unit_key": [
+      "product",
+      "local_date",
+      "underlying_month",
+      "option_type",
+      "strike",
+      "cadence",
+      "source_alias"
+    ],
+    "join_key_for_explicit_pa_alerts": ["product", "local_date"],
+    "total_order": [
+      "local_date ascending",
+      "product ascending",
+      "underlying_month numeric ascending",
+      "option_type C before P",
+      "strike numeric ascending",
+      "cadence min5 before min15",
+      "source_alias bytewise ascending"
+    ],
+    "strike_encoding": "Canonical source identity string; numeric ordering uses exact decimal comparison and does not rewrite identity.",
+    "duplicate_unit_key": "fatal identity collision",
+    "eligible_members_only": true,
+    "json_sort_keys": true,
+    "public_safe": true,
+    "absolute_paths": false,
+    "local_usernames": false,
+    "credentials_or_tokens": false,
+    "raw_rows": false,
+    "ohlc_or_price_fields": false,
+    "premium_paths": false,
+    "option_outcomes": false,
+    "rankings": false,
+    "selected_contract": false,
+    "performance_fields": false
+  },
+  "required_verification": [
+    "Verify both bound input bytes before external access.",
+    "Verify exact inventory count and digest for every product-cadence partition.",
+    "Verify every member passes the unchanged bound eligibility rule using only rows at or before its cutoff.",
+    "Verify appending post-cutoff rows cannot change member identities.",
+    "Verify missing, extra, unreadable or schema-incompatible expected files fail closed without partial output.",
+    "Verify member keys are unique, complete, deterministically ordered and reconcile to all four bound eligible counts.",
+    "Verify the public artifact contains only the exact member fields and public-safe aggregate metadata."
+  ],
+  "guardrails": {
+    "eligibility_membership_only": true,
+    "external_repositories_or_data_modified": false,
+    "strict_decision_time_cutoff": true,
+    "future_row_invariance_required": true,
+    "outcome_dependent_filter": false,
+    "threshold_tuning": false,
+    "pa_alert_changes": false,
+    "bare_k_or_dd_line_confirmation": false,
+    "premium_path_reading": false,
+    "greeks_or_delta": false,
+    "expiry_or_dte_dependency": false,
+    "bid_or_ask_dependency": false,
+    "model_pricing": false,
+    "pnl_or_win_rate": false,
+    "contract_ranking_or_selection": false,
+    "m7": false,
+    "m8": false,
+    "execution": false
+  },
+  "limitations": [
+    "Finalized historical rows may contain later revisions and do not establish contemporaneous operational observability.",
+    "Eligibility membership does not expose or evaluate any option price, premium path, outcome or executable quote.",
+    "Membership does not select a contract or establish a bare-K or DD-line confirmation.",
+    "A faithful authentic machine-testable Feitian bare-K or DD-line rule remains a separate blocker."
+  ],
+  "promotion": {
+    "per_unit_eligibility_membership": true,
+    "premium_path_observation": false,
+    "faithful_feitian_confirmation": false,
+    "performance_research": false,
+    "m7": false,
+    "m8": false,
+    "execution": false,
+    "next_gate": "Bind this membership artifact with the explicit PA alert corpus, but do not inspect a premium path until an authentic machine-testable bare-K or DD-line definition is recovered and a successor observation contract is frozen."
+  }
+}
