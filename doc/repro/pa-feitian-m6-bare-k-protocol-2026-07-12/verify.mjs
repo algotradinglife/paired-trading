@@ -41,12 +41,33 @@ const expectedInputs = new Map([
   ["public://paired-trading/m6/underlying-signal-corpus-v1", "sha256:cb3407910dd15f4327a2465da3a00d6797f81fd9124066695887ddb53d3bf080"],
   ["public://paired-trading/m6/liquid-premium-eligibility-evidence-v1", "sha256:4ac7519fafe713a6f74e079d80acb7e4c2cce885ae946ac8083df95e0a6e7ab4"],
 ]);
+const inputPaths = new Map([
+  ["public://paired-trading/m6/underlying-signal-corpus-v1", {
+    artifact: "doc/repro/pa-feitian-m6-underlying-corpus-2026-07-12/underlying_signal_corpus_v1.json",
+    contract: "docs/research/pa-feitian-m6-underlying-corpus-contract-v1.json",
+  }],
+  ["public://paired-trading/m6/liquid-premium-eligibility-evidence-v1", {
+    artifact: "doc/repro/pa-feitian-m6-liquid-premium-2026-07-12/liquid_premium_evidence_v1.json",
+    contract: "docs/research/pa-feitian-m6-liquid-premium-eligibility-contract-v1.json",
+  }],
+]);
 for (const binding of contract.input_bindings) {
+  const paths = inputPaths.get(binding.alias);
+  assert.ok(paths, `no committed path mapping for ${binding.alias}`);
+  const actualArtifactSha256 = sha256(path.join(root, paths.artifact));
+  const actualContractSha256 = sha256(path.join(root, paths.contract));
   assert.equal(binding.sha256, expectedInputs.get(binding.alias));
+  assert.equal(binding.sha256, actualArtifactSha256, `${binding.alias} artifact bytes differ from protocol binding`);
+  assert.equal(binding.contract_sha256, actualContractSha256, `${binding.alias} contract bytes differ from protocol binding`);
   assert.equal(binding.required_label, "retrospective_finalized");
 }
 for (const verified of evidence.bound_input_verification) {
+  const paths = inputPaths.get(verified.alias);
+  assert.ok(paths, `no committed path mapping for ${verified.alias}`);
+  const actualArtifactSha256 = sha256(path.join(root, paths.artifact));
   assert.equal(verified.expected_sha256, expectedInputs.get(verified.alias));
+  assert.equal(verified.expected_sha256, actualArtifactSha256);
+  assert.equal(verified.observed_sha256, actualArtifactSha256);
   assert.equal(verified.observed_sha256, verified.expected_sha256);
   assert.equal(verified.hash_verified, true);
   assert.equal(verified.label_verified, "retrospective_finalized");
@@ -92,15 +113,20 @@ assert.equal(classify({ explicitAlert: true, direction: "bottom_or_bullish", uni
 
 const cadenceRank = new Map([["min5", 0], ["min15", 1]]);
 const units = [
-  { decision: "2025-01-02T07:00:00Z", product: "ag", alert: "a", month: 2506, side: "C", strike: 8000, cadence: "min15", source: "b" },
-  { decision: "2025-01-02T07:00:00Z", product: "ag", alert: "a", month: 2506, side: "C", strike: 8000, cadence: "min5", source: "b" },
-  { decision: "2025-01-02T07:00:00Z", product: "ag", alert: "a", month: 2506, side: "C", strike: 7900, cadence: "min5", source: "a" },
+  { decision: "2025-01-02T07:00:00Z", product: "ag", alert: "a", month: 2506, side: "C", strike: 8000, cadence: "min15", source_alias: "public://b" },
+  { decision: "2025-01-02T07:00:00Z", product: "ag", alert: "a", month: 2506, side: "C", strike: 8000, cadence: "min5", source_alias: "public://é" },
+  { decision: "2025-01-02T07:00:00Z", product: "ag", alert: "a", month: 2506, side: "C", strike: 8000, cadence: "min5", source_alias: "public://z" },
+  { decision: "2025-01-02T07:00:00Z", product: "ag", alert: "a", month: 2506, side: "C", strike: 7900, cadence: "min5", source_alias: "public://a" },
 ];
 const order = (a, b) =>
   a.decision.localeCompare(b.decision) || a.product.localeCompare(b.product) || a.alert.localeCompare(b.alert) ||
   a.month - b.month || a.side.localeCompare(b.side) || a.strike - b.strike ||
-  cadenceRank.get(a.cadence) - cadenceRank.get(b.cadence) || a.source.localeCompare(b.source);
-assert.deepEqual(units.toSorted(order).map((u) => `${u.strike}:${u.cadence}`), ["7900:min5", "8000:min5", "8000:min15"]);
+  cadenceRank.get(a.cadence) - cadenceRank.get(b.cadence) ||
+  Buffer.compare(Buffer.from(a.source_alias, "utf8"), Buffer.from(b.source_alias, "utf8"));
+assert.deepEqual(
+  units.toSorted(order).map((u) => `${u.strike}:${u.cadence}:${u.source_alias}`),
+  ["7900:min5:public://a", "8000:min5:public://z", "8000:min5:public://é", "8000:min15:public://b"],
+);
 
 const serialized = fs.readFileSync(evidencePath, "utf8");
 assert.doesNotMatch(serialized, /\/(?:home|Users)\//);
