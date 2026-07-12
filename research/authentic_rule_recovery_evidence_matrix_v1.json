@@ -1,0 +1,144 @@
+{
+  "schema_version": "authentic_rule_recovery_evidence_matrix_v1",
+  "contract_reference": {
+    "path": "research/authentic_rule_recovery_contract_v1.json",
+    "contract_id": "authentic_rule_recovery_contract_v1"
+  },
+  "authentic_rule_recovery_status": "blocked",
+  "faithful_bare_k_v1_emitted": false,
+  "decision": "The accessible local material is insufficient to emit an authentic, machine-testable Feitian bare-K rule. It supports a partial decision-chain narrative only.",
+  "source_inventory": [
+    {
+      "source_alias": "SRC-PT-DECISION-TREE-2026-06-17",
+      "repository_alias": "trade-philosopher",
+      "source_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a",
+      "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+      "public_safe_locator": "doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md",
+      "evidence_role": "Detailed oral-design summary; explicitly distinguishes fixed intent from later calibration and unresolved structure details."
+    },
+    {
+      "source_alias": "SRC-PT-XIAO-SYSTEM-2026-06-16",
+      "repository_alias": "trade-philosopher",
+      "source_revision": "900f8146be61e5235d7e754cd475733aed770fa8",
+      "file_sha256": "67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb",
+      "public_safe_locator": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
+      "evidence_role": "System inventory that labels confirmed, oral-design, and black-box portions separately."
+    },
+    {
+      "source_alias": "SRC-PAIRED-XIAO-SYSTEM-2026-06-16",
+      "repository_alias": "paired-trading",
+      "source_revision": "ac7e5bb882c533d213cfc2e5a06d261ed1918fce",
+      "file_sha256": "67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb",
+      "public_safe_locator": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
+      "evidence_role": "Paired-trading copy used to check the public decision-chain inventory."
+    },
+    {
+      "source_alias": "SRC-PAIRED-DEPLOYABLE-2026-06-16",
+      "repository_alias": "paired-trading",
+      "source_revision": "60e5372fdc96d3f0124e8afe502cac16669f3209",
+      "file_sha256": "de6ffce47ba40af07a455af9acff1d078f7e83829b2df49514dc3a2d8fc2a569",
+      "public_safe_locator": "doc/feitian-deployable-rules-2026-06-16.md",
+      "evidence_role": "A deployable research proposal that records parameter choices and caveats; it is not treated as an authentic rule source."
+    },
+    {
+      "source_alias": "SRC-PT-K-LINE-PROMPT",
+      "repository_alias": "trade-philosopher",
+      "source_revision": "385891fbdd75ec531e51b6e6db22a5892dba4246",
+      "file_sha256": "aa1b0a6dbb894c2dbf20f0e4430807d8e13ccdfed9dd7789a1fe9563ec916a2d",
+      "public_safe_locator": "prompts/pa/文件16-K线信号识别.txt",
+      "evidence_role": "Generic PA prompt material; it may clarify terminology but cannot authenticate Feitian-specific behavior."
+    }
+  ],
+  "dimension_results": [
+    {
+      "dimension": "chart_cadence_and_decision_timing",
+      "status": "ambiguous_source_supported",
+      "paraphrased_support": "The oral-design material identifies option daily K-bars as the intended structural reading cadence.",
+      "source_aliases": ["SRC-PT-DECISION-TREE-2026-06-17"],
+      "missing_machine_testable_details": ["bar-finalization timing", "session and holiday convention", "decision timestamp"]
+    },
+    {
+      "dimension": "long_directional_chain",
+      "status": "ambiguous_source_supported",
+      "paraphrased_support": "The material describes directional context followed by a preferred left-side low-line path and an alternate right-side descending-high break.",
+      "source_aliases": ["SRC-PT-DECISION-TREE-2026-06-17", "SRC-PT-XIAO-SYSTEM-2026-06-16"],
+      "missing_machine_testable_details": ["directional-context predicate", "alert-to-structure handoff", "complete entry ordering"]
+    },
+    {
+      "dimension": "short_directional_chain",
+      "status": "ambiguous_source_supported",
+      "paraphrased_support": "The material acknowledges call and put orientations but does not define a complete bearish geometric mirror.",
+      "source_aliases": ["SRC-PT-XIAO-SYSTEM-2026-06-16"],
+      "missing_machine_testable_details": ["bearish anchors", "bearish entry and invalidation rules", "symmetry policy"]
+    },
+    {
+      "dimension": "pivot_and_anchor_selection",
+      "status": "unresolved",
+      "paraphrased_support": "Sources name structural highs and lows but do not define a pivot detector, tie policy, touch count, or anchor replacement rule.",
+      "source_aliases": ["SRC-PT-DECISION-TREE-2026-06-17", "SRC-PT-XIAO-SYSTEM-2026-06-16"],
+      "missing_machine_testable_details": ["pivot predicate", "tie handling", "anchor selection", "anchor update rule"]
+    },
+    {
+      "dimension": "dd_trend_line_construction_and_projection",
+      "status": "ambiguous_source_supported",
+      "paraphrased_support": "DD is described as an extension of descending lows and the right-side line as an extension of descending highs.",
+      "source_aliases": ["SRC-PT-DECISION-TREE-2026-06-17"],
+      "missing_machine_testable_details": ["line fitting method", "projection convention", "minimum touches", "line update rule"]
+    },
+    {
+      "dimension": "touch_break_and_tolerance_semantics",
+      "status": "unresolved",
+      "paraphrased_support": "The sources distinguish a line touch from a break and refer to strict structure, without defining numeric or unit-free tolerances.",
+      "source_aliases": ["SRC-PT-DECISION-TREE-2026-06-17", "SRC-PT-XIAO-SYSTEM-2026-06-16"],
+      "missing_machine_testable_details": ["touch predicate", "break predicate", "buffer or tolerance", "evaluation bar field"]
+    },
+    {
+      "dimension": "candidate_confirmation_and_invalidation",
+      "status": "ambiguous_source_supported",
+      "paraphrased_support": "The narrative assigns candidate and structural-confirmation roles to left and right paths and calls for strict invalidation.",
+      "source_aliases": ["SRC-PT-DECISION-TREE-2026-06-17", "SRC-PT-XIAO-SYSTEM-2026-06-16"],
+      "missing_machine_testable_details": ["candidate K-bar definition", "confirmation timing", "invalidation threshold", "simultaneous-state ordering"]
+    },
+    {
+      "dimension": "one_b_two_b_and_k_line_quality",
+      "status": "unresolved",
+      "paraphrased_support": "The material gives 2B a higher-quality role and describes K-line strength as holistic, while expressly withholding a deterministic 1B/2B and quality definition.",
+      "source_aliases": ["SRC-PT-DECISION-TREE-2026-06-17", "SRC-PT-XIAO-SYSTEM-2026-06-16"],
+      "missing_machine_testable_details": ["1B definition", "2B definition", "quality dimensions", "scoring or adjudication rule"]
+    },
+    {
+      "dimension": "contract_and_option_selection_boundaries",
+      "status": "ambiguous_source_supported",
+      "paraphrased_support": "Sources describe shallow out-of-the-money naked options and broad expiry preferences, but document alternative and proposed conventions.",
+      "source_aliases": ["SRC-PT-XIAO-SYSTEM-2026-06-16", "SRC-PAIRED-DEPLOYABLE-2026-06-16"],
+      "missing_machine_testable_details": ["authoritative selection hierarchy", "expiration boundary", "direction-specific contract rule", "conflict handling"]
+    },
+    {
+      "dimension": "conflict_precedence_and_abstention",
+      "status": "unresolved",
+      "paraphrased_support": "A left-side preference is stated, but no full precedence or abstention ledger is supplied.",
+      "source_aliases": ["SRC-PT-DECISION-TREE-2026-06-17"],
+      "missing_machine_testable_details": ["positive and negative conflict order", "abstention conditions", "missing-data behavior"]
+    },
+    {
+      "dimension": "explicit_no_lookahead_constraints",
+      "status": "inferred_only",
+      "paraphrased_support": "Completed-bar evaluation is a necessary implementation discipline but is not specified as an authentic Feitian rule in the accessible material.",
+      "source_aliases": ["SRC-PT-K-LINE-PROMPT"],
+      "missing_machine_testable_details": ["authoritative decision-time rule", "permitted delayed confirmation", "label and outcome exclusions"]
+    }
+  ],
+  "minimum_missing_evidence": [
+    "Authoritative annotated examples that label 1B, 2B, and any higher-order structure on completed charts.",
+    "A rule or annotated chart set that fixes pivot anchors, line updates, projection, and touch or break tolerance.",
+    "A complete bearish decision chain or an explicit statement that it is not symmetric with the long chain.",
+    "A complete candidate, confirmation, invalidation, conflict, and abstention ordering at a declared decision time.",
+    "Authoritative contract-selection conventions where they are part of the original decision chain."
+  ],
+  "scope_boundary": {
+    "market_or_option_data_inspected": false,
+    "performance_or_outcome_claim": false,
+    "execution_or_live_work": false,
+    "operationalized_rule_promoted": false
+  }
+}
