@@ -1,0 +1,151 @@
+{
+  "schema_version": "pa_feitian_m6_option_input_audit_contract_v1",
+  "hermes_task": "t_4c2ae680",
+  "research_mode": "retrospective_finalized_capability_audit",
+  "purpose": "Inventory locally available AU/AG option inputs without evaluating, selecting, or proxying option legs.",
+  "predecessors": [
+    {
+      "name": "epistemic_replay_contract",
+      "path": "docs/research/pa-feitian-m6-epistemic-replay-contract-v1.json",
+      "sha256": "sha256:f6f3daa7a1dae99bc2e69a5a3471802173fad1f1333c814ec1152802592a0290"
+    },
+    {
+      "name": "underlying_corpus_contract",
+      "path": "docs/research/pa-feitian-m6-underlying-corpus-contract-v1.json",
+      "sha256": "sha256:e35d4567792a386270989b47af31d4e2e23d76b632eff92cabc6188f8ba37c34"
+    },
+    {
+      "name": "underlying_signal_corpus",
+      "path": "doc/repro/pa-feitian-m6-underlying-corpus-2026-07-12/underlying_signal_corpus_v1.json",
+      "sha256": "sha256:cb3407910dd15f4327a2465da3a00d6797f81fd9124066695887ddb53d3bf080"
+    }
+  ],
+  "window": {
+    "first_trading_date": "2025-01-02",
+    "last_trading_date": "2026-06-08",
+    "decision_local_time": "15:00:00",
+    "source_timezone": "Asia/Shanghai",
+    "timestamp_semantics_to_test": [
+      "timezone",
+      "period_start_or_end",
+      "exchange_trading_date",
+      "historical_availability"
+    ],
+    "current_time_discovery": false
+  },
+  "products": ["au", "ag"],
+  "external_roots": [
+    {
+      "root_id": "quant_data",
+      "runtime_binding": "QUANT_DATA_ROOT",
+      "access": "read_only",
+      "allowed_relative_roots": ["min5", "min15", "daily", "continuous"]
+    },
+    {
+      "root_id": "quant_repository",
+      "runtime_binding": "QUANT_REPO",
+      "access": "read_only",
+      "allowed_relative_roots": ["scripts", "src", "docs", "doc"]
+    }
+  ],
+  "inventory": {
+    "market_data_relative_roots": ["min5", "min15", "daily"],
+    "greeks_related_sources": [
+      "daily/*.greeks.parquet",
+      "continuous/SHFE.au0.option_ivskew.parquet",
+      "continuous/SHFE.ag0.option_ivskew.parquet"
+    ],
+    "contract_filename_regex": "^SHFE\\.(au|ag)([0-9]{4})([CP])([0-9]+(?:\\.[0-9]+)?)(?:\\.greeks)?\\.parquet$",
+    "contract_parse_fields": ["product", "underlying_month", "option_type", "strike"],
+    "ordering": ["relative_root", "product", "underlying_month", "option_type", "strike", "relative_path"],
+    "inspect": [
+      "relative_path",
+      "sha256",
+      "parquet_schema",
+      "row_count",
+      "minimum_observation_timestamp",
+      "maximum_observation_timestamp",
+      "rows_in_frozen_window",
+      "duplicate_timestamp_count",
+      "timestamp_ordering"
+    ],
+    "raw_source_bytes_committed": false,
+    "filesystem_metadata_as_availability_evidence": false
+  },
+  "capabilities": [
+    {
+      "name": "premium_bars_at_or_below_15_minutes",
+      "required_evidence": ["parsed_contract", "bar_interval_at_or_below_15_minutes", "decision_timestamp_truncation", "historical_availability"]
+    },
+    {
+      "name": "contract_and_maturity_lineage",
+      "required_evidence": ["parsed_contract", "underlying_month", "source_lineage", "decision_time_chain_membership"]
+    },
+    {
+      "name": "exact_exchange_expiry_and_dte",
+      "required_evidence": ["authoritative_exchange_expiry", "decision_timestamp", "declared_dte_convention"]
+    },
+    {
+      "name": "decision_time_delta",
+      "required_evidence": ["contract_bound_delta", "observation_timestamp", "historical_availability", "input_lineage"]
+    },
+    {
+      "name": "historical_bid_and_ask",
+      "required_evidence": ["contract_bound_bid", "contract_bound_ask", "observation_timestamp", "historical_availability"]
+    },
+    {
+      "name": "formal_pa_feitian_dd_line",
+      "required_evidence": ["versioned_formula", "input_fields", "bar_interval", "decision_rule", "source_reference"]
+    }
+  ],
+  "finding_states": ["data_present", "data_present_but_unverified", "missing"],
+  "positive_finding_ceiling": "data_present_but_unverified unless every required no-lookahead, availability, and lineage condition is explicitly proven",
+  "output": {
+    "schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+    "artifact_path": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+    "json_sort_keys": true,
+    "public_source_prefixes": ["external://quant-data/", "external://quant-repository/", "repository://paired-trading/"],
+    "absolute_paths_forbidden": true,
+    "local_names_forbidden": true,
+    "credentials_forbidden": true
+  },
+  "guardrails": {
+    "external_access_read_only": true,
+    "implicit_current_time": false,
+    "deterministic_inventory_order": true,
+    "proxy_or_imputation": false,
+    "legacy_four_event_control_as_performance_evidence": false,
+    "option_corpus_generation": false,
+    "evaluation": false,
+    "selection": false,
+    "policy_change": false,
+    "m7": false,
+    "m8": false,
+    "execution": false
+  },
+  "forbidden_evaluation_fields": [
+    "candidate",
+    "entry",
+    "exit",
+    "fill",
+    "leg",
+    "pnl",
+    "premium_return",
+    "profit",
+    "rank",
+    "recommendation",
+    "selected_contract",
+    "selection",
+    "signal_outcome",
+    "trade",
+    "win_rate"
+  ],
+  "promotion": {
+    "option_corpus": false,
+    "option_evaluation": false,
+    "strategy_screening": false,
+    "m7": false,
+    "m8": false,
+    "execution": false
+  }
+}
