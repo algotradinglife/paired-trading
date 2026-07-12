@@ -23,6 +23,10 @@ const eligibilityEvidencePath = path.join(
   "doc/repro/pa-feitian-m6-liquid-premium-2026-07-12/liquid_premium_evidence_v1.json",
 );
 const artifactPath = path.join(here, "liquid_premium_membership_v1.json");
+const contractRelativePath =
+  "docs/research/pa-feitian-m6-liquid-premium-membership-contract-v1.json";
+const artifactRelativePath =
+  "doc/repro/pa-feitian-m6-unit-membership-2026-07-12/liquid_premium_membership_v1.json";
 
 function readJson(filename) {
   return JSON.parse(fs.readFileSync(filename, "utf8"));
@@ -30,6 +34,20 @@ function readJson(filename) {
 
 function sha256(filename) {
   return `sha256:${crypto.createHash("sha256").update(fs.readFileSync(filename)).digest("hex")}`;
+}
+
+function sha256Bytes(value) {
+  return `sha256:${crypto.createHash("sha256").update(value).digest("hex")}`;
+}
+
+function git(args) {
+  return spawnSync("git", args, { cwd: repo, encoding: null });
+}
+
+function gitOutput(args) {
+  const result = git(args);
+  assert.equal(result.status, 0, result.stderr.toString() || result.stdout.toString());
+  return result.stdout;
 }
 
 function decimalParts(value) {
@@ -62,6 +80,38 @@ function compareMembers(left, right) {
 
 const contract = readJson(contractPath);
 const artifact = readJson(artifactPath);
+const artifactFields = [
+  "schema_version",
+  "hermes_task",
+  "research_mode",
+  "label",
+  "contract",
+  "bound_inputs",
+  "decision_cutoff",
+  "coverage",
+  "member_fields",
+  "members",
+  "limitations",
+  "promotion",
+];
+const coverageFields = [
+  "product",
+  "cadence",
+  "inventory_state",
+  "source_alias",
+  "source_files",
+  "source_inventory_sha256",
+  "source_content_manifest_sha256",
+  "contract_date_units",
+  "eligible_units",
+  "ineligible_units",
+];
+const coverageDimensions = [
+  ["au", "min5"],
+  ["ag", "min5"],
+  ["au", "min15"],
+  ["ag", "min15"],
+];
 assert.equal(contract.schema_version, "pa_feitian_m6_liquid_premium_membership_contract_v1");
 assert.equal(contract.hermes_task, "t_02ba3dea");
 assert.equal(contract.frozen_before_external_option_data_inspection, true);
@@ -79,12 +129,23 @@ assert.equal(contract.bound_inputs[1].sha256, sha256(eligibilityEvidencePath));
 assert.equal(artifact.contract.sha256, sha256(contractPath));
 assert.equal(artifact.contract.freeze_commit, "e81d283fac967db06932cd2bc3bdf5eeab8e8ef4");
 assert.equal(artifact.contract.frozen_before_external_option_data_inspection, true);
+const freezeCommit = artifact.contract.freeze_commit;
+assert.equal(
+  gitOutput(["rev-parse", "--verify", `${freezeCommit}^{commit}`]).toString().trim(),
+  freezeCommit,
+);
+assert.equal(
+  sha256Bytes(gitOutput(["show", `${freezeCommit}:${contractRelativePath}`])),
+  artifact.contract.sha256,
+);
+assert.notEqual(git(["cat-file", "-e", `${freezeCommit}:${artifactRelativePath}`]).status, 0);
 assert.deepEqual(artifact.bound_inputs, contract.bound_inputs);
 assert.equal(artifact.schema_version, "pa_feitian_m6_liquid_premium_membership_v1");
 assert.equal(artifact.hermes_task, "t_02ba3dea");
 assert.equal(artifact.label, "retrospective_finalized");
 assert.equal(artifact.decision_cutoff.inclusive_local_time, "15:00:00");
 assert.equal(artifact.decision_cutoff.post_cutoff_rows_excluded_before_eligibility, true);
+assert.deepEqual(Object.keys(artifact).sort(), [...artifactFields].sort());
 
 const memberFields = [
   "product",
@@ -97,6 +158,10 @@ const memberFields = [
 ];
 assert.deepEqual(artifact.member_fields, memberFields);
 assert.equal(artifact.members.length, 47079);
+assert.deepEqual(
+  artifact.coverage.map(({ product, cadence }) => [product, cadence]),
+  coverageDimensions,
+);
 const expectedCounts = new Map(
   contract.data_access_policy.expected_inventories.map((row) => [
     `${row.product}/${row.cadence}`,
@@ -104,6 +169,7 @@ const expectedCounts = new Map(
   ]),
 );
 for (const row of artifact.coverage) {
+  assert.deepEqual(Object.keys(row).sort(), [...coverageFields].sort());
   assert.equal(row.inventory_state, "verified_complete");
   assert.equal(row.eligible_units, expectedCounts.get(`${row.product}/${row.cadence}`));
   assert.equal(row.eligible_units + row.ineligible_units, row.contract_date_units);

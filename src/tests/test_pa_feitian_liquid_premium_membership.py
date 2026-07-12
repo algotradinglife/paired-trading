@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from datetime import date
 from pathlib import Path
 
@@ -8,6 +9,9 @@ import pandas as pd
 import pytest
 
 from engine.pa_feitian.liquid_premium_membership import (
+    ARTIFACT_FIELDS,
+    COVERAGE_DIMENSIONS,
+    COVERAGE_FIELDS,
     MEMBER_FIELDS,
     load_contract,
     read_file_units,
@@ -119,23 +123,37 @@ def test_missing_and_unexpected_inventory_fail_closed(tmp_path: Path) -> None:
 
 def test_artifact_rejects_non_allowlisted_member_field() -> None:
     contract = load_contract(CONTRACT_PATH)
-    counts = [row["expected_eligible_units"] for row in contract["data_access_policy"]["expected_inventories"]]
-    artifact = {
-        "schema_version": "pa_feitian_m6_liquid_premium_membership_v1",
-        "hermes_task": "t_02ba3dea",
-        "label": "retrospective_finalized",
-        "coverage": [
-            {"product": product, "cadence": cadence, "eligible_units": count}
-            for (product, cadence), count in zip(
-                [("au", "min5"), ("ag", "min5"), ("au", "min15"), ("ag", "min15")], counts
-            )
-        ],
-        "members": [],
-    }
+    artifact = json.loads(ARTIFACT_PATH.read_text())
+    artifact["members"] = []
     with pytest.raises(ValueError, match="reconcile"):
         validate_artifact(artifact, contract=contract)
     artifact["members"] = [{field: "x" for field in MEMBER_FIELDS} | {"close": 10}]
     with pytest.raises(ValueError, match="allowlist"):
+        validate_artifact(artifact, contract=contract)
+
+
+def test_artifact_rejects_injected_top_level_raw_field() -> None:
+    contract = load_contract(CONTRACT_PATH)
+    artifact = json.loads(ARTIFACT_PATH.read_text())
+    artifact["raw_rows"] = []
+    with pytest.raises(ValueError, match="artifact fields differ"):
+        validate_artifact(artifact, contract=contract)
+
+
+def test_artifact_rejects_injected_coverage_field() -> None:
+    contract = load_contract(CONTRACT_PATH)
+    artifact = json.loads(ARTIFACT_PATH.read_text())
+    artifact["coverage"][0]["close"] = 10.0
+    with pytest.raises(ValueError, match="coverage fields differ"):
+        validate_artifact(artifact, contract=contract)
+
+
+def test_artifact_rejects_coverage_dimension_drift() -> None:
+    contract = load_contract(CONTRACT_PATH)
+    artifact = json.loads(ARTIFACT_PATH.read_text())
+    artifact["coverage"] = deepcopy(artifact["coverage"])
+    artifact["coverage"][0]["product"] = "ag"
+    with pytest.raises(ValueError, match="coverage dimensions"):
         validate_artifact(artifact, contract=contract)
 
 
@@ -145,4 +163,9 @@ def test_committed_artifact_is_public_safe_and_reconciled() -> None:
     validate_artifact(artifact, contract=contract)
     assert len(artifact["members"]) == 47_079
     assert artifact["contract"]["freeze_commit"] == "e81d283fac967db06932cd2bc3bdf5eeab8e8ef4"
+    assert set(artifact) == set(ARTIFACT_FIELDS)
+    assert [
+        (row["product"], row["cadence"]) for row in artifact["coverage"]
+    ] == list(COVERAGE_DIMENSIONS)
+    assert all(set(row) == set(COVERAGE_FIELDS) for row in artifact["coverage"])
     assert all(set(member) == set(MEMBER_FIELDS) for member in artifact["members"])

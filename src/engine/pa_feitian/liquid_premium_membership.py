@@ -39,6 +39,33 @@ MEMBER_FIELDS = (
     "cadence",
     "source_alias",
 )
+ARTIFACT_FIELDS = (
+    "schema_version",
+    "hermes_task",
+    "research_mode",
+    "label",
+    "contract",
+    "bound_inputs",
+    "decision_cutoff",
+    "coverage",
+    "member_fields",
+    "members",
+    "limitations",
+    "promotion",
+)
+COVERAGE_FIELDS = (
+    "product",
+    "cadence",
+    "inventory_state",
+    "source_alias",
+    "source_files",
+    "source_inventory_sha256",
+    "source_content_manifest_sha256",
+    "contract_date_units",
+    "eligible_units",
+    "ineligible_units",
+)
+COVERAGE_DIMENSIONS = (("au", "min5"), ("ag", "min5"), ("au", "min15"), ("ag", "min15"))
 BOUND_PATHS = (
     "docs/research/pa-feitian-m6-liquid-premium-eligibility-contract-v1.json",
     "doc/repro/pa-feitian-m6-liquid-premium-2026-07-12/liquid_premium_evidence_v1.json",
@@ -317,10 +344,18 @@ def build_membership(
 
 
 def validate_artifact(artifact: dict[str, Any], *, contract: dict[str, Any]) -> None:
+    if set(artifact) != set(ARTIFACT_FIELDS) or len(artifact) != len(ARTIFACT_FIELDS):
+        raise ValueError("artifact fields differ from exact allowlist")
     if artifact.get("schema_version") != SCHEMA_VERSION or artifact.get("hermes_task") != TASK_ID:
         raise ValueError("unexpected membership artifact identity")
     if artifact.get("label") != "retrospective_finalized":
         raise ValueError("finalized-vintage label changed")
+    coverage = artifact["coverage"]
+    dimensions = [(row.get("product"), row.get("cadence")) for row in coverage]
+    if dimensions != list(COVERAGE_DIMENSIONS):
+        raise ValueError("coverage dimensions are incomplete or reordered")
+    if any(set(row) != set(COVERAGE_FIELDS) or len(row) != len(COVERAGE_FIELDS) for row in coverage):
+        raise ValueError("coverage fields differ from exact allowlist")
     members = artifact.get("members", [])
     if any(set(member) != set(MEMBER_FIELDS) or len(member) != len(MEMBER_FIELDS) for member in members):
         raise ValueError("member fields differ from exact allowlist")
@@ -333,7 +368,7 @@ def validate_artifact(artifact: dict[str, Any], *, contract: dict[str, Any]) -> 
         (row["product"], row["cadence"]): row["expected_eligible_units"]
         for row in contract["data_access_policy"]["expected_inventories"]
     }
-    observed_counts = {(row["product"], row["cadence"]): row["eligible_units"] for row in artifact["coverage"]}
+    observed_counts = {(row["product"], row["cadence"]): row["eligible_units"] for row in coverage}
     if observed_counts != expected_counts or sum(observed_counts.values()) != len(members):
         raise ValueError("member counts do not reconcile")
     encoded = canonical_json_bytes(artifact).decode()
@@ -349,6 +384,9 @@ def write_artifact(artifact: dict[str, Any], path: Path) -> None:
 
 __all__ = [
     "MEMBER_FIELDS",
+    "ARTIFACT_FIELDS",
+    "COVERAGE_DIMENSIONS",
+    "COVERAGE_FIELDS",
     "build_membership",
     "enumerate_inventory",
     "load_contract",
