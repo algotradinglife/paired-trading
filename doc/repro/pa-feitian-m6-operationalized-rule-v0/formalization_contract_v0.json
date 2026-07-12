@@ -1,0 +1,64 @@
+{
+  "artifact_type": "formalization_contract",
+  "contract_version": "operationalized_bare_k_v0",
+  "status_label": "operationalized_hypothesis_not_authentic",
+  "authentic_rule_recovery": {
+    "status": "unresolved",
+    "claim": "This contract does not recover, reproduce, certify, or complete an authentic Feitian or DD-line rule."
+  },
+  "purpose": "Bound a deterministic, auditable bare-K decision hypothesis derived only from local research statements and explicit provisional assumptions.",
+  "scope": {
+    "permitted_inputs": [
+      "synthetic OHLCV-like bare-K fixtures",
+      "local research statements read after this contract is committed",
+      "source provenance metadata",
+      "explicit provisional assumptions"
+    ],
+    "permitted_outputs": [
+      "deterministic context, candidate, confirmation, invalidation, abstain, and direction decisions",
+      "decision traces and verifier results on synthetic fixtures",
+      "source and assumption ledgers"
+    ],
+    "forbidden_inputs_or_outputs": [
+      "external market data",
+      "external option data",
+      "premium paths",
+      "performance or outcome claims",
+      "PnL, win rate, or tuning",
+      "fitting or parameter optimisation",
+      "execution instructions",
+      "bid/ask data",
+      "delta or Greeks",
+      "DTE",
+      "model pricing",
+      "future-bar observations"
+    ]
+  },
+  "non_anticipation_rule": "At decision index t, every rule input must be computed solely from the bar at t and bars with index less than t. A fixture verifier must reject any trace that cites a bar after t.",
+  "source_policy": {
+    "read_order": "Commit this contract before opening source research.",
+    "allowed_sources": "Read-only paired-trading and trade-philosopher research; source statements are recorded as paraphrased, public-safe claims rather than raw excerpts.",
+    "required_source_metadata": [
+      "source_alias",
+      "repository_alias",
+      "source_revision",
+      "file_sha256",
+      "public_safe_locator",
+      "use"
+    ],
+    "required_behavior_attribution": [
+      "id",
+      "behavior",
+      "source_aliases"
+    ],
+    "assumption_policy": "Any material behavior lacking exact support is recorded as a named provisional assumption with rationale, source gap, expected impact, and a testable alternative. Assumptions are never presented as authentic Feitian behavior."
+  },
+  "public_safety_rule": "Public artifacts must not contain absolute paths, local usernames, credentials, tokens, proprietary raw research excerpts, raw market or option rows, or outcome/performance data.",
+  "acceptance_requirements": [
+    "A deterministic bare-K rule surface defines context inputs, setup/candidate conditions, confirmation, invalidation, abstain/missing states, direction semantics, bar-close timing, observation window, and conflict precedence.",
+    "A source ledger and an assumption ledger identify every material behavior and its status.",
+    "Synthetic fixtures cover normal, invalidated, abstaining, missing, and conflict-precedence behavior.",
+    "Tests and a standalone verifier validate schema, provenance labels, non-anticipation, public-safety checks, and expected fixture decisions."
+  ],
+  "completion_gate": "The deliverable remains an operationalized hypothesis. Authentic-rule recovery remains unresolved until separately sourced and reviewed."
+}
