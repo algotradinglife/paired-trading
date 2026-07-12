@@ -1,0 +1,176 @@
+{
+  "schema_version": "pa_feitian_m6_bare_k_premium_path_protocol_v1",
+  "hermes_task": "t_49902c76",
+  "frozen_before_external_research_or_data_inspection": true,
+  "research_mode": "retrospective_finalized_protocol_only",
+  "purpose": "Define a deterministic, no-lookahead observation protocol joining finalized underlying alerts to eligible naked-option K-line units without computing results or inventing a Feitian rule.",
+  "input_bindings": [
+    {
+      "alias": "public://paired-trading/m6/underlying-signal-corpus-v1",
+      "schema_version": "pa_feitian_m6_underlying_signal_corpus_v1",
+      "sha256": "sha256:cb3407910dd15f4327a2465da3a00d6797f81fd9124066695887ddb53d3bf080",
+      "contract_sha256": "sha256:e35d4567792a386270989b47af31d4e2e23d76b632eff92cabc6188f8ba37c34",
+      "required_label": "retrospective_finalized"
+    },
+    {
+      "alias": "public://paired-trading/m6/liquid-premium-eligibility-evidence-v1",
+      "schema_version": "pa_feitian_m6_liquid_premium_evidence_v1",
+      "sha256": "sha256:4ac7519fafe713a6f74e079d80acb7e4c2cce885ae946ac8083df95e0a6e7ab4",
+      "contract_sha256": "sha256:abf2c9148a9dcc3e60e24d64721c5e24fd9bf8cd732b476658afaff109452ab0",
+      "required_label": "retrospective_finalized"
+    }
+  ],
+  "input_boundary": {
+    "only_bound_inputs_and_this_protocol_are_allowed": true,
+    "underlying_record_key": ["product", "trading_date"],
+    "premium_unit_key": ["product", "local_date", "underlying_month", "option_type", "strike", "cadence", "source_alias"],
+    "joined_key": ["product", "trading_date"],
+    "eligible_units_only": true,
+    "aggregate_eligibility_counts_do_not_prove_unit_membership": true,
+    "unbound_raw_rows_or_directory_discovery_forbidden": true,
+    "contract_or_unit_reselection_forbidden": true
+  },
+  "timestamp_semantics": {
+    "timezone": "Asia/Shanghai",
+    "underlying_decision_time_local_inclusive": "15:00:00",
+    "underlying_decision_time_utc": "07:00:00Z",
+    "underlying_source_labels": "timezone-naive local period-end labels normalized to UTC before comparison",
+    "premium_source_labels": "timezone-naive Asia/Shanghai period-end labels",
+    "decision_cutoff_rule": "Every alert field and every eligibility field must be computed only from timestamps less than or equal to that trading date's decision timestamp.",
+    "confirmation_clock_rule": "No post-decision confirmation window is authorized until an authentic, hash-pinned bare-K or DD-line rule defines its start, end, cadence and bar-completion semantics.",
+    "future_rows_allowed": false,
+    "implicit_current_time_allowed": false
+  },
+  "alert_and_side_rules": {
+    "pa_alert_is_not_bare_k_confirmation": true,
+    "alert_requirement": "The underlying input must explicitly carry a PA alert identity and direction. Descriptive bar direction, breakout, EMA alignment or any combination of them may not be converted into an alert.",
+    "direction_side_mapping": {
+      "bottom_or_bullish": "C",
+      "top_or_bearish": "P",
+      "flat_missing_conflicting_or_unknown": "abstain"
+    },
+    "side_mapping_role": "This mapping filters observation to the alert-consistent option side; it never ranks or chooses a contract.",
+    "multiple_alerts_same_key": "Preserve each distinct hash-pinned alert identity. Exact duplicate identities are invalid; conflicting directions each become abstain_conflicting_alert_direction."
+  },
+  "observation_order": {
+    "population_rule": "Observe every eligible unit matching the joined product/date and mapped option side; do not choose a strike or month.",
+    "total_order": [
+      "decision_timestamp_utc ascending",
+      "product ascending",
+      "alert_id ascending",
+      "underlying_month numeric ascending",
+      "option_type C before P",
+      "strike numeric ascending",
+      "cadence min5 before min15",
+      "source_alias bytewise ascending"
+    ],
+    "tie_rule": "Two units equal on the full premium_unit_key are an identity collision and invalidate that joined observation; source row order is timestamp ascending and duplicate timestamps invalidate the unit.",
+    "cross_cadence_rule": "Cadences remain distinct observations. Min15 is not substituted for missing min5 and min5 is not resampled to manufacture min15 eligibility.",
+    "price_rule": "Use only authentic OHLC fields from the bound eligible unit. No modeled, synthetic, interpolated or forward-filled price is permitted."
+  },
+  "bare_k_state_machine": {
+    "initial_state": "unresolved",
+    "terminal_states": [
+      "blocked_missing_explicit_pa_alert",
+      "blocked_missing_unit_membership",
+      "blocked_authentic_rule_unrecovered",
+      "invalid_identity_or_timestamp",
+      "abstain_direction",
+      "abstain_conflicting_alert_direction",
+      "abstain_no_eligible_unit",
+      "abstain_missing_required_bar",
+      "alert_only",
+      "confirmed_bare_k"
+    ],
+    "transition_order": [
+      "Validate the exact input hashes, schemas and retrospective_finalized labels; otherwise invalid_identity_or_timestamp.",
+      "Require an explicit PA alert identity and direction; otherwise blocked_missing_explicit_pa_alert.",
+      "Apply the frozen direction-side mapping; a non-directional value becomes abstain_direction and conflicting alerts become abstain_conflicting_alert_direction.",
+      "Require a hash-pinned per-unit eligibility membership record; aggregate counts alone become blocked_missing_unit_membership.",
+      "If no eligible unit matches the joined key and mapped side, emit abstain_no_eligible_unit.",
+      "Validate unit identity, unique ordered timestamps and strict cutoff; failures become invalid_identity_or_timestamp.",
+      "Require every bar named by the authentic rule; an absent bar becomes abstain_missing_required_bar with no fill or cadence substitution.",
+      "If no authentic rule package satisfies rule_recovery_gate, emit blocked_authentic_rule_unrecovered.",
+      "An explicit PA alert with valid eligible observations remains alert_only unless every frozen authentic confirmation predicate is satisfied.",
+      "confirmed_bare_k is reachable only by literal application of a rule package accepted by rule_recovery_gate; protocol implementations may not infer an equivalent rule."
+    ],
+    "invalidation_precedence": [
+      "invalid_identity_or_timestamp",
+      "blocked_missing_explicit_pa_alert",
+      "abstain_conflicting_alert_direction",
+      "abstain_direction",
+      "blocked_missing_unit_membership",
+      "abstain_no_eligible_unit",
+      "abstain_missing_required_bar",
+      "blocked_authentic_rule_unrecovered",
+      "alert_only",
+      "confirmed_bare_k"
+    ]
+  },
+  "rule_recovery_gate": {
+    "default_state": "blocked_authentic_rule_unrecovered",
+    "accepted_source_types": ["committed source file", "committed research note with exact algorithm", "verbatim primary rule definition"],
+    "required_binding_fields": ["public_safe_source_alias", "source_sha256", "source_revision", "exact_locator", "rule_identifier", "machine_testable_predicates", "cadence", "bar_completion_semantics", "confirmation_window", "invalidation_rules"],
+    "authenticity_requirement": "The source must explicitly identify the rule as Feitian bare-K or DD-line. Similar candle, swing, percent-distance or generic support rules are not equivalent.",
+    "ambiguity_rule": "Missing parameters, discretionary chart interpretation, contradictory definitions or an unavailable primary definition preserve the blocked state.",
+    "contract_immutability": "Research discovered after this freeze may document whether the gate is satisfied, but may not silently amend this protocol. A usable recovered rule requires a separately reviewed, versioned successor contract committed before observing premium paths."
+  },
+  "missing_data_rules": {
+    "missing_join_key": "abstain_no_eligible_unit",
+    "aggregate_only_eligibility": "blocked_missing_unit_membership",
+    "missing_rule_bar": "abstain_missing_required_bar",
+    "missing_or_duplicate_timestamp": "invalid_identity_or_timestamp",
+    "post_cutoff_only_bar": "Treat as missing; never admit the row.",
+    "imputation": "forbidden",
+    "cadence_substitution": "forbidden",
+    "contract_substitution": "forbidden"
+  },
+  "output_contract": {
+    "schema_version": "pa_feitian_m6_bare_k_protocol_evidence_v1",
+    "allowed_content": ["input hash verification", "source-rule recovery status", "capability and blocker states", "deterministic state-machine fixtures", "public-safe aliases and hashes", "limitations", "next gate"],
+    "premium_rows_or_paths": false,
+    "per_contract_observation_results": false,
+    "performance_fields": false,
+    "selection_artifact": false,
+    "public_safe": true,
+    "absolute_paths": false,
+    "local_usernames": false,
+    "credentials": false
+  },
+  "rejection_tests": [
+    "Reject a changed byte in either bound input.",
+    "Reject any underlying field or premium row timestamped after the decision cutoff.",
+    "Prove that appending a post-cutoff row cannot change any pre-cutoff state.",
+    "Reject conversion of descriptive underlying diagnostics into a PA alert.",
+    "Reject aggregate eligibility evidence as proof of a specific unit's membership.",
+    "Reject duplicate unit identities or duplicate premium timestamps.",
+    "Reject missing-bar fill, interpolation, resampling or cadence substitution.",
+    "Reject strike or month ranking and any one-contract tie winner.",
+    "Reject confirmed_bare_k when the authentic rule gate is blocked.",
+    "Reject any output outside the protocol-evidence allowlist."
+  ],
+  "guardrails": {
+    "strict_decision_time_cutoff": true,
+    "retrospective_finalized_label_preserved": true,
+    "deterministic_rerun_required": true,
+    "future_row_invariance_required": true,
+    "proxy_or_imputation": false,
+    "model_pricing": false,
+    "greeks_or_delta": false,
+    "expiry_or_dte_dependency": false,
+    "bid_or_ask_dependency": false,
+    "outcomes_or_performance": false,
+    "threshold_tuning": false,
+    "contract_selection": false,
+    "m7": false,
+    "m8": false,
+    "execution": false
+  },
+  "promotion": {
+    "protocol_frozen": true,
+    "premium_path_observation": false,
+    "faithful_feitian_confirmation": false,
+    "performance_research": false,
+    "next_gate": "Publish protocol-only evidence. Then separately supply hash-pinned explicit PA alerts, per-unit eligible membership and an authentic machine-testable bare-K or DD-line definition; freeze a successor contract before reading any premium path."
+  }
+}
