@@ -1,0 +1,132 @@
+{
+  "classification": {
+    "exact_expiry_dependency": "none",
+    "name": "exploratory_liquid_premium_ohlc",
+    "quote_or_greeks_dependency": "none",
+    "thresholds_chosen_from_outcomes": false,
+    "thresholds_frozen_before_source_inspection": true
+  },
+  "contract": {
+    "path": "docs/research/pa-feitian-m6-liquid-premium-eligibility-contract-v1.json",
+    "sha256": "sha256:abf2c9148a9dcc3e60e24d64721c5e24fd9bf8cd732b476658afaff109452ab0"
+  },
+  "coverage": [
+    {
+      "cadence": "min5",
+      "contract_date_units": 196996,
+      "eligible_units": 10779,
+      "failure_reason_counts": {
+        "excessive_final_hour_gap": 31333,
+        "insufficient_final_hour_grid_coverage": 31333,
+        "missing_exact_cutoff_bar": 32691,
+        "open_interest_below_500": 178335,
+        "session_turnover_not_positive": 116328,
+        "session_volume_below_100": 181831
+      },
+      "ineligible_units": 186217,
+      "product": "au",
+      "source": "external://quant-data/min5/SHFE.au-options",
+      "source_files": 1768,
+      "source_inventory_sha256": "sha256:a70915067a34ca9c30fb295ad9a57c992fe30b0d655ab42b1375e65c029fd633",
+      "source_rows_after_cutoff_excluded": 5770512,
+      "source_rows_at_or_before_cutoff": 12452530
+    },
+    {
+      "cadence": "min5",
+      "contract_date_units": 301220,
+      "eligible_units": 14975,
+      "failure_reason_counts": {
+        "excessive_final_hour_gap": 47045,
+        "insufficient_final_hour_grid_coverage": 47045,
+        "missing_exact_cutoff_bar": 48013,
+        "open_interest_below_500": 276988,
+        "session_turnover_not_positive": 199657,
+        "session_volume_below_100": 279130
+      },
+      "ineligible_units": 286245,
+      "product": "ag",
+      "source": "external://quant-data/min5/SHFE.ag-options",
+      "source_files": 3167,
+      "source_inventory_sha256": "sha256:6b8e399a4167ef253b4a67c4f5a9ec47a5014027e7f7340fac0f73b84df383e8",
+      "source_rows_after_cutoff_excluded": 8811648,
+      "source_rows_at_or_before_cutoff": 19078991
+    },
+    {
+      "cadence": "min15",
+      "contract_date_units": 196996,
+      "eligible_units": 8804,
+      "failure_reason_counts": {
+        "excessive_final_hour_gap": 31333,
+        "insufficient_final_hour_grid_coverage": 56261,
+        "missing_exact_cutoff_bar": 56261,
+        "open_interest_below_500": 178335,
+        "session_turnover_not_positive": 116359,
+        "session_volume_below_100": 181840
+      },
+      "ineligible_units": 188192,
+      "product": "au",
+      "source": "external://quant-data/min15/SHFE.au-options",
+      "source_files": 1768,
+      "source_inventory_sha256": "sha256:68ed0dbf2d9007aa690f3cbf7b61afb359c0244c1703ab27bc2a392089816c01",
+      "source_rows_after_cutoff_excluded": 1947615,
+      "source_rows_at_or_before_cutoff": 4660223
+    },
+    {
+      "cadence": "min15",
+      "contract_date_units": 301220,
+      "eligible_units": 12521,
+      "failure_reason_counts": {
+        "excessive_final_hour_gap": 47045,
+        "insufficient_final_hour_grid_coverage": 90718,
+        "missing_exact_cutoff_bar": 90718,
+        "open_interest_below_500": 276988,
+        "session_turnover_not_positive": 199705,
+        "session_volume_below_100": 279154
+      },
+      "ineligible_units": 288699,
+      "product": "ag",
+      "source": "external://quant-data/min15/SHFE.ag-options",
+      "source_files": 3167,
+      "source_inventory_sha256": "sha256:bb01d51790165df74da880ceffea457e77a47b896f374424de81dda66f6683b8",
+      "source_rows_after_cutoff_excluded": 2979357,
+      "source_rows_at_or_before_cutoff": 7115257
+    }
+  ],
+  "hermes_task": "t_3bf64f0c",
+  "label": "retrospective_finalized",
+  "limitations": [
+    "Finalized historical rows may include later revisions and do not establish contemporaneous operational observability.",
+    "K-line activity does not establish executable prices, transaction costs or market impact.",
+    "This evidence does not select contracts or evaluate any premium path or strategy result.",
+    "A faithful frozen DD-line remains absent, so this is not faithful Feitian replication."
+  ],
+  "promotion": {
+    "execution": false,
+    "exploratory_liquid_premium_ohlc_lane": true,
+    "faithful_feitian": false,
+    "m7": false,
+    "m8": false,
+    "next_gate": "After this eligibility evidence is verified, separately freeze a premium-path research protocol using only eligible bare-K units; a faithful frozen DD-line remains required for faithful Feitian claims.",
+    "option_candidate_selection": false,
+    "premium_path_research": false,
+    "strategy_evaluation": false
+  },
+  "research_mode": "retrospective_finalized_liquid_premium_ohlc",
+  "schema_version": "pa_feitian_m6_liquid_premium_evidence_v1",
+  "source_context": [
+    {
+      "sha256": "sha256:9e0d905026a4a772c61bdb45d355e6b6bebb75e379e560f37fbefebd3dd862e3",
+      "source": "external://quant-repository/docs/strategy-data-access-guide.md"
+    },
+    {
+      "sha256": "sha256:61035f6058d5bd394da9b6f089453583bf6814ca531cb058cf5cf450a63c7cd0",
+      "source": "external://quant-repository/docs/strategy-instrument-quality-framework.md"
+    }
+  ],
+  "timestamp_cutoff": {
+    "future_rows_excluded_before_all_metrics": true,
+    "inclusive_local_time": "15:00:00",
+    "source_labels": "timezone_naive_period_end",
+    "timezone": "Asia/Shanghai"
+  }
+}

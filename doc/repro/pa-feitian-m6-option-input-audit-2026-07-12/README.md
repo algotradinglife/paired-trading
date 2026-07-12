@@ -1,5 +1,16 @@
 # PA / Feitian M6 historical option-input capability audit
 
+> **M6 bare-K boundary correction (Hermes `t_3bf64f0c`):** this packet remains
+> an immutable record of the earlier faithful-replication capability audit,
+> but its bid/ask, delta, exact-expiry/DTE, and append-only-lineage gates do not
+> apply to the separate exploratory historical premium-K-line lane. Bid/ask and
+> contract delta are absent and must not be proxied; finalized historical replay
+> is allowed with strict event-time truncation and explicit non-claims about
+> spreads, slippage, fills, execution, and operational observability. See the
+> frozen `pa-feitian-m6-liquid-premium-eligibility-contract-v1.json` and its
+> public evidence packet. A faithful frozen DD-line remains a separate missing
+> input for any faithful Feitian claim.
+
 Hermes task: `t_4c2ae680`
 
 The audit contract was committed before external data was inspected or this
