@@ -1,0 +1,59 @@
+{
+  "contract_id": "authentic_rule_recovery_contract_v1",
+  "contract_version": 1,
+  "target": "authentic_rule_recovery",
+  "target_exclusions": [
+    "strategy_performance"
+  ],
+  "permitted_public_evidence": [
+    "public_safe_paraphrase",
+    "content_hash",
+    "source_revision",
+    "relative_locator"
+  ],
+  "forbidden_inputs_and_outputs": [
+    "raw_proprietary_excerpt",
+    "local_path",
+    "username",
+    "credential",
+    "market_data",
+    "option_data",
+    "outcome",
+    "pnl",
+    "fitting",
+    "execution",
+    "bid_ask",
+    "delta_or_greeks",
+    "dte",
+    "live_work"
+  ],
+  "evidence_statuses": [
+    "exact_source_supported",
+    "ambiguous_source_supported",
+    "inferred_only",
+    "unresolved"
+  ],
+  "required_rule_dimensions": [
+    "chart_cadence_and_decision_timing",
+    "long_directional_chain",
+    "short_directional_chain",
+    "pivot_and_anchor_selection",
+    "dd_trend_line_construction_and_projection",
+    "touch_break_and_tolerance_semantics",
+    "candidate_confirmation_and_invalidation",
+    "one_b_two_b_and_k_line_quality",
+    "contract_and_option_selection_boundaries",
+    "conflict_precedence_and_abstention",
+    "explicit_no_lookahead_constraints"
+  ],
+  "completion_policy": {
+    "faithful_bare_k_v1": "Every required rule dimension must be exact_source_supported with an unambiguous machine-testable definition.",
+    "blocked": "If any required rule dimension fails that standard, report authentic_rule_recovery_status=blocked with the concrete minimum missing-evidence list.",
+    "fail_closed": true
+  },
+  "protected_artifact_policy": {
+    "artifact": "operationalized_bare_k_v0",
+    "may_alter": false,
+    "may_promote_to_authentic": false
+  }
+}
