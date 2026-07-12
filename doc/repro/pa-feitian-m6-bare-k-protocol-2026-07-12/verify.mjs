@@ -106,6 +106,11 @@ const serialized = fs.readFileSync(evidencePath, "utf8");
 assert.doesNotMatch(serialized, /\/(?:home|Users)\//);
 assert.doesNotMatch(serialized, /drwho1985/i);
 assert.ok(evidence.source_research_audit.sources.every((s) => s.alias.startsWith("public://") && /^sha256:[0-9a-f]{64}$/.test(s.sha256)));
+const genericCandleSource = evidence.source_research_audit.sources.find(
+  (s) => s.alias === "public://trade-philosopher/prompts/pa/文件16-K线信号识别.txt",
+);
+assert.ok(genericCandleSource, "generic candlestick source alias must match its actual filename");
+assert.equal(genericCandleSource.sha256, "sha256:aa1b0a6dbb894c2dbf20f0e4430807d8e13ccdfed9dd7789a1fe9563ec916a2d");
 assert.equal(evidence.guardrails.premium_rows_or_paths_read, false);
 assert.equal(evidence.guardrails.performance_result, false);
 assert.equal(evidence.guardrails.selection_artifact, false);

@@ -108,3 +108,12 @@ def test_public_packet_has_only_public_safe_source_aliases_and_hashes() -> None:
         assert prefix == "sha256"
         assert len(digest) == 64
         int(digest, 16)
+
+    generic_source = next(
+        source
+        for source in evidence["source_research_audit"]["sources"]
+        if source["alias"] == "public://trade-philosopher/prompts/pa/文件16-K线信号识别.txt"
+    )
+    assert generic_source["sha256"] == (
+        "sha256:aa1b0a6dbb894c2dbf20f0e4430807d8e13ccdfed9dd7789a1fe9563ec916a2d"
+    )

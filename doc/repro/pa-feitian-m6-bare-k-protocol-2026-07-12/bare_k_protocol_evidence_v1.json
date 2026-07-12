@@ -46,7 +46,7 @@
         "finding": "The design calls for holistic discretionary quality assessment and proposed helpers, but does not supply a complete frozen set of machine-testable Feitian predicates, confirmation-window semantics and invalidation parameters."
       },
       {
-        "alias": "public://trade-philosopher/prompts/pa/candlestick-signal-dictionary.txt",
+        "alias": "public://trade-philosopher/prompts/pa/文件16-K线信号识别.txt",
         "sha256": "sha256:aa1b0a6dbb894c2dbf20f0e4430807d8e13ccdfed9dd7789a1fe9563ec916a2d",
         "locators": ["generic signal bar", "generic confirmation bar"],
         "finding": "Generic PA candlestick definitions are not explicitly identified as a Feitian bare-K or DD-line rule and therefore fail the frozen authenticity requirement. No content from this source is promoted into the protocol."
