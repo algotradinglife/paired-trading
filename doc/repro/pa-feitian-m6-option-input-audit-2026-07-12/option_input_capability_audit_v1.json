@@ -1,0 +1,287 @@
+{
+  "availability_evidence": {
+    "decision_time_availability": "unproven",
+    "filesystem_timestamps_accepted": false,
+    "historical_acquisition_timestamp_present": false,
+    "observation_timestamps_present": true,
+    "period_start_or_end_declared_in_bar_schema": false,
+    "query_cutoff_present": false,
+    "timezone_declared_in_bar_schema": false
+  },
+  "capability_findings": [
+    {
+      "basis": "Parsed min5 and min15 contract files contain OHLCV, turnover and open interest, but timestamps are naive and historical availability, query cutoff and period semantics are absent.",
+      "capability": "premium_bars_at_or_below_15_minutes",
+      "state": "data_present_but_unverified"
+    },
+    {
+      "basis": "Filenames deterministically bind product, underlying month, option type and strike; decision-time chain membership and append-only source lineage are absent.",
+      "capability": "contract_and_maturity_lineage",
+      "state": "data_present_but_unverified"
+    },
+    {
+      "basis": "No audited bar or Greeks-related file contains exact exchange expiry or a declared DTE convention; underlying month is not an expiry date.",
+      "capability": "exact_exchange_expiry_and_dte",
+      "state": "missing"
+    },
+    {
+      "basis": "No contract-bound Greeks sibling exists. The date-only continuous IV-skew files retain aggregate 25-delta interpolation outputs, not each contract delta, maturity, inputs or availability timestamp.",
+      "capability": "decision_time_delta",
+      "state": "missing"
+    },
+    {
+      "basis": "No audited schema contains bid or ask.",
+      "capability": "historical_bid_and_ask",
+      "state": "missing"
+    },
+    {
+      "basis": "Repository references describe an explicitly approximate daily W-bottom implementation, but there is no frozen faithful formula with input fields, intraday cadence and decision rule.",
+      "capability": "formal_pa_feitian_dd_line",
+      "state": "missing"
+    }
+  ],
+  "contract": {
+    "path": "docs/research/pa-feitian-m6-option-input-audit-contract-v1.json",
+    "sha256": "sha256:03afcc9b5760eab50ea66f0163ef17e46c8ecc2f3924fd1ca9e7939142bc861b"
+  },
+  "decision": {
+    "faithful_option_corpus": "blocked",
+    "next_gate": "Freeze authoritative AU/AG contract metadata with exact exchange expiry and DTE convention; acquire contract-bound delta and historical bid/ask with append-only availability timestamps and query cutoffs; then freeze a faithful intraday DD-line formula before generating an option corpus.",
+    "option_corpus_generation_warranted_now": false
+  },
+  "guardrails": {
+    "deterministic_inventory_order": true,
+    "evaluation": false,
+    "execution": false,
+    "external_access_read_only": true,
+    "implicit_current_time": false,
+    "legacy_four_event_control_as_performance_evidence": false,
+    "m7": false,
+    "m8": false,
+    "option_corpus_generation": false,
+    "policy_change": false,
+    "proxy_or_imputation": false,
+    "selection": false
+  },
+  "hermes_task": "t_4c2ae680",
+  "inventory": {
+    "bar_roots": [
+      {
+        "au_ag_prefixed_parquet_candidates": 5040,
+        "duplicate_timestamp_rows": 0,
+        "files_by_product": {
+          "ag": 3167,
+          "au": 1768
+        },
+        "files_not_nondecreasing": 0,
+        "files_overlapping_frozen_window_by_product": {
+          "ag": 2905,
+          "au": 1565
+        },
+        "files_with_exact_1500_row_in_frozen_window": 4434,
+        "inventory_sha256": "sha256:f7047b55c733b224ccc4ccc17acf57da077ef6cf38873a415fb1b3cc343ef81d",
+        "maximum_observation_timestamp": "2026-06-17T15:00:00",
+        "minimum_observation_timestamp": "2023-11-22T00:00:00",
+        "parsed_option_files": 4935,
+        "rejected_non_option_or_sidecar_files": 105,
+        "relative_root": "min5",
+        "rows_by_product": {
+          "ag": 32444983,
+          "au": 23587772
+        },
+        "rows_in_frozen_window_by_product": {
+          "ag": 27892187,
+          "au": 18224302
+        },
+        "schema_variants": [
+          {
+            "file_count": 441,
+            "schema": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+          },
+          {
+            "file_count": 40,
+            "schema": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double,quality_flag:large_string,_fallback_close:double"
+          },
+          {
+            "file_count": 4454,
+            "schema": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+          }
+        ],
+        "source": "external://quant-data/min5/",
+        "timezone_aware_files": 0,
+        "unique_calendar_dates_in_frozen_window_by_product": {
+          "ag": 409,
+          "au": 409
+        }
+      },
+      {
+        "au_ag_prefixed_parquet_candidates": 5040,
+        "duplicate_timestamp_rows": 0,
+        "files_by_product": {
+          "ag": 3167,
+          "au": 1768
+        },
+        "files_not_nondecreasing": 0,
+        "files_overlapping_frozen_window_by_product": {
+          "ag": 2905,
+          "au": 1565
+        },
+        "files_with_exact_1500_row_in_frozen_window": 3706,
+        "inventory_sha256": "sha256:12201f83b024f75fd4e889ea33ceab53c2916f8f23d92111e37463704adfa931",
+        "maximum_observation_timestamp": "2026-06-17T15:00:00",
+        "minimum_observation_timestamp": "2023-11-22T00:00:00",
+        "parsed_option_files": 4935,
+        "rejected_non_option_or_sidecar_files": 105,
+        "relative_root": "min15",
+        "rows_by_product": {
+          "ag": 11747846,
+          "au": 8537804
+        },
+        "rows_in_frozen_window_by_product": {
+          "ag": 10095130,
+          "au": 6608258
+        },
+        "schema_variants": [
+          {
+            "file_count": 481,
+            "schema": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+          },
+          {
+            "file_count": 4454,
+            "schema": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+          }
+        ],
+        "source": "external://quant-data/min15/",
+        "timezone_aware_files": 0,
+        "unique_calendar_dates_in_frozen_window_by_product": {
+          "ag": 409,
+          "au": 409
+        }
+      },
+      {
+        "au_ag_prefixed_parquet_candidates": 5040,
+        "duplicate_timestamp_rows": 0,
+        "files_by_product": {
+          "ag": 3167,
+          "au": 1768
+        },
+        "files_not_nondecreasing": 0,
+        "files_overlapping_frozen_window_by_product": {
+          "ag": 2905,
+          "au": 1568
+        },
+        "files_with_exact_1500_row_in_frozen_window": 0,
+        "inventory_sha256": "sha256:1bd3360bc070ba0e8a3ac97fbd8a36c87105da864916daddfad6f03dce38c5eb",
+        "maximum_observation_timestamp": "2026-06-17T00:00:00",
+        "minimum_observation_timestamp": "2023-11-22T00:00:00",
+        "parsed_option_files": 4935,
+        "rejected_non_option_or_sidecar_files": 105,
+        "relative_root": "daily",
+        "rows_by_product": {
+          "ag": 313292,
+          "au": 226083
+        },
+        "rows_in_frozen_window_by_product": {
+          "ag": 266966,
+          "au": 175265
+        },
+        "schema_variants": [
+          {
+            "file_count": 4874,
+            "schema": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+          },
+          {
+            "file_count": 61,
+            "schema": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double,quality_flag:large_string,_fallback_close:double"
+          }
+        ],
+        "source": "external://quant-data/daily/",
+        "timezone_aware_files": 0,
+        "unique_calendar_dates_in_frozen_window_by_product": {
+          "ag": 344,
+          "au": 344
+        }
+      }
+    ],
+    "greeks_related_continuous": {
+      "files": [
+        {
+          "ask_field": false,
+          "bid_field": false,
+          "contract_bound_delta_field": false,
+          "expiry_field": false,
+          "maximum_observation_date": "2026-06-08",
+          "minimum_observation_date": "2024-07-01",
+          "observation_timestamp_field": false,
+          "product": "au",
+          "row_count": 468,
+          "rows_in_frozen_window": 343,
+          "schema": "date:date32[day],main_month:large_string,F:double,atm_iv:double,iv_25dc:double,iv_25dp:double,rr_25d:double,n_call:int64,n_put:int64",
+          "sha256": "sha256:6cc7d7ca8dd6013ba4c00bf72a372fe340affc16dbde45afe23d2da9d08176ba",
+          "source": "external://quant-data/continuous/SHFE.au0.option_ivskew.parquet"
+        },
+        {
+          "ask_field": false,
+          "bid_field": false,
+          "contract_bound_delta_field": false,
+          "expiry_field": false,
+          "maximum_observation_date": "2026-06-08",
+          "minimum_observation_date": "2024-07-01",
+          "observation_timestamp_field": false,
+          "product": "ag",
+          "row_count": 466,
+          "rows_in_frozen_window": 344,
+          "schema": "date:date32[day],main_month:large_string,F:double,atm_iv:double,iv_25dc:double,iv_25dp:double,rr_25d:double,n_call:int64,n_put:int64",
+          "sha256": "sha256:9d8eb906aa3eaae1450dba011a43b1bf5f7427dcc8004973aa925947e6bebfe3",
+          "source": "external://quant-data/continuous/SHFE.ag0.option_ivskew.parquet"
+        }
+      ],
+      "inventory_sha256": "sha256:8e67ff5e17a4cae55ae1ec12223a79e70467608178b88b8837499b8e3cd9924a"
+    },
+    "greeks_sibling_files": 0,
+    "parsed_contract_set_count": 4935,
+    "parsed_contract_set_sha256": "sha256:1763a5d704c4a03ce7a930db00cdbfd784edbeed86c23803c77c651e7e8408ec",
+    "same_parsed_contract_set_across_bar_roots": true
+  },
+  "promotion": {
+    "execution": false,
+    "m7": false,
+    "m8": false,
+    "option_corpus": false,
+    "option_evaluation": false,
+    "strategy_screening": false
+  },
+  "research_mode": "retrospective_finalized_capability_audit",
+  "schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+  "source_implementation_references": [
+    {
+      "sha256": "sha256:3eaf7db0637cc69c2a07eddfd0b69f02d1db6f590017f59fa894b9048fbcb37a",
+      "source": "repository://quant-repository/scripts/data_backfill/build_cn_option_ivskew.py"
+    },
+    {
+      "sha256": "sha256:b6b5e25033dfedc55aded1739ed0d32f12fc1ce83e17f126e7243c20cd2e8ee1",
+      "source": "repository://quant-repository/scripts/data_backfill/sync_feitian_option_5min.py"
+    },
+    {
+      "sha256": "sha256:35513737794348b7567d4cf29f56ccbab74a5f1e9211216468f51a47e65f1233",
+      "source": "repository://paired-trading/src/scripts/analyze_ag_options_ddline.py"
+    },
+    {
+      "sha256": "sha256:67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb",
+      "source": "repository://paired-trading/doc/xiao-feitian-options-timing-system-2026-06-16.md"
+    }
+  ],
+  "window": {
+    "current_time_discovery": false,
+    "decision_local_time": "15:00:00",
+    "first_trading_date": "2025-01-02",
+    "last_trading_date": "2026-06-08",
+    "source_timezone": "Asia/Shanghai",
+    "timestamp_semantics_to_test": [
+      "timezone",
+      "period_start_or_end",
+      "exchange_trading_date",
+      "historical_availability"
+    ]
+  }
+}
