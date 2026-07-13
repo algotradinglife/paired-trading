@@ -1,0 +1,136 @@
+{
+  "schema_version": "pa_feitian_m6_premium_k_response_protocol_v1",
+  "hermes_task": "t_7179dc3b",
+  "protocol_status": "frozen_before_external_market_data_access",
+  "study_label": "empirical_exploratory_non_authentic_non_executable",
+  "purpose": "Evaluate a fixed, causal, structural-label-to-premium-K response matrix without changing the M6-EXP-012 proxy semantics or inferring a Feitian rule.",
+  "read_only_bindings": {
+    "m6_exp_011": {
+      "protocol": {
+        "path": "docs/research/pa-feitian-m6-historical-swing-induction-protocol-v1.json",
+        "sha256": "sha256:ee36ca7b701c403a7a1d79fcc6877913fdb24119f878043bad4cf70b9f9c0c3d"
+      },
+      "atlas": {
+        "path": "doc/repro/pa-feitian-m6-historical-swing-induction-2026-07-12/historical_swing_atlas_v1.json",
+        "sha256": "sha256:f8f4d678625764accf8af65cf8198e8c33504b00f2b32488145ac83e79251df1"
+      }
+    },
+    "m6_exp_012": {
+      "protocol": {
+        "path": "docs/research/pa-feitian-m6-causal-swing-line-induction-protocol-v1.json",
+        "sha256": "sha256:0b7bf0324cfa10627916ec009281a462c2aa23504fbd11b9038790c48156aa5f"
+      },
+      "atlas": {
+        "path": "doc/repro/pa-feitian-m6-causal-swing-line-induction-2026-07-13/causal_swing_line_atlas_v1.json",
+        "sha256": "sha256:f65eadb4c5e6468b02fb01e717b4997af53ed5db0be57d82dcfa3d72006c9de8"
+      }
+    }
+  },
+  "source_boundary": {
+    "access": "read_only",
+    "data_root": "caller_provided_transient_data_root",
+    "data_root_serialization": "forbidden",
+    "corpus": "exactly the eight direct daily AU/AG option series selected by M6-EXP-011 and M6-EXP-012",
+    "products": ["AU", "AG"],
+    "series_per_product": 4,
+    "source_inventory_digest": "sha256:6ac907adc50eb23d946e063944166da94c7599484c95a9622d5d0e700620cfda",
+    "source_alias": "external://quant-data/daily/SHFE.au-ag-option-ohlc",
+    "new_contract_product_period_or_series_selection": "forbidden",
+    "raw_store_rescan_outside_protocol_authorized_inputs": "forbidden",
+    "public_source_identity": "public-safe aliases and hashes only"
+  },
+  "chronological_split": {
+    "timezone": "Asia/Shanghai",
+    "training_end_inclusive": "2025-12-31",
+    "holdout_start_inclusive": "2026-01-01",
+    "holdout_end_inclusive": "2026-06-30",
+    "holdout_runs": 1,
+    "holdout_reselection_or_tuning": "forbidden"
+  },
+  "causal_label_binding": {
+    "protocol": "M6-EXP-012 causal proxy semantics are applied unchanged at the close of each completed daily decision bar.",
+    "future_bars_for_labels": "forbidden",
+    "controls": ["abstain", "conflict"],
+    "controls_are_candidates": false
+  },
+  "response_matrix": {
+    "eligible_structural_labels": [
+      "long_left_touch",
+      "long_right_break",
+      "short_left_touch",
+      "short_right_break",
+      "long_invalidation",
+      "short_invalidation"
+    ],
+    "mappings": {
+      "long_left_touch": "upward",
+      "long_right_break": "upward",
+      "short_left_touch": "downward",
+      "short_right_break": "downward",
+      "long_invalidation": "downward",
+      "short_invalidation": "upward"
+    },
+    "horizons_completed_daily_bars": [1, 3, 5],
+    "response_formula": "direction_sign times (future_completed_close / decision_close minus 1), where direction_sign is +1 for upward and -1 for downward; no incomplete or substituted bar is admitted.",
+    "missing_future_bar_action": "exclude_that_label_horizon_observation",
+    "aggregation_unit": "all eligible observations from the fixed eight-series corpus; no series, product, label, horizon, or mapping is ranked"
+  },
+  "training_candidate_gate": {
+    "minimum_observations": 20,
+    "mean_signed_response": "strictly_positive",
+    "median_signed_response": "strictly_positive",
+    "clustered_bootstrap_ci": {
+      "cluster": "hashed_series_identity",
+      "resampling": "sample the observed series clusters with replacement and retain every eligible response in each selected cluster",
+      "replicates": 2000,
+      "seed": 7179,
+      "confidence_level": 0.95,
+      "statistic": "mean_signed_response",
+      "quantile_rule": "linear interpolation at p times (n minus 1) in the sorted replicate values",
+      "lower_bound_requirement": "greater_than_or_equal_to_zero"
+    },
+    "candidate_set_order": ["structural_label bytewise ascending", "horizon_completed_daily_bars numeric ascending"],
+    "candidate_set_frozen_before_holdout": true,
+    "no_survivor_action": "publish_negative_or_inconclusive_result_and_do_not_apply_holdout"
+  },
+  "public_artifact_contract": {
+    "required_labels": ["empirical", "exploratory", "non-authentic", "non-executable"],
+    "allowed": [
+      "protocol and binding hashes",
+      "public-safe source alias and inventory digest",
+      "aggregate matrix statistics",
+      "aggregate counts",
+      "candidate-freeze digest and boolean status",
+      "hashed specimen identities",
+      "limitations and verification status"
+    ],
+    "forbidden": [
+      "local paths",
+      "usernames",
+      "credentials",
+      "filenames",
+      "contract identifiers or contract text",
+      "raw OHLC",
+      "per-event response values",
+      "PnL",
+      "trade signal or recommendation",
+      "ranking",
+      "execution",
+      "bid ask",
+      "delta",
+      "Greeks",
+      "DTE"
+    ]
+  },
+  "required_verification": [
+    "all read-only binding hashes",
+    "source-inventory digest equality",
+    "M6-EXP-012 future-bar causality",
+    "fixed mapping and horizons",
+    "training and holdout separation",
+    "training candidate freeze before holdout",
+    "public-safety rejection and forbidden-field absence",
+    "deterministic byte-identical regeneration"
+  ],
+  "conclusion_boundary": "This study is empirical and exploratory only. It is non-authentic and non-executable; its structural classes and aggregate response summaries are neither a Feitian reconstruction nor a trade signal, recommendation, ranking, or execution instruction."
+}
