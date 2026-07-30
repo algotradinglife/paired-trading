@@ -1,0 +1,175 @@
+{
+  "schema_version": "pa_feitian_phase1_data_capability_contract_v1",
+  "contract_id": "pa_feitian_phase1_data_capability_2026_07_30",
+  "issue_number": 43,
+  "status": "frozen_without_market_outcome_access",
+  "audit_as_of_local_date": "2026-07-30",
+  "timezone": "Asia/Shanghai",
+  "purpose": "Publish a deterministic public-safe capability and freshness inventory from the explicit read-only candidate-universe interface audit without reading strategy outcomes or refreshing source data.",
+  "candidate_universe": [
+    {
+      "instrument_family": "SHFE.au",
+      "role": "continuity_candidate"
+    },
+    {
+      "instrument_family": "SHFE.ag",
+      "role": "continuity_candidate"
+    },
+    {
+      "instrument_family": "CZCE.TA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "instrument_family": "CZCE.MA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "instrument_family": "SHFE.cu",
+      "role": "non_czce_control"
+    },
+    {
+      "instrument_family": "DCE.i",
+      "role": "non_czce_control"
+    }
+  ],
+  "audit_cadences": [
+    "daily",
+    "hour",
+    "min15",
+    "min5"
+  ],
+  "freshness_policy": {
+    "fresh_max_calendar_lag_days": 7,
+    "stale_min_calendar_lag_days": 8,
+    "unknown_when_latest_observation_is_not_bound": true,
+    "implicit_current_time": false
+  },
+  "liquidity_proxy": {
+    "name": "rows_with_any_observed_nonzero_activity_rate",
+    "formula": "option_rows_with_any_nonzero_observed_activity / option_rows",
+    "inputs": [
+      "row_count",
+      "nonzero_volume",
+      "nonzero_turnover",
+      "nonzero_open_interest",
+      "freshness"
+    ],
+    "minimum_pass_rate": null,
+    "ranking_allowed": false,
+    "outcome_fields_allowed": false
+  },
+  "status_definitions": {
+    "usable": "All data capabilities required by the frozen experiment are hash-bound, fresh, and available at decision time.",
+    "stale": "Bound evidence has a latest observation more than seven calendar days before the fixed audit date.",
+    "incomplete": "Some declared cadence or required field evidence exists, but the declared capability surface is not complete.",
+    "unavailable": "No bound public-safe evidence establishes the capability for the instrument family.",
+    "data_blocked": "Evidence exists, but one or more fail-closed experiment requirements are missing or unproven."
+  },
+  "p1_exp_001": {
+    "registry_alias": "repository://paired-trading/phase1-hypothesis-registry-v1",
+    "experiment_id": "P1-EXP-001",
+    "required_universe": [
+      "SHFE.ag",
+      "SHFE.au"
+    ],
+    "required_capabilities": [
+      "immutable_hash_bound_decision_intent_and_snapshot",
+      "decision_time_underlying_close_with_timestamp",
+      "selected_option_call_close_strike_exact_expiry_and_timestamp",
+      "causal_product_local_signal_day_iv_history_with_availability",
+      "seventeenth_subsequent_completed_daily_option_close"
+    ],
+    "universe_changes_require_new_registry_version_and_experiment_id": true
+  },
+  "bound_inputs": [
+    {
+      "alias": "repository://paired-trading/phase1-hypothesis-registry-v1",
+      "path": "docs/research/pa-feitian-phase1-hypothesis-registry-v1.json",
+      "schema_version": "pa_feitian_phase1_hypothesis_registry_v1",
+      "sha256": "sha256:8658189af71f58e665d09af6c84ee49558b41ff33b79d4aafbcc0479c5eaab57"
+    },
+    {
+      "alias": "repository://paired-trading/phase1-hypothesis-registry-lock-v1",
+      "path": "docs/research/pa-feitian-phase1-hypothesis-registry-v1.lock.json",
+      "schema_version": "pa_feitian_phase1_hypothesis_registry_lock_v1",
+      "sha256": "sha256:ae7f2975ef44b53f56ee28a9f6b18ca3906c828a42d30ca90cd90c6968452ee7"
+    },
+    {
+      "alias": "repository://paired-trading/phase1-candidate-interface-audit-contract-v1",
+      "path": "docs/research/pa-feitian-phase1-candidate-interface-audit-contract-v1.json",
+      "schema_version": "pa_feitian_phase1_candidate_interface_audit_contract_v1",
+      "sha256": "sha256:83ed38538fea204b6567b6f3c35a0b928e15117f9009943e6055e87e55cc650a"
+    },
+    {
+      "alias": "repository://paired-trading/phase1-candidate-interface-audit-v1",
+      "path": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+      "schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+      "sha256": "sha256:becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795"
+    },
+    {
+      "alias": "repository://paired-trading/m6-option-input-capability-audit-v1",
+      "path": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+      "schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+      "sha256": "sha256:892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753"
+    },
+    {
+      "alias": "repository://paired-trading/m6-liquid-premium-evidence-v1",
+      "path": "doc/repro/pa-feitian-m6-liquid-premium-2026-07-12/liquid_premium_evidence_v1.json",
+      "schema_version": "pa_feitian_m6_liquid_premium_evidence_v1",
+      "sha256": "sha256:4ac7519fafe713a6f74e079d80acb7e4c2cce885ae946ac8083df95e0a6e7ab4"
+    },
+    {
+      "alias": "repository://paired-trading/m6-continuous-provenance-v1",
+      "path": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+      "schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+      "sha256": "sha256:a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3"
+    },
+    {
+      "alias": "repository://paired-trading/m6-underlying-signal-corpus-v1",
+      "path": "doc/repro/pa-feitian-m6-underlying-corpus-2026-07-12/underlying_signal_corpus_v1.json",
+      "schema_version": "pa_feitian_m6_underlying_signal_corpus_v1",
+      "sha256": "sha256:cb3407910dd15f4327a2465da3a00d6797f81fd9124066695887ddb53d3bf080"
+    },
+    {
+      "alias": "repository://paired-trading/m6-retrospective-replay-evidence-v1",
+      "path": "doc/repro/pa-feitian-m6-retrospective-replay-2026-07-12/retrospective_replay_evidence_v1.json",
+      "schema_version": "pa_feitian_m6_retrospective_replay_evidence_v1",
+      "sha256": "sha256:eaeb6c3fffa93115c4fc7a0f8b86abbabed5e776bdd8f3c139826150f51a12fb"
+    },
+    {
+      "alias": "repository://paired-trading/m6-raw-availability-blocker-v1",
+      "path": "doc/repro/pa-feitian-m6-raw-availability-2026-07-12/raw_availability_blocker_v1.json",
+      "schema_version": "pa_feitian_raw_availability_blocker_v1",
+      "sha256": "sha256:a0f9b91b86b33bfdf97d9fc325435a8b8f6cdf8925eb5464edbea9c3494939ee"
+    }
+  ],
+  "output": {
+    "schema_version": "pa_feitian_phase1_data_capability_inventory_v1",
+    "artifact_path": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_capability_inventory_v1.json",
+    "json_sort_keys": true,
+    "raw_rows": false,
+    "contract_identifiers": false,
+    "local_paths": false,
+    "local_usernames": false,
+    "source_filenames": false
+  },
+  "guardrails": {
+    "candidate_interface_audit_required": true,
+    "candidate_interface_external_access_read_only": true,
+    "inventory_builder_bound_aggregate_only": true,
+    "external_source_refresh": false,
+    "raw_market_data_mutation": false,
+    "implicit_current_time": false,
+    "cadence_resampling_or_substitution": false,
+    "strategy_outcome_access": false,
+    "performance_calculation": false,
+    "instrument_ranking": false,
+    "contract_selection": false,
+    "future_result_membership_change": false,
+    "bid_ask_synthesis": false,
+    "delta_synthesis": false,
+    "m7": false,
+    "m8": false,
+    "execution": false
+  }
+}
