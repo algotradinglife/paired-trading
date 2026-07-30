@@ -1,0 +1,5617 @@
+{
+  "audit_as_of_local_date": "2026-07-30",
+  "candidate_interface_evidence": {
+    "public_location": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+    "sha256": "sha256:becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+    "source_inventory_sha256": "sha256:9bbd6c94ca9bf8228c76cd2078513b82655990c88084297d710cd83c2f33ec8f"
+  },
+  "contract": {
+    "public_location": "docs/research/pa-feitian-m6-exploratory-swing-views-contract-v1.json",
+    "sha256": "sha256:ab61a0ac1418f07eba0860272e2205ea0ed8cfac5f1a67e9d5dbab4b91bfaa5c"
+  },
+  "evidence_separation": {
+    "exploration": "descriptive historical data views only",
+    "future_live_or_shadow": "not authorized or assessed",
+    "issue_51_unblocked": false,
+    "p1_exp_001_or_p1_exp_002_outcomes": "not accessed",
+    "preregistered_evidence": "not produced"
+  },
+  "family_window_summaries": [
+    {
+      "all_complete_windows": {
+        "clean_window_total_excursion_pct": {
+          "p20": 3.510439,
+          "p50": 5.513659,
+          "p80": 8.238342
+        },
+        "quality_counts": {
+          "clean": 405,
+          "invalid": 0,
+          "messy": 0
+        },
+        "window_count": 405
+      },
+      "anonymous_underlying_series_count": 39,
+      "freshness_status": "stale",
+      "instrument_family": "SHFE.au",
+      "latest_window_calendar_lag_days": 70,
+      "latest_window_observation_date": "2026-05-21",
+      "representative_eligible_clean_windows": {
+        "daily_option_coverage": {
+          "maximum_observation_date": "2026-06-16",
+          "minimum_observation_date": "2023-11-22"
+        },
+        "definition": "clean complete windows wholly inside audited daily option-premium coverage",
+        "share_of_all_clean_windows": 0.459259,
+        "total_excursion_pct": {
+          "p20": 4.74125,
+          "p50": 7.125828,
+          "p80": 13.218862
+        },
+        "window_count": 186
+      },
+      "role": "continuity_candidate"
+    },
+    {
+      "all_complete_windows": {
+        "clean_window_total_excursion_pct": {
+          "p20": 7.244354,
+          "p50": 10.453508,
+          "p80": 16.309131
+        },
+        "quality_counts": {
+          "clean": 651,
+          "invalid": 0,
+          "messy": 0
+        },
+        "window_count": 651
+      },
+      "anonymous_underlying_series_count": 63,
+      "freshness_status": "stale",
+      "instrument_family": "SHFE.ag",
+      "latest_window_calendar_lag_days": 66,
+      "latest_window_observation_date": "2026-05-25",
+      "representative_eligible_clean_windows": {
+        "daily_option_coverage": {
+          "maximum_observation_date": "2026-06-17",
+          "minimum_observation_date": "2023-12-29"
+        },
+        "definition": "clean complete windows wholly inside audited daily option-premium coverage",
+        "share_of_all_clean_windows": 0.490015,
+        "total_excursion_pct": {
+          "p20": 7.701257,
+          "p50": 12.267551,
+          "p80": 25.859188
+        },
+        "window_count": 319
+      },
+      "role": "continuity_candidate"
+    },
+    {
+      "all_complete_windows": {
+        "clean_window_total_excursion_pct": {
+          "p20": 6.718255,
+          "p50": 10.287908,
+          "p80": 15.228216
+        },
+        "quality_counts": {
+          "clean": 351,
+          "invalid": 5,
+          "messy": 23
+        },
+        "window_count": 379
+      },
+      "anonymous_underlying_series_count": 35,
+      "freshness_status": "stale",
+      "instrument_family": "CZCE.TA",
+      "latest_window_calendar_lag_days": 49,
+      "latest_window_observation_date": "2026-06-11",
+      "representative_eligible_clean_windows": {
+        "daily_option_coverage": {
+          "maximum_observation_date": "2026-06-22",
+          "minimum_observation_date": "2025-11-12"
+        },
+        "definition": "clean complete windows wholly inside audited daily option-premium coverage",
+        "share_of_all_clean_windows": 0.074074,
+        "total_excursion_pct": {
+          "p20": 10.558009,
+          "p50": 13.208553,
+          "p80": 20.643877
+        },
+        "window_count": 26
+      },
+      "role": "mainstream_candidate"
+    },
+    {
+      "all_complete_windows": {
+        "clean_window_total_excursion_pct": {
+          "p20": 6.498547,
+          "p50": 9.177489,
+          "p80": 14.301453
+        },
+        "quality_counts": {
+          "clean": 345,
+          "invalid": 3,
+          "messy": 31
+        },
+        "window_count": 379
+      },
+      "anonymous_underlying_series_count": 35,
+      "freshness_status": "stale",
+      "instrument_family": "CZCE.MA",
+      "latest_window_calendar_lag_days": 49,
+      "latest_window_observation_date": "2026-06-11",
+      "representative_eligible_clean_windows": {
+        "daily_option_coverage": {
+          "maximum_observation_date": "2026-06-22",
+          "minimum_observation_date": "2025-11-04"
+        },
+        "definition": "clean complete windows wholly inside audited daily option-premium coverage",
+        "share_of_all_clean_windows": 0.086957,
+        "total_excursion_pct": {
+          "p20": 8.749162,
+          "p50": 9.895464,
+          "p80": 18.577276
+        },
+        "window_count": 30
+      },
+      "role": "mainstream_candidate"
+    },
+    {
+      "all_complete_windows": {
+        "clean_window_total_excursion_pct": {
+          "p20": 4.200039,
+          "p50": 6.531935,
+          "p80": 10.85014
+        },
+        "quality_counts": {
+          "clean": 750,
+          "invalid": 0,
+          "messy": 0
+        },
+        "window_count": 750
+      },
+      "anonymous_underlying_series_count": 70,
+      "freshness_status": "stale",
+      "instrument_family": "SHFE.cu",
+      "latest_window_calendar_lag_days": 66,
+      "latest_window_observation_date": "2026-05-25",
+      "representative_eligible_clean_windows": {
+        "daily_option_coverage": {
+          "maximum_observation_date": "2026-06-16",
+          "minimum_observation_date": "2024-01-24"
+        },
+        "definition": "clean complete windows wholly inside audited daily option-premium coverage",
+        "share_of_all_clean_windows": 0.432,
+        "total_excursion_pct": {
+          "p20": 3.864811,
+          "p50": 6.935961,
+          "p80": 12.074405
+        },
+        "window_count": 324
+      },
+      "role": "non_czce_control"
+    },
+    {
+      "all_complete_windows": {
+        "clean_window_total_excursion_pct": {
+          "p20": 8.514633,
+          "p50": 13.264768,
+          "p80": 24.679266
+        },
+        "quality_counts": {
+          "clean": 662,
+          "invalid": 0,
+          "messy": 0
+        },
+        "window_count": 662
+      },
+      "anonymous_underlying_series_count": 74,
+      "freshness_status": "stale",
+      "instrument_family": "DCE.i",
+      "latest_window_calendar_lag_days": 69,
+      "latest_window_observation_date": "2026-05-22",
+      "representative_eligible_clean_windows": {
+        "daily_option_coverage": {
+          "maximum_observation_date": "2026-06-22",
+          "minimum_observation_date": "2025-07-16"
+        },
+        "definition": "clean complete windows wholly inside audited daily option-premium coverage",
+        "share_of_all_clean_windows": 0.164653,
+        "total_excursion_pct": {
+          "p20": 5.916405,
+          "p50": 7.157058,
+          "p80": 9.890476
+        },
+        "window_count": 109
+      },
+      "role": "non_czce_control"
+    }
+  ],
+  "interface_availability": [
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 185834,
+                "observation_count": 226083,
+                "selection_threshold": null,
+                "share": 0.821972
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T00:00:00",
+                "minimum_observation_timestamp": "2023-11-22T00:00:00"
+              },
+              "file_count": 1768,
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 226083,
+                "violation_rows": 106232
+              },
+              "row_count": 226083
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 8459,
+                "observation_count": 8462,
+                "selection_threshold": null,
+                "share": 0.999645
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-08T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "file_count": 40,
+              "freshness": {
+                "calendar_lag_days": 52,
+                "latest_observation": "2026-06-08T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 8462,
+                "violation_rows": 0
+              },
+              "row_count": 8462
+            }
+          }
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 2056599,
+                "observation_count": 2534389,
+                "selection_threshold": null,
+                "share": 0.811477
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:05:00",
+                "minimum_observation_timestamp": "2023-11-22T00:00:00"
+              },
+              "file_count": 1768,
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:05:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 2534389,
+                "violation_rows": 0
+              },
+              "row_count": 2534389
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 92059,
+                "observation_count": 95547,
+                "selection_threshold": null,
+                "share": 0.963494
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 40,
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 95547,
+                "violation_rows": 0
+              },
+              "row_count": 95547
+            }
+          }
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 6910333,
+                "observation_count": 8537804,
+                "selection_threshold": null,
+                "share": 0.809381
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:50:00",
+                "minimum_observation_timestamp": "2023-11-22T00:00:00"
+              },
+              "file_count": 1768,
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:50:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 8537804,
+                "violation_rows": 0
+              },
+              "row_count": 8537804
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 299608,
+                "observation_count": 315411,
+                "selection_threshold": null,
+                "share": 0.949897
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:30:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 40,
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:30:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 315411,
+                "violation_rows": 0
+              },
+              "row_count": 315411
+            }
+          }
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 19106461,
+                "observation_count": 23587772,
+                "selection_threshold": null,
+                "share": 0.810016
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:55:00",
+                "minimum_observation_timestamp": "2023-11-22T00:00:00"
+              },
+              "file_count": 1768,
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:55:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 23587772,
+                "violation_rows": 0
+              },
+              "row_count": 23587772
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 847109,
+                "observation_count": 927017,
+                "selection_threshold": null,
+                "share": 0.913801
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:30:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 40,
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:30:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 927017,
+                "violation_rows": 0
+              },
+              "row_count": 927017
+            }
+          }
+        }
+      ],
+      "instrument_family": "SHFE.au",
+      "role": "continuity_candidate"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 256087,
+                "observation_count": 313625,
+                "selection_threshold": null,
+                "share": 0.816539
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-17T00:00:00",
+                "minimum_observation_timestamp": "2023-12-29T00:00:00"
+              },
+              "file_count": 3170,
+              "freshness": {
+                "calendar_lag_days": 43,
+                "latest_observation": "2026-06-17T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 313625,
+                "violation_rows": 174034
+              },
+              "row_count": 313625
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 13408,
+                "observation_count": 13408,
+                "selection_threshold": null,
+                "share": 1.0
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-08T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "file_count": 65,
+              "freshness": {
+                "calendar_lag_days": 52,
+                "latest_observation": "2026-06-08T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 13408,
+                "violation_rows": 0
+              },
+              "row_count": 13408
+            }
+          }
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 2822898,
+                "observation_count": 3490603,
+                "selection_threshold": null,
+                "share": 0.808714
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-17T15:00:00",
+                "minimum_observation_timestamp": "2023-12-29T00:00:00"
+              },
+              "file_count": 3170,
+              "freshness": {
+                "calendar_lag_days": 43,
+                "latest_observation": "2026-06-17T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 3490603,
+                "violation_rows": 0
+              },
+              "row_count": 3490603
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 154695,
+                "observation_count": 156546,
+                "selection_threshold": null,
+                "share": 0.988176
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:05:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 65,
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:05:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 156546,
+                "violation_rows": 0
+              },
+              "row_count": 156546
+            }
+          }
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 9500460,
+                "observation_count": 11759813,
+                "selection_threshold": null,
+                "share": 0.807875
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-17T15:00:00",
+                "minimum_observation_timestamp": "2023-12-29T00:00:00"
+              },
+              "file_count": 3170,
+              "freshness": {
+                "calendar_lag_days": 43,
+                "latest_observation": "2026-06-17T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 11759813,
+                "violation_rows": 0
+              },
+              "row_count": 11759813
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 514005,
+                "observation_count": 528172,
+                "selection_threshold": null,
+                "share": 0.973177
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:30:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 65,
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:30:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 528172,
+                "violation_rows": 0
+              },
+              "row_count": 528172
+            }
+          }
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 26239408,
+                "observation_count": 32480047,
+                "selection_threshold": null,
+                "share": 0.807862
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-17T15:00:00",
+                "minimum_observation_timestamp": "2023-12-29T00:00:00"
+              },
+              "file_count": 3170,
+              "freshness": {
+                "calendar_lag_days": 43,
+                "latest_observation": "2026-06-17T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 32480047,
+                "violation_rows": 0
+              },
+              "row_count": 32480047
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 1373253,
+                "observation_count": 1456957,
+                "selection_threshold": null,
+                "share": 0.942549
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:30:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 65,
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:30:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 1456957,
+                "violation_rows": 0
+              },
+              "row_count": 1456957
+            }
+          }
+        }
+      ],
+      "instrument_family": "SHFE.ag",
+      "role": "continuity_candidate"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 22928,
+                "observation_count": 25494,
+                "selection_threshold": null,
+                "share": 0.899349
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T00:00:00",
+                "minimum_observation_timestamp": "2025-11-12T00:00:00"
+              },
+              "file_count": 379,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 25494,
+                "violation_rows": 0
+              },
+              "row_count": 25494
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 7712,
+                "observation_count": 7725,
+                "selection_threshold": null,
+                "share": 0.998317
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "file_count": 36,
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 7725,
+                "violation_rows": 63
+              },
+              "row_count": 7725
+            }
+          }
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 182024,
+                "observation_count": 202546,
+                "selection_threshold": null,
+                "share": 0.89868
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T22:05:00",
+                "minimum_observation_timestamp": "2025-11-12T09:05:00"
+              },
+              "file_count": 379,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T22:05:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 202546,
+                "violation_rows": 0
+              },
+              "row_count": 202546
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 53462,
+                "observation_count": 53554,
+                "selection_threshold": null,
+                "share": 0.998282
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 36,
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 53554,
+                "violation_rows": 0
+              },
+              "row_count": 53554
+            }
+          }
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 544042,
+                "observation_count": 605650,
+                "selection_threshold": null,
+                "share": 0.898278
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T22:50:00",
+                "minimum_observation_timestamp": "2025-11-12T09:05:00"
+              },
+              "file_count": 379,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T22:50:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 605650,
+                "violation_rows": 0
+              },
+              "row_count": 605650
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 183074,
+                "observation_count": 183403,
+                "selection_threshold": null,
+                "share": 0.998206
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 36,
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 183403,
+                "violation_rows": 0
+              },
+              "row_count": 183403
+            }
+          }
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 1579285,
+                "observation_count": 1759109,
+                "selection_threshold": null,
+                "share": 0.897776
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T23:00:00",
+                "minimum_observation_timestamp": "2025-11-12T09:05:00"
+              },
+              "file_count": 379,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T23:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 1759109,
+                "violation_rows": 0
+              },
+              "row_count": 1759109
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 533845,
+                "observation_count": 534817,
+                "selection_threshold": null,
+                "share": 0.998183
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 36,
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 534817,
+                "violation_rows": 0
+              },
+              "row_count": 534817
+            }
+          }
+        }
+      ],
+      "instrument_family": "CZCE.TA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 25302,
+                "observation_count": 29394,
+                "selection_threshold": null,
+                "share": 0.860788
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T00:00:00",
+                "minimum_observation_timestamp": "2025-11-04T00:00:00"
+              },
+              "file_count": 438,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 29394,
+                "violation_rows": 0
+              },
+              "row_count": 29394
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 7709,
+                "observation_count": 7725,
+                "selection_threshold": null,
+                "share": 0.997929
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "file_count": 36,
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 7725,
+                "violation_rows": 32
+              },
+              "row_count": 7725
+            }
+          }
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 200299,
+                "observation_count": 232886,
+                "selection_threshold": null,
+                "share": 0.860073
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T23:00:00",
+                "minimum_observation_timestamp": "2025-11-04T09:05:00"
+              },
+              "file_count": 438,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T23:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 232886,
+                "violation_rows": 0
+              },
+              "row_count": 232886
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 53503,
+                "observation_count": 53554,
+                "selection_threshold": null,
+                "share": 0.999048
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 36,
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 53554,
+                "violation_rows": 0
+              },
+              "row_count": 53554
+            }
+          }
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 598471,
+                "observation_count": 696238,
+                "selection_threshold": null,
+                "share": 0.859578
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T23:00:00",
+                "minimum_observation_timestamp": "2025-11-04T09:05:00"
+              },
+              "file_count": 438,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T23:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 696238,
+                "violation_rows": 0
+              },
+              "row_count": 696238
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 183214,
+                "observation_count": 183403,
+                "selection_threshold": null,
+                "share": 0.998969
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 36,
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 183403,
+                "violation_rows": 0
+              },
+              "row_count": 183403
+            }
+          }
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 1741588,
+                "observation_count": 2026260,
+                "selection_threshold": null,
+                "share": 0.859509
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T23:00:00",
+                "minimum_observation_timestamp": "2025-11-04T09:05:00"
+              },
+              "file_count": 438,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T23:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 2026260,
+                "violation_rows": 0
+              },
+              "row_count": 2026260
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 534254,
+                "observation_count": 534817,
+                "selection_threshold": null,
+                "share": 0.998947
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 36,
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 534817,
+                "violation_rows": 0
+              },
+              "row_count": 534817
+            }
+          }
+        }
+      ],
+      "instrument_family": "CZCE.MA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 145438,
+                "observation_count": 184196,
+                "selection_threshold": null,
+                "share": 0.789583
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T00:00:00",
+                "minimum_observation_timestamp": "2024-01-24T00:00:00"
+              },
+              "file_count": 1490,
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 184196,
+                "violation_rows": 91378
+              },
+              "row_count": 184196
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 15397,
+                "observation_count": 15397,
+                "selection_threshold": null,
+                "share": 1.0
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-08T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "file_count": 72,
+              "freshness": {
+                "calendar_lag_days": 52,
+                "latest_observation": "2026-06-08T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 15397,
+                "violation_rows": 0
+              },
+              "row_count": 15397
+            }
+          }
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 1517100,
+                "observation_count": 1940843,
+                "selection_threshold": null,
+                "share": 0.781671
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:05:00",
+                "minimum_observation_timestamp": "2024-01-24T00:00:00"
+              },
+              "file_count": 1490,
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:05:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 1940843,
+                "violation_rows": 0
+              },
+              "row_count": 1940843
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 116349,
+                "observation_count": 131518,
+                "selection_threshold": null,
+                "share": 0.884662
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T01:00:00",
+                "minimum_observation_timestamp": "2021-06-01T00:00:00"
+              },
+              "file_count": 72,
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T01:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 131518,
+                "violation_rows": 0
+              },
+              "row_count": 131518
+            }
+          }
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 4816131,
+                "observation_count": 6173891,
+                "selection_threshold": null,
+                "share": 0.78008
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:50:00",
+                "minimum_observation_timestamp": "2024-01-24T00:00:00"
+              },
+              "file_count": 1490,
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:50:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 6173891,
+                "violation_rows": 0
+              },
+              "row_count": 6173891
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 360618,
+                "observation_count": 450409,
+                "selection_threshold": null,
+                "share": 0.800646
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T01:00:00",
+                "minimum_observation_timestamp": "2021-06-01T00:00:00"
+              },
+              "file_count": 72,
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T01:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 450409,
+                "violation_rows": 0
+              },
+              "row_count": 450409
+            }
+          }
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 13175995,
+                "observation_count": 16904905,
+                "selection_threshold": null,
+                "share": 0.779418
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:55:00",
+                "minimum_observation_timestamp": "2024-01-24T00:00:00"
+              },
+              "file_count": 1490,
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:55:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 16904905,
+                "violation_rows": 0
+              },
+              "row_count": 16904905
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 907459,
+                "observation_count": 1319691,
+                "selection_threshold": null,
+                "share": 0.68763
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T01:00:00",
+                "minimum_observation_timestamp": "2021-06-01T00:00:00"
+              },
+              "file_count": 72,
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T01:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 1319691,
+                "violation_rows": 0
+              },
+              "row_count": 1319691
+            }
+          }
+        }
+      ],
+      "instrument_family": "SHFE.cu",
+      "role": "non_czce_control"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 7707,
+                "observation_count": 19756,
+                "selection_threshold": null,
+                "share": 0.390109
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T00:00:00",
+                "minimum_observation_timestamp": "2025-07-16T00:00:00"
+              },
+              "file_count": 214,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 19756,
+                "violation_rows": 10140
+              },
+              "row_count": 19756
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 14003,
+                "observation_count": 14003,
+                "selection_threshold": null,
+                "share": 1.0
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-08T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "file_count": 77,
+              "freshness": {
+                "calendar_lag_days": 52,
+                "latest_observation": "2026-06-08T00:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 14003,
+                "violation_rows": 0
+              },
+              "row_count": 14003
+            }
+          }
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 47982,
+                "observation_count": 128491,
+                "selection_threshold": null,
+                "share": 0.373427
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-10T15:00:00",
+                "minimum_observation_timestamp": "2025-07-15T21:00:00"
+              },
+              "file_count": 214,
+              "freshness": {
+                "calendar_lag_days": 50,
+                "latest_observation": "2026-06-10T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 128491,
+                "violation_rows": 0
+              },
+              "row_count": 128491
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 113546,
+                "observation_count": 121165,
+                "selection_threshold": null,
+                "share": 0.937119
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-05T23:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 77,
+              "freshness": {
+                "calendar_lag_days": 55,
+                "latest_observation": "2026-06-05T23:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 121165,
+                "violation_rows": 0
+              },
+              "row_count": 121165
+            }
+          }
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 157350,
+                "observation_count": 433664,
+                "selection_threshold": null,
+                "share": 0.362839
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-10T22:45:00",
+                "minimum_observation_timestamp": "2025-07-15T21:00:00"
+              },
+              "file_count": 214,
+              "freshness": {
+                "calendar_lag_days": 50,
+                "latest_observation": "2026-06-10T22:45:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 433664,
+                "violation_rows": 0
+              },
+              "row_count": 433664
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 336467,
+                "observation_count": 363143,
+                "selection_threshold": null,
+                "share": 0.926541
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-05T23:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 77,
+              "freshness": {
+                "calendar_lag_days": 55,
+                "latest_observation": "2026-06-05T23:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 363143,
+                "violation_rows": 0
+              },
+              "row_count": 363143
+            }
+          }
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 259492,
+                "observation_count": 1306685,
+                "selection_threshold": null,
+                "share": 0.198588
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T15:00:00",
+                "minimum_observation_timestamp": "2025-07-15T21:00:00"
+              },
+              "file_count": 214,
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T15:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 1306685,
+                "violation_rows": 0
+              },
+              "row_count": 1306685
+            },
+            "underlying": {
+              "activity": {
+                "definition": "rows_with_any_observed_nonzero_activity_rate",
+                "nonzero_observation_count": 866071,
+                "observation_count": 986928,
+                "selection_threshold": null,
+                "share": 0.877542
+              },
+              "available": true,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-05T23:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "file_count": 77,
+              "freshness": {
+                "calendar_lag_days": 55,
+                "latest_observation": "2026-06-05T23:00:00",
+                "status": "stale"
+              },
+              "ohlc_quality": {
+                "null_rows": 0,
+                "rows_checked": 986928,
+                "violation_rows": 0
+              },
+              "row_count": 986928
+            }
+          }
+        }
+      ],
+      "instrument_family": "DCE.i",
+      "role": "non_czce_control"
+    }
+  ],
+  "issue_number": 53,
+  "limitations": [
+    "The representative windows are descriptive anonymous-contract views, not continuous-series or executable-contract evidence.",
+    "Current-vintage historical files do not prove the bytes observable at any historical decision time.",
+    "Historical presence and activity do not establish current freshness, causal IV, bid/ask, delta, or live/shadow readiness.",
+    "Within-family volatility slices are not signals, forecasts, performance results, or family rankings."
+  ],
+  "public_safety": {
+    "bid_ask_or_delta_synthesis": false,
+    "credentials": false,
+    "local_paths": false,
+    "local_usernames": false,
+    "profitability_metrics": false,
+    "raw_contract_identifiers": false,
+    "raw_ohlc_values": false,
+    "raw_rows": false,
+    "source_filenames": false,
+    "strategy_outcomes": false
+  },
+  "quality_examples": {
+    "clean": {
+      "end_date": "2021-01-29",
+      "instrument_family": "SHFE.au",
+      "interpretation": "complete coherent input suitable for descriptive viewing",
+      "observation_count": 20,
+      "quality_findings": {
+        "duplicate_timestamps": 0,
+        "future_timestamps": 0,
+        "invalid_observations": 0
+      },
+      "quality_status": "clean",
+      "start_date": "2021-01-04"
+    },
+    "invalid": {
+      "end_date": "2024-08-09",
+      "instrument_family": "CZCE.TA",
+      "interpretation": "quality threshold failed; do not calculate or inspect swing metrics",
+      "observation_count": 20,
+      "quality_findings": {
+        "duplicate_timestamps": 0,
+        "future_timestamps": 0,
+        "invalid_observations": 9
+      },
+      "quality_status": "invalid",
+      "start_date": "2024-07-15"
+    },
+    "messy": {
+      "end_date": "2021-04-12",
+      "instrument_family": "CZCE.TA",
+      "interpretation": "limited incoherent observations; exclude from representative metrics",
+      "observation_count": 20,
+      "quality_findings": {
+        "duplicate_timestamps": 0,
+        "future_timestamps": 0,
+        "invalid_observations": 2
+      },
+      "quality_status": "messy",
+      "start_date": "2021-03-15"
+    },
+    "stale": {
+      "end_date": "2026-06-11",
+      "freshness": {
+        "calendar_lag_days": 49,
+        "status": "stale"
+      },
+      "instrument_family": "CZCE.TA",
+      "interpretation": "coherent historical input whose latest observation exceeds the seven-day freshness threshold",
+      "observation_count": 20,
+      "quality_findings": {
+        "duplicate_timestamps": 0,
+        "future_timestamps": 0,
+        "invalid_observations": 0
+      },
+      "quality_status": "clean",
+      "start_date": "2026-05-15"
+    }
+  },
+  "representative_swing_views": [
+    {
+      "calendar_span_days": 25,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 0.942287,
+        "net_change_pct": 1.224075,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 10.094746,
+        "total_excursion_pct": 4.74125,
+        "up_bar_share": 0.55
+      },
+      "end_date": "2025-03-14",
+      "freshness": {
+        "calendar_lag_days": 503,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "SHFE.au",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 98.517766,
+          "high_index": 100.0,
+          "low_index": 98.172589,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 99.399565,
+          "high_index": 99.515591,
+          "low_index": 98.596084,
+          "open_index": 98.715011
+        },
+        {
+          "bar_index": 2,
+          "close_index": 100.145033,
+          "high_index": 100.467005,
+          "low_index": 99.503988,
+          "open_index": 99.579405
+        },
+        {
+          "bar_index": 3,
+          "close_index": 100.522117,
+          "high_index": 100.530819,
+          "low_index": 99.666425,
+          "open_index": 100.284264
+        },
+        {
+          "bar_index": 4,
+          "close_index": 99.738941,
+          "high_index": 100.368383,
+          "low_index": 99.382161,
+          "open_index": 100.304569
+        },
+        {
+          "bar_index": 5,
+          "close_index": 99.95359,
+          "high_index": 100.072516,
+          "low_index": 99.419869,
+          "open_index": 99.802756
+        },
+        {
+          "bar_index": 6,
+          "close_index": 99.895577,
+          "high_index": 100.461204,
+          "low_index": 99.657723,
+          "open_index": 100.261059
+        },
+        {
+          "bar_index": 7,
+          "close_index": 98.961566,
+          "high_index": 100.017404,
+          "low_index": 98.26831,
+          "open_index": 99.663524
+        },
+        {
+          "bar_index": 8,
+          "close_index": 98.639594,
+          "high_index": 99.393764,
+          "low_index": 98.395939,
+          "open_index": 99.176215
+        },
+        {
+          "bar_index": 9,
+          "close_index": 97.91153,
+          "high_index": 98.819434,
+          "low_index": 97.850616,
+          "open_index": 98.419144
+        },
+        {
+          "bar_index": 10,
+          "close_index": 98.004351,
+          "high_index": 98.073967,
+          "low_index": 96.968818,
+          "open_index": 97.64467
+        },
+        {
+          "bar_index": 11,
+          "close_index": 98.625091,
+          "high_index": 98.906454,
+          "low_index": 98.079768,
+          "open_index": 98.323423
+        },
+        {
+          "bar_index": 12,
+          "close_index": 99.393764,
+          "high_index": 99.50979,
+          "low_index": 98.810732,
+          "open_index": 99.451777
+        },
+        {
+          "bar_index": 13,
+          "close_index": 99.15591,
+          "high_index": 99.434373,
+          "low_index": 98.482959,
+          "open_index": 99.434373
+        },
+        {
+          "bar_index": 14,
+          "close_index": 98.996374,
+          "high_index": 99.187817,
+          "low_index": 98.607687,
+          "open_index": 98.648296
+        },
+        {
+          "bar_index": 15,
+          "close_index": 99.240029,
+          "high_index": 99.347353,
+          "low_index": 98.654097,
+          "open_index": 99.138506
+        },
+        {
+          "bar_index": 16,
+          "close_index": 98.683104,
+          "high_index": 99.094996,
+          "low_index": 98.230602,
+          "open_index": 99.02248
+        },
+        {
+          "bar_index": 17,
+          "close_index": 98.984772,
+          "high_index": 99.103698,
+          "low_index": 98.636693,
+          "open_index": 98.964467
+        },
+        {
+          "bar_index": 18,
+          "close_index": 99.704133,
+          "high_index": 99.860769,
+          "low_index": 98.851342,
+          "open_index": 99.138506
+        },
+        {
+          "bar_index": 19,
+          "close_index": 101.224075,
+          "high_index": 101.566352,
+          "low_index": 99.843365,
+          "open_index": 99.872371
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 364,
+        "coherent_observation_count": 3854,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 134,
+          "close_path_change_pct_distribution": {
+            "p20": -60.548013,
+            "p50": -41.982881,
+            "p80": 25.630571
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 101.22708,
+            "p50": 154.547903,
+            "p80": 1036.179775
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 64,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 2886,
+        "input_quality_violation_share": 0.42819,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 2886,
+        "nonzero_activity_observation_count": 5608,
+        "nonzero_activity_share": 0.832047,
+        "observation_count": 6740,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "quiet",
+      "start_date": "2025-02-17",
+      "within_family_percentile_target": 0.2
+    },
+    {
+      "calendar_span_days": 28,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.072709,
+        "net_change_pct": -3.099238,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 17.072629,
+        "total_excursion_pct": 7.125245,
+        "up_bar_share": 0.4
+      },
+      "end_date": "2024-06-17",
+      "freshness": {
+        "calendar_lag_days": 773,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "SHFE.au",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 102.253991,
+          "high_index": 102.761835,
+          "low_index": 99.937389,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 101.130474,
+          "high_index": 102.664441,
+          "low_index": 101.008731,
+          "open_index": 101.488747
+        },
+        {
+          "bar_index": 2,
+          "close_index": 101.339177,
+          "high_index": 102.121813,
+          "low_index": 101.116561,
+          "open_index": 101.56875
+        },
+        {
+          "bar_index": 3,
+          "close_index": 99.005183,
+          "high_index": 101.220912,
+          "low_index": 98.479947,
+          "open_index": 101.179171
+        },
+        {
+          "bar_index": 4,
+          "close_index": 98.149501,
+          "high_index": 99.224321,
+          "low_index": 97.467738,
+          "open_index": 98.959964
+        },
+        {
+          "bar_index": 5,
+          "close_index": 98.333855,
+          "high_index": 98.671258,
+          "low_index": 97.99993,
+          "open_index": 98.191241
+        },
+        {
+          "bar_index": 6,
+          "close_index": 98.264287,
+          "high_index": 99.133883,
+          "low_index": 98.177328,
+          "open_index": 98.584299
+        },
+        {
+          "bar_index": 7,
+          "close_index": 98.897353,
+          "high_index": 99.356499,
+          "low_index": 98.500817,
+          "open_index": 98.702564
+        },
+        {
+          "bar_index": 8,
+          "close_index": 97.906014,
+          "high_index": 98.685172,
+          "low_index": 97.457303,
+          "open_index": 98.403423
+        },
+        {
+          "bar_index": 9,
+          "close_index": 98.389509,
+          "high_index": 98.573863,
+          "low_index": 97.972103,
+          "open_index": 98.059063
+        },
+        {
+          "bar_index": 10,
+          "close_index": 97.203381,
+          "high_index": 99.046923,
+          "low_index": 96.817281,
+          "open_index": 98.768653
+        },
+        {
+          "bar_index": 11,
+          "close_index": 98.076455,
+          "high_index": 98.274723,
+          "low_index": 97.429476,
+          "open_index": 97.690354
+        },
+        {
+          "bar_index": 12,
+          "close_index": 97.540784,
+          "high_index": 97.916449,
+          "low_index": 96.939024,
+          "open_index": 97.582525
+        },
+        {
+          "bar_index": 13,
+          "close_index": 99.019096,
+          "high_index": 99.356499,
+          "low_index": 97.672963,
+          "open_index": 97.926884
+        },
+        {
+          "bar_index": 14,
+          "close_index": 99.057359,
+          "high_index": 99.603464,
+          "low_index": 98.406901,
+          "open_index": 98.60169
+        },
+        {
+          "bar_index": 15,
+          "close_index": 96.114647,
+          "high_index": 96.664232,
+          "low_index": 95.975512,
+          "open_index": 96.664232
+        },
+        {
+          "bar_index": 16,
+          "close_index": 96.702494,
+          "high_index": 96.782497,
+          "low_index": 96.264218,
+          "open_index": 96.615534
+        },
+        {
+          "bar_index": 17,
+          "close_index": 96.803367,
+          "high_index": 97.752965,
+          "low_index": 96.379004,
+          "open_index": 97.568611
+        },
+        {
+          "bar_index": 18,
+          "close_index": 96.744235,
+          "high_index": 97.03294,
+          "low_index": 95.926815,
+          "open_index": 97.03294
+        },
+        {
+          "bar_index": 19,
+          "close_index": 96.900762,
+          "high_index": 97.551219,
+          "low_index": 96.79641,
+          "open_index": 97.405127
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 188,
+        "coherent_observation_count": 2056,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 50,
+          "close_path_change_pct_distribution": {
+            "p20": -73.034932,
+            "p50": 30.952381,
+            "p80": 50.456674
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 103.534884,
+            "p50": 231.884058,
+            "p80": 462.0
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 16,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 1598,
+        "input_quality_violation_share": 0.437329,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 1598,
+        "nonzero_activity_observation_count": 3198,
+        "nonzero_activity_share": 0.875205,
+        "observation_count": 3654,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "typical",
+      "start_date": "2024-05-20",
+      "within_family_percentile_target": 0.5
+    },
+    {
+      "calendar_span_days": 28,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.492806,
+        "net_change_pct": 11.082553,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 17.654177,
+        "total_excursion_pct": 13.218862,
+        "up_bar_share": 0.85
+      },
+      "end_date": "2025-04-18",
+      "freshness": {
+        "calendar_lag_days": 468,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "SHFE.au",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 99.645202,
+          "high_index": 100.217908,
+          "low_index": 99.497136,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 99.692695,
+          "high_index": 99.857522,
+          "low_index": 98.868557,
+          "open_index": 99.751362
+        },
+        {
+          "bar_index": 2,
+          "close_index": 99.65917,
+          "high_index": 99.790474,
+          "low_index": 99.240117,
+          "open_index": 99.60609
+        },
+        {
+          "bar_index": 3,
+          "close_index": 99.958095,
+          "high_index": 100.10616,
+          "low_index": 99.689901,
+          "open_index": 99.715044
+        },
+        {
+          "bar_index": 4,
+          "close_index": 100.120129,
+          "high_index": 100.231876,
+          "low_index": 99.639614,
+          "open_index": 100.019556
+        },
+        {
+          "bar_index": 5,
+          "close_index": 101.737673,
+          "high_index": 101.799134,
+          "low_index": 100.349211,
+          "open_index": 100.709596
+        },
+        {
+          "bar_index": 6,
+          "close_index": 102.701495,
+          "high_index": 103.03115,
+          "low_index": 101.271127,
+          "open_index": 101.58402
+        },
+        {
+          "bar_index": 7,
+          "close_index": 103.601062,
+          "high_index": 104.087163,
+          "low_index": 102.220981,
+          "open_index": 102.983657
+        },
+        {
+          "bar_index": 8,
+          "close_index": 103.22112,
+          "high_index": 103.883224,
+          "low_index": 102.852354,
+          "open_index": 103.712809
+        },
+        {
+          "bar_index": 9,
+          "close_index": 104.011733,
+          "high_index": 105.201844,
+          "low_index": 103.014387,
+          "open_index": 103.478139
+        },
+        {
+          "bar_index": 10,
+          "close_index": 100.849281,
+          "high_index": 102.66797,
+          "low_index": 98.759603,
+          "open_index": 99.902221
+        },
+        {
+          "bar_index": 11,
+          "close_index": 101.178936,
+          "high_index": 101.223635,
+          "low_index": 99.935745,
+          "open_index": 101.056013
+        },
+        {
+          "bar_index": 12,
+          "close_index": 102.405364,
+          "high_index": 102.452857,
+          "low_index": 100.854868,
+          "open_index": 101.019695
+        },
+        {
+          "bar_index": 13,
+          "close_index": 104.578852,
+          "high_index": 104.606789,
+          "low_index": 102.469619,
+          "open_index": 102.598128
+        },
+        {
+          "bar_index": 14,
+          "close_index": 106.327699,
+          "high_index": 107.165805,
+          "low_index": 104.126275,
+          "open_index": 104.408437
+        },
+        {
+          "bar_index": 15,
+          "close_index": 107.221679,
+          "high_index": 107.626764,
+          "low_index": 106.324906,
+          "open_index": 107.109932
+        },
+        {
+          "bar_index": 16,
+          "close_index": 107.372538,
+          "high_index": 107.433999,
+          "low_index": 106.375192,
+          "open_index": 106.757927
+        },
+        {
+          "bar_index": 17,
+          "close_index": 109.70806,
+          "high_index": 109.805839,
+          "low_index": 107.07082,
+          "open_index": 107.294315
+        },
+        {
+          "bar_index": 18,
+          "close_index": 110.805978,
+          "high_index": 111.814499,
+          "low_index": 109.758346,
+          "open_index": 110.071239
+        },
+        {
+          "bar_index": 19,
+          "close_index": 111.082553,
+          "high_index": 111.227825,
+          "low_index": 109.358849,
+          "open_index": 110.629976
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 578,
+        "coherent_observation_count": 4652,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 93,
+          "close_path_change_pct_distribution": {
+            "p20": -60.848875,
+            "p50": 38.53211,
+            "p80": 540.949153
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 292.211538,
+            "p50": 496.774194,
+            "p80": 1104.600675
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 3.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 276,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 16
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 3270,
+        "input_quality_violation_share": 0.412775,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 3270,
+        "nonzero_activity_observation_count": 6645,
+        "nonzero_activity_share": 0.838803,
+        "observation_count": 7922,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "volatile",
+      "start_date": "2025-03-21",
+      "within_family_percentile_target": 0.8
+    },
+    {
+      "calendar_span_days": 27,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.127725,
+        "net_change_pct": 4.075235,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 18.417789,
+        "total_excursion_pct": 7.718894,
+        "up_bar_share": 0.7
+      },
+      "end_date": "2025-07-14",
+      "freshness": {
+        "calendar_lag_days": 381,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "SHFE.ag",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 100.201523,
+          "high_index": 100.380654,
+          "low_index": 99.585759,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 102.339901,
+          "high_index": 102.608598,
+          "low_index": 100.761308,
+          "open_index": 100.783699
+        },
+        {
+          "bar_index": 2,
+          "close_index": 100.011196,
+          "high_index": 102.171966,
+          "low_index": 99.574563,
+          "open_index": 102.104792
+        },
+        {
+          "bar_index": 3,
+          "close_index": 98.320645,
+          "high_index": 100.033587,
+          "low_index": 98.074339,
+          "open_index": 99.809673
+        },
+        {
+          "bar_index": 4,
+          "close_index": 99.484998,
+          "high_index": 99.552172,
+          "low_index": 98.667712,
+          "open_index": 99.328258
+        },
+        {
+          "bar_index": 5,
+          "close_index": 99.137931,
+          "high_index": 99.854456,
+          "low_index": 98.88043,
+          "open_index": 99.429019
+        },
+        {
+          "bar_index": 6,
+          "close_index": 98.914017,
+          "high_index": 98.992387,
+          "low_index": 97.178683,
+          "open_index": 98.634124
+        },
+        {
+          "bar_index": 7,
+          "close_index": 99.753695,
+          "high_index": 99.787282,
+          "low_index": 98.298253,
+          "open_index": 98.634124
+        },
+        {
+          "bar_index": 8,
+          "close_index": 99.742499,
+          "high_index": 100.403045,
+          "low_index": 99.440215,
+          "open_index": 99.641738
+        },
+        {
+          "bar_index": 9,
+          "close_index": 99.373041,
+          "high_index": 99.406628,
+          "low_index": 98.354232,
+          "open_index": 99.03717
+        },
+        {
+          "bar_index": 10,
+          "close_index": 99.84326,
+          "high_index": 99.854456,
+          "low_index": 98.746082,
+          "open_index": 99.025974
+        },
+        {
+          "bar_index": 11,
+          "close_index": 99.205105,
+          "high_index": 100.0,
+          "low_index": 99.19391,
+          "open_index": 99.820869
+        },
+        {
+          "bar_index": 12,
+          "close_index": 101.388267,
+          "high_index": 101.634572,
+          "low_index": 99.596955,
+          "open_index": 99.641738
+        },
+        {
+          "bar_index": 13,
+          "close_index": 101.141961,
+          "high_index": 101.421854,
+          "low_index": 100.682938,
+          "open_index": 100.761308
+        },
+        {
+          "bar_index": 14,
+          "close_index": 100.682938,
+          "high_index": 101.466637,
+          "low_index": 100.31348,
+          "open_index": 101.141961
+        },
+        {
+          "bar_index": 15,
+          "close_index": 101.209136,
+          "high_index": 101.410658,
+          "low_index": 100.033587,
+          "open_index": 100.212718
+        },
+        {
+          "bar_index": 16,
+          "close_index": 100.671742,
+          "high_index": 101.097179,
+          "low_index": 100.111957,
+          "open_index": 101.097179
+        },
+        {
+          "bar_index": 17,
+          "close_index": 100.839678,
+          "high_index": 100.862069,
+          "low_index": 100.223914,
+          "open_index": 100.425437
+        },
+        {
+          "bar_index": 18,
+          "close_index": 102.283923,
+          "high_index": 103.022839,
+          "low_index": 100.96283,
+          "open_index": 101.097179
+        },
+        {
+          "bar_index": 19,
+          "close_index": 104.075235,
+          "high_index": 104.679803,
+          "low_index": 102.776534,
+          "open_index": 103.011644
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 478,
+        "coherent_observation_count": 3652,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 94,
+          "close_path_change_pct_distribution": {
+            "p20": -82.745098,
+            "p50": -50.77702,
+            "p80": 30.990789
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 165.415445,
+            "p50": 303.555933,
+            "p80": 1213.333333
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 30,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 5564,
+        "input_quality_violation_share": 0.603733,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 5564,
+        "nonzero_activity_observation_count": 7554,
+        "nonzero_activity_share": 0.819661,
+        "observation_count": 9216,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "quiet",
+      "start_date": "2025-06-17",
+      "within_family_percentile_target": 0.2
+    },
+    {
+      "calendar_span_days": 33,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 2.222351,
+        "net_change_pct": 1.909408,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 26.61903,
+        "total_excursion_pct": 12.267551,
+        "up_bar_share": 0.5
+      },
+      "end_date": "2024-05-14",
+      "freshness": {
+        "calendar_lag_days": 807,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "SHFE.ag",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 99.763066,
+          "high_index": 101.156794,
+          "low_index": 98.703833,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 104.125436,
+          "high_index": 104.209059,
+          "low_index": 99.54007,
+          "open_index": 100.055749
+        },
+        {
+          "bar_index": 2,
+          "close_index": 103.498258,
+          "high_index": 108.543554,
+          "low_index": 101.491289,
+          "open_index": 104.348432
+        },
+        {
+          "bar_index": 3,
+          "close_index": 102.689895,
+          "high_index": 104.641115,
+          "low_index": 101.965157,
+          "open_index": 104.013937
+        },
+        {
+          "bar_index": 4,
+          "close_index": 102.898955,
+          "high_index": 103.289199,
+          "low_index": 101.644599,
+          "open_index": 102.675958
+        },
+        {
+          "bar_index": 5,
+          "close_index": 103.665505,
+          "high_index": 104.445993,
+          "low_index": 101.89547,
+          "open_index": 103.080139
+        },
+        {
+          "bar_index": 6,
+          "close_index": 103.470383,
+          "high_index": 105.12892,
+          "low_index": 102.174216,
+          "open_index": 103.777003
+        },
+        {
+          "bar_index": 7,
+          "close_index": 99.972125,
+          "high_index": 104.097561,
+          "low_index": 99.651568,
+          "open_index": 103.163763
+        },
+        {
+          "bar_index": 8,
+          "close_index": 97.491289,
+          "high_index": 99.512195,
+          "low_index": 96.919861,
+          "open_index": 98.968641
+        },
+        {
+          "bar_index": 9,
+          "close_index": 98.954704,
+          "high_index": 99.470383,
+          "low_index": 97.505226,
+          "open_index": 97.909408
+        },
+        {
+          "bar_index": 10,
+          "close_index": 98.634146,
+          "high_index": 99.038328,
+          "low_index": 97.519164,
+          "open_index": 98.940767
+        },
+        {
+          "bar_index": 11,
+          "close_index": 99.888502,
+          "high_index": 99.930314,
+          "low_index": 98.243902,
+          "open_index": 99.135889
+        },
+        {
+          "bar_index": 12,
+          "close_index": 98.689895,
+          "high_index": 99.860627,
+          "low_index": 97.993031,
+          "open_index": 99.665505
+        },
+        {
+          "bar_index": 13,
+          "close_index": 97.728223,
+          "high_index": 99.010453,
+          "low_index": 97.142857,
+          "open_index": 98.689895
+        },
+        {
+          "bar_index": 14,
+          "close_index": 98.25784,
+          "high_index": 98.369338,
+          "low_index": 96.682927,
+          "open_index": 96.961672
+        },
+        {
+          "bar_index": 15,
+          "close_index": 98.801394,
+          "high_index": 99.763066,
+          "low_index": 98.648084,
+          "open_index": 98.71777
+        },
+        {
+          "bar_index": 16,
+          "close_index": 98.912892,
+          "high_index": 99.637631,
+          "low_index": 98.188153,
+          "open_index": 99.108014
+        },
+        {
+          "bar_index": 17,
+          "close_index": 99.665505,
+          "high_index": 100.041812,
+          "low_index": 98.926829,
+          "open_index": 98.926829
+        },
+        {
+          "bar_index": 18,
+          "close_index": 102.480836,
+          "high_index": 102.480836,
+          "low_index": 99.902439,
+          "open_index": 100.15331
+        },
+        {
+          "bar_index": 19,
+          "close_index": 101.909408,
+          "high_index": 102.857143,
+          "low_index": 97.839721,
+          "open_index": 101.630662
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 100,
+        "coherent_observation_count": 1249,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 24,
+          "close_path_change_pct_distribution": {
+            "p20": -68.140704,
+            "p50": -47.636194,
+            "p80": -24.004885
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 148.144036,
+            "p50": 352.916667,
+            "p80": 506.64238
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 14,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 705,
+        "input_quality_violation_share": 0.360798,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 705,
+        "nonzero_activity_observation_count": 1722,
+        "nonzero_activity_share": 0.881269,
+        "observation_count": 1954,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "typical",
+      "start_date": "2024-04-11",
+      "within_family_percentile_target": 0.5
+    },
+    {
+      "calendar_span_days": 35,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 2.083821,
+        "net_change_pct": 22.634963,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 26.240711,
+        "total_excursion_pct": 25.854657,
+        "up_bar_share": 0.7
+      },
+      "end_date": "2025-10-16",
+      "freshness": {
+        "calendar_lag_days": 287,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "SHFE.ag",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 100.224513,
+          "high_index": 100.734769,
+          "low_index": 99.704051,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 102.673742,
+          "high_index": 102.959486,
+          "low_index": 100.02041,
+          "open_index": 100.051026
+        },
+        {
+          "bar_index": 2,
+          "close_index": 102.51046,
+          "high_index": 103.112563,
+          "low_index": 102.081845,
+          "open_index": 102.163486
+        },
+        {
+          "bar_index": 3,
+          "close_index": 103.418716,
+          "high_index": 103.867742,
+          "low_index": 102.357383,
+          "open_index": 102.51046
+        },
+        {
+          "bar_index": 4,
+          "close_index": 101.367486,
+          "high_index": 103.816716,
+          "low_index": 101.183794,
+          "open_index": 103.571793
+        },
+        {
+          "bar_index": 5,
+          "close_index": 100.367384,
+          "high_index": 102.143076,
+          "low_index": 100.0,
+          "open_index": 101.27564
+        },
+        {
+          "bar_index": 6,
+          "close_index": 101.755281,
+          "high_index": 102.439024,
+          "low_index": 100.581692,
+          "open_index": 101.132769
+        },
+        {
+          "bar_index": 7,
+          "close_index": 105.286254,
+          "high_index": 105.480151,
+          "low_index": 101.683845,
+          "open_index": 101.755281
+        },
+        {
+          "bar_index": 8,
+          "close_index": 105.612818,
+          "high_index": 106.082253,
+          "low_index": 104.347382,
+          "open_index": 104.867844
+        },
+        {
+          "bar_index": 9,
+          "close_index": 106.102664,
+          "high_index": 106.970099,
+          "low_index": 105.163792,
+          "open_index": 106.561894
+        },
+        {
+          "bar_index": 10,
+          "close_index": 106.245535,
+          "high_index": 106.806817,
+          "low_index": 105.429125,
+          "open_index": 106.184305
+        },
+        {
+          "bar_index": 11,
+          "close_index": 108.500867,
+          "high_index": 108.643739,
+          "low_index": 106.439433,
+          "open_index": 107.266048
+        },
+        {
+          "bar_index": 12,
+          "close_index": 111.63384,
+          "high_index": 112.337994,
+          "low_index": 108.633534,
+          "open_index": 108.694765
+        },
+        {
+          "bar_index": 13,
+          "close_index": 111.419533,
+          "high_index": 112.552301,
+          "low_index": 110.552097,
+          "open_index": 111.062353
+        },
+        {
+          "bar_index": 14,
+          "close_index": 113.981018,
+          "high_index": 115.409736,
+          "low_index": 113.093173,
+          "open_index": 114.297377
+        },
+        {
+          "bar_index": 15,
+          "close_index": 113.093173,
+          "high_index": 117.256863,
+          "low_index": 111.868558,
+          "open_index": 116.583325
+        },
+        {
+          "bar_index": 16,
+          "close_index": 117.675273,
+          "high_index": 118.216145,
+          "low_index": 111.61343,
+          "open_index": 114.185121
+        },
+        {
+          "bar_index": 17,
+          "close_index": 117.695683,
+          "high_index": 123.441167,
+          "low_index": 116.011838,
+          "open_index": 118.195734
+        },
+        {
+          "bar_index": 18,
+          "close_index": 122.114501,
+          "high_index": 122.185937,
+          "low_index": 116.011838,
+          "open_index": 116.644556
+        },
+        {
+          "bar_index": 19,
+          "close_index": 122.634963,
+          "high_index": 125.482192,
+          "low_index": 120.77763,
+          "open_index": 121.828758
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 826,
+        "coherent_observation_count": 5675,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 78,
+          "close_path_change_pct_distribution": {
+            "p20": -71.144925,
+            "p50": 68.434343,
+            "p80": 648.823472
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 287.381957,
+            "p50": 555.844408,
+            "p80": 918.203889
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 10.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 342,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 50
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 6945,
+        "input_quality_violation_share": 0.550317,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 6945,
+        "nonzero_activity_observation_count": 9576,
+        "nonzero_activity_share": 0.758796,
+        "observation_count": 12620,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "volatile",
+      "start_date": "2025-09-11",
+      "within_family_percentile_target": 0.8
+    },
+    {
+      "calendar_span_days": 25,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 2.292142,
+        "net_change_pct": 1.214734,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 27.632817,
+        "total_excursion_pct": 10.558009,
+        "up_bar_share": 0.5
+      },
+      "end_date": "2026-02-06",
+      "freshness": {
+        "calendar_lag_days": 174,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "CZCE.TA",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 100.744514,
+          "high_index": 102.429467,
+          "low_index": 99.725705,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 100.705329,
+          "high_index": 101.293103,
+          "low_index": 99.725705,
+          "open_index": 100.509404
+        },
+        {
+          "bar_index": 2,
+          "close_index": 100.23511,
+          "high_index": 101.645768,
+          "low_index": 99.882445,
+          "open_index": 100.509404
+        },
+        {
+          "bar_index": 3,
+          "close_index": 98.902821,
+          "high_index": 101.410658,
+          "low_index": 98.589342,
+          "open_index": 100.705329
+        },
+        {
+          "bar_index": 4,
+          "close_index": 98.315047,
+          "high_index": 99.373041,
+          "low_index": 97.609718,
+          "open_index": 98.550157
+        },
+        {
+          "bar_index": 5,
+          "close_index": 98.550157,
+          "high_index": 99.059561,
+          "low_index": 98.119122,
+          "open_index": 98.863636
+        },
+        {
+          "bar_index": 6,
+          "close_index": 100.783699,
+          "high_index": 101.018809,
+          "low_index": 97.727273,
+          "open_index": 98.550157
+        },
+        {
+          "bar_index": 7,
+          "close_index": 100.979624,
+          "high_index": 101.724138,
+          "low_index": 100.039185,
+          "open_index": 100.822884
+        },
+        {
+          "bar_index": 8,
+          "close_index": 103.80094,
+          "high_index": 104.11442,
+          "low_index": 100.744514,
+          "open_index": 101.371473
+        },
+        {
+          "bar_index": 9,
+          "close_index": 106.739812,
+          "high_index": 106.818182,
+          "low_index": 103.095611,
+          "open_index": 103.330721
+        },
+        {
+          "bar_index": 10,
+          "close_index": 106.543887,
+          "high_index": 107.288401,
+          "low_index": 105.564263,
+          "open_index": 107.288401
+        },
+        {
+          "bar_index": 11,
+          "close_index": 103.017241,
+          "high_index": 106.387147,
+          "low_index": 102.155172,
+          "open_index": 106.073668
+        },
+        {
+          "bar_index": 12,
+          "close_index": 105.211599,
+          "high_index": 105.485893,
+          "low_index": 102.076803,
+          "open_index": 103.095611
+        },
+        {
+          "bar_index": 13,
+          "close_index": 104.467085,
+          "high_index": 105.329154,
+          "low_index": 103.213166,
+          "open_index": 105.172414
+        },
+        {
+          "bar_index": 14,
+          "close_index": 103.252351,
+          "high_index": 107.915361,
+          "low_index": 102.468652,
+          "open_index": 104.976489
+        },
+        {
+          "bar_index": 15,
+          "close_index": 99.76489,
+          "high_index": 104.545455,
+          "low_index": 99.529781,
+          "open_index": 103.565831
+        },
+        {
+          "bar_index": 16,
+          "close_index": 100.901254,
+          "high_index": 101.606583,
+          "low_index": 100.0,
+          "open_index": 100.431034
+        },
+        {
+          "bar_index": 17,
+          "close_index": 102.233542,
+          "high_index": 102.978056,
+          "low_index": 100.666144,
+          "open_index": 101.410658
+        },
+        {
+          "bar_index": 18,
+          "close_index": 100.783699,
+          "high_index": 102.429467,
+          "low_index": 100.470219,
+          "open_index": 102.233542
+        },
+        {
+          "bar_index": 19,
+          "close_index": 101.214734,
+          "high_index": 102.233542,
+          "low_index": 99.882445,
+          "open_index": 100.431034
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 83,
+        "coherent_observation_count": 502,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 1,
+          "close_path_change_pct_distribution": {
+            "p20": -16.818182,
+            "p50": -16.818182,
+            "p80": -16.818182
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 484.939759,
+            "p50": 484.939759,
+            "p80": 484.939759
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 3.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 38,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 594,
+        "input_quality_violation_share": 0.541971,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 594,
+        "nonzero_activity_observation_count": 1025,
+        "nonzero_activity_share": 0.935219,
+        "observation_count": 1096,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "quiet",
+      "start_date": "2026-01-12",
+      "within_family_percentile_target": 0.2
+    },
+    {
+      "calendar_span_days": 29,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.80896,
+        "net_change_pct": 9.267241,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 21.265159,
+        "total_excursion_pct": 13.159041,
+        "up_bar_share": 0.55
+      },
+      "end_date": "2026-01-14",
+      "freshness": {
+        "calendar_lag_days": 197,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "CZCE.TA",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 99.525862,
+          "high_index": 100.215517,
+          "low_index": 98.922414,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 99.698276,
+          "high_index": 100.12931,
+          "low_index": 99.008621,
+          "open_index": 99.439655
+        },
+        {
+          "bar_index": 2,
+          "close_index": 100.862069,
+          "high_index": 101.12069,
+          "low_index": 99.698276,
+          "open_index": 99.913793
+        },
+        {
+          "bar_index": 3,
+          "close_index": 103.663793,
+          "high_index": 103.793103,
+          "low_index": 100.646552,
+          "open_index": 100.646552
+        },
+        {
+          "bar_index": 4,
+          "close_index": 106.982759,
+          "high_index": 107.025862,
+          "low_index": 103.87931,
+          "open_index": 103.87931
+        },
+        {
+          "bar_index": 5,
+          "close_index": 107.801724,
+          "high_index": 108.060345,
+          "low_index": 106.077586,
+          "open_index": 107.327586
+        },
+        {
+          "bar_index": 6,
+          "close_index": 108.103448,
+          "high_index": 109.396552,
+          "low_index": 107.672414,
+          "open_index": 108.103448
+        },
+        {
+          "bar_index": 7,
+          "close_index": 109.008621,
+          "high_index": 109.353448,
+          "low_index": 107.068966,
+          "open_index": 107.931034
+        },
+        {
+          "bar_index": 8,
+          "close_index": 110.991379,
+          "high_index": 111.939655,
+          "low_index": 109.310345,
+          "open_index": 109.482759
+        },
+        {
+          "bar_index": 9,
+          "close_index": 108.017241,
+          "high_index": 110.301724,
+          "low_index": 107.327586,
+          "open_index": 110.172414
+        },
+        {
+          "bar_index": 10,
+          "close_index": 108.318966,
+          "high_index": 109.439655,
+          "low_index": 107.758621,
+          "open_index": 108.189655
+        },
+        {
+          "bar_index": 11,
+          "close_index": 107.974138,
+          "high_index": 109.008621,
+          "low_index": 107.801724,
+          "open_index": 108.706897
+        },
+        {
+          "bar_index": 12,
+          "close_index": 106.810345,
+          "high_index": 108.706897,
+          "low_index": 106.293103,
+          "open_index": 108.362069
+        },
+        {
+          "bar_index": 13,
+          "close_index": 109.051724,
+          "high_index": 109.267241,
+          "low_index": 107.327586,
+          "open_index": 107.327586
+        },
+        {
+          "bar_index": 14,
+          "close_index": 109.353448,
+          "high_index": 110.689655,
+          "low_index": 107.844828,
+          "open_index": 109.181034
+        },
+        {
+          "bar_index": 15,
+          "close_index": 108.318966,
+          "high_index": 110.0,
+          "low_index": 107.801724,
+          "open_index": 109.698276
+        },
+        {
+          "bar_index": 16,
+          "close_index": 108.706897,
+          "high_index": 109.137931,
+          "low_index": 107.5,
+          "open_index": 108.836207
+        },
+        {
+          "bar_index": 17,
+          "close_index": 109.784483,
+          "high_index": 111.25,
+          "low_index": 108.318966,
+          "open_index": 108.491379
+        },
+        {
+          "bar_index": 18,
+          "close_index": 109.655172,
+          "high_index": 110.344828,
+          "low_index": 108.534483,
+          "open_index": 109.655172
+        },
+        {
+          "bar_index": 19,
+          "close_index": 109.267241,
+          "high_index": 110.689655,
+          "low_index": 109.008621,
+          "open_index": 109.655172
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 48,
+        "coherent_observation_count": 321,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 0,
+          "reason": "no anonymous option series has one coherent positive observation on each of the 20 required dates",
+          "required_distinct_date_count": 20,
+          "status": "unavailable"
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 16.2,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 13,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 563,
+        "input_quality_violation_share": 0.636878,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 563,
+        "nonzero_activity_observation_count": 822,
+        "nonzero_activity_share": 0.929864,
+        "observation_count": 884,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "typical",
+      "start_date": "2025-12-16",
+      "within_family_percentile_target": 0.5
+    },
+    {
+      "calendar_span_days": 28,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 5.253067,
+        "net_change_pct": -6.107539,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 60.923298,
+        "total_excursion_pct": 20.643877,
+        "up_bar_share": 0.35
+      },
+      "end_date": "2026-04-14",
+      "freshness": {
+        "calendar_lag_days": 107,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "CZCE.TA",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 101.081239,
+          "high_index": 102.07481,
+          "low_index": 97.48685,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 99.210988,
+          "high_index": 103.156049,
+          "low_index": 97.603741,
+          "open_index": 100.350672
+        },
+        {
+          "bar_index": 2,
+          "close_index": 99.853887,
+          "high_index": 104.354179,
+          "low_index": 99.181765,
+          "open_index": 103.360608
+        },
+        {
+          "bar_index": 3,
+          "close_index": 97.1654,
+          "high_index": 100.204559,
+          "low_index": 93.541788,
+          "open_index": 99.210988
+        },
+        {
+          "bar_index": 4,
+          "close_index": 104.237288,
+          "high_index": 106.22443,
+          "low_index": 97.194623,
+          "open_index": 98.36353
+        },
+        {
+          "bar_index": 5,
+          "close_index": 97.808299,
+          "high_index": 102.162478,
+          "low_index": 97.282291,
+          "open_index": 98.334307
+        },
+        {
+          "bar_index": 6,
+          "close_index": 96.317943,
+          "high_index": 99.678551,
+          "low_index": 91.554646,
+          "open_index": 98.772648
+        },
+        {
+          "bar_index": 7,
+          "close_index": 99.035652,
+          "high_index": 99.327878,
+          "low_index": 95.061368,
+          "open_index": 95.704267
+        },
+        {
+          "bar_index": 8,
+          "close_index": 100.467563,
+          "high_index": 101.461134,
+          "low_index": 97.428404,
+          "open_index": 100.467563
+        },
+        {
+          "bar_index": 9,
+          "close_index": 98.889538,
+          "high_index": 102.717709,
+          "low_index": 98.36353,
+          "open_index": 101.753361
+        },
+        {
+          "bar_index": 10,
+          "close_index": 97.662186,
+          "high_index": 101.402688,
+          "low_index": 96.201052,
+          "open_index": 98.188194
+        },
+        {
+          "bar_index": 11,
+          "close_index": 93.01578,
+          "high_index": 99.736996,
+          "low_index": 92.928112,
+          "open_index": 97.662186
+        },
+        {
+          "bar_index": 12,
+          "close_index": 100.175336,
+          "high_index": 101.490357,
+          "low_index": 94.301578,
+          "open_index": 94.360023
+        },
+        {
+          "bar_index": 13,
+          "close_index": 102.104033,
+          "high_index": 103.331385,
+          "low_index": 97.399182,
+          "open_index": 103.331385
+        },
+        {
+          "bar_index": 14,
+          "close_index": 100.642899,
+          "high_index": 103.009936,
+          "low_index": 99.941555,
+          "open_index": 102.893045
+        },
+        {
+          "bar_index": 15,
+          "close_index": 93.249562,
+          "high_index": 102.571596,
+          "low_index": 88.047925,
+          "open_index": 100.467563
+        },
+        {
+          "bar_index": 16,
+          "close_index": 95.324372,
+          "high_index": 96.025716,
+          "low_index": 92.022209,
+          "open_index": 92.431327
+        },
+        {
+          "bar_index": 17,
+          "close_index": 92.109877,
+          "high_index": 95.996493,
+          "low_index": 90.999416,
+          "open_index": 95.879603
+        },
+        {
+          "bar_index": 18,
+          "close_index": 91.671537,
+          "high_index": 95.324372,
+          "low_index": 90.677966,
+          "open_index": 91.496201
+        },
+        {
+          "bar_index": 19,
+          "close_index": 93.892461,
+          "high_index": 94.067797,
+          "low_index": 90.005845,
+          "open_index": 92.051432
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 289,
+        "coherent_observation_count": 2608,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 16,
+          "close_path_change_pct_distribution": {
+            "p20": -50.0,
+            "p50": -6.590909,
+            "p80": 23.71134
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 121.428571,
+            "p50": 192.100887,
+            "p80": 348.163265
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 2,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 3152,
+        "input_quality_violation_share": 0.547222,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 3152,
+        "nonzero_activity_observation_count": 5344,
+        "nonzero_activity_share": 0.927778,
+        "observation_count": 5760,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "volatile",
+      "start_date": "2026-03-17",
+      "within_family_percentile_target": 0.8
+    },
+    {
+      "calendar_span_days": 25,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.852526,
+        "net_change_pct": 0.878477,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 17.892814,
+        "total_excursion_pct": 8.853119,
+        "up_bar_share": 0.4
+      },
+      "end_date": "2025-12-12",
+      "freshness": {
+        "calendar_lag_days": 230,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "CZCE.MA",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 99.023914,
+          "high_index": 100.488043,
+          "low_index": 98.63348,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 99.072718,
+          "high_index": 99.365544,
+          "low_index": 97.755002,
+          "open_index": 99.170327
+        },
+        {
+          "bar_index": 2,
+          "close_index": 98.243045,
+          "high_index": 99.511957,
+          "low_index": 97.120547,
+          "open_index": 99.072718
+        },
+        {
+          "bar_index": 3,
+          "close_index": 98.389458,
+          "high_index": 99.463153,
+          "low_index": 97.022938,
+          "open_index": 98.096633
+        },
+        {
+          "bar_index": 4,
+          "close_index": 97.803807,
+          "high_index": 99.023914,
+          "low_index": 97.657394,
+          "open_index": 98.389458
+        },
+        {
+          "bar_index": 5,
+          "close_index": 101.36652,
+          "high_index": 101.854563,
+          "low_index": 97.95022,
+          "open_index": 97.95022
+        },
+        {
+          "bar_index": 6,
+          "close_index": 100.878477,
+          "high_index": 101.903367,
+          "low_index": 100.292826,
+          "open_index": 101.268912
+        },
+        {
+          "bar_index": 7,
+          "close_index": 102.196193,
+          "high_index": 102.977062,
+          "low_index": 100.878477,
+          "open_index": 101.36652
+        },
+        {
+          "bar_index": 8,
+          "close_index": 103.172279,
+          "high_index": 104.148365,
+          "low_index": 102.196193,
+          "open_index": 102.196193
+        },
+        {
+          "bar_index": 9,
+          "close_index": 104.197169,
+          "high_index": 104.343582,
+          "low_index": 103.123475,
+          "open_index": 103.221083
+        },
+        {
+          "bar_index": 10,
+          "close_index": 104.245974,
+          "high_index": 104.538799,
+          "low_index": 102.635432,
+          "open_index": 104.148365
+        },
+        {
+          "bar_index": 11,
+          "close_index": 104.050756,
+          "high_index": 105.612494,
+          "low_index": 103.660322,
+          "open_index": 104.148365
+        },
+        {
+          "bar_index": 12,
+          "close_index": 103.855539,
+          "high_index": 104.441191,
+          "low_index": 103.221083,
+          "open_index": 103.953148
+        },
+        {
+          "bar_index": 13,
+          "close_index": 103.123475,
+          "high_index": 104.587604,
+          "low_index": 102.196193,
+          "open_index": 103.855539
+        },
+        {
+          "bar_index": 14,
+          "close_index": 101.36652,
+          "high_index": 103.513909,
+          "low_index": 100.976086,
+          "open_index": 103.123475
+        },
+        {
+          "bar_index": 15,
+          "close_index": 101.952172,
+          "high_index": 102.293802,
+          "low_index": 100.439239,
+          "open_index": 101.073694
+        },
+        {
+          "bar_index": 16,
+          "close_index": 100.829673,
+          "high_index": 101.903367,
+          "low_index": 100.34163,
+          "open_index": 101.610542
+        },
+        {
+          "bar_index": 17,
+          "close_index": 100.195217,
+          "high_index": 101.02489,
+          "low_index": 99.463153,
+          "open_index": 101.02489
+        },
+        {
+          "bar_index": 18,
+          "close_index": 101.220107,
+          "high_index": 102.04978,
+          "low_index": 100.195217,
+          "open_index": 100.439239
+        },
+        {
+          "bar_index": 19,
+          "close_index": 100.878477,
+          "high_index": 101.659346,
+          "low_index": 98.926306,
+          "open_index": 101.02489
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 44,
+        "coherent_observation_count": 132,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 0,
+          "reason": "no anonymous option series has one coherent positive observation on each of the 20 required dates",
+          "required_distinct_date_count": 20,
+          "status": "unavailable"
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 6,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 2
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 648,
+        "input_quality_violation_share": 0.830769,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 648,
+        "nonzero_activity_observation_count": 498,
+        "nonzero_activity_share": 0.638462,
+        "observation_count": 780,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "quiet",
+      "start_date": "2025-11-17",
+      "within_family_percentile_target": 0.2
+    },
+    {
+      "calendar_span_days": 30,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 2.228185,
+        "net_change_pct": 6.0,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 28.918063,
+        "total_excursion_pct": 9.82431,
+        "up_bar_share": 0.7
+      },
+      "end_date": "2026-05-20",
+      "freshness": {
+        "calendar_lag_days": 71,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "CZCE.MA",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 102.0,
+          "high_index": 106.464286,
+          "low_index": 99.607143,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 100.857143,
+          "high_index": 102.035714,
+          "low_index": 100.178571,
+          "open_index": 102.0
+        },
+        {
+          "bar_index": 2,
+          "close_index": 101.714286,
+          "high_index": 102.892857,
+          "low_index": 100.75,
+          "open_index": 101.285714
+        },
+        {
+          "bar_index": 3,
+          "close_index": 102.821429,
+          "high_index": 103.357143,
+          "low_index": 101.571429,
+          "open_index": 102.428571
+        },
+        {
+          "bar_index": 4,
+          "close_index": 103.392857,
+          "high_index": 104.642857,
+          "low_index": 102.357143,
+          "open_index": 102.571429
+        },
+        {
+          "bar_index": 5,
+          "close_index": 104.964286,
+          "high_index": 105.321429,
+          "low_index": 102.964286,
+          "open_index": 103.25
+        },
+        {
+          "bar_index": 6,
+          "close_index": 107.857143,
+          "high_index": 108.428571,
+          "low_index": 104.285714,
+          "open_index": 104.928571
+        },
+        {
+          "bar_index": 7,
+          "close_index": 107.392857,
+          "high_index": 108.178571,
+          "low_index": 106.5,
+          "open_index": 108.142857
+        },
+        {
+          "bar_index": 8,
+          "close_index": 107.464286,
+          "high_index": 108.892857,
+          "low_index": 106.857143,
+          "open_index": 108.464286
+        },
+        {
+          "bar_index": 9,
+          "close_index": 108.75,
+          "high_index": 109.392857,
+          "low_index": 106.642857,
+          "open_index": 106.642857
+        },
+        {
+          "bar_index": 10,
+          "close_index": 102.5,
+          "high_index": 106.964286,
+          "low_index": 102.285714,
+          "open_index": 106.964286
+        },
+        {
+          "bar_index": 11,
+          "close_index": 101.964286,
+          "high_index": 104.285714,
+          "low_index": 100.964286,
+          "open_index": 101.071429
+        },
+        {
+          "bar_index": 12,
+          "close_index": 102.928571,
+          "high_index": 104.678571,
+          "low_index": 101.5,
+          "open_index": 101.928571
+        },
+        {
+          "bar_index": 13,
+          "close_index": 104.107143,
+          "high_index": 104.214286,
+          "low_index": 102.392857,
+          "open_index": 102.678571
+        },
+        {
+          "bar_index": 14,
+          "close_index": 103.785714,
+          "high_index": 104.321429,
+          "low_index": 102.642857,
+          "open_index": 104.142857
+        },
+        {
+          "bar_index": 15,
+          "close_index": 102.142857,
+          "high_index": 104.535714,
+          "low_index": 101.75,
+          "open_index": 104.214286
+        },
+        {
+          "bar_index": 16,
+          "close_index": 103.821429,
+          "high_index": 104.821429,
+          "low_index": 101.785714,
+          "open_index": 101.785714
+        },
+        {
+          "bar_index": 17,
+          "close_index": 106.392857,
+          "high_index": 107.0,
+          "low_index": 103.357143,
+          "open_index": 104.285714
+        },
+        {
+          "bar_index": 18,
+          "close_index": 105.821429,
+          "high_index": 106.214286,
+          "low_index": 104.214286,
+          "open_index": 105.321429
+        },
+        {
+          "bar_index": 19,
+          "close_index": 106.0,
+          "high_index": 107.035714,
+          "low_index": 105.714286,
+          "open_index": 105.928571
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 376,
+        "coherent_observation_count": 3251,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 64,
+          "close_path_change_pct_distribution": {
+            "p20": -69.509179,
+            "p50": -52.727217,
+            "p80": -37.494708
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 162.075528,
+            "p50": 204.20094,
+            "p80": 708.0
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 4,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 4249,
+        "input_quality_violation_share": 0.566533,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 4249,
+        "nonzero_activity_observation_count": 6594,
+        "nonzero_activity_share": 0.8792,
+        "observation_count": 7500,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "typical",
+      "start_date": "2026-04-20",
+      "within_family_percentile_target": 0.5
+    },
+    {
+      "calendar_span_days": 28,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 4.83854,
+        "net_change_pct": 0.551724,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 64.666708,
+        "total_excursion_pct": 18.065693,
+        "up_bar_share": 0.5
+      },
+      "end_date": "2026-04-17",
+      "freshness": {
+        "calendar_lag_days": 104,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "CZCE.MA",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 99.655172,
+          "high_index": 101.275862,
+          "low_index": 96.37931,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 107.241379,
+          "high_index": 107.551724,
+          "low_index": 99.172414,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 2,
+          "close_index": 101.344828,
+          "high_index": 104.482759,
+          "low_index": 100.137931,
+          "open_index": 100.344828
+        },
+        {
+          "bar_index": 3,
+          "close_index": 99.413793,
+          "high_index": 103.034483,
+          "low_index": 95.241379,
+          "open_index": 102.551724
+        },
+        {
+          "bar_index": 4,
+          "close_index": 101.965517,
+          "high_index": 102.586207,
+          "low_index": 98.413793,
+          "open_index": 100.344828
+        },
+        {
+          "bar_index": 5,
+          "close_index": 103.655172,
+          "high_index": 104.137931,
+          "low_index": 101.517241,
+          "open_index": 103.517241
+        },
+        {
+          "bar_index": 6,
+          "close_index": 104.724138,
+          "high_index": 108.965517,
+          "low_index": 104.068966,
+          "open_index": 105.206897
+        },
+        {
+          "bar_index": 7,
+          "close_index": 102.0,
+          "high_index": 105.965517,
+          "low_index": 100.413793,
+          "open_index": 103.965517
+        },
+        {
+          "bar_index": 8,
+          "close_index": 95.793103,
+          "high_index": 103.37931,
+          "low_index": 95.241379,
+          "open_index": 102.0
+        },
+        {
+          "bar_index": 9,
+          "close_index": 101.482759,
+          "high_index": 102.310345,
+          "low_index": 95.965517,
+          "open_index": 97.241379
+        },
+        {
+          "bar_index": 10,
+          "close_index": 103.793103,
+          "high_index": 105.344828,
+          "low_index": 98.551724,
+          "open_index": 105.172414
+        },
+        {
+          "bar_index": 11,
+          "close_index": 108.931034,
+          "high_index": 110.344828,
+          "low_index": 104.482759,
+          "open_index": 106.896552
+        },
+        {
+          "bar_index": 12,
+          "close_index": 99.068966,
+          "high_index": 111.551724,
+          "low_index": 96.310345,
+          "open_index": 108.586207
+        },
+        {
+          "bar_index": 13,
+          "close_index": 100.448276,
+          "high_index": 101.344828,
+          "low_index": 97.586207,
+          "open_index": 98.551724
+        },
+        {
+          "bar_index": 14,
+          "close_index": 97.724138,
+          "high_index": 101.62069,
+          "low_index": 96.965517,
+          "open_index": 101.586207
+        },
+        {
+          "bar_index": 15,
+          "close_index": 98.758621,
+          "high_index": 103.103448,
+          "low_index": 94.482759,
+          "open_index": 96.896552
+        },
+        {
+          "bar_index": 16,
+          "close_index": 97.517241,
+          "high_index": 99.448276,
+          "low_index": 94.862069,
+          "open_index": 98.62069
+        },
+        {
+          "bar_index": 17,
+          "close_index": 98.068966,
+          "high_index": 98.586207,
+          "low_index": 95.344828,
+          "open_index": 96.931034
+        },
+        {
+          "bar_index": 18,
+          "close_index": 100.275862,
+          "high_index": 100.551724,
+          "low_index": 97.413793,
+          "open_index": 98.275862
+        },
+        {
+          "bar_index": 19,
+          "close_index": 100.551724,
+          "high_index": 102.275862,
+          "low_index": 99.689655,
+          "open_index": 100.793103
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 374,
+        "coherent_observation_count": 3338,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 33,
+          "close_path_change_pct_distribution": {
+            "p20": -28.127592,
+            "p50": -24.696356,
+            "p80": -20.078155
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 85.795455,
+            "p50": 163.157895,
+            "p80": 272.647783
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 19.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 86,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 3796,
+        "input_quality_violation_share": 0.5321,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 3796,
+        "nonzero_activity_observation_count": 6210,
+        "nonzero_activity_share": 0.870479,
+        "observation_count": 7134,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "volatile",
+      "start_date": "2026-03-20",
+      "within_family_percentile_target": 0.8
+    },
+    {
+      "calendar_span_days": 27,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 0.603046,
+        "net_change_pct": 1.349598,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 9.660994,
+        "total_excursion_pct": 3.870211,
+        "up_bar_share": 0.55
+      },
+      "end_date": "2025-07-14",
+      "freshness": {
+        "calendar_lag_days": 381,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "SHFE.cu",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 99.961069,
+          "high_index": 100.20763,
+          "low_index": 99.883208,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 100.441215,
+          "high_index": 100.441215,
+          "low_index": 99.844277,
+          "open_index": 100.090838
+        },
+        {
+          "bar_index": 2,
+          "close_index": 99.896185,
+          "high_index": 100.324423,
+          "low_index": 99.844277,
+          "open_index": 100.298469
+        },
+        {
+          "bar_index": 3,
+          "close_index": 99.662601,
+          "high_index": 100.064885,
+          "low_index": 99.584739,
+          "open_index": 99.779393
+        },
+        {
+          "bar_index": 4,
+          "close_index": 99.8313,
+          "high_index": 100.20763,
+          "low_index": 99.79237,
+          "open_index": 100.155723
+        },
+        {
+          "bar_index": 5,
+          "close_index": 100.454192,
+          "high_index": 100.480145,
+          "low_index": 99.8313,
+          "open_index": 99.961069
+        },
+        {
+          "bar_index": 6,
+          "close_index": 100.350376,
+          "high_index": 100.532053,
+          "low_index": 100.077861,
+          "open_index": 100.129769
+        },
+        {
+          "bar_index": 7,
+          "close_index": 100.661822,
+          "high_index": 100.687776,
+          "low_index": 100.272515,
+          "open_index": 100.324423
+        },
+        {
+          "bar_index": 8,
+          "close_index": 101.764859,
+          "high_index": 102.05035,
+          "low_index": 101.258759,
+          "open_index": 101.323644
+        },
+        {
+          "bar_index": 9,
+          "close_index": 101.816766,
+          "high_index": 101.946535,
+          "low_index": 101.323644,
+          "open_index": 101.323644
+        },
+        {
+          "bar_index": 10,
+          "close_index": 102.634311,
+          "high_index": 102.634311,
+          "low_index": 101.46639,
+          "open_index": 101.609136
+        },
+        {
+          "bar_index": 11,
+          "close_index": 102.841941,
+          "high_index": 103.101479,
+          "low_index": 102.413704,
+          "open_index": 102.426681
+        },
+        {
+          "bar_index": 12,
+          "close_index": 102.97171,
+          "high_index": 103.438879,
+          "low_index": 102.919803,
+          "open_index": 103.062549
+        },
+        {
+          "bar_index": 13,
+          "close_index": 101.985466,
+          "high_index": 103.114456,
+          "low_index": 101.725928,
+          "open_index": 102.76408
+        },
+        {
+          "bar_index": 14,
+          "close_index": 101.518297,
+          "high_index": 102.206073,
+          "low_index": 101.323644,
+          "open_index": 101.933558
+        },
+        {
+          "bar_index": 15,
+          "close_index": 101.959512,
+          "high_index": 101.959512,
+          "low_index": 101.414482,
+          "open_index": 101.531274
+        },
+        {
+          "bar_index": 16,
+          "close_index": 100.467168,
+          "high_index": 101.998443,
+          "low_index": 100.402284,
+          "open_index": 101.920581
+        },
+        {
+          "bar_index": 17,
+          "close_index": 101.206852,
+          "high_index": 101.245783,
+          "low_index": 100.37633,
+          "open_index": 100.415261
+        },
+        {
+          "bar_index": 18,
+          "close_index": 101.051129,
+          "high_index": 101.336621,
+          "low_index": 100.934337,
+          "open_index": 101.310667
+        },
+        {
+          "bar_index": 19,
+          "close_index": 101.349598,
+          "high_index": 101.401505,
+          "low_index": 100.778614,
+          "open_index": 100.778614
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 456,
+        "coherent_observation_count": 2936,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 73,
+          "close_path_change_pct_distribution": {
+            "p20": -68.269795,
+            "p50": -30.678851,
+            "p80": -4.753949
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 135.123009,
+            "p50": 251.851852,
+            "p80": 661.818182
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 52,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 5466,
+        "input_quality_violation_share": 0.650559,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 5466,
+        "nonzero_activity_observation_count": 6350,
+        "nonzero_activity_share": 0.755772,
+        "observation_count": 8402,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "quiet",
+      "start_date": "2025-06-17",
+      "within_family_percentile_target": 0.2
+    },
+    {
+      "calendar_span_days": 27,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.284894,
+        "net_change_pct": 1.15983,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 13.763584,
+        "total_excursion_pct": 6.902405,
+        "up_bar_share": 0.4
+      },
+      "end_date": "2024-09-05",
+      "freshness": {
+        "calendar_lag_days": 693,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "SHFE.cu",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 101.55587,
+          "high_index": 102.206506,
+          "low_index": 100.0,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 102.234795,
+          "high_index": 102.362093,
+          "low_index": 101.046676,
+          "open_index": 101.669024
+        },
+        {
+          "bar_index": 2,
+          "close_index": 102.41867,
+          "high_index": 103.748232,
+          "low_index": 102.008487,
+          "open_index": 102.560113
+        },
+        {
+          "bar_index": 3,
+          "close_index": 102.065064,
+          "high_index": 102.956153,
+          "low_index": 101.485149,
+          "open_index": 102.319661
+        },
+        {
+          "bar_index": 4,
+          "close_index": 103.140028,
+          "high_index": 103.168317,
+          "low_index": 101.838755,
+          "open_index": 102.41867
+        },
+        {
+          "bar_index": 5,
+          "close_index": 104.639321,
+          "high_index": 104.893918,
+          "low_index": 103.507779,
+          "open_index": 103.847242
+        },
+        {
+          "bar_index": 6,
+          "close_index": 104.582744,
+          "high_index": 105.091938,
+          "low_index": 103.295615,
+          "open_index": 103.946252
+        },
+        {
+          "bar_index": 7,
+          "close_index": 104.398868,
+          "high_index": 105.120226,
+          "low_index": 104.200849,
+          "open_index": 104.950495
+        },
+        {
+          "bar_index": 8,
+          "close_index": 104.596888,
+          "high_index": 104.922207,
+          "low_index": 103.635078,
+          "open_index": 104.794908
+        },
+        {
+          "bar_index": 9,
+          "close_index": 104.5686,
+          "high_index": 105.176803,
+          "low_index": 104.07355,
+          "open_index": 104.66761
+        },
+        {
+          "bar_index": 10,
+          "close_index": 103.960396,
+          "high_index": 104.413013,
+          "low_index": 103.762376,
+          "open_index": 104.214993
+        },
+        {
+          "bar_index": 11,
+          "close_index": 106.322489,
+          "high_index": 106.336634,
+          "low_index": 103.917963,
+          "open_index": 104.17256
+        },
+        {
+          "bar_index": 12,
+          "close_index": 106.096181,
+          "high_index": 106.407355,
+          "low_index": 105.601132,
+          "open_index": 105.869873
+        },
+        {
+          "bar_index": 13,
+          "close_index": 105.502122,
+          "high_index": 106.902405,
+          "low_index": 105.459689,
+          "open_index": 106.421499
+        },
+        {
+          "bar_index": 14,
+          "close_index": 104.950495,
+          "high_index": 105.417256,
+          "low_index": 104.314003,
+          "open_index": 105.021216
+        },
+        {
+          "bar_index": 15,
+          "close_index": 104.978784,
+          "high_index": 105.346535,
+          "low_index": 104.031117,
+          "open_index": 104.413013
+        },
+        {
+          "bar_index": 16,
+          "close_index": 104.115983,
+          "high_index": 104.978784,
+          "low_index": 103.903819,
+          "open_index": 104.978784
+        },
+        {
+          "bar_index": 17,
+          "close_index": 103.097595,
+          "high_index": 104.483734,
+          "low_index": 103.055163,
+          "open_index": 103.960396
+        },
+        {
+          "bar_index": 18,
+          "close_index": 101.414427,
+          "high_index": 102.574257,
+          "low_index": 101.272984,
+          "open_index": 102.404526
+        },
+        {
+          "bar_index": 19,
+          "close_index": 101.15983,
+          "high_index": 102.347949,
+          "low_index": 101.15983,
+          "open_index": 101.782178
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 404,
+        "coherent_observation_count": 4277,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 95,
+          "close_path_change_pct_distribution": {
+            "p20": -53.009786,
+            "p50": -19.53125,
+            "p80": -4.705788
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 145.826883,
+            "p50": 347.47191,
+            "p80": 1120.0
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 54,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 3371,
+        "input_quality_violation_share": 0.440769,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 3371,
+        "nonzero_activity_observation_count": 6727,
+        "nonzero_activity_share": 0.879576,
+        "observation_count": 7648,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "typical",
+      "start_date": "2024-08-09",
+      "within_family_percentile_target": 0.5
+    },
+    {
+      "calendar_span_days": 27,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.146004,
+        "net_change_pct": -8.902485,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 18.501004,
+        "total_excursion_pct": 12.043642,
+        "up_bar_share": 0.4
+      },
+      "end_date": "2024-08-12",
+      "freshness": {
+        "calendar_lag_days": 717,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "SHFE.cu",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 99.700337,
+          "high_index": 100.012486,
+          "low_index": 99.700337,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 98.576601,
+          "high_index": 99.250843,
+          "low_index": 98.526658,
+          "open_index": 98.926208
+        },
+        {
+          "bar_index": 2,
+          "close_index": 98.064677,
+          "high_index": 98.589087,
+          "low_index": 97.852416,
+          "open_index": 98.564115
+        },
+        {
+          "bar_index": 3,
+          "close_index": 95.854664,
+          "high_index": 96.716194,
+          "low_index": 95.28031,
+          "open_index": 96.653765
+        },
+        {
+          "bar_index": 4,
+          "close_index": 94.456237,
+          "high_index": 95.567487,
+          "low_index": 94.456237,
+          "open_index": 95.492571
+        },
+        {
+          "bar_index": 5,
+          "close_index": 93.831939,
+          "high_index": 95.005619,
+          "low_index": 93.682108,
+          "open_index": 94.094144
+        },
+        {
+          "bar_index": 6,
+          "close_index": 93.831939,
+          "high_index": 94.031714,
+          "low_index": 93.270071,
+          "open_index": 93.831939
+        },
+        {
+          "bar_index": 7,
+          "close_index": 91.459608,
+          "high_index": 93.682108,
+          "low_index": 91.197403,
+          "open_index": 93.669622
+        },
+        {
+          "bar_index": 8,
+          "close_index": 92.895493,
+          "high_index": 93.344987,
+          "low_index": 91.809215,
+          "open_index": 91.859158
+        },
+        {
+          "bar_index": 9,
+          "close_index": 92.795605,
+          "high_index": 93.64465,
+          "low_index": 92.795605,
+          "open_index": 92.845549
+        },
+        {
+          "bar_index": 10,
+          "close_index": 92.658259,
+          "high_index": 92.883007,
+          "low_index": 91.921588,
+          "open_index": 92.208765
+        },
+        {
+          "bar_index": 11,
+          "close_index": 93.769509,
+          "high_index": 93.769509,
+          "low_index": 91.796729,
+          "open_index": 92.033962
+        },
+        {
+          "bar_index": 12,
+          "close_index": 94.019228,
+          "high_index": 94.843301,
+          "low_index": 93.794481,
+          "open_index": 93.856911
+        },
+        {
+          "bar_index": 13,
+          "close_index": 93.12024,
+          "high_index": 94.131602,
+          "low_index": 92.783119,
+          "open_index": 93.682108
+        },
+        {
+          "bar_index": 14,
+          "close_index": 91.259833,
+          "high_index": 93.207641,
+          "low_index": 91.172431,
+          "open_index": 93.207641
+        },
+        {
+          "bar_index": 15,
+          "close_index": 89.749032,
+          "high_index": 91.134973,
+          "low_index": 89.26208,
+          "open_index": 89.586715
+        },
+        {
+          "bar_index": 16,
+          "close_index": 90.298414,
+          "high_index": 90.660507,
+          "low_index": 89.774004,
+          "open_index": 89.774004
+        },
+        {
+          "bar_index": 17,
+          "close_index": 89.586715,
+          "high_index": 90.273442,
+          "low_index": 89.586715,
+          "open_index": 90.273442
+        },
+        {
+          "bar_index": 18,
+          "close_index": 90.485704,
+          "high_index": 91.060057,
+          "low_index": 89.511799,
+          "open_index": 89.511799
+        },
+        {
+          "bar_index": 19,
+          "close_index": 91.097515,
+          "high_index": 91.097515,
+          "low_index": 90.3109,
+          "open_index": 90.83531
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 466,
+        "coherent_observation_count": 4229,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 84,
+          "close_path_change_pct_distribution": {
+            "p20": -91.071655,
+            "p50": -80.682248,
+            "p80": 651.545837
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 905.887027,
+            "p50": 1678.393108,
+            "p80": 2838.853695
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 12.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 154,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 2
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 3459,
+        "input_quality_violation_share": 0.449922,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 3459,
+        "nonzero_activity_observation_count": 6617,
+        "nonzero_activity_share": 0.860692,
+        "observation_count": 7688,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "volatile",
+      "start_date": "2024-07-16",
+      "within_family_percentile_target": 0.8
+    },
+    {
+      "calendar_span_days": 27,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.301869,
+        "net_change_pct": 0.0,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 20.226496,
+        "total_excursion_pct": 5.965147,
+        "up_bar_share": 0.4
+      },
+      "end_date": "2025-09-08",
+      "freshness": {
+        "calendar_lag_days": 325,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "DCE.i",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 101.285347,
+          "high_index": 101.478149,
+          "low_index": 99.550129,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 100.514139,
+          "high_index": 101.606684,
+          "low_index": 100.514139,
+          "open_index": 101.349614
+        },
+        {
+          "bar_index": 2,
+          "close_index": 97.686375,
+          "high_index": 100.835476,
+          "low_index": 97.300771,
+          "open_index": 100.321337
+        },
+        {
+          "bar_index": 3,
+          "close_index": 98.007712,
+          "high_index": 98.586118,
+          "low_index": 97.365039,
+          "open_index": 97.81491
+        },
+        {
+          "bar_index": 4,
+          "close_index": 97.429306,
+          "high_index": 98.843188,
+          "low_index": 96.8509,
+          "open_index": 98.071979
+        },
+        {
+          "bar_index": 5,
+          "close_index": 97.365039,
+          "high_index": 97.622108,
+          "low_index": 96.915167,
+          "open_index": 97.365039
+        },
+        {
+          "bar_index": 6,
+          "close_index": 97.043702,
+          "high_index": 97.236504,
+          "low_index": 95.886889,
+          "open_index": 97.236504
+        },
+        {
+          "bar_index": 7,
+          "close_index": 97.172237,
+          "high_index": 98.264781,
+          "low_index": 97.107969,
+          "open_index": 97.300771
+        },
+        {
+          "bar_index": 8,
+          "close_index": 97.043702,
+          "high_index": 97.493573,
+          "low_index": 96.529563,
+          "open_index": 97.172237
+        },
+        {
+          "bar_index": 9,
+          "close_index": 99.164524,
+          "high_index": 99.293059,
+          "low_index": 97.300771,
+          "open_index": 97.365039
+        },
+        {
+          "bar_index": 10,
+          "close_index": 97.879177,
+          "high_index": 99.100257,
+          "low_index": 97.622108,
+          "open_index": 99.100257
+        },
+        {
+          "bar_index": 11,
+          "close_index": 97.81491,
+          "high_index": 98.457584,
+          "low_index": 97.622108,
+          "open_index": 97.943445
+        },
+        {
+          "bar_index": 12,
+          "close_index": 99.421594,
+          "high_index": 99.421594,
+          "low_index": 97.750643,
+          "open_index": 97.879177
+        },
+        {
+          "bar_index": 13,
+          "close_index": 99.100257,
+          "high_index": 99.550129,
+          "low_index": 98.586118,
+          "open_index": 99.485861
+        },
+        {
+          "bar_index": 14,
+          "close_index": 96.465296,
+          "high_index": 98.843188,
+          "low_index": 96.015424,
+          "open_index": 98.843188
+        },
+        {
+          "bar_index": 15,
+          "close_index": 97.493573,
+          "high_index": 97.81491,
+          "low_index": 96.529563,
+          "open_index": 96.8509
+        },
+        {
+          "bar_index": 16,
+          "close_index": 98.071979,
+          "high_index": 98.650386,
+          "low_index": 97.686375,
+          "open_index": 97.81491
+        },
+        {
+          "bar_index": 17,
+          "close_index": 99.871465,
+          "high_index": 100.192802,
+          "low_index": 97.686375,
+          "open_index": 98.200514
+        },
+        {
+          "bar_index": 18,
+          "close_index": 99.485861,
+          "high_index": 99.742931,
+          "low_index": 98.586118,
+          "open_index": 99.678663
+        },
+        {
+          "bar_index": 19,
+          "close_index": 100.0,
+          "high_index": 100.128535,
+          "low_index": 98.843188,
+          "open_index": 99.678663
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 20,
+        "coherent_observation_count": 134,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 3,
+          "close_path_change_pct_distribution": {
+            "p20": -14.714405,
+            "p50": -4.098361,
+            "p80": 2.982878
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 28.441493,
+            "p50": 29.398664,
+            "p80": 51.67882
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 16.0,
+            "p50": 18.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 10,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 226,
+        "input_quality_violation_share": 0.627778,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 226,
+        "nonzero_activity_observation_count": 71,
+        "nonzero_activity_share": 0.197222,
+        "observation_count": 360,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "quiet",
+      "start_date": "2025-08-12",
+      "within_family_percentile_target": 0.2
+    },
+    {
+      "calendar_span_days": 30,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.279188,
+        "net_change_pct": 0.585938,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 15.699863,
+        "total_excursion_pct": 7.157058,
+        "up_bar_share": 0.5
+      },
+      "end_date": "2026-05-22",
+      "freshness": {
+        "calendar_lag_days": 69,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "DCE.i",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 100.260417,
+          "high_index": 100.585938,
+          "low_index": 99.609375,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 99.804688,
+          "high_index": 100.976562,
+          "low_index": 99.21875,
+          "open_index": 100.065104
+        },
+        {
+          "bar_index": 2,
+          "close_index": 100.260417,
+          "high_index": 100.520833,
+          "low_index": 99.674479,
+          "open_index": 99.739583
+        },
+        {
+          "bar_index": 3,
+          "close_index": 100.130208,
+          "high_index": 101.041667,
+          "low_index": 99.739583,
+          "open_index": 100.260417
+        },
+        {
+          "bar_index": 4,
+          "close_index": 99.088542,
+          "high_index": 100.325521,
+          "low_index": 98.242188,
+          "open_index": 99.934896
+        },
+        {
+          "bar_index": 5,
+          "close_index": 100.065104,
+          "high_index": 100.130208,
+          "low_index": 99.023438,
+          "open_index": 99.674479
+        },
+        {
+          "bar_index": 6,
+          "close_index": 101.432292,
+          "high_index": 102.148438,
+          "low_index": 99.869792,
+          "open_index": 100.130208
+        },
+        {
+          "bar_index": 7,
+          "close_index": 103.971354,
+          "high_index": 104.166667,
+          "low_index": 101.822917,
+          "open_index": 101.822917
+        },
+        {
+          "bar_index": 8,
+          "close_index": 104.231771,
+          "high_index": 104.427083,
+          "low_index": 103.385417,
+          "open_index": 103.385417
+        },
+        {
+          "bar_index": 9,
+          "close_index": 103.710938,
+          "high_index": 104.557292,
+          "low_index": 103.385417,
+          "open_index": 104.361979
+        },
+        {
+          "bar_index": 10,
+          "close_index": 104.752604,
+          "high_index": 105.273438,
+          "low_index": 103.385417,
+          "open_index": 103.385417
+        },
+        {
+          "bar_index": 11,
+          "close_index": 103.385417,
+          "high_index": 105.078125,
+          "low_index": 103.125,
+          "open_index": 104.492188
+        },
+        {
+          "bar_index": 12,
+          "close_index": 104.361979,
+          "high_index": 104.817708,
+          "low_index": 103.515625,
+          "open_index": 103.515625
+        },
+        {
+          "bar_index": 13,
+          "close_index": 103.90625,
+          "high_index": 104.622396,
+          "low_index": 102.994792,
+          "open_index": 104.296875
+        },
+        {
+          "bar_index": 14,
+          "close_index": 102.604167,
+          "high_index": 104.296875,
+          "low_index": 102.408854,
+          "open_index": 103.90625
+        },
+        {
+          "bar_index": 15,
+          "close_index": 102.018229,
+          "high_index": 102.929688,
+          "low_index": 101.627604,
+          "open_index": 102.734375
+        },
+        {
+          "bar_index": 16,
+          "close_index": 101.5625,
+          "high_index": 102.213542,
+          "low_index": 100.911458,
+          "open_index": 101.953125
+        },
+        {
+          "bar_index": 17,
+          "close_index": 101.692708,
+          "high_index": 101.822917,
+          "low_index": 100.78125,
+          "open_index": 101.432292
+        },
+        {
+          "bar_index": 18,
+          "close_index": 100.325521,
+          "high_index": 101.5625,
+          "low_index": 100.325521,
+          "open_index": 101.432292
+        },
+        {
+          "bar_index": 19,
+          "close_index": 100.585938,
+          "high_index": 101.236979,
+          "low_index": 100.325521,
+          "open_index": 100.325521
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 206,
+        "coherent_observation_count": 2011,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 86,
+          "close_path_change_pct_distribution": {
+            "p20": -36.956522,
+            "p50": -18.383117,
+            "p80": -8.154506
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 66.542056,
+            "p50": 113.289037,
+            "p80": 178.90625
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 20.0,
+            "p50": 20.0,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 30,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 18
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 1701,
+        "input_quality_violation_share": 0.458244,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 1701,
+        "nonzero_activity_observation_count": 1632,
+        "nonzero_activity_share": 0.439655,
+        "observation_count": 3712,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "typical",
+      "start_date": "2026-04-22",
+      "within_family_percentile_target": 0.5
+    },
+    {
+      "calendar_span_days": 28,
+      "descriptive_metrics": {
+        "median_bar_range_pct": 1.858782,
+        "net_change_pct": 2.706104,
+        "nonzero_activity_share": 1.0,
+        "realized_variability_annualized_pct": 20.260179,
+        "total_excursion_pct": 9.859155,
+        "up_bar_share": 0.4
+      },
+      "end_date": "2025-09-12",
+      "freshness": {
+        "calendar_lag_days": 321,
+        "status": "stale"
+      },
+      "input_quality": {
+        "duplicate_timestamps": 0,
+        "invalid_observations": 0,
+        "status": "clean"
+      },
+      "instrument_family": "DCE.i",
+      "normalized_ohlc_path": [
+        {
+          "bar_index": 0,
+          "close_index": 99.685337,
+          "high_index": 100.125865,
+          "low_index": 99.307741,
+          "open_index": 100.0
+        },
+        {
+          "bar_index": 1,
+          "close_index": 99.433606,
+          "high_index": 100.94399,
+          "low_index": 98.804279,
+          "open_index": 100.062933
+        },
+        {
+          "bar_index": 2,
+          "close_index": 99.307741,
+          "high_index": 99.874135,
+          "low_index": 98.804279,
+          "open_index": 99.496539
+        },
+        {
+          "bar_index": 3,
+          "close_index": 98.930145,
+          "high_index": 99.559471,
+          "low_index": 98.300818,
+          "open_index": 99.559471
+        },
+        {
+          "bar_index": 4,
+          "close_index": 99.559471,
+          "high_index": 100.377596,
+          "low_index": 99.181875,
+          "open_index": 99.370673
+        },
+        {
+          "bar_index": 5,
+          "close_index": 99.307741,
+          "high_index": 99.937067,
+          "low_index": 98.993077,
+          "open_index": 99.433606
+        },
+        {
+          "bar_index": 6,
+          "close_index": 101.510384,
+          "high_index": 101.699182,
+          "low_index": 99.433606,
+          "open_index": 100.062933
+        },
+        {
+          "bar_index": 7,
+          "close_index": 100.314663,
+          "high_index": 101.825047,
+          "low_index": 100.188798,
+          "open_index": 101.825047
+        },
+        {
+          "bar_index": 8,
+          "close_index": 100.251731,
+          "high_index": 100.818125,
+          "low_index": 100.062933,
+          "open_index": 100.314663
+        },
+        {
+          "bar_index": 9,
+          "close_index": 102.076778,
+          "high_index": 102.076778,
+          "low_index": 100.188798,
+          "open_index": 100.251731
+        },
+        {
+          "bar_index": 10,
+          "close_index": 101.069855,
+          "high_index": 102.391441,
+          "low_index": 100.503461,
+          "open_index": 102.328508
+        },
+        {
+          "bar_index": 11,
+          "close_index": 100.881057,
+          "high_index": 102.517306,
+          "low_index": 99.433606,
+          "open_index": 101.321586
+        },
+        {
+          "bar_index": 12,
+          "close_index": 100.94399,
+          "high_index": 101.258653,
+          "low_index": 99.811202,
+          "open_index": 101.258653
+        },
+        {
+          "bar_index": 13,
+          "close_index": 102.328508,
+          "high_index": 103.209566,
+          "low_index": 99.874135,
+          "open_index": 100.94399
+        },
+        {
+          "bar_index": 14,
+          "close_index": 104.594084,
+          "high_index": 104.594084,
+          "low_index": 102.328508,
+          "open_index": 102.328508
+        },
+        {
+          "bar_index": 15,
+          "close_index": 105.034613,
+          "high_index": 106.230334,
+          "low_index": 103.587162,
+          "open_index": 106.230334
+        },
+        {
+          "bar_index": 16,
+          "close_index": 106.985525,
+          "high_index": 106.985525,
+          "low_index": 102.643172,
+          "open_index": 106.922593
+        },
+        {
+          "bar_index": 17,
+          "close_index": 106.985525,
+          "high_index": 106.985525,
+          "low_index": 105.601007,
+          "open_index": 105.601007
+        },
+        {
+          "bar_index": 18,
+          "close_index": 105.789805,
+          "high_index": 107.992448,
+          "low_index": 105.789805,
+          "open_index": 107.992448
+        },
+        {
+          "bar_index": 19,
+          "close_index": 102.706104,
+          "high_index": 102.706104,
+          "low_index": 100.692259,
+          "open_index": 100.692259
+        }
+      ],
+      "normalized_path_encoding": {
+        "bar_count": 20,
+        "base": "first completed bar open equals 100",
+        "raw_prices_published": false
+      },
+      "observation_count": 20,
+      "option_premium_overlay": {
+        "anonymous_series_with_observations": 20,
+        "coherent_observation_count": 149,
+        "comparable_complete_path_metrics": {
+          "anonymous_series_count": 3,
+          "close_path_change_pct_distribution": {
+            "p20": -15.562973,
+            "p50": -15.47619,
+            "p80": 2.705423
+          },
+          "required_distinct_date_count": 20,
+          "status": "available",
+          "total_excursion_pct_distribution": {
+            "p20": 36.370058,
+            "p50": 43.45679,
+            "p80": 46.414974
+          }
+        },
+        "distinct_date_coverage": {
+          "distribution": {
+            "p20": 19.0,
+            "p50": 19.5,
+            "p80": 20.0
+          },
+          "duplicate_date_series_count": 0,
+          "incomplete_fragment_series_count": 10,
+          "required_for_comparable_path": 20,
+          "two_point_fragment_series_count": 0
+        },
+        "duplicate_date_observation_count": 0,
+        "input_quality_violation_observation_count": 241,
+        "input_quality_violation_share": 0.617949,
+        "interpretation": "anonymous descriptive premium paths within the frozen underlying date window; not outcomes or profitability",
+        "nonpositive_or_missing_observation_count": 241,
+        "nonzero_activity_observation_count": 82,
+        "nonzero_activity_share": 0.210256,
+        "observation_count": 390,
+        "ohlc_incoherent_observation_count": 0,
+        "quality_status": "invalid",
+        "selection_influence": false
+      },
+      "regime_slice": "volatile",
+      "start_date": "2025-08-15",
+      "within_family_percentile_target": 0.8
+    }
+  ],
+  "schema_version": "pa_feitian_m6_exploratory_swing_views_v1",
+  "source": {
+    "access": "read_only",
+    "daily_option_files_in_frozen_inventory": 7459,
+    "daily_option_inventory_sha256": "sha256:f7f20b533190a312e8bc70d6fb7bf7c8f81e34d197cd5984795d910118ab5ecf",
+    "daily_underlying_files_in_frozen_inventory": 326,
+    "daily_underlying_inventory_sha256": "sha256:89f192606bb46382e7b1bec41352814cab66236e46c6f1ea552200c704f86411",
+    "filesystem_timestamps_used_as_freshness": false,
+    "future_only_files_excluded_from_inventory": true,
+    "post_audit_rows_excluded_before_partitioning": true,
+    "public_alias": "external://quant-data/daily/",
+    "runtime_binding": "QUANT_DATA_ROOT",
+    "source_refresh_performed": false
+  },
+  "strategy_handoff": {
+    "all_six_families_retained": true,
+    "family_or_contract_profitability_ranking": false,
+    "suggested_inspection_groups": [
+      {
+        "families": [
+          "SHFE.au",
+          "SHFE.ag"
+        ],
+        "role": "continuity_candidate",
+        "use": "inspect quiet, typical, and volatile underlying windows alongside the daily option-premium OHLC caveat"
+      },
+      {
+        "families": [
+          "CZCE.TA",
+          "CZCE.MA"
+        ],
+        "role": "mainstream_candidate",
+        "use": "inspect all three regime slices and retain the underlying-input quality flags"
+      },
+      {
+        "families": [
+          "SHFE.cu",
+          "DCE.i"
+        ],
+        "role": "control",
+        "use": "inspect as non-CZCE contrasts; preserve the option-quality and activity caveats"
+      }
+    ]
+  },
+  "study_label": "exploratory_historical_data_view_only",
+  "underlying_window_method": {
+    "cadence_resampling": false,
+    "completed_observations": 20,
+    "cross_contract_stitching": false,
+    "daily_option_coverage_required": true,
+    "regime_percentile_targets": [
+      {
+        "label": "quiet",
+        "percentile": 0.2
+      },
+      {
+        "label": "typical",
+        "percentile": 0.5
+      },
+      {
+        "label": "volatile",
+        "percentile": 0.8
+      }
+    ],
+    "representative_selection": "nearest clean within-family total-excursion percentile; no strategy outcomes or profitability",
+    "stride_observations": 20
+  }
+}
