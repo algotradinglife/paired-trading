@@ -49,9 +49,9 @@
     "option or execution input access"
   ],
   "dependency_recommendation": {
-    "issue_51": "remain_blocked",
+    "issue_51": "cancel_without_implementation",
     "issue_50": "remain_done_without_gate_weakening",
-    "native_source_follow_up": "No implementation request is authorized under this decision. Any future source work requires a new immutable source version, provider/bar-end semantics binding, lossless row accounting, zero-finding quality gate, and a newly reviewed strategy decision."
+    "native_source_follow_up": "No implementation request is authorized under this decision. Any future source work requires a new immutable source version, provider/bar-end semantics binding, lossless row accounting, zero-finding quality gate, a newly reviewed strategy decision, and a new implementation issue."
   },
   "claim_boundary": "Only public-safe, pre-outcome source-quality aggregates from the Issue #59 audit were consumed. No strategy events, outcomes, returns, holdout strategy evidence, options, raw rows, filenames, contract identifiers, or source mutations were accessed or published."
 }

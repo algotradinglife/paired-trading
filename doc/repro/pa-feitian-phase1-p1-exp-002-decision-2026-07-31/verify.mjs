@@ -49,5 +49,5 @@ const c = memo.public_safe_classification;
 if (c.captured_source_files !== 978 || c.captured_source_rows !== 2702545 || c.required_matrix_cells !== 18) throw new Error("source accounting drift");
 if (c.intraday_cells_without_independent_provider_bar_end_semantics !== 12 || c.intraday_unexplained_timestamp_rows !== 521090) throw new Error("intraday blocker drift");
 if (c.daily_price_findings.total !== 169 || c.daily_price_findings.family_aggregate["CZCE.TA"] !== 76 || c.daily_price_findings.family_aggregate["CZCE.MA"] !== 93) throw new Error("daily blocker drift");
-if (memo.dependency_recommendation.issue_51 !== "remain_blocked") throw new Error("dependency drift");
+if (memo.dependency_recommendation.issue_51 !== "cancel_without_implementation") throw new Error("dependency drift");
 console.log(JSON.stringify({ ok: true, issue: 60, verdict: memo.verdict, source_files: c.captured_source_files, source_rows: c.captured_source_rows }));

@@ -28,11 +28,12 @@ changes, not a causal revision.
 
 Only the public-safe, pre-outcome source-quality aggregates from #59 were
 consumed. No strategy events, outcomes, returns, holdout strategy evidence,
-options, or execution inputs were accessed. #51 remains blocked. #50 remains
-complete and is not weakened. A future attempt would require a new immutable
-source version with provider and bar-end semantics, lossless accounting for
-every row, and a new reviewed Strategy decision; this memo does not authorize
-Data implementation work.
+options, or execution inputs were accessed. #51 must close without
+implementation because its frozen experiment has stopped. #50 remains complete
+and is not weakened. A future attempt would require a new immutable source
+version with provider and bar-end semantics, lossless accounting for every row,
+a new reviewed Strategy decision, and a new implementation issue; this memo
+does not authorize Data implementation work.
 
 ## Reproduce
 
