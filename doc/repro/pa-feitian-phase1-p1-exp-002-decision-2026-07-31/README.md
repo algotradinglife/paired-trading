@@ -1,7 +1,7 @@
 # P1-EXP-002 native-source decision
 
-Issue: #60  
-Decision time: `2026-07-30T17:01:53Z`  
+Issue: #60
+Decision time: `2026-07-30T17:01:53Z`
 Verdict: **`stop_p1_exp_002`**
 
 This is a pre-outcome Strategy decision bound to the accepted #59 native-source
@@ -26,11 +26,13 @@ changes, not a causal revision.
 
 ## Required boundary
 
-No events, outcomes, returns, holdout data, options, or execution inputs were
-accessed. #51 remains blocked. #50 remains complete and is not weakened. A
-future attempt would require a new immutable source version with provider and
-bar-end semantics, lossless accounting for every row, and a new reviewed
-Strategy decision; this memo does not authorize Data implementation work.
+Only the public-safe, pre-outcome source-quality aggregates from #59 were
+consumed. No strategy events, outcomes, returns, holdout strategy evidence,
+options, or execution inputs were accessed. #51 remains blocked. #50 remains
+complete and is not weakened. A future attempt would require a new immutable
+source version with provider and bar-end semantics, lossless accounting for
+every row, and a new reviewed Strategy decision; this memo does not authorize
+Data implementation work.
 
 ## Reproduce
 

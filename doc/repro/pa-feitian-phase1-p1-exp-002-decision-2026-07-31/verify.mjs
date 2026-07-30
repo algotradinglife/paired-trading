@@ -11,12 +11,32 @@ function sha256(path) {
   return `sha256:${createHash("sha256").update(readFileSync(join(root, path))).digest("hex")}`;
 }
 
+function sortKeys(value) {
+  if (Array.isArray(value)) return value.map(sortKeys);
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, sortKeys(value[key])]),
+    );
+  }
+  return value;
+}
+
+function canonicalJsonSha256(path) {
+  const value = JSON.parse(readFileSync(join(root, path), "utf8"));
+  const canonical = JSON.stringify(sortKeys(value));
+  return `sha256:${createHash("sha256").update(canonical).digest("hex")}`;
+}
+
 const expected = {
   issue_59_audit_artifact_sha256: sha256("doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json"),
   issue_59_registration_contract_sha256: sha256("docs/research/pa-feitian-m6-native-source-registration-contract-v1.json"),
   p1_exp_002_registry_sha256: sha256("docs/research/pa-feitian-phase1-hypothesis-registry-v2.json"),
   p1_exp_002_registry_lock_sha256: sha256("docs/research/pa-feitian-phase1-hypothesis-registry-v2.lock.json"),
-  historical_gate_contract_sha256: "sha256:ce8508f1cb6f15d5030e6424404f07c7d2e346811ccbc1bad033f63d4bc3d351",
+  historical_gate_contract_sha256: canonicalJsonSha256(
+    "docs/research/pa-feitian-m6-historical-backtest-data-gate-contract-v1.json",
+  ),
 };
 
 if (memo.schema_version !== "pa_feitian_phase1_p1_exp_002_decision_v1") throw new Error("schema drift");

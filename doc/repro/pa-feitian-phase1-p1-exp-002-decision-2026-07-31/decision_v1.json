@@ -43,7 +43,7 @@
   "prohibited_actions": [
     "strategy event construction",
     "outcome or return access",
-    "holdout opening",
+    "holdout strategy event or outcome opening",
     "raw-row repair or timestamp shifting",
     "silent row dropping, resampling, or clock-grid exclusion",
     "option or execution input access"
@@ -53,5 +53,5 @@
     "issue_50": "remain_done_without_gate_weakening",
     "native_source_follow_up": "No implementation request is authorized under this decision. Any future source work requires a new immutable source version, provider/bar-end semantics binding, lossless row accounting, zero-finding quality gate, and a newly reviewed strategy decision."
   },
-  "claim_boundary": "No strategy events, outcomes, returns, options, raw rows, filenames, contract identifiers, or source mutations were accessed or published."
+  "claim_boundary": "Only public-safe, pre-outcome source-quality aggregates from the Issue #59 audit were consumed. No strategy events, outcomes, returns, holdout strategy evidence, options, raw rows, filenames, contract identifiers, or source mutations were accessed or published."
 }
