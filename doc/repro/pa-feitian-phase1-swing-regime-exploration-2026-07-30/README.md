@@ -1,7 +1,9 @@
 # Phase 1 historical swing-regime exploration
 
-Issue: #52  
-Research date: 2026-07-30  
+Issue: #52
+
+Research date: 2026-07-30
+
 Decision: **stop before freezing `P1-EXP-002`; request a six-family causal
 regime view first**
 
@@ -45,9 +47,12 @@ evidence that a regime or structure is absent in those families.
 ### AU/AG completed-bar regime sketches
 
 The table is in fixed continuity-reference order. `Aligned breakout` means a
-daily strict-prior-20 breakout whose direction agrees with the causal EMA
-alignment on D, W, 60-minute, and 15-minute views. `Mixed EMA` means the four
-views do not all carry the same alignment.
+daily strict-prior-20 breakout whose direction agrees with the frozen causal
+EMA condition on D, W, 60-minute, and 15-minute views: EMA5 > EMA20 for an
+upward alignment and EMA5 < EMA20 for a downward alignment. `Mixed EMA` means
+the four views do not all carry the same alignment. `Expanded daily range`
+means the current daily high-low range is at least 1.5 times the mean
+high-low range of the 20 completed daily bars strictly before it.
 
 | Family | Records | Daily strict-prior-20 breakouts | Direction-aligned on all four views | Mixed EMA alignment | Expanded daily range |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -111,8 +116,8 @@ At the completed 15:00 Asia/Shanghai decision snapshot:
    source rows under a fixed causal roll policy.
 2. The daily close is strictly above the highs, or strictly below the lows,
    of the 20 completed daily bars before the decision bar.
-3. For an upward event, the close is above the causal fast/slow EMA relation
-   on all four views. For a downward event, it is below on all four views.
+3. For an upward event, EMA5 is greater than EMA20 on all four views. For a
+   downward event, EMA5 is less than EMA20 on all four views.
 4. Missing scheduled closes, unavailable prior-20 history, roll ambiguity, or
    disagreement on any view produces `abstain`.
 5. No option side, leg, expiry, performance claim, or execution meaning is
@@ -227,4 +232,3 @@ artifacts and checks their frozen SHA-256 bindings:
 ```sh
 node doc/repro/pa-feitian-phase1-swing-regime-exploration-2026-07-30/verify.mjs
 ```
-
