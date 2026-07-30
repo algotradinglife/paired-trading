@@ -1,0 +1,16 @@
+{
+  "schema_version": "pa_feitian_phase1_hypothesis_registry_lock_v1",
+  "registry": {
+    "path": "docs/research/pa-feitian-phase1-hypothesis-registry-v1.json",
+    "sha256": "sha256:8658189af71f58e665d09af6c84ee49558b41ff33b79d4aafbcc0479c5eaab57"
+  },
+  "selected_experiment": {
+    "experiment_id": "P1-EXP-001",
+    "canonical_design_sha256": "sha256:ef4d64e30684c7febf50be69ff75732c01d091bbdf853a15f5ee0c6c69206907"
+  },
+  "freeze": {
+    "frozen_at_utc": "2026-07-26T09:45:21Z",
+    "outcome_inspection_status": "not_started",
+    "amendment_policy": "new_registry_version_and_experiment_id_required"
+  }
+}
