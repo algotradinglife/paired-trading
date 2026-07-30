@@ -1,0 +1,139 @@
+{
+  "schema_version": "pa_feitian_m6_native_source_registration_contract_v1",
+  "contract_id": "pa_feitian_m6_native_source_registration_2026_07_30",
+  "issue_number": 58,
+  "audit_as_of_utc": "2026-07-30T15:45:00Z",
+  "dependency": {
+    "issue_50_status": "done",
+    "merged_gate_contract_sha256": "sha256:ce8508f1cb6f15d5030e6424404f07c7d2e346811ccbc1bad033f63d4bc3d351",
+    "approved_native_source_version_manifest_sha256_before_audit": null
+  },
+  "runtime_input": {
+    "binding": "QUANT_DATA_ROOT",
+    "public_alias": "external://quant-data/",
+    "access": "read_only",
+    "format": "parquet",
+    "allowed_relative_roots": [
+      "daily",
+      "hour",
+      "min15"
+    ],
+    "direct_children_only": true,
+    "symlinks_allowed": false
+  },
+  "source_version_candidate": {
+    "source_version_id": "p1-exp-002-native-source-2026-07-30-v1",
+    "history_start_inclusive": "2021-06-01T00:00:00+08:00",
+    "last_formal_decision_local": "2026-04-30T15:00:00+08:00",
+    "last_outcome_observation_date": "2026-05-15",
+    "finalized_at_utc": "2026-07-30T15:45:00Z",
+    "required_families": [
+      "SHFE.au",
+      "SHFE.ag",
+      "CZCE.TA",
+      "CZCE.MA",
+      "SHFE.cu",
+      "DCE.i"
+    ],
+    "required_cadences": [
+      "daily",
+      "hour",
+      "min15"
+    ],
+    "required_matrix_cells": 18
+  },
+  "filename_policy": {
+    "case_insensitive_family_prefix": true,
+    "contract_underlying_suffix_regex": "^[0-9]{3,4}$",
+    "continuous_underlying_suffix": "0",
+    "continuous_underlying_included": false,
+    "option_inputs_included": false,
+    "source_filenames_in_public_output": false,
+    "raw_contract_identifiers_in_public_output": false
+  },
+  "row_policy": {
+    "required_fields": [
+      "datetime",
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "open_interest"
+    ],
+    "timestamp_storage_type": "timezone_naive_local_wall_clock",
+    "source_timezone": "Asia/Shanghai",
+    "daily_normalization": "date_only_midnight_to_authoritative_session_close",
+    "intraday_normalization": "none_without_bound_provider_bar_end_semantics",
+    "provider_metadata_keys": [
+      "source_provider",
+      "timestamp_semantics",
+      "bar_timestamp_position"
+    ],
+    "approved_provider_metadata_value_sha256": null,
+    "required_bar_timestamp_position": "end",
+    "unexplained_timestamp_action": "contract_revision_required",
+    "prehistory_action": "excluded_with_accounting",
+    "post_horizon_rows": "retained_in_finalized_source_version_then_causally_filtered_per_request"
+  },
+  "session_policy": {
+    "calendar_versions": {
+      "XSGE": "exchange_calendars==4.13.2+XSGE+cn_night_session_v1",
+      "XZCE": "exchange_calendars==4.13.2+XZCE+cn_night_session_v1",
+      "XDCE": "exchange_calendars==4.13.2+XDCE+cn_night_session_v1"
+    },
+    "slot_policy": "frozen_exchange_sessions_and_family_night_segments",
+    "daily_timestamp": "authoritative_session_close",
+    "hour_timestamp": "completed_bar_end_on_consecutive_60_minute_trading_session_offsets",
+    "min15_timestamp": "completed_bar_end_on_consecutive_15_minute_trading_session_offsets"
+  },
+  "staged_windows": [
+    {
+      "window_id": "P1-EXP-002-TRAIN",
+      "decision_date_start": "2021-11-01",
+      "decision_date_end": "2023-06-30"
+    },
+    {
+      "window_id": "P1-EXP-002-VALIDATE",
+      "decision_date_start": "2023-07-08",
+      "decision_date_end": "2024-12-31"
+    },
+    {
+      "window_id": "P1-EXP-002-HOLDOUT",
+      "decision_date_start": "2025-01-11",
+      "decision_date_end": "2026-04-30"
+    }
+  ],
+  "verdict_policy": {
+    "registered": "all_18_cells_materialized_and_manifest_hash_registered_by_the_same_reviewed_change",
+    "data_blocked": "a_required_cell_is_missing_unreadable_or_fails_row_quality",
+    "contract_revision_required": "real_source_timestamp_semantics_or_grid_conflicts_with_the_frozen_gate_and_no_reviewed_lossless_mapping_exists",
+    "registration_before_review": false
+  },
+  "output": {
+    "schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+    "artifact_path": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+    "private_snapshots_committed": false,
+    "private_inventory_committed": false,
+    "local_paths": false,
+    "source_filenames": false,
+    "raw_contract_identifiers": false,
+    "raw_rows": false,
+    "credentials": false
+  },
+  "guardrails": {
+    "external_access_read_only": true,
+    "source_refresh": false,
+    "source_mutation": false,
+    "outcome_access": false,
+    "strategy_event_construction": false,
+    "instrument_ranking": false,
+    "option_input_access": false,
+    "bid_ask_synthesis": false,
+    "delta_synthesis": false,
+    "iv_synthesis": false,
+    "m7": false,
+    "m8": false,
+    "execution": false
+  }
+}
