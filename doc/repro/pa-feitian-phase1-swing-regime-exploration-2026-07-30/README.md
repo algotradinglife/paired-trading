@@ -39,12 +39,13 @@ status is `usable_with_limitations`, while causal operational use remains
 blocked.
 
 AU and AG have a committed, hash-bound causal historical corpus containing 333
-AU and 337 AG decision records from 2025-01-02 through 2026-06-08 and four
-completed-bar views per record. PR #55 adds a separate accepted daily
-exploration packet for every family. It freezes anonymous contracts before
-outcome access, partitions them into non-overlapping 20-observation windows,
-and publishes normalized OHLC paths without stitching contracts or exposing
-raw values.
+AU and 337 AG included decision records from 2025-01-02 through 2026-06-05 and
+four completed-bar views per record. The contract's requested frozen boundary
+extends through 2026-06-08, but that session is excluded because the exact
+15:00 source bar is missing. PR #55 adds a separate accepted daily exploration
+packet for every family. It freezes anonymous contracts before outcome access,
+partitions them into non-overlapping 20-observation windows, and publishes
+normalized OHLC paths without stitching contracts or exposing raw values.
 
 ### Accepted six-family exploration
 
@@ -66,8 +67,9 @@ The artifact contains 3,226 complete underlying windows, 994
 representative-eligible clean windows, and 18 inspectable normalized paths.
 It improves the exploration in four ways:
 
-1. Every family exhibits clean daily swing windows, so none may be discarded
-   merely because the earlier AU/AG causal corpus omitted it.
+1. Every family has complete 20-observation windows suitable for descriptive
+   inspection, so none may be discarded merely because the earlier AU/AG
+   causal corpus omitted it.
 2. `Quiet`, `typical`, and `volatile` are within-family excursion percentiles,
    not shared structural definitions. A TA quiet window can have more total
    excursion than an AU typical window.
@@ -116,12 +118,13 @@ observations matter:
 
 ### Bare-K vocabulary and swing-line ambiguity
 
-The outcome-free bare-K atlas produced 54 distinct training trace classes
-from 122 windows and 132 distinct holdout classes from 449 windows. Only 13
-training classes were shared between AU and AG. A bar-shape vocabulary can
-describe many charts, but the growth in distinct classes shows why an
-unbounded combination of direction, body location, range, turn, and
-three-bar shape is not yet a hypothesis.
+The outcome-free bare-K atlas shows high structural heterogeneity: 54 distinct
+trace classes among 122 training windows and 132 among 449 holdout windows.
+Only 13 training classes were shared between AU and AG. The split sizes differ,
+so the raw growth in class count is not evidence by itself. The supported
+conclusion is the large within-split variety and low cross-family overlap: an
+unbounded combination of direction, body location, range, turn, and three-bar
+shape is not yet one reproducible hypothesis.
 
 The causal two-anchor swing-line proxy is more precise, but ambiguity remains
 material:
@@ -146,6 +149,15 @@ No authentic Feitian definition is recoverable from the committed evidence.
 The three descriptions below deliberately include non-candidates so #49 can
 freeze, revise, or stop without pretending every chart idea is ready.
 
+The SR-02 mechanics come from
+`docs/research/pa-feitian-m6-causal-swing-line-induction-protocol-v1.json`
+(`sha256:0b7bf0324cfa10627916ec009281a462c2aa23504fbd11b9038790c48156aa5f`).
+The SR-03 narrative boundary comes from
+`doc/xiao-feitian-options-timing-system-2026-06-16.md`
+(`sha256:67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb`).
+Both sources are provenance-bound by this packet's verifier; neither supplies
+strategy outcomes or authenticates a Feitian rule.
+
 ### SR-01 — completed daily breakout with four-view agreement
 
 Status: **derived / proxy; definition-mature for #49, empirically unevaluated**
@@ -153,7 +165,9 @@ Status: **derived / proxy; definition-mature for #49, empirically unevaluated**
 At the completed 15:00 Asia/Shanghai decision snapshot:
 
 1. D, W, 60-minute, and 15-minute bars are built from timestamp-truncated
-   source rows under a fixed causal roll policy.
+   source rows under a fixed causal roll policy. `W` is the ISO year/week of
+   causal daily bars including the decision-time partial week, not the last
+   completed week.
 2. The daily close is strictly above the highs, or strictly below the lows,
    of the 20 completed daily bars before the decision bar.
 3. For an upward event, EMA5 is greater than EMA20 on all four views. For a
@@ -253,7 +267,8 @@ If #49 freezes SR-01, it must:
    direction, option-path change, activity, or overlay availability.
 2. Bind causal, hash-bound D/W/60-minute/15-minute underlying views under an
    explicit roll policy, exact scheduled decision close, and strict timestamp
-   truncation.
+   truncation. Preserve the underlying-corpus contract's `W` rule exactly:
+   ISO year/week of causal daily bars including the decision-time partial week.
 3. Freeze the prior-20 breakout, EMA5/EMA20 agreement, `abstain`, event
    deduplication, exclusions, minimum sample gate, and train/validation/holdout
    policy before reading any response.
@@ -271,8 +286,11 @@ to #52.
 
 ## Reproduce
 
-The verifier recomputes every count used above from the committed source
-artifacts and checks their frozen SHA-256 bindings:
+The verifier recomputes the AU/AG included date bounds and structural table,
+the bare-K and swing-line class counts, and the six-family window/path totals.
+It validates the remaining #48 and #53 capability and evidence-separation
+claims from hash-bound aggregate artifacts. It also binds and checks the
+underlying `W` semantics plus the SR-02 and SR-03 provenance sources:
 
 ```sh
 node doc/repro/pa-feitian-phase1-swing-regime-exploration-2026-07-30/verify.mjs
