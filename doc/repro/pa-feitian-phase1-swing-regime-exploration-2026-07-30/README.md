@@ -4,8 +4,8 @@ Issue: #52
 
 Research date: 2026-07-30
 
-Decision: **stop before freezing `P1-EXP-002`; request a six-family causal
-regime view first**
+Decision: **advance SR-01 to #49 as the sole definition-mature candidate;
+do not freeze or evaluate `P1-EXP-002` in this issue**
 
 ## Scope and evidence boundary
 
@@ -18,6 +18,7 @@ authorize #51.
 The observations below come only from committed, public-safe artifacts:
 
 - the six-family capability and interface audit from #43 / PR #48;
+- the accepted six-family exploratory swing views from #53 / PR #55;
 - the causal AU/AG underlying corpus with completed D/W/60-minute/15-minute
   summaries;
 - the outcome-free daily bare-K trace and causal swing-line atlases; and
@@ -25,9 +26,9 @@ The observations below come only from committed, public-safe artifacts:
 
 The source artifacts contain current-vintage retrospective data. They do not
 prove what a vendor exposed at each historical decision. This pass did not
-refresh market data, read strategy outcomes, or inspect the uncommitted
-runtime interface. Counts are structural coverage, not PnL, win rate, EV,
-instrument ranking, or evidence of future value.
+refresh market data, read strategy outcomes, or inspect the caller-provided
+runtime interface directly. Counts are structural coverage, not PnL, win rate,
+EV, instrument ranking, or evidence of future value.
 
 ## What is actually observable
 
@@ -37,12 +38,51 @@ interfaces are stale at the 2026-07-30 audit date. The historical research
 status is `usable_with_limitations`, while causal operational use remains
 blocked.
 
-Only AU and AG currently have a committed, hash-bound causal historical
-corpus suitable for regime inspection. That corpus contains 333 AU and 337 AG
-decision records from 2025-01-02 through 2026-06-08 and four completed-bar
-views per record. TA, MA, CU, and i have interface-level aggregates, but no
-equivalent committed causal regime matrix. Absence of that matrix is not
-evidence that a regime or structure is absent in those families.
+AU and AG have a committed, hash-bound causal historical corpus containing 333
+AU and 337 AG decision records from 2025-01-02 through 2026-06-08 and four
+completed-bar views per record. PR #55 adds a separate accepted daily
+exploration packet for every family. It freezes anonymous contracts before
+outcome access, partitions them into non-overlapping 20-observation windows,
+and publishes normalized OHLC paths without stitching contracts or exposing
+raw values.
+
+### Accepted six-family exploration
+
+The fixed-order table separates every complete underlying window from the
+clean windows eligible for representative selection. `Overlay views` counts
+the quiet, typical, and volatile representatives with a complete comparable
+20-date premium-path distribution. Every overlay remains quality-invalid.
+
+| Family | Complete windows | Clean windows | Representative eligible | Eligible share of clean | Overlay views available |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| SHFE.au | 405 | 405 | 186 | 45.9259% | 3/3 |
+| SHFE.ag | 651 | 651 | 319 | 49.0015% | 3/3 |
+| CZCE.TA | 379 | 351 | 26 | 7.4074% | 2/3 |
+| CZCE.MA | 379 | 345 | 30 | 8.6957% | 2/3 |
+| SHFE.cu | 750 | 750 | 324 | 43.2000% | 3/3 |
+| DCE.i | 662 | 662 | 109 | 16.4653% | 3/3 |
+
+The artifact contains 3,226 complete underlying windows, 994
+representative-eligible clean windows, and 18 inspectable normalized paths.
+It improves the exploration in four ways:
+
+1. Every family exhibits clean daily swing windows, so none may be discarded
+   merely because the earlier AU/AG causal corpus omitted it.
+2. `Quiet`, `typical`, and `volatile` are within-family excursion percentiles,
+   not shared structural definitions. A TA quiet window can have more total
+   excursion than an AU typical window.
+3. Similar excursion can describe different shapes. The accepted typical
+   views include both directional paths and choppy round trips; the volatile
+   views likewise include directional moves and paths that finish near their
+   starting level. Excursion alone is therefore not an event definition.
+4. All 18 option overlays are quality-invalid, and TA-typical plus MA-quiet
+   have no complete comparable path distribution. These paths are inspection
+   aids, not premium evidence or a basis for family selection.
+
+PR #55 is daily and contract-local. It deliberately does not construct the
+roll-bound D/W/60-minute/15-minute event state required by SR-01. That is an
+implementation and evidence gate for #49 and later work, not a reason to add
+discretion to the SR-01 definition.
 
 ### AU/AG completed-bar regime sketches
 
@@ -108,7 +148,7 @@ freeze, revise, or stop without pretending every chart idea is ready.
 
 ### SR-01 — completed daily breakout with four-view agreement
 
-Status: **derived / proxy; conditionally mature after the six-family view**
+Status: **derived / proxy; definition-mature for #49, empirically unevaluated**
 
 At the completed 15:00 Asia/Shanghai decision snapshot:
 
@@ -125,7 +165,9 @@ At the completed 15:00 Asia/Shanghai decision snapshot:
 
 Why it is worth retaining: every clause is already represented in the causal
 underlying corpus, the timeframe is explicit, and the definition does not
-reuse M6-EXP-013 swing-line labels.
+reuse M6-EXP-013 swing-line labels. The accepted #53 packet retains all six
+families and supplies inspectable daily counterexamples without using outcomes
+or profitability to select among them.
 
 Counterexamples and failure modes:
 
@@ -135,8 +177,14 @@ Counterexamples and failure modes:
 - The AU/AG slice has almost no fully aligned downside coverage.
 - Contract rolls can create apparent range breaks unless the causal roll
   ledger and exact scheduled close are bound.
-- The definition has not been applied to TA, MA, CU, or i in a committed
-  causal matrix, so it is not ready to determine the `P1-EXP-002` universe.
+- Within-family excursion slices contain both directional and round-trip
+  paths, so excursion percentile cannot substitute for the breakout and EMA
+  clauses.
+- The definition has not been applied to TA, MA, CU, or i in a roll-bound
+  multi-cadence matrix. #49 must freeze the universe and fail closed on missing
+  event inputs rather than select families from the descriptive views.
+- Every accepted option overlay is quality-invalid and stale; SR-01 has no
+  option-leg, premium-outcome, or execution evidence.
 
 ### SR-02 — causal two-anchor swing-line right break
 
@@ -186,43 +234,40 @@ fixes every discretionary field before any outcome access.
 
 ## Recommendation for #49
 
-**Do not freeze `P1-EXP-002` yet. Keep #49 blocked and revise its prerequisite
-to require one public-safe six-family causal regime matrix.**
+**Advance only SR-01 to #49 as the definition-mature candidate.** SR-02 remains
+protected by the M6-EXP-013 negative gate, and SR-03 remains too subjective.
+This recommendation is about preregistration readiness, not economic value.
 
-SR-01 is the only definition clear enough to carry forward, but the current
-committed evidence covers only AU/AG. Freezing a universe now would either
-reuse the data-blocked continuity pair without resolving its gate or select
-TA/MA/CU/i without the comparable historical regime view requested by #52.
-SR-02 is protected by the earlier negative gate, and SR-03 remains
-too subjective.
+The accepted six-family views remove the exploratory prerequisite: Strategy
+can inspect balanced continuity, mainstream, and control lanes without raw
+directory access or outcome-based ranking. They do not validate SR-01, choose
+an instrument, or authorize `P1-EXP-002`. #49 must make the separate freeze,
+revise, or stop decision before any event enrollment or outcome access.
 
-This is a valid stop decision for #52: the exploration improved the candidate
-language and identified the smallest missing evidence needed to make #49
-admissible. It is not a claim that SR-01 has economic value.
+## Constraints for #49
 
-## Data views needed before #49
+If #49 freezes SR-01, it must:
 
-Ask Data for one deterministic, read-only artifact with:
-
-1. The fixed six-family order from #48 and a frozen historical calendar shared
-   across families.
-2. Causal, hash-bound D/W/60-minute/15-minute underlying views using an
+1. Preserve the fixed six-family order and the continuity/mainstream/control
+   roles. Do not include or exclude a family because of observed excursion,
+   direction, option-path change, activity, or overlay availability.
+2. Bind causal, hash-bound D/W/60-minute/15-minute underlying views under an
    explicit roll policy, exact scheduled decision close, and strict timestamp
    truncation.
-3. For every family and view: availability, exclusion reasons, prior-20
-   high/low breakout state, causal EMA alignment, bar direction, close
-   location, and range divided by prior-20 mean range.
-4. Aggregate counts for SR-01 admission, `abstain`, timeframe disagreement,
-   roll sessions, missing closes, and OHLC-quality failures. No returns,
-   outcomes, PnL, win rate, EV, or instrument ranking.
-5. A future-row invariance test, deterministic regeneration, source inventory
-   digest, and current-vintage / historical-visibility limitation.
-6. Public output that omits local paths, usernames, filenames, raw contract
-   identifiers, raw rows, and raw chart values. Optional normalized sketches
-   must use hashed specimen identities only.
+3. Freeze the prior-20 breakout, EMA5/EMA20 agreement, `abstain`, event
+   deduplication, exclusions, minimum sample gate, and train/validation/holdout
+   policy before reading any response.
+4. Treat missing multi-cadence inputs, roll ambiguity, inadequate two-sided
+   coverage, and every stale or quality-invalid option input as fail-closed
+   conditions. Do not relax SR-01 or reselect a family.
+5. Retain PR #55's future-row invariance, deterministic regeneration,
+   field-allowlist, credential-prefix, and public-safety protections.
+6. Bind exact filtered input content or an acquisition version for formal
+   experiment evidence. PR #55's anonymous inventory hashes are sufficient
+   for exploration only.
 
-If the fixed view shows inadequate two-sided or cross-family coverage, #49
-should stop rather than relax SR-01 or select a family by posterior behavior.
+#51 remains blocked. No outcome, registry mutation, or execution work belongs
+to #52.
 
 ## Reproduce
 

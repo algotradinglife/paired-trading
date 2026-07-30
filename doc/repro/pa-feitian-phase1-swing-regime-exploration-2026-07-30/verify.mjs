@@ -15,6 +15,8 @@ const sources = {
     "doc/repro/pa-feitian-m6-causal-swing-line-induction-2026-07-13/causal_swing_line_atlas_v1.json",
   negativeGate:
     "doc/repro/pa-feitian-m6-premium-k-response-2026-07-13/premium_k_response_atlas_v1.json",
+  swingViews:
+    "doc/repro/pa-feitian-m6-exploratory-swing-views-2026-07-30/exploratory_swing_views_v1.json",
 };
 
 const expectedHashes = {
@@ -30,6 +32,8 @@ const expectedHashes = {
     "f65eadb4c5e6468b02fb01e717b4997af53ed5db0be57d82dcfa3d72006c9de8",
   negativeGate:
     "61c41f3de571f4f27da54665e14d3b0994524883d0aa34d1cbc568f6dc4bd0c8",
+  swingViews:
+    "e8e1e3ea2f6c6fc158055feda9a7662da6a1a16e695ea3693a1663c8cd0e1809",
 };
 
 const loaded = {};
@@ -150,11 +154,67 @@ assert.equal(
   "not_applied_no_training_candidates",
 );
 
+const expectedSwingViews = [
+  ["SHFE.au", 405, 405, 186],
+  ["SHFE.ag", 651, 651, 319],
+  ["CZCE.TA", 379, 351, 26],
+  ["CZCE.MA", 379, 345, 30],
+  ["SHFE.cu", 750, 750, 324],
+  ["DCE.i", 662, 662, 109],
+];
+assert.deepEqual(
+  loaded.swingViews.family_window_summaries.map((row) => [
+    row.instrument_family,
+    row.all_complete_windows.window_count,
+    row.all_complete_windows.quality_counts.clean,
+    row.representative_eligible_clean_windows.window_count,
+  ]),
+  expectedSwingViews,
+);
+assert.equal(
+  loaded.swingViews.family_window_summaries.reduce(
+    (total, row) => total + row.all_complete_windows.window_count,
+    0,
+  ),
+  3226,
+);
+assert.equal(
+  loaded.swingViews.family_window_summaries.reduce(
+    (total, row) =>
+      total + row.representative_eligible_clean_windows.window_count,
+    0,
+  ),
+  994,
+);
+assert.equal(loaded.swingViews.representative_swing_views.length, 18);
+assert.ok(
+  loaded.swingViews.representative_swing_views.every(
+    (view) =>
+      view.normalized_ohlc_path.length === 20 &&
+      view.input_quality.status === "clean" &&
+      view.option_premium_overlay.quality_status === "invalid",
+  ),
+);
+assert.equal(
+  loaded.swingViews.representative_swing_views.filter(
+    (view) =>
+      view.option_premium_overlay.comparable_complete_path_metrics.status ===
+      "unavailable",
+  ).length,
+  2,
+);
+assert.equal(loaded.swingViews.strategy_handoff.all_six_families_retained, true);
+assert.equal(
+  loaded.swingViews.evidence_separation.p1_exp_001_or_p1_exp_002_outcomes,
+  "not accessed",
+);
+assert.equal(loaded.swingViews.evidence_separation.issue_51_unblocked, false);
+
 console.log(
   JSON.stringify({
     ok: true,
     issue: 52,
-    decision: "stop_before_p1_exp_002_freeze",
+    decision: "advance_sr_01_to_issue_49_definition_only",
     source_bindings: Object.keys(sources).length,
   }),
 );
