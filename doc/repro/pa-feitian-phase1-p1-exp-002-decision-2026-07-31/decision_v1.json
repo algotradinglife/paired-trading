@@ -1,0 +1,57 @@
+{
+  "schema_version": "pa_feitian_phase1_p1_exp_002_decision_v1",
+  "decision_id": "pa_feitian_phase1_p1_exp_002_decision_2026_07_31",
+  "issue_number": 60,
+  "decided_at_utc": "2026-07-30T17:01:53Z",
+  "verdict": "stop_p1_exp_002",
+  "decision_scope": "pre_outcome_native_source_contract_decision",
+  "evidence_bindings": {
+    "issue_59_audit_artifact_sha256": "sha256:93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+    "issue_59_registration_contract_sha256": "sha256:8c2713ae02710e8dbdeeff04fa4be84b818690b9d881104a23069c218f5b83c1",
+    "p1_exp_002_registry_sha256": "sha256:f2b77c11317c1f98fe6d4c95f47b2213243322f2f3d4ed6dd1ccbf92d972afa0",
+    "p1_exp_002_registry_lock_sha256": "sha256:d7e36900efb91807a0960922c5cdbc5241ec4ca1988eb477ac6bc5a32c940718",
+    "historical_gate_contract_sha256": "sha256:ce8508f1cb6f15d5030e6424404f07c7d2e346811ccbc1bad033f63d4bc3d351",
+    "approved_native_source_manifest": null
+  },
+  "public_safe_classification": {
+    "captured_source_files": 978,
+    "captured_source_rows": 2702545,
+    "required_matrix_cells": 18,
+    "intraday_cells_without_independent_provider_bar_end_semantics": 12,
+    "intraday_unexplained_timestamp_rows": 521090,
+    "intraday_unexplained_rows_span_stages": [
+      "P1-EXP-002-TRAIN",
+      "P1-EXP-002-VALIDATE",
+      "P1-EXP-002-HOLDOUT"
+    ],
+    "daily_price_findings": {
+      "total": 169,
+      "classification": "non_positive_or_non_finite_ohlc_price_rows",
+      "family_aggregate": {
+        "CZCE.TA": 76,
+        "CZCE.MA": 93
+      },
+      "causal_status": "cannot distinguish corrupt data from provider no-trade placeholders under the bound evidence"
+    }
+  },
+  "reasoning": {
+    "timestamp_semantics": "No intraday cell has an independently approved provider/bar-end semantics binding; embedded metadata cannot self-certify its own provenance.",
+    "mixed_grid": "The unexplained timestamp population is material and occurs in training, validation, and holdout, so a delayed availability rule would be an unvalidated post hoc mapping rather than a frozen causal contract.",
+    "invalid_price_rows": "The 169 daily findings independently violate the accepted zero-finding historical gate, and the audit cannot classify them as inactive-contract observations without source semantics or a reviewed native-source version.",
+    "revision_test": "A revise_source_contract verdict is not defensible from this evidence because it would require inventing provider timing, inactive-row, or lossless normalization semantics that the audit explicitly does not bind."
+  },
+  "prohibited_actions": [
+    "strategy event construction",
+    "outcome or return access",
+    "holdout opening",
+    "raw-row repair or timestamp shifting",
+    "silent row dropping, resampling, or clock-grid exclusion",
+    "option or execution input access"
+  ],
+  "dependency_recommendation": {
+    "issue_51": "remain_blocked",
+    "issue_50": "remain_done_without_gate_weakening",
+    "native_source_follow_up": "No implementation request is authorized under this decision. Any future source work requires a new immutable source version, provider/bar-end semantics binding, lossless row accounting, zero-finding quality gate, and a newly reviewed strategy decision."
+  },
+  "claim_boundary": "No strategy events, outcomes, returns, options, raw rows, filenames, contract identifiers, or source mutations were accessed or published."
+}
