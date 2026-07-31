@@ -1,0 +1,2604 @@
+{
+  "audit_as_of_utc": "2026-07-30T15:45:00Z",
+  "audit_id": "pa-feitian-m6-native-source-registration-2026-07-30",
+  "cells": [
+    {
+      "cadence": "daily",
+      "instrument_family": "SHFE.au",
+      "materialization_status": "eligible_for_private_snapshot_materialization",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-08T15:00:00",
+      "maximum_native_wall_clock": "2026-06-08T00:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T15:00:00",
+      "minimum_native_wall_clock": "2021-01-04T00:00:00",
+      "normalized_source_identity_count": 40,
+      "private_raw_inventory_manifest_sha256": "sha256:33301931fdf96427bcd2c2b63a2e581560681ae02789f847b7c7184ca4bf1bc3",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 40,
+      "registration_blockers": [],
+      "required_field_complete_file_count": 40,
+      "schema_variant_count": 1,
+      "source_byte_count": 358558,
+      "source_file_count": 40,
+      "source_inventory_membership_sha256": "sha256:239bb280bdec0c5aacde49999222e698bb1ea7f3941aa0613118d952b4121641",
+      "source_row_count": 8462,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 7852,
+        "daily_rows_normalizable_to_session_close": 7852,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 7852,
+        "prehistory_rows_excluded": 610,
+        "unexplained_timestamp_rows": 0
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 2599,
+          "candidate_rows": 2599,
+          "compatible": true,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 2339,
+          "candidate_rows": 2339,
+          "compatible": true,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 2048,
+          "candidate_rows": 2048,
+          "compatible": true,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 8462
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 40,
+        "timezone_naive_storage_file_count": 40
+      }
+    },
+    {
+      "cadence": "hour",
+      "instrument_family": "SHFE.au",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-06T02:00:00",
+      "maximum_native_wall_clock": "2026-06-06T02:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T00:00:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 40,
+      "private_raw_inventory_manifest_sha256": "sha256:b81b5b35adfa0587c920368b87d33ac3c4215c663cde64838396f3b4c28a13d0",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 40,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 40,
+      "schema_variant_count": 1,
+      "source_byte_count": 2088277,
+      "source_file_count": 40,
+      "source_inventory_membership_sha256": "sha256:ed6071db175c68a0cea9e52b41954b55b92ddcbe96ed0af4616936b8827771f5",
+      "source_row_count": 95547,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 88769,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 76275,
+        "prehistory_rows_excluded": 6778,
+        "unexplained_timestamp_rows": 12494
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 25542,
+          "candidate_rows": 28136,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 22336,
+          "candidate_rows": 24585,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 19625,
+          "candidate_rows": 25500,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 8315
+          },
+          {
+            "clock": "01:00",
+            "rows": 8151
+          },
+          {
+            "clock": "02:00",
+            "rows": 8151
+          },
+          {
+            "clock": "09:00",
+            "rows": 1173
+          },
+          {
+            "clock": "09:30",
+            "rows": 8114
+          },
+          {
+            "clock": "10:00",
+            "rows": 1173
+          },
+          {
+            "clock": "10:45",
+            "rows": 8114
+          },
+          {
+            "clock": "11:00",
+            "rows": 959
+          },
+          {
+            "clock": "11:15",
+            "rows": 235
+          },
+          {
+            "clock": "13:00",
+            "rows": 959
+          },
+          {
+            "clock": "13:45",
+            "rows": 8114
+          },
+          {
+            "clock": "14:00",
+            "rows": 959
+          },
+          {
+            "clock": "14:15",
+            "rows": 235
+          },
+          {
+            "clock": "14:45",
+            "rows": 8114
+          },
+          {
+            "clock": "15:00",
+            "rows": 8349
+          },
+          {
+            "clock": "21:00",
+            "rows": 8144
+          },
+          {
+            "clock": "22:00",
+            "rows": 8144
+          },
+          {
+            "clock": "23:00",
+            "rows": 8144
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 40
+      }
+    },
+    {
+      "cadence": "min15",
+      "instrument_family": "SHFE.au",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-06T02:30:00",
+      "maximum_native_wall_clock": "2026-06-06T02:30:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T00:00:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 40,
+      "private_raw_inventory_manifest_sha256": "sha256:b417a43dc0e5ce58dc5c416f7a3d056a6437fdcee1bbfa831503b76a8fe6e1d1",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 40,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 40,
+      "schema_variant_count": 1,
+      "source_byte_count": 5814021,
+      "source_file_count": 40,
+      "source_inventory_membership_sha256": "sha256:8ce8c8e64c98d55ed72755552aa2307f3ac6fafce29c18a09dbf4c94d891cdb8",
+      "source_row_count": 315411,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 292848,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 282246,
+        "prehistory_rows_excluded": 22563,
+        "unexplained_timestamp_rows": 10602
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 94414,
+          "candidate_rows": 97008,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 82429,
+          "candidate_rows": 84678,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 72844,
+          "candidate_rows": 77172,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 8292
+          },
+          {
+            "clock": "00:15",
+            "rows": 8128
+          },
+          {
+            "clock": "00:30",
+            "rows": 8128
+          },
+          {
+            "clock": "00:45",
+            "rows": 8128
+          },
+          {
+            "clock": "01:00",
+            "rows": 8128
+          },
+          {
+            "clock": "01:15",
+            "rows": 8128
+          },
+          {
+            "clock": "01:30",
+            "rows": 8128
+          },
+          {
+            "clock": "01:45",
+            "rows": 8128
+          },
+          {
+            "clock": "02:00",
+            "rows": 8128
+          },
+          {
+            "clock": "02:15",
+            "rows": 8128
+          },
+          {
+            "clock": "02:30",
+            "rows": 8100
+          },
+          {
+            "clock": "09:00",
+            "rows": 1172
+          },
+          {
+            "clock": "09:15",
+            "rows": 8361
+          },
+          {
+            "clock": "09:30",
+            "rows": 8361
+          },
+          {
+            "clock": "09:45",
+            "rows": 8361
+          },
+          {
+            "clock": "10:00",
+            "rows": 8361
+          },
+          {
+            "clock": "10:15",
+            "rows": 8327
+          },
+          {
+            "clock": "10:30",
+            "rows": 959
+          },
+          {
+            "clock": "10:45",
+            "rows": 8361
+          },
+          {
+            "clock": "11:00",
+            "rows": 8361
+          },
+          {
+            "clock": "11:15",
+            "rows": 8361
+          },
+          {
+            "clock": "11:30",
+            "rows": 8327
+          },
+          {
+            "clock": "13:30",
+            "rows": 959
+          },
+          {
+            "clock": "13:45",
+            "rows": 8361
+          },
+          {
+            "clock": "14:00",
+            "rows": 8361
+          },
+          {
+            "clock": "14:15",
+            "rows": 8361
+          },
+          {
+            "clock": "14:30",
+            "rows": 8361
+          },
+          {
+            "clock": "14:45",
+            "rows": 8361
+          },
+          {
+            "clock": "15:00",
+            "rows": 8327
+          },
+          {
+            "clock": "21:00",
+            "rows": 8122
+          },
+          {
+            "clock": "21:15",
+            "rows": 8122
+          },
+          {
+            "clock": "21:30",
+            "rows": 8122
+          },
+          {
+            "clock": "21:45",
+            "rows": 8122
+          },
+          {
+            "clock": "22:00",
+            "rows": 8122
+          },
+          {
+            "clock": "22:15",
+            "rows": 8122
+          },
+          {
+            "clock": "22:30",
+            "rows": 8122
+          },
+          {
+            "clock": "22:45",
+            "rows": 8122
+          },
+          {
+            "clock": "23:00",
+            "rows": 8122
+          },
+          {
+            "clock": "23:15",
+            "rows": 8122
+          },
+          {
+            "clock": "23:30",
+            "rows": 8122
+          },
+          {
+            "clock": "23:45",
+            "rows": 8122
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 40
+      }
+    },
+    {
+      "cadence": "daily",
+      "instrument_family": "SHFE.ag",
+      "materialization_status": "eligible_for_private_snapshot_materialization",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-08T15:00:00",
+      "maximum_native_wall_clock": "2026-06-08T00:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T15:00:00",
+      "minimum_native_wall_clock": "2021-01-04T00:00:00",
+      "normalized_source_identity_count": 65,
+      "private_raw_inventory_manifest_sha256": "sha256:e2178e72e5f7c2a8cef0064557752372f5cb162c5b9cea5eb5db79dca3f84a58",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 65,
+      "registration_blockers": [],
+      "required_field_complete_file_count": 65,
+      "schema_variant_count": 1,
+      "source_byte_count": 493413,
+      "source_file_count": 65,
+      "source_inventory_membership_sha256": "sha256:2deef2ffad7cc20bc241e1dc18718a56aee3a61209829949343662968dd13d87",
+      "source_row_count": 13408,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 12535,
+        "daily_rows_normalizable_to_session_close": 12535,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 12535,
+        "prehistory_rows_excluded": 873,
+        "unexplained_timestamp_rows": 0
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 3729,
+          "candidate_rows": 3729,
+          "compatible": true,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 3765,
+          "candidate_rows": 3765,
+          "compatible": true,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 3736,
+          "candidate_rows": 3736,
+          "compatible": true,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 13408
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 65,
+        "timezone_naive_storage_file_count": 65
+      }
+    },
+    {
+      "cadence": "hour",
+      "instrument_family": "SHFE.ag",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-06T02:00:00",
+      "maximum_native_wall_clock": "2026-06-06T02:05:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T00:00:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 65,
+      "private_raw_inventory_manifest_sha256": "sha256:a8cef60b407b927738067811fa0d4b1b0278f0c636bd0a4dc5fcd9dba7662246",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 65,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 65,
+      "schema_variant_count": 1,
+      "source_byte_count": 2895069,
+      "source_file_count": 65,
+      "source_inventory_membership_sha256": "sha256:37bad667ca25922bf8b394d65728ee923df4e492c5df5319eaef61b575e54e23",
+      "source_row_count": 156546,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 146268,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 63130,
+        "prehistory_rows_excluded": 10278,
+        "unexplained_timestamp_rows": 83138
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 18710,
+          "candidate_rows": 43668,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 17590,
+          "candidate_rows": 43507,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 20032,
+          "candidate_rows": 43579,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 11350
+          },
+          {
+            "clock": "00:05",
+            "rows": 1679
+          },
+          {
+            "clock": "01:00",
+            "rows": 11143
+          },
+          {
+            "clock": "01:05",
+            "rows": 1679
+          },
+          {
+            "clock": "02:00",
+            "rows": 11143
+          },
+          {
+            "clock": "02:05",
+            "rows": 1679
+          },
+          {
+            "clock": "08:05",
+            "rows": 116
+          },
+          {
+            "clock": "09:00",
+            "rows": 11477
+          },
+          {
+            "clock": "09:05",
+            "rows": 1738
+          },
+          {
+            "clock": "10:00",
+            "rows": 11477
+          },
+          {
+            "clock": "10:05",
+            "rows": 1738
+          },
+          {
+            "clock": "11:00",
+            "rows": 11477
+          },
+          {
+            "clock": "11:05",
+            "rows": 1738
+          },
+          {
+            "clock": "13:00",
+            "rows": 11477
+          },
+          {
+            "clock": "13:05",
+            "rows": 1738
+          },
+          {
+            "clock": "14:00",
+            "rows": 11477
+          },
+          {
+            "clock": "14:05",
+            "rows": 1738
+          },
+          {
+            "clock": "15:00",
+            "rows": 11456
+          },
+          {
+            "clock": "20:05",
+            "rows": 1685
+          },
+          {
+            "clock": "21:00",
+            "rows": 11150
+          },
+          {
+            "clock": "21:05",
+            "rows": 1686
+          },
+          {
+            "clock": "22:00",
+            "rows": 11155
+          },
+          {
+            "clock": "22:05",
+            "rows": 1686
+          },
+          {
+            "clock": "23:00",
+            "rows": 11155
+          },
+          {
+            "clock": "23:05",
+            "rows": 1709
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 65
+      }
+    },
+    {
+      "cadence": "min15",
+      "instrument_family": "SHFE.ag",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-06T02:30:00",
+      "maximum_native_wall_clock": "2026-06-06T02:30:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T00:00:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 65,
+      "private_raw_inventory_manifest_sha256": "sha256:b589005d03f658113388cf815fb6bc97e1b4890ccc3fc5b784bd4fd0c7d545ff",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 65,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 65,
+      "schema_variant_count": 1,
+      "source_byte_count": 8236119,
+      "source_file_count": 65,
+      "source_inventory_membership_sha256": "sha256:cd41d9bbdfdafb8741a3fb0fe8f02e0d555c0ad7fc82345e1da31e5503fdfef3",
+      "source_row_count": 528172,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 493391,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 389104,
+        "prehistory_rows_excluded": 34781,
+        "unexplained_timestamp_rows": 104287
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 115452,
+          "candidate_rows": 147268,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 108213,
+          "candidate_rows": 146092,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 123463,
+          "candidate_rows": 147642,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 11350
+          },
+          {
+            "clock": "00:05",
+            "rows": 1679
+          },
+          {
+            "clock": "00:15",
+            "rows": 11143
+          },
+          {
+            "clock": "00:20",
+            "rows": 1679
+          },
+          {
+            "clock": "00:30",
+            "rows": 11143
+          },
+          {
+            "clock": "00:35",
+            "rows": 1679
+          },
+          {
+            "clock": "00:45",
+            "rows": 11143
+          },
+          {
+            "clock": "00:50",
+            "rows": 1679
+          },
+          {
+            "clock": "01:00",
+            "rows": 11143
+          },
+          {
+            "clock": "01:05",
+            "rows": 1679
+          },
+          {
+            "clock": "01:15",
+            "rows": 11143
+          },
+          {
+            "clock": "01:20",
+            "rows": 1679
+          },
+          {
+            "clock": "01:30",
+            "rows": 11143
+          },
+          {
+            "clock": "01:35",
+            "rows": 1679
+          },
+          {
+            "clock": "01:45",
+            "rows": 11143
+          },
+          {
+            "clock": "01:50",
+            "rows": 1679
+          },
+          {
+            "clock": "02:00",
+            "rows": 11143
+          },
+          {
+            "clock": "02:05",
+            "rows": 1679
+          },
+          {
+            "clock": "02:15",
+            "rows": 11143
+          },
+          {
+            "clock": "02:20",
+            "rows": 1679
+          },
+          {
+            "clock": "02:30",
+            "rows": 11128
+          },
+          {
+            "clock": "08:50",
+            "rows": 116
+          },
+          {
+            "clock": "09:00",
+            "rows": 11477
+          },
+          {
+            "clock": "09:05",
+            "rows": 1738
+          },
+          {
+            "clock": "09:15",
+            "rows": 11477
+          },
+          {
+            "clock": "09:20",
+            "rows": 1738
+          },
+          {
+            "clock": "09:30",
+            "rows": 11477
+          },
+          {
+            "clock": "09:35",
+            "rows": 1738
+          },
+          {
+            "clock": "09:45",
+            "rows": 11477
+          },
+          {
+            "clock": "09:50",
+            "rows": 1738
+          },
+          {
+            "clock": "10:00",
+            "rows": 11477
+          },
+          {
+            "clock": "10:05",
+            "rows": 1738
+          },
+          {
+            "clock": "10:15",
+            "rows": 11456
+          },
+          {
+            "clock": "10:20",
+            "rows": 69
+          },
+          {
+            "clock": "10:30",
+            "rows": 11477
+          },
+          {
+            "clock": "10:35",
+            "rows": 1738
+          },
+          {
+            "clock": "10:45",
+            "rows": 11477
+          },
+          {
+            "clock": "10:50",
+            "rows": 1738
+          },
+          {
+            "clock": "11:00",
+            "rows": 11477
+          },
+          {
+            "clock": "11:05",
+            "rows": 1738
+          },
+          {
+            "clock": "11:15",
+            "rows": 11477
+          },
+          {
+            "clock": "11:20",
+            "rows": 1738
+          },
+          {
+            "clock": "11:30",
+            "rows": 11456
+          },
+          {
+            "clock": "13:20",
+            "rows": 69
+          },
+          {
+            "clock": "13:30",
+            "rows": 11477
+          },
+          {
+            "clock": "13:35",
+            "rows": 1738
+          },
+          {
+            "clock": "13:45",
+            "rows": 11477
+          },
+          {
+            "clock": "13:50",
+            "rows": 1738
+          },
+          {
+            "clock": "14:00",
+            "rows": 11477
+          },
+          {
+            "clock": "14:05",
+            "rows": 1738
+          },
+          {
+            "clock": "14:15",
+            "rows": 11477
+          },
+          {
+            "clock": "14:20",
+            "rows": 1738
+          },
+          {
+            "clock": "14:30",
+            "rows": 11477
+          },
+          {
+            "clock": "14:35",
+            "rows": 1738
+          },
+          {
+            "clock": "14:45",
+            "rows": 11477
+          },
+          {
+            "clock": "14:50",
+            "rows": 1738
+          },
+          {
+            "clock": "15:00",
+            "rows": 11456
+          },
+          {
+            "clock": "20:50",
+            "rows": 1685
+          },
+          {
+            "clock": "21:00",
+            "rows": 11150
+          },
+          {
+            "clock": "21:05",
+            "rows": 1686
+          },
+          {
+            "clock": "21:15",
+            "rows": 11150
+          },
+          {
+            "clock": "21:20",
+            "rows": 1686
+          },
+          {
+            "clock": "21:30",
+            "rows": 11150
+          },
+          {
+            "clock": "21:35",
+            "rows": 1686
+          },
+          {
+            "clock": "21:45",
+            "rows": 11150
+          },
+          {
+            "clock": "21:50",
+            "rows": 1686
+          },
+          {
+            "clock": "22:00",
+            "rows": 11150
+          },
+          {
+            "clock": "22:05",
+            "rows": 1686
+          },
+          {
+            "clock": "22:15",
+            "rows": 11150
+          },
+          {
+            "clock": "22:20",
+            "rows": 1686
+          },
+          {
+            "clock": "22:30",
+            "rows": 11155
+          },
+          {
+            "clock": "22:35",
+            "rows": 1686
+          },
+          {
+            "clock": "22:45",
+            "rows": 11155
+          },
+          {
+            "clock": "22:50",
+            "rows": 1686
+          },
+          {
+            "clock": "23:00",
+            "rows": 11155
+          },
+          {
+            "clock": "23:05",
+            "rows": 1686
+          },
+          {
+            "clock": "23:15",
+            "rows": 11155
+          },
+          {
+            "clock": "23:20",
+            "rows": 1686
+          },
+          {
+            "clock": "23:30",
+            "rows": 11155
+          },
+          {
+            "clock": "23:35",
+            "rows": 1686
+          },
+          {
+            "clock": "23:45",
+            "rows": 11155
+          },
+          {
+            "clock": "23:50",
+            "rows": 1709
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 65
+      }
+    },
+    {
+      "cadence": "daily",
+      "instrument_family": "CZCE.TA",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-11T15:00:00",
+      "maximum_native_wall_clock": "2026-06-11T00:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T15:00:00",
+      "minimum_native_wall_clock": "2021-01-04T00:00:00",
+      "normalized_source_identity_count": 36,
+      "private_raw_inventory_manifest_sha256": "sha256:2736e28376b8cf2e879bc76c9fc1393d46181c34c02e6a8a10b96bcc9dc8ad98",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 76,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 36,
+      "registration_blockers": [
+        "ohlc_quality_findings_present"
+      ],
+      "required_field_complete_file_count": 36,
+      "schema_variant_count": 1,
+      "source_byte_count": 273195,
+      "source_file_count": 36,
+      "source_inventory_membership_sha256": "sha256:139a7fff6223abdeb2c00b44511f8ad900a45bc8f8797c730f1ed4e63ac382fb",
+      "source_row_count": 7725,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 7143,
+        "daily_rows_normalizable_to_session_close": 7143,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 7143,
+        "prehistory_rows_excluded": 582,
+        "unexplained_timestamp_rows": 0
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 2430,
+          "candidate_rows": 2430,
+          "compatible": true,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 2166,
+          "candidate_rows": 2166,
+          "compatible": true,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 1778,
+          "candidate_rows": 1778,
+          "compatible": true,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 7725
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 36,
+        "timezone_naive_storage_file_count": 36
+      }
+    },
+    {
+      "cadence": "hour",
+      "instrument_family": "CZCE.TA",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-11T15:00:00",
+      "maximum_native_wall_clock": "2026-06-11T15:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T10:00:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 36,
+      "private_raw_inventory_manifest_sha256": "sha256:99c2e74ac8a982b0847ea8f9dbc85f7857aae7d566be3bd18fb4b23ea7c79dd9",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 36,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 36,
+      "schema_variant_count": 1,
+      "source_byte_count": 1043907,
+      "source_file_count": 36,
+      "source_inventory_membership_sha256": "sha256:039c179bbadc4da1635c6df0a85f75a07211c6640faa5bb19ff912a9a62d801c",
+      "source_row_count": 53554,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 49519,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 42408,
+        "prehistory_rows_excluded": 4035,
+        "unexplained_timestamp_rows": 7111
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 14416,
+          "candidate_rows": 16836,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 12884,
+          "candidate_rows": 15036,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 10566,
+          "candidate_rows": 12332,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "09:00",
+            "rows": 217
+          },
+          {
+            "clock": "10:00",
+            "rows": 7725
+          },
+          {
+            "clock": "11:15",
+            "rows": 7725
+          },
+          {
+            "clock": "14:15",
+            "rows": 7725
+          },
+          {
+            "clock": "15:00",
+            "rows": 7725
+          },
+          {
+            "clock": "21:00",
+            "rows": 7479
+          },
+          {
+            "clock": "22:00",
+            "rows": 7479
+          },
+          {
+            "clock": "23:00",
+            "rows": 7479
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 36
+      }
+    },
+    {
+      "cadence": "min15",
+      "instrument_family": "CZCE.TA",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-11T15:00:00",
+      "maximum_native_wall_clock": "2026-06-11T15:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T09:15:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 36,
+      "private_raw_inventory_manifest_sha256": "sha256:587b101be9f9c38854ef58bc4785d51e161831673add1b648bee2db504b7663f",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 36,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 36,
+      "schema_variant_count": 1,
+      "source_byte_count": 2850147,
+      "source_file_count": 36,
+      "source_inventory_membership_sha256": "sha256:4a255e9e08ba26969aa4362e3698c388ef38f0936dd37387ea6009f21af7b035",
+      "source_row_count": 183403,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 169600,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 162489,
+        "prehistory_rows_excluded": 13803,
+        "unexplained_timestamp_rows": 7111
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 55234,
+          "candidate_rows": 57654,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 49370,
+          "candidate_rows": 51522,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 40486,
+          "candidate_rows": 42252,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "09:00",
+            "rows": 217
+          },
+          {
+            "clock": "09:15",
+            "rows": 7725
+          },
+          {
+            "clock": "09:30",
+            "rows": 7725
+          },
+          {
+            "clock": "09:45",
+            "rows": 7725
+          },
+          {
+            "clock": "10:00",
+            "rows": 7725
+          },
+          {
+            "clock": "10:15",
+            "rows": 7725
+          },
+          {
+            "clock": "10:45",
+            "rows": 7725
+          },
+          {
+            "clock": "11:00",
+            "rows": 7725
+          },
+          {
+            "clock": "11:15",
+            "rows": 7725
+          },
+          {
+            "clock": "11:30",
+            "rows": 7725
+          },
+          {
+            "clock": "13:45",
+            "rows": 7725
+          },
+          {
+            "clock": "14:00",
+            "rows": 7725
+          },
+          {
+            "clock": "14:15",
+            "rows": 7725
+          },
+          {
+            "clock": "14:30",
+            "rows": 7725
+          },
+          {
+            "clock": "14:45",
+            "rows": 7725
+          },
+          {
+            "clock": "15:00",
+            "rows": 7725
+          },
+          {
+            "clock": "21:00",
+            "rows": 7479
+          },
+          {
+            "clock": "21:15",
+            "rows": 7479
+          },
+          {
+            "clock": "21:30",
+            "rows": 7479
+          },
+          {
+            "clock": "21:45",
+            "rows": 7479
+          },
+          {
+            "clock": "22:00",
+            "rows": 7479
+          },
+          {
+            "clock": "22:15",
+            "rows": 7479
+          },
+          {
+            "clock": "22:30",
+            "rows": 7479
+          },
+          {
+            "clock": "22:45",
+            "rows": 7479
+          },
+          {
+            "clock": "23:00",
+            "rows": 7479
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 36
+      }
+    },
+    {
+      "cadence": "daily",
+      "instrument_family": "CZCE.MA",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-11T15:00:00",
+      "maximum_native_wall_clock": "2026-06-11T00:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T15:00:00",
+      "minimum_native_wall_clock": "2021-01-04T00:00:00",
+      "normalized_source_identity_count": 36,
+      "private_raw_inventory_manifest_sha256": "sha256:e55e08ab0d2245a1ee0aee1d8212a30237b45f90bd7340197941d11ac99ffd64",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 93,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 36,
+      "registration_blockers": [
+        "ohlc_quality_findings_present"
+      ],
+      "required_field_complete_file_count": 36,
+      "schema_variant_count": 1,
+      "source_byte_count": 269955,
+      "source_file_count": 36,
+      "source_inventory_membership_sha256": "sha256:3641d39d2be48237a13787481ffd6e78828072f52035b566f055ca273881e8d3",
+      "source_row_count": 7725,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 7143,
+        "daily_rows_normalizable_to_session_close": 7143,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 7143,
+        "prehistory_rows_excluded": 582,
+        "unexplained_timestamp_rows": 0
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 2430,
+          "candidate_rows": 2430,
+          "compatible": true,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 2166,
+          "candidate_rows": 2166,
+          "compatible": true,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 1778,
+          "candidate_rows": 1778,
+          "compatible": true,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 7725
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 36,
+        "timezone_naive_storage_file_count": 36
+      }
+    },
+    {
+      "cadence": "hour",
+      "instrument_family": "CZCE.MA",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-11T15:00:00",
+      "maximum_native_wall_clock": "2026-06-11T15:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T10:00:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 36,
+      "private_raw_inventory_manifest_sha256": "sha256:7011b0dfb7c4aaa2b6e20ab8278e1631857fa89989161c8d95f776cbc709a8f4",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 36,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 36,
+      "schema_variant_count": 1,
+      "source_byte_count": 1024010,
+      "source_file_count": 36,
+      "source_inventory_membership_sha256": "sha256:6168e37f7a57d448373c290ba63d2acabbcdbe71403817814561882581e1c86e",
+      "source_row_count": 53554,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 49519,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 42408,
+        "prehistory_rows_excluded": 4035,
+        "unexplained_timestamp_rows": 7111
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 14416,
+          "candidate_rows": 16836,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 12884,
+          "candidate_rows": 15036,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 10566,
+          "candidate_rows": 12332,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "09:00",
+            "rows": 217
+          },
+          {
+            "clock": "10:00",
+            "rows": 7725
+          },
+          {
+            "clock": "11:15",
+            "rows": 7725
+          },
+          {
+            "clock": "14:15",
+            "rows": 7725
+          },
+          {
+            "clock": "15:00",
+            "rows": 7725
+          },
+          {
+            "clock": "21:00",
+            "rows": 7479
+          },
+          {
+            "clock": "22:00",
+            "rows": 7479
+          },
+          {
+            "clock": "23:00",
+            "rows": 7479
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 36
+      }
+    },
+    {
+      "cadence": "min15",
+      "instrument_family": "CZCE.MA",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-11T15:00:00",
+      "maximum_native_wall_clock": "2026-06-11T15:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T09:15:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 36,
+      "private_raw_inventory_manifest_sha256": "sha256:dd9f053792d35110755520dc99e00b31acb8fc0e4da3c0e9d9074b7b6ee3aa60",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 36,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 36,
+      "schema_variant_count": 1,
+      "source_byte_count": 2785666,
+      "source_file_count": 36,
+      "source_inventory_membership_sha256": "sha256:290a083739215f006c4266de9d9ca05055053569e98f0678d450e408d61e0d23",
+      "source_row_count": 183403,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 169600,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 162489,
+        "prehistory_rows_excluded": 13803,
+        "unexplained_timestamp_rows": 7111
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 55234,
+          "candidate_rows": 57654,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 49370,
+          "candidate_rows": 51522,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 40486,
+          "candidate_rows": 42252,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "09:00",
+            "rows": 217
+          },
+          {
+            "clock": "09:15",
+            "rows": 7725
+          },
+          {
+            "clock": "09:30",
+            "rows": 7725
+          },
+          {
+            "clock": "09:45",
+            "rows": 7725
+          },
+          {
+            "clock": "10:00",
+            "rows": 7725
+          },
+          {
+            "clock": "10:15",
+            "rows": 7725
+          },
+          {
+            "clock": "10:45",
+            "rows": 7725
+          },
+          {
+            "clock": "11:00",
+            "rows": 7725
+          },
+          {
+            "clock": "11:15",
+            "rows": 7725
+          },
+          {
+            "clock": "11:30",
+            "rows": 7725
+          },
+          {
+            "clock": "13:45",
+            "rows": 7725
+          },
+          {
+            "clock": "14:00",
+            "rows": 7725
+          },
+          {
+            "clock": "14:15",
+            "rows": 7725
+          },
+          {
+            "clock": "14:30",
+            "rows": 7725
+          },
+          {
+            "clock": "14:45",
+            "rows": 7725
+          },
+          {
+            "clock": "15:00",
+            "rows": 7725
+          },
+          {
+            "clock": "21:00",
+            "rows": 7479
+          },
+          {
+            "clock": "21:15",
+            "rows": 7479
+          },
+          {
+            "clock": "21:30",
+            "rows": 7479
+          },
+          {
+            "clock": "21:45",
+            "rows": 7479
+          },
+          {
+            "clock": "22:00",
+            "rows": 7479
+          },
+          {
+            "clock": "22:15",
+            "rows": 7479
+          },
+          {
+            "clock": "22:30",
+            "rows": 7479
+          },
+          {
+            "clock": "22:45",
+            "rows": 7479
+          },
+          {
+            "clock": "23:00",
+            "rows": 7479
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 36
+      }
+    },
+    {
+      "cadence": "daily",
+      "instrument_family": "SHFE.cu",
+      "materialization_status": "eligible_for_private_snapshot_materialization",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-08T15:00:00",
+      "maximum_native_wall_clock": "2026-06-08T00:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T15:00:00",
+      "minimum_native_wall_clock": "2021-01-04T00:00:00",
+      "normalized_source_identity_count": 72,
+      "private_raw_inventory_manifest_sha256": "sha256:9857c03f6f0eb0190e9b1e436914cfb4fd4aa616e87d8ee74e36a24a121e6cc8",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 72,
+      "registration_blockers": [],
+      "required_field_complete_file_count": 72,
+      "schema_variant_count": 1,
+      "source_byte_count": 583525,
+      "source_file_count": 72,
+      "source_inventory_membership_sha256": "sha256:9fad62d14fbf1931d50f0d2232bf1e7851b100fe51586332e049ada635cd8b80",
+      "source_row_count": 15397,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 14569,
+        "daily_rows_normalizable_to_session_close": 14569,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 14569,
+        "prehistory_rows_excluded": 828,
+        "unexplained_timestamp_rows": 0
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 4843,
+          "candidate_rows": 4843,
+          "compatible": true,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 4332,
+          "candidate_rows": 4332,
+          "compatible": true,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 3756,
+          "candidate_rows": 3756,
+          "compatible": true,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 15397
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 72,
+        "timezone_naive_storage_file_count": 72
+      }
+    },
+    {
+      "cadence": "hour",
+      "instrument_family": "SHFE.cu",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-06T01:00:00",
+      "maximum_native_wall_clock": "2026-06-06T01:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T00:00:00",
+      "minimum_native_wall_clock": "2021-06-01T00:00:00",
+      "normalized_source_identity_count": 72,
+      "private_raw_inventory_manifest_sha256": "sha256:568690029df98f7c5c58f7690bfaaece7c2ebbc0ecbb519534ae36e483ec89c9",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 72,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 72,
+      "schema_variant_count": 1,
+      "source_byte_count": 2551938,
+      "source_file_count": 72,
+      "source_inventory_membership_sha256": "sha256:c83378bbd3f978ec1b31078cbab9dcb94aadb151a0bc9723de09f5d10d84ed93",
+      "source_row_count": 131518,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 131518,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 111365,
+        "prehistory_rows_excluded": 0,
+        "unexplained_timestamp_rows": 20153
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 36910,
+          "candidate_rows": 41772,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 32973,
+          "candidate_rows": 37106,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 28998,
+          "candidate_rows": 37488,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 14168
+          },
+          {
+            "clock": "01:00",
+            "rows": 13633
+          },
+          {
+            "clock": "09:00",
+            "rows": 1868
+          },
+          {
+            "clock": "10:00",
+            "rows": 14109
+          },
+          {
+            "clock": "11:00",
+            "rows": 1523
+          },
+          {
+            "clock": "11:15",
+            "rows": 14009
+          },
+          {
+            "clock": "13:00",
+            "rows": 1524
+          },
+          {
+            "clock": "14:00",
+            "rows": 1524
+          },
+          {
+            "clock": "14:15",
+            "rows": 14009
+          },
+          {
+            "clock": "15:00",
+            "rows": 14009
+          },
+          {
+            "clock": "21:00",
+            "rows": 13714
+          },
+          {
+            "clock": "22:00",
+            "rows": 13714
+          },
+          {
+            "clock": "23:00",
+            "rows": 13714
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 72
+      }
+    },
+    {
+      "cadence": "min15",
+      "instrument_family": "SHFE.cu",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-06T01:00:00",
+      "maximum_native_wall_clock": "2026-06-06T01:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T00:00:00",
+      "minimum_native_wall_clock": "2021-06-01T00:00:00",
+      "normalized_source_identity_count": 72,
+      "private_raw_inventory_manifest_sha256": "sha256:a4f6b754a0c3738b611117d5e51f1187a3c939254ff5eea779a7dee1964bead2",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 72,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 72,
+      "schema_variant_count": 1,
+      "source_byte_count": 7042962,
+      "source_file_count": 72,
+      "source_inventory_membership_sha256": "sha256:dc92c89e27a58497e2b82d104b0c6d7746cc57702d1cd41d2f44a9d0649925b1",
+      "source_row_count": 450409,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 450409,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 431696,
+        "prehistory_rows_excluded": 0,
+        "unexplained_timestamp_rows": 18713
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 142879,
+          "candidate_rows": 147758,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 127860,
+          "candidate_rows": 132013,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 112681,
+          "candidate_rows": 119962,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 14190
+          },
+          {
+            "clock": "00:15",
+            "rows": 13744
+          },
+          {
+            "clock": "00:30",
+            "rows": 13744
+          },
+          {
+            "clock": "00:45",
+            "rows": 13744
+          },
+          {
+            "clock": "01:00",
+            "rows": 13635
+          },
+          {
+            "clock": "09:00",
+            "rows": 1888
+          },
+          {
+            "clock": "09:15",
+            "rows": 14128
+          },
+          {
+            "clock": "09:30",
+            "rows": 14128
+          },
+          {
+            "clock": "09:45",
+            "rows": 14128
+          },
+          {
+            "clock": "10:00",
+            "rows": 14128
+          },
+          {
+            "clock": "10:15",
+            "rows": 14006
+          },
+          {
+            "clock": "10:30",
+            "rows": 1544
+          },
+          {
+            "clock": "10:45",
+            "rows": 14128
+          },
+          {
+            "clock": "11:00",
+            "rows": 14128
+          },
+          {
+            "clock": "11:15",
+            "rows": 14128
+          },
+          {
+            "clock": "11:30",
+            "rows": 14006
+          },
+          {
+            "clock": "13:30",
+            "rows": 1546
+          },
+          {
+            "clock": "13:45",
+            "rows": 14128
+          },
+          {
+            "clock": "14:00",
+            "rows": 14128
+          },
+          {
+            "clock": "14:15",
+            "rows": 14128
+          },
+          {
+            "clock": "14:30",
+            "rows": 14128
+          },
+          {
+            "clock": "14:45",
+            "rows": 14128
+          },
+          {
+            "clock": "15:00",
+            "rows": 14006
+          },
+          {
+            "clock": "21:00",
+            "rows": 13735
+          },
+          {
+            "clock": "21:15",
+            "rows": 13735
+          },
+          {
+            "clock": "21:30",
+            "rows": 13735
+          },
+          {
+            "clock": "21:45",
+            "rows": 13735
+          },
+          {
+            "clock": "22:00",
+            "rows": 13735
+          },
+          {
+            "clock": "22:15",
+            "rows": 13735
+          },
+          {
+            "clock": "22:30",
+            "rows": 13735
+          },
+          {
+            "clock": "22:45",
+            "rows": 13735
+          },
+          {
+            "clock": "23:00",
+            "rows": 13735
+          },
+          {
+            "clock": "23:15",
+            "rows": 13735
+          },
+          {
+            "clock": "23:30",
+            "rows": 13735
+          },
+          {
+            "clock": "23:45",
+            "rows": 13735
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 72
+      }
+    },
+    {
+      "cadence": "daily",
+      "instrument_family": "DCE.i",
+      "materialization_status": "eligible_for_private_snapshot_materialization",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-08T15:00:00",
+      "maximum_native_wall_clock": "2026-06-08T00:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T15:00:00",
+      "minimum_native_wall_clock": "2021-01-04T00:00:00",
+      "normalized_source_identity_count": 77,
+      "private_raw_inventory_manifest_sha256": "sha256:ed31bd9741d78029be5f527dd9bcae11aea4e0f98fd11b10b659e6a1c420e7c1",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 77,
+      "registration_blockers": [],
+      "required_field_complete_file_count": 77,
+      "schema_variant_count": 1,
+      "source_byte_count": 508681,
+      "source_file_count": 77,
+      "source_inventory_membership_sha256": "sha256:070a5b484ebe043c87672352620a801adb11f023b9701a0888c4d1fb2760d586",
+      "source_row_count": 14003,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 12855,
+        "daily_rows_normalizable_to_session_close": 12855,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 12855,
+        "prehistory_rows_excluded": 1148,
+        "unexplained_timestamp_rows": 0
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 4410,
+          "candidate_rows": 4410,
+          "compatible": true,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 3172,
+          "candidate_rows": 3172,
+          "compatible": true,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 3692,
+          "candidate_rows": 3692,
+          "compatible": true,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "00:00",
+            "rows": 14003
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 77,
+        "timezone_naive_storage_file_count": 77
+      }
+    },
+    {
+      "cadence": "hour",
+      "instrument_family": "DCE.i",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-05T23:00:00",
+      "maximum_native_wall_clock": "2026-06-05T23:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T10:00:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 77,
+      "private_raw_inventory_manifest_sha256": "sha256:bbb659d13332ff272b872df00f8988cf3d1d9d306231a64698bf013ce9138450",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 77,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 77,
+      "schema_variant_count": 1,
+      "source_byte_count": 2068545,
+      "source_file_count": 77,
+      "source_inventory_membership_sha256": "sha256:eb5eaad2224d3193565014c9dd69a871d4454f190468b9f00bfbcf2bca5082d3",
+      "source_row_count": 121165,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 111089,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 29632,
+        "prehistory_rows_excluded": 10076,
+        "unexplained_timestamp_rows": 81457
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 164,
+          "candidate_rows": 35605,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 11428,
+          "candidate_rows": 28522,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 14821,
+          "candidate_rows": 33493,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "08:05",
+            "rows": 164
+          },
+          {
+            "clock": "09:00",
+            "rows": 8426
+          },
+          {
+            "clock": "09:05",
+            "rows": 5794
+          },
+          {
+            "clock": "10:00",
+            "rows": 8427
+          },
+          {
+            "clock": "10:05",
+            "rows": 5794
+          },
+          {
+            "clock": "11:00",
+            "rows": 8428
+          },
+          {
+            "clock": "11:05",
+            "rows": 5794
+          },
+          {
+            "clock": "13:00",
+            "rows": 8428
+          },
+          {
+            "clock": "13:05",
+            "rows": 5793
+          },
+          {
+            "clock": "14:00",
+            "rows": 8428
+          },
+          {
+            "clock": "14:05",
+            "rows": 5793
+          },
+          {
+            "clock": "15:00",
+            "rows": 8417
+          },
+          {
+            "clock": "20:05",
+            "rows": 5631
+          },
+          {
+            "clock": "21:00",
+            "rows": 8204
+          },
+          {
+            "clock": "21:05",
+            "rows": 5630
+          },
+          {
+            "clock": "22:00",
+            "rows": 8198
+          },
+          {
+            "clock": "22:05",
+            "rows": 5628
+          },
+          {
+            "clock": "23:00",
+            "rows": 8188
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 77
+      }
+    },
+    {
+      "cadence": "min15",
+      "instrument_family": "DCE.i",
+      "materialization_status": "not_emitted_fail_closed",
+      "maximum_authorized_endpoint_wall_clock": "2026-06-05T23:00:00",
+      "maximum_native_wall_clock": "2026-06-05T23:00:00",
+      "minimum_authorized_endpoint_wall_clock": "2021-06-01T09:15:00",
+      "minimum_native_wall_clock": "2021-01-04T09:00:00",
+      "normalized_source_identity_count": 77,
+      "private_raw_inventory_manifest_sha256": "sha256:8844061e9bfd95f79b42e9ce29f129ee53ecc10bf184eeea7547242c19989891",
+      "quality": {
+        "duplicate_contract_timestamp_rows": 0,
+        "nonfinite_or_negative_activity_rows": 0,
+        "null_timestamp_rows": 0,
+        "ohlc_violation_rows": 0,
+        "unusable_timestamp_rows": 0
+      },
+      "readable_source_file_count": 77,
+      "registration_blockers": [
+        "provider_bar_end_semantics_unbound",
+        "timestamps_outside_frozen_session_end_grid"
+      ],
+      "required_field_complete_file_count": 77,
+      "schema_variant_count": 1,
+      "source_byte_count": 5078598,
+      "source_file_count": 77,
+      "source_inventory_membership_sha256": "sha256:5a5f54431bc1ac6d251babfd0680da63591c66afabef87436b88c9bfc95e186e",
+      "source_row_count": 363143,
+      "source_to_candidate_accounting": {
+        "candidate_rows_at_or_after_history_start": 332949,
+        "daily_rows_normalizable_to_session_close": 0,
+        "intraday_or_normalized_rows_on_authorized_endpoints": 171147,
+        "prehistory_rows_excluded": 30194,
+        "unexplained_timestamp_rows": 161802
+      },
+      "stage_coverage": [
+        {
+          "authorized_endpoint_rows": 935,
+          "candidate_rows": 106541,
+          "compatible": false,
+          "window_id": "P1-EXP-002-TRAIN"
+        },
+        {
+          "authorized_endpoint_rows": 65978,
+          "candidate_rows": 85550,
+          "compatible": false,
+          "window_id": "P1-EXP-002-VALIDATE"
+        },
+        {
+          "authorized_endpoint_rows": 85599,
+          "candidate_rows": 100515,
+          "compatible": false,
+          "window_id": "P1-EXP-002-HOLDOUT"
+        }
+      ],
+      "timestamp_semantics": {
+        "embedded_provider_metadata_file_count": 0,
+        "observed_native_clock_counts": [
+          {
+            "clock": "08:50",
+            "rows": 164
+          },
+          {
+            "clock": "09:00",
+            "rows": 8425
+          },
+          {
+            "clock": "09:05",
+            "rows": 5793
+          },
+          {
+            "clock": "09:15",
+            "rows": 8426
+          },
+          {
+            "clock": "09:20",
+            "rows": 5793
+          },
+          {
+            "clock": "09:30",
+            "rows": 8426
+          },
+          {
+            "clock": "09:35",
+            "rows": 5794
+          },
+          {
+            "clock": "09:45",
+            "rows": 8426
+          },
+          {
+            "clock": "09:50",
+            "rows": 5794
+          },
+          {
+            "clock": "10:00",
+            "rows": 8426
+          },
+          {
+            "clock": "10:05",
+            "rows": 5794
+          },
+          {
+            "clock": "10:15",
+            "rows": 8417
+          },
+          {
+            "clock": "10:30",
+            "rows": 8426
+          },
+          {
+            "clock": "10:35",
+            "rows": 5794
+          },
+          {
+            "clock": "10:45",
+            "rows": 8427
+          },
+          {
+            "clock": "10:50",
+            "rows": 5794
+          },
+          {
+            "clock": "11:00",
+            "rows": 8427
+          },
+          {
+            "clock": "11:05",
+            "rows": 5794
+          },
+          {
+            "clock": "11:15",
+            "rows": 8428
+          },
+          {
+            "clock": "11:20",
+            "rows": 5794
+          },
+          {
+            "clock": "11:30",
+            "rows": 8419
+          },
+          {
+            "clock": "13:30",
+            "rows": 8428
+          },
+          {
+            "clock": "13:35",
+            "rows": 5793
+          },
+          {
+            "clock": "13:45",
+            "rows": 8428
+          },
+          {
+            "clock": "13:50",
+            "rows": 5793
+          },
+          {
+            "clock": "14:00",
+            "rows": 8428
+          },
+          {
+            "clock": "14:05",
+            "rows": 5793
+          },
+          {
+            "clock": "14:15",
+            "rows": 8428
+          },
+          {
+            "clock": "14:20",
+            "rows": 5793
+          },
+          {
+            "clock": "14:30",
+            "rows": 8428
+          },
+          {
+            "clock": "14:35",
+            "rows": 5793
+          },
+          {
+            "clock": "14:45",
+            "rows": 8428
+          },
+          {
+            "clock": "14:50",
+            "rows": 5793
+          },
+          {
+            "clock": "15:00",
+            "rows": 8417
+          },
+          {
+            "clock": "20:50",
+            "rows": 5631
+          },
+          {
+            "clock": "21:00",
+            "rows": 8204
+          },
+          {
+            "clock": "21:05",
+            "rows": 5630
+          },
+          {
+            "clock": "21:15",
+            "rows": 8195
+          },
+          {
+            "clock": "21:20",
+            "rows": 5627
+          },
+          {
+            "clock": "21:30",
+            "rows": 8196
+          },
+          {
+            "clock": "21:35",
+            "rows": 5627
+          },
+          {
+            "clock": "21:45",
+            "rows": 8195
+          },
+          {
+            "clock": "21:50",
+            "rows": 5627
+          },
+          {
+            "clock": "22:00",
+            "rows": 8197
+          },
+          {
+            "clock": "22:05",
+            "rows": 5628
+          },
+          {
+            "clock": "22:15",
+            "rows": 8197
+          },
+          {
+            "clock": "22:20",
+            "rows": 5628
+          },
+          {
+            "clock": "22:30",
+            "rows": 8197
+          },
+          {
+            "clock": "22:35",
+            "rows": 5627
+          },
+          {
+            "clock": "22:45",
+            "rows": 8198
+          },
+          {
+            "clock": "22:50",
+            "rows": 5627
+          },
+          {
+            "clock": "23:00",
+            "rows": 8188
+          }
+        ],
+        "provider_bar_end_semantics_bound_file_count": 0,
+        "timezone_naive_storage_file_count": 77
+      }
+    }
+  ],
+  "claim_boundary": {
+    "execution_authorized": false,
+    "m7_or_m8_authorized": false,
+    "option_inputs_accessed": false,
+    "private_paths_or_rows_published": false,
+    "source_refreshed_or_mutated": false,
+    "strategy_events_materialized": false,
+    "strategy_outcomes_accessed": false
+  },
+  "contract_sha256": "sha256:8c2713ae02710e8dbdeeff04fa4be84b818690b9d881104a23069c218f5b83c1",
+  "dependency": {
+    "approved_native_source_version_manifest_sha256": null,
+    "issue_50_status": "done",
+    "merged_gate_contract_sha256": "sha256:ce8508f1cb6f15d5030e6424404f07c7d2e346811ccbc1bad033f63d4bc3d351"
+  },
+  "issue_number": 58,
+  "schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+  "source": {
+    "access": "read_only",
+    "captured_once_per_source_file": true,
+    "complete_private_inventory_sha256": "sha256:13e00e03007e47525bdeac9e5fddb81d222375d7921557b9b1569fe2bd17b819",
+    "matrix_cell_count": 18,
+    "public_alias": "external://quant-data/",
+    "public_membership_sha256": "sha256:2cdcd4e6ef456885d59fd89125099e3f1ceb0c27b82a849db45e298f2b1e310d",
+    "runtime_binding": "QUANT_DATA_ROOT",
+    "source_byte_count": 45966586,
+    "source_file_count": 978,
+    "source_row_count": 2702545
+  },
+  "source_version_candidate": {
+    "history_start_inclusive": "2021-06-01T00:00:00+08:00",
+    "last_formal_decision_local": "2026-04-30T15:00:00+08:00",
+    "last_outcome_observation_date": "2026-05-15",
+    "materialized_private_snapshot_cells": 0,
+    "native_source_version_manifest_sha256": null,
+    "required_matrix_cells": 18,
+    "source_version_id": "p1-exp-002-native-source-2026-07-30-v1"
+  },
+  "verdict": {
+    "approved_native_source_version_registered": false,
+    "contract_updated": false,
+    "formal_allow_demonstrated": false,
+    "issue_51_unblocked": false,
+    "reason_codes": [
+      "ohlc_quality_findings_present",
+      "provider_bar_end_semantics_unbound",
+      "timestamps_outside_frozen_session_end_grid"
+    ],
+    "required_next_actions": [
+      "repair_or_replace_the_invalid_required_source_cells",
+      "revise_and_review_a_lossless_source_specific_timestamp_normalization_contract"
+    ],
+    "status": "data_blocked"
+  }
+}

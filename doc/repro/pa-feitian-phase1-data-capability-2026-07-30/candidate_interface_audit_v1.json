@@ -1,0 +1,4026 @@
+{
+  "audit_as_of_local_date": "2026-07-30",
+  "audit_id": "pa_feitian_phase1_candidate_interface_audit_2026_07_30",
+  "contract": {
+    "alias": "repository://paired-trading/phase1-candidate-interface-audit-contract-v1",
+    "schema_version": "pa_feitian_phase1_candidate_interface_audit_contract_v1",
+    "sha256": "sha256:83ed38538fea204b6567b6f3c35a0b928e15117f9009943e6055e87e55cc650a"
+  },
+  "decision_surface": [
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 226083,
+                  "nonzero_rows": 183757
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 226083,
+                  "nonzero_rows": 118186
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 226083,
+                  "nonzero_rows": 117238
+                }
+              },
+              "byte_size": 9697494,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T00:00:00",
+                "minimum_observation_timestamp": "2023-11-22T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 226083,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.821972,
+                "rows_with_any_nonzero_activity": 185834
+              },
+              "matched_files": 1768,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 226083,
+                "violation_rows": 106232
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 226083,
+              "scanned_files": 1768,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 2,
+                "variants": [
+                  {
+                    "file_count": 1737,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 31,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double,quality_flag:large_string,_fallback_close:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 8462,
+                  "nonzero_rows": 8195
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 8462,
+                  "nonzero_rows": 8195
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 8462,
+                  "nonzero_rows": 8449
+                }
+              },
+              "byte_size": 358558,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-08T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 52,
+                "latest_observation": "2026-06-08T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 8462,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.999645,
+                "rows_with_any_nonzero_activity": 8459
+              },
+              "matched_files": 40,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 8462,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 8462,
+              "scanned_files": 40,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 40,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 1808
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 2534389,
+                  "nonzero_rows": 2051700
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 2534389,
+                  "nonzero_rows": 589111
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 2534389,
+                  "nonzero_rows": 590357
+                }
+              },
+              "byte_size": 30014744,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:05:00",
+                "minimum_observation_timestamp": "2023-11-22T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:05:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 2534389,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.811477,
+                "rows_with_any_nonzero_activity": 2056599
+              },
+              "matched_files": 1768,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 2534389,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 2534389,
+              "scanned_files": 1768,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 2,
+                "variants": [
+                  {
+                    "file_count": 184,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 1584,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 95547,
+                  "nonzero_rows": 35551
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 95547,
+                  "nonzero_rows": 81042
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 95547,
+                  "nonzero_rows": 85942
+                }
+              },
+              "byte_size": 2088277,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 95547,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.963494,
+                "rows_with_any_nonzero_activity": 92059
+              },
+              "matched_files": 40,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 95547,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 95547,
+              "scanned_files": 40,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 40,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 1808
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 8537804,
+                  "nonzero_rows": 6901574
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 8537804,
+                  "nonzero_rows": 1237961
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 8537804,
+                  "nonzero_rows": 1240170
+                }
+              },
+              "byte_size": 60907400,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:50:00",
+                "minimum_observation_timestamp": "2023-11-22T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:50:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 8537804,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.809381,
+                "rows_with_any_nonzero_activity": 6910333
+              },
+              "matched_files": 1768,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 8537804,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 8537804,
+              "scanned_files": 1768,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 2,
+                "variants": [
+                  {
+                    "file_count": 184,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 1584,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 315411,
+                  "nonzero_rows": 108807
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 315411,
+                  "nonzero_rows": 267603
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 315411,
+                  "nonzero_rows": 271464
+                }
+              },
+              "byte_size": 5814021,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:30:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:30:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 315411,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.949897,
+                "rows_with_any_nonzero_activity": 299608
+              },
+              "matched_files": 40,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 315411,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 315411,
+              "scanned_files": 40,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 40,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 1808
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 23587772,
+                  "nonzero_rows": 19092824
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 23587772,
+                  "nonzero_rows": 2175254
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 23587772,
+                  "nonzero_rows": 2178977
+                }
+              },
+              "byte_size": 251799295,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:55:00",
+                "minimum_observation_timestamp": "2023-11-22T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:55:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 23587772,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.810016,
+                "rows_with_any_nonzero_activity": 19106461
+              },
+              "matched_files": 1768,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 23587772,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 23587772,
+              "scanned_files": 1768,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 3,
+                "variants": [
+                  {
+                    "file_count": 160,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 24,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double,quality_flag:large_string,_fallback_close:double"
+                  },
+                  {
+                    "file_count": 1584,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 927017,
+                  "nonzero_rows": 320084
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 927017,
+                  "nonzero_rows": 740307
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 927017,
+                  "nonzero_rows": 743559
+                }
+              },
+              "byte_size": 14763477,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:30:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:30:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 927017,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.913801,
+                "rows_with_any_nonzero_activity": 847109
+              },
+              "matched_files": 40,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 927017,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 927017,
+              "scanned_files": 40,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 40,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 1808
+        }
+      ],
+      "instrument_family": "SHFE.au",
+      "role": "continuity_candidate"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 313625,
+                  "nonzero_rows": 254166
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 313625,
+                  "nonzero_rows": 137132
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 313625,
+                  "nonzero_rows": 136721
+                }
+              },
+              "byte_size": 14120506,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-17T00:00:00",
+                "minimum_observation_timestamp": "2023-12-29T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 43,
+                "latest_observation": "2026-06-17T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 313625,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.816539,
+                "rows_with_any_nonzero_activity": 256087
+              },
+              "matched_files": 3170,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 313625,
+                "violation_rows": 174034
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 313625,
+              "scanned_files": 3170,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 2,
+                "variants": [
+                  {
+                    "file_count": 3140,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 30,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double,quality_flag:large_string,_fallback_close:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 13408,
+                  "nonzero_rows": 12192
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 13408,
+                  "nonzero_rows": 13251
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 13408,
+                  "nonzero_rows": 13408
+                }
+              },
+              "byte_size": 493413,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-08T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 52,
+                "latest_observation": "2026-06-08T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 13408,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 1.0,
+                "rows_with_any_nonzero_activity": 13408
+              },
+              "matched_files": 65,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 13408,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 13408,
+              "scanned_files": 65,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 65,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 3235
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 3490603,
+                  "nonzero_rows": 2821559
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 3490603,
+                  "nonzero_rows": 626725
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 3490603,
+                  "nonzero_rows": 627227
+                }
+              },
+              "byte_size": 35889698,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-17T15:00:00",
+                "minimum_observation_timestamp": "2023-12-29T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 43,
+                "latest_observation": "2026-06-17T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 3490603,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.808714,
+                "rows_with_any_nonzero_activity": 2822898
+              },
+              "matched_files": 3170,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 3490603,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 3490603,
+              "scanned_files": 3170,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 2,
+                "variants": [
+                  {
+                    "file_count": 300,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 2870,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 156546,
+                  "nonzero_rows": 65117
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 156546,
+                  "nonzero_rows": 147507
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 156546,
+                  "nonzero_rows": 147799
+                }
+              },
+              "byte_size": 2895069,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:05:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:05:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 156546,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.988176,
+                "rows_with_any_nonzero_activity": 154695
+              },
+              "matched_files": 65,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 156546,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 156546,
+              "scanned_files": 65,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 65,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 3235
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 11759813,
+                  "nonzero_rows": 9498392
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 11759813,
+                  "nonzero_rows": 1331762
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 11759813,
+                  "nonzero_rows": 1332632
+                }
+              },
+              "byte_size": 73449418,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-17T15:00:00",
+                "minimum_observation_timestamp": "2023-12-29T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 43,
+                "latest_observation": "2026-06-17T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 11759813,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.807875,
+                "rows_with_any_nonzero_activity": 9500460
+              },
+              "matched_files": 3170,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 11759813,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 11759813,
+              "scanned_files": 3170,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 2,
+                "variants": [
+                  {
+                    "file_count": 300,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 2870,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 528172,
+                  "nonzero_rows": 219610
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 528172,
+                  "nonzero_rows": 473616
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 528172,
+                  "nonzero_rows": 474590
+                }
+              },
+              "byte_size": 8236119,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:30:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:30:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 528172,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.973177,
+                "rows_with_any_nonzero_activity": 514005
+              },
+              "matched_files": 65,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 528172,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 528172,
+              "scanned_files": 65,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 65,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 3235
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 32480047,
+                  "nonzero_rows": 26236140
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 32480047,
+                  "nonzero_rows": 2419809
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 32480047,
+                  "nonzero_rows": 2420963
+                }
+              },
+              "byte_size": 339444217,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-17T15:00:00",
+                "minimum_observation_timestamp": "2023-12-29T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 43,
+                "latest_observation": "2026-06-17T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 32480047,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.807862,
+                "rows_with_any_nonzero_activity": 26239408
+              },
+              "matched_files": 3170,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 32480047,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 32480047,
+              "scanned_files": 3170,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 3,
+                "variants": [
+                  {
+                    "file_count": 284,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 16,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double,quality_flag:large_string,_fallback_close:double"
+                  },
+                  {
+                    "file_count": 2870,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1456957,
+                  "nonzero_rows": 607554
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1456957,
+                  "nonzero_rows": 1216058
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1456957,
+                  "nonzero_rows": 1220270
+                }
+              },
+              "byte_size": 20212287,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T02:30:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T02:30:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 1456957,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.942549,
+                "rows_with_any_nonzero_activity": 1373253
+              },
+              "matched_files": 65,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 1456957,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 1456957,
+              "scanned_files": 65,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 65,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 3235
+        }
+      ],
+      "instrument_family": "SHFE.ag",
+      "role": "continuity_candidate"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 25494,
+                  "nonzero_rows": 22878
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 25494,
+                  "nonzero_rows": 11845
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 25494,
+                  "nonzero_rows": 11845
+                }
+              },
+              "byte_size": 2544446,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T00:00:00",
+                "minimum_observation_timestamp": "2025-11-12T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 25494,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.899349,
+                "rows_with_any_nonzero_activity": 22928
+              },
+              "matched_files": 379,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 25494,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 25494,
+              "scanned_files": 379,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 379,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 7725,
+                  "nonzero_rows": 7679
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 7725,
+                  "nonzero_rows": 7647
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 7725,
+                  "nonzero_rows": 7647
+                }
+              },
+              "byte_size": 273195,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 7725,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.998317,
+                "rows_with_any_nonzero_activity": 7712
+              },
+              "matched_files": 36,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 7725,
+                "violation_rows": 63
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 7725,
+              "scanned_files": 36,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 36,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 415
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 202546,
+                  "nonzero_rows": 182016
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 202546,
+                  "nonzero_rows": 42502
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 202546,
+                  "nonzero_rows": 42162
+                }
+              },
+              "byte_size": 2845035,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T22:05:00",
+                "minimum_observation_timestamp": "2025-11-12T09:05:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T22:05:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 202546,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.89868,
+                "rows_with_any_nonzero_activity": 182024
+              },
+              "matched_files": 379,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 202546,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 202546,
+              "scanned_files": 379,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 379,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 53554,
+                  "nonzero_rows": 53461
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 53554,
+                  "nonzero_rows": 48595
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 53554,
+                  "nonzero_rows": 48202
+                }
+              },
+              "byte_size": 1043907,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 53554,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.998282,
+                "rows_with_any_nonzero_activity": 53462
+              },
+              "matched_files": 36,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 53554,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 53554,
+              "scanned_files": 36,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 36,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 415
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 605650,
+                  "nonzero_rows": 544029
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 605650,
+                  "nonzero_rows": 92429
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 605650,
+                  "nonzero_rows": 91749
+                }
+              },
+              "byte_size": 4928053,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T22:50:00",
+                "minimum_observation_timestamp": "2025-11-12T09:05:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T22:50:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 605650,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.898278,
+                "rows_with_any_nonzero_activity": 544042
+              },
+              "matched_files": 379,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 605650,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 605650,
+              "scanned_files": 379,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 379,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 183403,
+                  "nonzero_rows": 183073
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 183403,
+                  "nonzero_rows": 154989
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 183403,
+                  "nonzero_rows": 154219
+                }
+              },
+              "byte_size": 2850147,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 183403,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.998206,
+                "rows_with_any_nonzero_activity": 183074
+              },
+              "matched_files": 36,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 183403,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 183403,
+              "scanned_files": 36,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 36,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 415
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1759109,
+                  "nonzero_rows": 1579272
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1759109,
+                  "nonzero_rows": 178737
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1759109,
+                  "nonzero_rows": 178372
+                }
+              },
+              "byte_size": 20886932,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T23:00:00",
+                "minimum_observation_timestamp": "2025-11-12T09:05:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T23:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 1759109,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.897776,
+                "rows_with_any_nonzero_activity": 1579285
+              },
+              "matched_files": 379,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 1759109,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 1759109,
+              "scanned_files": 379,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 379,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 534817,
+                  "nonzero_rows": 533844
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 534817,
+                  "nonzero_rows": 407253
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 534817,
+                  "nonzero_rows": 406025
+                }
+              },
+              "byte_size": 7096156,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 534817,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.998183,
+                "rows_with_any_nonzero_activity": 533845
+              },
+              "matched_files": 36,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 534817,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 534817,
+              "scanned_files": 36,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 36,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 415
+        }
+      ],
+      "instrument_family": "CZCE.TA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 29394,
+                  "nonzero_rows": 25240
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 29394,
+                  "nonzero_rows": 13557
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 29394,
+                  "nonzero_rows": 13557
+                }
+              },
+              "byte_size": 2925672,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T00:00:00",
+                "minimum_observation_timestamp": "2025-11-04T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 29394,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.860788,
+                "rows_with_any_nonzero_activity": 25302
+              },
+              "matched_files": 438,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 29394,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 29394,
+              "scanned_files": 438,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 438,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 7725,
+                  "nonzero_rows": 7684
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 7725,
+                  "nonzero_rows": 7618
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 7725,
+                  "nonzero_rows": 7618
+                }
+              },
+              "byte_size": 269955,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 7725,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.997929,
+                "rows_with_any_nonzero_activity": 7709
+              },
+              "matched_files": 36,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 7725,
+                "violation_rows": 32
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 7725,
+              "scanned_files": 36,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 36,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 474
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 232886,
+                  "nonzero_rows": 200287
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 232886,
+                  "nonzero_rows": 48944
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 232886,
+                  "nonzero_rows": 48621
+                }
+              },
+              "byte_size": 3236442,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T23:00:00",
+                "minimum_observation_timestamp": "2025-11-04T09:05:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T23:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 232886,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.860073,
+                "rows_with_any_nonzero_activity": 200299
+              },
+              "matched_files": 438,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 232886,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 232886,
+              "scanned_files": 438,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 438,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 53554,
+                  "nonzero_rows": 53501
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 53554,
+                  "nonzero_rows": 47889
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 53554,
+                  "nonzero_rows": 47609
+                }
+              },
+              "byte_size": 1024010,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 53554,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.999048,
+                "rows_with_any_nonzero_activity": 53503
+              },
+              "matched_files": 36,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 53554,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 53554,
+              "scanned_files": 36,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 36,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 474
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 696238,
+                  "nonzero_rows": 598457
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 696238,
+                  "nonzero_rows": 104893
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 696238,
+                  "nonzero_rows": 104251
+                }
+              },
+              "byte_size": 5561523,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T23:00:00",
+                "minimum_observation_timestamp": "2025-11-04T09:05:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T23:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 696238,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.859578,
+                "rows_with_any_nonzero_activity": 598471
+              },
+              "matched_files": 438,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 696238,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 696238,
+              "scanned_files": 438,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 438,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 183403,
+                  "nonzero_rows": 183212
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 183403,
+                  "nonzero_rows": 152312
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 183403,
+                  "nonzero_rows": 151598
+                }
+              },
+              "byte_size": 2785666,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 183403,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.998969,
+                "rows_with_any_nonzero_activity": 183214
+              },
+              "matched_files": 36,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 183403,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 183403,
+              "scanned_files": 36,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 36,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 474
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 2026260,
+                  "nonzero_rows": 1741571
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 2026260,
+                  "nonzero_rows": 200230
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 2026260,
+                  "nonzero_rows": 199975
+                }
+              },
+              "byte_size": 23340076,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T23:00:00",
+                "minimum_observation_timestamp": "2025-11-04T09:05:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T23:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 2026260,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.859509,
+                "rows_with_any_nonzero_activity": 1741588
+              },
+              "matched_files": 438,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 2026260,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 2026260,
+              "scanned_files": 438,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 438,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 534817,
+                  "nonzero_rows": 534252
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 534817,
+                  "nonzero_rows": 396721
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 534817,
+                  "nonzero_rows": 395501
+                }
+              },
+              "byte_size": 6911816,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T15:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 534817,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.998947,
+                "rows_with_any_nonzero_activity": 534254
+              },
+              "matched_files": 36,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 534817,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 534817,
+              "scanned_files": 36,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 36,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 474
+        }
+      ],
+      "instrument_family": "CZCE.MA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "continuous_underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 9,
+                  "nonzero_rows": 9
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 9,
+                  "nonzero_rows": 9
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 9,
+                  "nonzero_rows": 9
+                }
+              },
+              "byte_size": 3068,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-11T00:00:00",
+                "minimum_observation_timestamp": "2026-06-01T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 49,
+                "latest_observation": "2026-06-11T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 9,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 1.0,
+                "rows_with_any_nonzero_activity": 9
+              },
+              "matched_files": 1,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 9,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 9,
+              "scanned_files": 1,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 1,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 184196,
+                  "nonzero_rows": 142573
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 184196,
+                  "nonzero_rows": 88596
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 184196,
+                  "nonzero_rows": 86256
+                }
+              },
+              "byte_size": 7255052,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T00:00:00",
+                "minimum_observation_timestamp": "2024-01-24T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 184196,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.789583,
+                "rows_with_any_nonzero_activity": 145438
+              },
+              "matched_files": 1490,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 184196,
+                "violation_rows": 91378
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 184196,
+              "scanned_files": 1490,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 2,
+                "variants": [
+                  {
+                    "file_count": 1418,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 72,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double,quality_flag:large_string,_fallback_close:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 15397,
+                  "nonzero_rows": 15392
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 15397,
+                  "nonzero_rows": 15389
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 15397,
+                  "nonzero_rows": 15397
+                }
+              },
+              "byte_size": 583525,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-08T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 52,
+                "latest_observation": "2026-06-08T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 15397,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 1.0,
+                "rows_with_any_nonzero_activity": 15397
+              },
+              "matched_files": 72,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 15397,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 15397,
+              "scanned_files": 72,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 72,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 1563
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1940843,
+                  "nonzero_rows": 1510374
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1940843,
+                  "nonzero_rows": 479225
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1940843,
+                  "nonzero_rows": 484217
+                }
+              },
+              "byte_size": 20764046,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:05:00",
+                "minimum_observation_timestamp": "2024-01-24T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:05:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 1940843,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.781671,
+                "rows_with_any_nonzero_activity": 1517100
+              },
+              "matched_files": 1490,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 1940843,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 1940843,
+              "scanned_files": 1490,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 2,
+                "variants": [
+                  {
+                    "file_count": 160,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 1330,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 131518,
+                  "nonzero_rows": 6503
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 131518,
+                  "nonzero_rows": 109846
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 131518,
+                  "nonzero_rows": 116248
+                }
+              },
+              "byte_size": 2551938,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T01:00:00",
+                "minimum_observation_timestamp": "2021-06-01T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T01:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 131518,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.884662,
+                "rows_with_any_nonzero_activity": 116349
+              },
+              "matched_files": 72,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 131518,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 131518,
+              "scanned_files": 72,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 72,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 1562
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 6173891,
+                  "nonzero_rows": 4805144
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 6173891,
+                  "nonzero_rows": 1071316
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 6173891,
+                  "nonzero_rows": 1083446
+                }
+              },
+              "byte_size": 42709259,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:50:00",
+                "minimum_observation_timestamp": "2024-01-24T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:50:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 6173891,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.78008,
+                "rows_with_any_nonzero_activity": 4816131
+              },
+              "matched_files": 1490,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 6173891,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 6173891,
+              "scanned_files": 1490,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 2,
+                "variants": [
+                  {
+                    "file_count": 160,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 1330,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 450409,
+                  "nonzero_rows": 7899
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 450409,
+                  "nonzero_rows": 352719
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 450409,
+                  "nonzero_rows": 360214
+                }
+              },
+              "byte_size": 7042962,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T01:00:00",
+                "minimum_observation_timestamp": "2021-06-01T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T01:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 450409,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.800646,
+                "rows_with_any_nonzero_activity": 360618
+              },
+              "matched_files": 72,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 450409,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 450409,
+              "scanned_files": 72,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 72,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 1562
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 16904905,
+                  "nonzero_rows": 13160133
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 16904905,
+                  "nonzero_rows": 1975664
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 16904905,
+                  "nonzero_rows": 2001135
+                }
+              },
+              "byte_size": 188733626,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-16T23:55:00",
+                "minimum_observation_timestamp": "2024-01-24T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 44,
+                "latest_observation": "2026-06-16T23:55:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 16904905,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.779418,
+                "rows_with_any_nonzero_activity": 13175995
+              },
+              "matched_files": 1490,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 16904905,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 16904905,
+              "scanned_files": 1490,
+              "schema": {
+                "consistent": false,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 3,
+                "variants": [
+                  {
+                    "file_count": 121,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  },
+                  {
+                    "file_count": 39,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double,quality_flag:large_string,_fallback_close:double"
+                  },
+                  {
+                    "file_count": 1330,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:int64,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1319691,
+                  "nonzero_rows": 32465
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1319691,
+                  "nonzero_rows": 885926
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1319691,
+                  "nonzero_rows": 903157
+                }
+              },
+              "byte_size": 16895763,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-06T01:00:00",
+                "minimum_observation_timestamp": "2021-06-01T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 54,
+                "latest_observation": "2026-06-06T01:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 1319691,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.68763,
+                "rows_with_any_nonzero_activity": 907459
+              },
+              "matched_files": 72,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 1319691,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 1319691,
+              "scanned_files": 72,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 72,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 1562
+        }
+      ],
+      "instrument_family": "SHFE.cu",
+      "role": "non_czce_control"
+    },
+    {
+      "cadences": [
+        {
+          "cadence": "daily",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 19756,
+                  "nonzero_rows": 5239
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 19302,
+                  "nonzero_rows": 3369
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 19756,
+                  "nonzero_rows": 2784
+                }
+              },
+              "byte_size": 1170327,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T00:00:00",
+                "minimum_observation_timestamp": "2025-07-16T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 19756,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.390109,
+                "rows_with_any_nonzero_activity": 7707
+              },
+              "matched_files": 214,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 19756,
+                "violation_rows": 10140
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 19756,
+              "scanned_files": 214,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 214,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 14003,
+                  "nonzero_rows": 6825
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 14003,
+                  "nonzero_rows": 13998
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 14003,
+                  "nonzero_rows": 14003
+                }
+              },
+              "byte_size": 508681,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-08T00:00:00",
+                "minimum_observation_timestamp": "2021-01-04T00:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 52,
+                "latest_observation": "2026-06-08T00:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 14003,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 1.0,
+                "rows_with_any_nonzero_activity": 14003
+              },
+              "matched_files": 77,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 14003,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 14003,
+              "scanned_files": 77,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 77,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 291
+        },
+        {
+          "cadence": "hour",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 128491,
+                  "nonzero_rows": 41056
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 128491,
+                  "nonzero_rows": 6922
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 128491,
+                  "nonzero_rows": 12100
+                }
+              },
+              "byte_size": 1651507,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-10T15:00:00",
+                "minimum_observation_timestamp": "2025-07-15T21:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 50,
+                "latest_observation": "2026-06-10T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 128491,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.373427,
+                "rows_with_any_nonzero_activity": 47982
+              },
+              "matched_files": 214,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 128491,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 128491,
+              "scanned_files": 214,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 214,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 121165,
+                  "nonzero_rows": 6924
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 121165,
+                  "nonzero_rows": 113006
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 121165,
+                  "nonzero_rows": 113069
+                }
+              },
+              "byte_size": 2068545,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-05T23:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 55,
+                "latest_observation": "2026-06-05T23:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 121165,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.937119,
+                "rows_with_any_nonzero_activity": 113546
+              },
+              "matched_files": 77,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 121165,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 121165,
+              "scanned_files": 77,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 77,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 291
+        },
+        {
+          "cadence": "min15",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 433664,
+                  "nonzero_rows": 140822
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 433664,
+                  "nonzero_rows": 16522
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 433664,
+                  "nonzero_rows": 28514
+                }
+              },
+              "byte_size": 2961748,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-10T22:45:00",
+                "minimum_observation_timestamp": "2025-07-15T21:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 50,
+                "latest_observation": "2026-06-10T22:45:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 433664,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.362839,
+                "rows_with_any_nonzero_activity": 157350
+              },
+              "matched_files": 214,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 433664,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 433664,
+              "scanned_files": 214,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 214,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 363143,
+                  "nonzero_rows": 20777
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 363143,
+                  "nonzero_rows": 334626
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 363143,
+                  "nonzero_rows": 334830
+                }
+              },
+              "byte_size": 5078598,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-05T23:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 55,
+                "latest_observation": "2026-06-05T23:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 363143,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.926541,
+                "rows_with_any_nonzero_activity": 336467
+              },
+              "matched_files": 77,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 363143,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 363143,
+              "scanned_files": 77,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 77,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 291
+        },
+        {
+          "cadence": "min5",
+          "interfaces": {
+            "option_premium": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1306685,
+                  "nonzero_rows": 214804
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1306685,
+                  "nonzero_rows": 54348
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 1306685,
+                  "nonzero_rows": 61066
+                }
+              },
+              "byte_size": 9530454,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-22T15:00:00",
+                "minimum_observation_timestamp": "2025-07-15T21:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 38,
+                "latest_observation": "2026-06-22T15:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 1306685,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.198588,
+                "rows_with_any_nonzero_activity": 259492
+              },
+              "matched_files": 214,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 1306685,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 1306685,
+              "scanned_files": 214,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 214,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            },
+            "underlying": {
+              "activity_fields": {
+                "open_interest": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 986928,
+                  "nonzero_rows": 57451
+                },
+                "turnover": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 986928,
+                  "nonzero_rows": 857667
+                },
+                "volume": {
+                  "availability": "present_in_all_scanned_files",
+                  "non_null_rows": 986928,
+                  "nonzero_rows": 858822
+                }
+              },
+              "byte_size": 12017494,
+              "coverage": {
+                "maximum_observation_timestamp": "2026-06-05T23:00:00",
+                "minimum_observation_timestamp": "2021-01-04T09:00:00"
+              },
+              "freshness": {
+                "calendar_lag_days": 55,
+                "latest_observation": "2026-06-05T23:00:00",
+                "status": "stale"
+              },
+              "liquidity_proxy": {
+                "all_rows": 986928,
+                "minimum_pass_rate": null,
+                "name": "rows_with_any_observed_nonzero_activity_rate",
+                "ranking_or_outcomes_used": false,
+                "rate": 0.877542,
+                "rows_with_any_nonzero_activity": 866071
+              },
+              "matched_files": 77,
+              "ohlc_quality": {
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files"
+                },
+                "null_rows": 0,
+                "rows_checked": 986928,
+                "violation_rows": 0
+              },
+              "read_error_files": 0,
+              "read_error_types": {},
+              "rows": 986928,
+              "scanned_files": 77,
+              "schema": {
+                "consistent": true,
+                "fields": {
+                  "close": "present_in_all_scanned_files",
+                  "high": "present_in_all_scanned_files",
+                  "low": "present_in_all_scanned_files",
+                  "open": "present_in_all_scanned_files",
+                  "open_interest": "present_in_all_scanned_files",
+                  "turnover": "present_in_all_scanned_files",
+                  "volume": "present_in_all_scanned_files"
+                },
+                "variant_count": 1,
+                "variants": [
+                  {
+                    "file_count": 77,
+                    "signature": "datetime:timestamp[us],open:double,high:double,low:double,close:double,volume:double,turnover:double,open_interest:double"
+                  }
+                ]
+              },
+              "timestamp_quality": {
+                "duplicate_rows": 0,
+                "null_rows": 0
+              }
+            }
+          },
+          "matched_files": 291
+        }
+      ],
+      "instrument_family": "DCE.i",
+      "role": "non_czce_control"
+    }
+  ],
+  "guardrails": {
+    "bid_ask_synthesis": false,
+    "cadence_resampling_or_substitution": false,
+    "contract_selection": false,
+    "delta_synthesis": false,
+    "deterministic_inventory_order": true,
+    "execution": false,
+    "explicit_runtime_root_required": true,
+    "external_access_read_only": true,
+    "filesystem_timestamps_as_freshness": false,
+    "implicit_current_time": false,
+    "instrument_ranking": false,
+    "m7": false,
+    "m8": false,
+    "performance_calculation": false,
+    "raw_contract_identifiers_in_output": false,
+    "raw_rows_in_output": false,
+    "source_filenames_in_output": false,
+    "source_refresh": false,
+    "strategy_outcome_access": false
+  },
+  "issue_number": 43,
+  "public_safety": {
+    "bid_ask_synthesis": false,
+    "credentials": false,
+    "delta_synthesis": false,
+    "instrument_ranking": false,
+    "local_paths": false,
+    "local_usernames": false,
+    "raw_contract_identifiers": false,
+    "raw_rows": false,
+    "source_filenames": false,
+    "strategy_outcomes": false
+  },
+  "schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+  "source": {
+    "access": "read_only",
+    "alias": "external://quant-data/",
+    "directory_entries_by_cadence": {
+      "daily": 41466,
+      "hour": 35408,
+      "min15": 35162,
+      "min5": 35223
+    },
+    "filesystem_timestamps_used_as_freshness": false,
+    "inventory_sha256": "sha256:9bbd6c94ca9bf8228c76cd2078513b82655990c88084297d710cd83c2f33ec8f",
+    "matched_candidate_files": 31141,
+    "runtime_binding": "QUANT_DATA_ROOT",
+    "source_refresh_performed": false
+  },
+  "timezone": "Asia/Shanghai"
+}

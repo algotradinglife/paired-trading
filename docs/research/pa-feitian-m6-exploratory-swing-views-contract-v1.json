@@ -1,0 +1,200 @@
+{
+  "schema_version": "pa_feitian_m6_exploratory_swing_views_contract_v1",
+  "contract_id": "pa_feitian_m6_exploratory_swing_views_2026_07_30",
+  "issue_number": 53,
+  "audit_as_of_local_date": "2026-07-30",
+  "timezone": "Asia/Shanghai",
+  "study_label": "exploratory_historical_data_view_only",
+  "purpose": "Publish deterministic, public-safe historical swing views for the six M6 candidate families without strategy outcomes, profitability claims, source mutation, or live-readiness claims.",
+  "candidate_interface_evidence": {
+    "path": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+    "schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+    "use": "family and cadence availability, activity, quality, coverage, and freshness aggregates"
+  },
+  "runtime_input": {
+    "binding": "QUANT_DATA_ROOT",
+    "public_alias": "external://quant-data/",
+    "access": "read_only",
+    "format": "parquet",
+    "relative_root": "daily",
+    "interfaces": [
+      "underlying_contract_ohlc_activity",
+      "option_premium_ohlc_activity"
+    ]
+  },
+  "candidate_universe": [
+    {
+      "instrument_family": "SHFE.au",
+      "exchange": "SHFE",
+      "product": "au",
+      "role": "continuity_candidate"
+    },
+    {
+      "instrument_family": "SHFE.ag",
+      "exchange": "SHFE",
+      "product": "ag",
+      "role": "continuity_candidate"
+    },
+    {
+      "instrument_family": "CZCE.TA",
+      "exchange": "CZCE",
+      "product": "TA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "instrument_family": "CZCE.MA",
+      "exchange": "CZCE",
+      "product": "MA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "instrument_family": "SHFE.cu",
+      "exchange": "SHFE",
+      "product": "cu",
+      "role": "non_czce_control"
+    },
+    {
+      "instrument_family": "DCE.i",
+      "exchange": "DCE",
+      "product": "i",
+      "role": "non_czce_control"
+    }
+  ],
+  "window_protocol": {
+    "completed_observations": 20,
+    "stride_observations": 20,
+    "partition_scope": "within_each_anonymous_underlying_contract_series",
+    "partial_final_window": "excluded",
+    "post_audit_rows": "excluded_before_series_inventory_and_window_partitioning",
+    "future_only_files": "excluded_from_source_inventory",
+    "cross_contract_stitching": false,
+    "cadence_resampling": false,
+    "representative_quality": "clean_only",
+    "representative_requires_daily_option_coverage": true,
+    "representative_metric": "total_excursion_pct",
+    "regime_percentile_targets": [
+      {
+        "label": "quiet",
+        "percentile": 0.2
+      },
+      {
+        "label": "typical",
+        "percentile": 0.5
+      },
+      {
+        "label": "volatile",
+        "percentile": 0.8
+      }
+    ],
+    "selection_scope": "within_family_only",
+    "selection_uses_strategy_outcomes_or_profitability": false
+  },
+  "quality_protocol": {
+    "required_fields": [
+      "datetime",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "activity_fields": [
+      "volume",
+      "turnover",
+      "open_interest"
+    ],
+    "clean": "zero invalid observations and zero duplicate timestamps",
+    "messy": "one through four invalid observations in a complete 20-observation window and zero duplicate timestamps",
+    "invalid": "five or more invalid observations or any duplicate timestamp after the fixed pre-audit filter",
+    "ohlc_coherence": "high >= low; high >= open and close; low <= open and close; all OHLC finite and strictly positive",
+    "fresh_max_calendar_lag_days": 7,
+    "freshness_uses_observation_date_not_filesystem_time": true
+  },
+  "descriptive_metrics": {
+    "raw_price_values_in_public_output": false,
+    "representative_path": {
+      "bar_count": 20,
+      "encoding": "each OHLC value divided by the first completed bar open and multiplied by 100",
+      "bar_identity": "zero-based index only",
+      "raw_dates_per_bar": false,
+      "raw_ohlc_values": false
+    },
+    "normalized_window_metrics": [
+      "net_change_pct",
+      "total_excursion_pct",
+      "realized_variability_annualized_pct",
+      "median_bar_range_pct",
+      "up_bar_share",
+      "nonzero_activity_share"
+    ],
+    "strategy_outcome_fields": false,
+    "profitability_interpretation": false
+  },
+  "option_premium_overlay": {
+    "window_binding": "the frozen representative underlying family and date window",
+    "selection_influence": false,
+    "anonymous_series_only": true,
+    "required_distinct_dates_for_comparable_path": 20,
+    "required_dates": "exactly the 20 completed dates in the frozen underlying window",
+    "duplicate_date_series_in_path_distribution": false,
+    "incomplete_fragment_series_in_path_distribution": false,
+    "coverage_length_distribution_published": true,
+    "quality_status": {
+      "clean": "zero null, nonfinite, nonpositive, or OHLC-incoherent observations",
+      "messy": "positive violation share no greater than 0.2",
+      "invalid": "violation share greater than 0.2 or no coherent observations"
+    },
+    "normalized_metrics": [
+      "close_path_change_pct_distribution",
+      "total_excursion_pct_distribution",
+      "nonzero_activity_share",
+      "input_quality_violation_share"
+    ],
+    "raw_premium_values_in_public_output": false,
+    "call_put_or_contract_selection": false,
+    "strategy_outcome_or_profitability_interpretation": false
+  },
+  "output": {
+    "schema_version": "pa_feitian_m6_exploratory_swing_views_v1",
+    "artifact_path": "doc/repro/pa-feitian-m6-exploratory-swing-views-2026-07-30/exploratory_swing_views_v1.json",
+    "json_sort_keys": true,
+    "local_paths": false,
+    "local_usernames": false,
+    "source_filenames": false,
+    "raw_contract_identifiers": false,
+    "raw_rows": false,
+    "raw_ohlc_values": false,
+    "credentials": false,
+    "atomic_same_directory_replace": true,
+    "output_inside_data_root": false,
+    "output_may_overwrite_contract_or_candidate_audit": false
+  },
+  "guardrails": {
+    "explicit_runtime_root_required": true,
+    "external_access_read_only": true,
+    "source_refresh": false,
+    "implicit_current_time": false,
+    "filesystem_timestamps_as_freshness": false,
+    "raw_rows_in_output": false,
+    "raw_ohlc_values_in_output": false,
+    "source_filenames_in_output": false,
+    "raw_contract_identifiers_in_output": false,
+    "strategy_outcome_access": false,
+    "performance_calculation": false,
+    "profitability_ranking": false,
+    "family_ranking": false,
+    "cross_contract_stitching": false,
+    "cadence_resampling_or_substitution": false,
+    "source_refresh_or_mutation": false,
+    "bid_ask_synthesis": false,
+    "delta_synthesis": false,
+    "preregistered_evidence_claim": false,
+    "live_or_shadow_readiness_claim": false,
+    "execution": false
+  },
+  "interpretation_boundary": {
+    "exploration": "These views describe historical data shape, activity, quality, and freshness only.",
+    "preregistered_evidence": "No view is evidence for P1-EXP-001, P1-EXP-002, or any other preregistered outcome claim.",
+    "future_live_or_shadow": "Historical presence does not establish point-in-time observability, append-only capture, current freshness, or live/shadow readiness.",
+    "issue_51_unblocked": false
+  }
+}

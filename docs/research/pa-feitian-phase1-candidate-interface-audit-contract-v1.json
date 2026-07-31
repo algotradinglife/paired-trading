@@ -1,0 +1,135 @@
+{
+  "schema_version": "pa_feitian_phase1_candidate_interface_audit_contract_v1",
+  "contract_id": "pa_feitian_phase1_candidate_interface_audit_2026_07_30",
+  "issue_number": 43,
+  "audit_as_of_local_date": "2026-07-30",
+  "timezone": "Asia/Shanghai",
+  "purpose": "Read-only deterministic audit of the predeclared Phase 1 candidate-universe market-data interfaces without strategy outcomes, selection, or source mutation.",
+  "runtime_input": {
+    "binding": "QUANT_DATA_ROOT",
+    "public_alias": "external://quant-data/",
+    "access": "read_only",
+    "format": "parquet",
+    "allowed_relative_roots": [
+      "daily",
+      "hour",
+      "min15",
+      "min5"
+    ]
+  },
+  "candidate_universe": [
+    {
+      "instrument_family": "SHFE.au",
+      "exchange": "SHFE",
+      "product": "au",
+      "role": "continuity_candidate"
+    },
+    {
+      "instrument_family": "SHFE.ag",
+      "exchange": "SHFE",
+      "product": "ag",
+      "role": "continuity_candidate"
+    },
+    {
+      "instrument_family": "CZCE.TA",
+      "exchange": "CZCE",
+      "product": "TA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "instrument_family": "CZCE.MA",
+      "exchange": "CZCE",
+      "product": "MA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "instrument_family": "SHFE.cu",
+      "exchange": "SHFE",
+      "product": "cu",
+      "role": "non_czce_control"
+    },
+    {
+      "instrument_family": "DCE.i",
+      "exchange": "DCE",
+      "product": "i",
+      "role": "non_czce_control"
+    }
+  ],
+  "cadences": [
+    "daily",
+    "hour",
+    "min15",
+    "min5"
+  ],
+  "filename_interface_grammar": {
+    "case_insensitive_family_prefix": true,
+    "underlying_suffix_regex": "^[0-9]{3,4}$",
+    "continuous_underlying_suffix": "0",
+    "option_premium_suffix_regex": "^[0-9]{3,4}(?:[CP][0-9]+(?:\\.[0-9]+)?|-[CP]-[0-9]+(?:\\.[0-9]+)?)$",
+    "greeks_sidecar_suffix": ".greeks",
+    "raw_contract_identifiers_in_output": false,
+    "source_filenames_in_output": false
+  },
+  "audit_fields": {
+    "timestamp_candidates": [
+      "datetime",
+      "timestamp",
+      "date"
+    ],
+    "ohlc": [
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "activity": [
+      "volume",
+      "turnover",
+      "open_interest"
+    ]
+  },
+  "freshness_policy": {
+    "fresh_max_calendar_lag_days": 7,
+    "stale_min_calendar_lag_days": 8,
+    "implicit_current_time": false
+  },
+  "liquidity_proxy": {
+    "name": "rows_with_any_observed_nonzero_activity_rate",
+    "formula": "option_rows_with_any_nonzero_observed_activity / option_rows",
+    "minimum_pass_rate": null,
+    "ranking_allowed": false,
+    "outcome_fields_allowed": false
+  },
+  "output": {
+    "schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+    "artifact_path": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+    "json_sort_keys": true,
+    "local_paths": false,
+    "local_usernames": false,
+    "source_filenames": false,
+    "raw_contract_identifiers": false,
+    "raw_rows": false,
+    "credentials": false
+  },
+  "guardrails": {
+    "explicit_runtime_root_required": true,
+    "external_access_read_only": true,
+    "source_refresh": false,
+    "implicit_current_time": false,
+    "deterministic_inventory_order": true,
+    "filesystem_timestamps_as_freshness": false,
+    "raw_rows_in_output": false,
+    "source_filenames_in_output": false,
+    "raw_contract_identifiers_in_output": false,
+    "strategy_outcome_access": false,
+    "performance_calculation": false,
+    "instrument_ranking": false,
+    "contract_selection": false,
+    "cadence_resampling_or_substitution": false,
+    "bid_ask_synthesis": false,
+    "delta_synthesis": false,
+    "m7": false,
+    "m8": false,
+    "execution": false
+  }
+}

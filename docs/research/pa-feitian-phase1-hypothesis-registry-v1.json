@@ -1,0 +1,600 @@
+{
+  "schema_version": "pa_feitian_phase1_hypothesis_registry_v1",
+  "registry_id": "pa_feitian_phase1_2026_07_26",
+  "version": 1,
+  "status": "frozen_before_phase1_outcome_inspection",
+  "frozen_at_utc": "2026-07-26T09:45:21Z",
+  "baseline": {
+    "commit": "6242a8a2d6562829a997dd925daf233684162cc5",
+    "workspace": "PT-Strategy",
+    "bookmark": "strategy/active",
+    "pull_request_base": "develop"
+  },
+  "scope": {
+    "phase": "phase_1",
+    "purpose": "Freeze the smallest source-traceable hypothesis set and exactly one next experiment after the M6-EXP-013 negative gate.",
+    "allowed": [
+      "pre-outcome research design",
+      "source and provenance binding",
+      "deterministic validation",
+      "future descriptive premium-space evaluation under the selected frozen design"
+    ],
+    "forbidden_in_this_issue": [
+      "external market-data access",
+      "outcome computation",
+      "parameter search",
+      "M7 or M8 work",
+      "production policy mutation",
+      "live trading",
+      "order execution",
+      "execution or profitability claims"
+    ],
+    "contract_preservation": {
+      "pa_feitian_snapshot_v1": "read_only",
+      "pa_feitian_decision_intent_v1": "read_only",
+      "posterior_outcome_fields_as_decision_inputs": "forbidden"
+    }
+  },
+  "source_status_definitions": {
+    "authentic": "An exact, machine-testable rule supported by an authoritative Feitian source.",
+    "derived": "A causal research hypothesis derived from repository evidence but not authenticated as an original Feitian rule.",
+    "proxy": "A deliberately non-authentic stand-in used only to test a named mechanism under explicit limitations."
+  },
+  "source_catalog": [
+    {
+      "source_id": "SRC-M6-EXP-013-NEGATIVE",
+      "path": "doc/repro/pa-feitian-m6-premium-k-response-2026-07-13/README.md",
+      "sha256": "sha256:87092b0a1cc349e70270287ef57d36e0fd3745ea7b29abcb4bc4fe687782109d",
+      "locators": [
+        "Design",
+        "Result"
+      ],
+      "role": "Binds the empty M6-EXP-013 training candidate set and the prohibition on tuning its mapping, horizons, thresholds, or corpus."
+    },
+    {
+      "source_id": "SRC-DEPLOYABLE-RULES",
+      "path": "doc/feitian-deployable-rules-2026-06-16.md",
+      "sha256": "sha256:de6ffce47ba40af07a455af9acff1d078f7e83829b2df49514dc3a2d8fc2a569",
+      "locators": [
+        "规则 1：凸性期权用 runner，别用固定 TP1/TP2",
+        "规则 2：IV-水平闸门",
+        "Caveat / 红线"
+      ],
+      "role": "Supplies the derived runner and causal IV-rank research claims, fixed warmup and rank cutoff, and their limitations."
+    },
+    {
+      "source_id": "SRC-XIAO-SYSTEM",
+      "path": "doc/xiao-feitian-options-timing-system-2026-06-16.md",
+      "sha256": "sha256:67bf64a897a85fe034925a13954489e4a09765ef887aa33b9e2d4941001769cb",
+      "locators": [
+        "1. 核心哲学：凸性赔付 + tick 级权利金止损",
+        "2. 四层机制链（核心结构）",
+        "3.3 时间标度与分批",
+        "3.4 IV regime（进场成本）",
+        "7. 黑盒清单 & 待测假设",
+        "7.3 方法论红线"
+      ],
+      "role": "Separates confirmed, oral or derived, and black-box content and requires premium-space testing with causal decision-time inputs."
+    },
+    {
+      "source_id": "SRC-M6-EVALUATION-SCOPE",
+      "path": "doc/design/pa-feitian-m6-strategy-evaluation-scope-2026-07-11.md",
+      "sha256": "sha256:b0a6f3a7bb29d92f722c95cd7c4675c0c6fd54660c727da1136f5bc4a7c36af2",
+      "locators": [
+        "2. 输入与输出边界",
+        "3. 评估维度",
+        "5. 无前视与时间切分",
+        "6. 候选筛选规则",
+        "9. Non-goals"
+      ],
+      "role": "Supplies the immutable artifact, no-lookahead, time-split, insufficient-sample, and non-execution contracts."
+    }
+  ],
+  "prior_negative_gate": {
+    "experiment_id": "M6-EXP-013",
+    "classification": "negative_or_inconclusive",
+    "eligible_training_candidate_count": 0,
+    "holdout_application": "not_applied_no_training_candidates",
+    "rejection_is_frozen": true,
+    "source_refs": [
+      {
+        "source_id": "SRC-M6-EXP-013-NEGATIVE",
+        "locator": "Result",
+        "claim": "No mapping and horizon passed every predeclared training gate, so the holdout was not applied."
+      }
+    ],
+    "prohibited_reinterpretations": [
+      "change structural labels",
+      "change label-direction mappings",
+      "change 1, 3, or 5 completed-daily-bar horizons",
+      "relax the 20-observation, positive mean, positive median, or bootstrap lower-bound gates",
+      "change or expand the fixed eight-series AU/AG corpus",
+      "inspect or apply the holdout after the empty training candidate set"
+    ]
+  },
+  "hypotheses": [
+    {
+      "hypothesis_id": "P1-HYP-001",
+      "title": "Causal decision-time IV rank conditions forward option-premium response",
+      "source_status": "derived",
+      "statement": "For prospectively enrolled SHFE ag and au long-call decision intents, events with product-local causal signal-day IV rank less than or equal to 0.66 have a higher mean 17-completed-daily-bar option-premium close return than events with rank greater than 0.66.",
+      "selection_status": "selected",
+      "source_refs": [
+        {
+          "source_id": "SRC-DEPLOYABLE-RULES",
+          "locator": "规则 2：IV-水平闸门",
+          "claim": "The repository records a look-ahead-free expanding-window IV-rank rule with warmup 40 and a fixed maximum rank of 0.66."
+        },
+        {
+          "source_id": "SRC-XIAO-SYSTEM",
+          "locator": "3.4 IV regime（进场成本）",
+          "claim": "Signal-day IV is a pre-outcome cost input and rich IV is a distinct mechanism from structural-label direction."
+        },
+        {
+          "source_id": "SRC-M6-EVALUATION-SCOPE",
+          "locator": "5. 无前视与时间切分",
+          "claim": "Gate choice must use decision-time information only and posterior fields may not enter eligibility."
+        }
+      ],
+      "causal_decision_time_inputs": [
+        {
+          "name": "immutable decision intent joined to the snapshot-selected long-call leg",
+          "available_by": "the finalized decision timestamp",
+          "rule": "Join pa_feitian_decision_intent_v1 to pa_feitian_snapshot_v1 by signal_id and use only the snapshot's selected_option_contract and matching options_calls metadata; never rescan or reselect a contract.",
+          "missing_action": "exclude_missing_hash_bound_decision_or_snapshot"
+        },
+        {
+          "name": "signal-day option close, underlying futures close, strike, exact expiry, and risk-free-rate convention",
+          "available_by": "the finalized Asia/Shanghai decision-day close",
+          "rule": "Invert IV with engine.options.black76.implied_vol using option_type C, annual continuously compounded r=0.02, expiry at 15:00:00 Asia/Shanghai on the recorded expiry date, and ACT/365F elapsed seconds from the observed option-close timestamp.",
+          "missing_action": "exclude_unrankable_decision_time_iv"
+        },
+        {
+          "name": "prior product-local signal-day IV history",
+          "available_by": "strictly before the current decision timestamp",
+          "rule": "Use finite IVs from earlier eligible signals for the same product only; current and future IVs are forbidden.",
+          "missing_action": "exclude_iv_warmup_or_invalid_history"
+        }
+      ],
+      "exclusions": [
+        {
+          "exclusion_id": "P1-HYP-001-EX-01",
+          "rule": "Exclude events with fewer than 40 finite earlier signal-day IV observations for the same product.",
+          "reason": "The causal rank is undefined during warmup."
+        },
+        {
+          "exclusion_id": "P1-HYP-001-EX-02",
+          "rule": "Exclude missing, non-positive, synthetic, or non-hash-bound option prices and any IV inversion without exact strike and expiry.",
+          "reason": "The experiment tests observed decision-time IV, not a model-generated market path."
+        },
+        {
+          "exclusion_id": "P1-HYP-001-EX-03",
+          "rule": "Exclude events without the seventeenth subsequent completed daily option close; do not shorten or substitute the horizon.",
+          "reason": "The forward response horizon is frozen."
+        },
+        {
+          "exclusion_id": "P1-HYP-001-EX-04",
+          "rule": "Deduplicate by stable signal id and selected contract symbol before reading any forward close; retain artifact hashes as provenance and exclude every copy when a stable key has conflicting provenance or decision-time fields.",
+          "reason": "One stable decision and leg contributes at most one observation even if its artifacts are regenerated."
+        }
+      ],
+      "falsification": {
+        "primary_estimand": "equal-weighted arithmetic mean of the ag and au within-product differences: mean premium close return for rank<=0.66 minus mean premium close return for rank>0.66",
+        "uncertainty": "A separate 95% percentile interval in each staged window from 2000 valid seed-42001 circular moving-block bootstrap replicates over 17 completed SHFE trading-day date bins, preserving same-date ag/au events and fixed rank assignments; windows are never pooled.",
+        "supported_when": "The training and validation gates pass without adaptation, the single-use holdout sample gate passes, and the holdout interval lower bound is strictly greater than zero.",
+        "falsified_when": "The first evaluated training, validation, or single-use holdout window whose sample gate passes has an interval upper bound less than or equal to zero.",
+        "inconclusive_when": "An evaluated window fails its minimum sample or valid-replicate gate, or its interval lower bound is less than or equal to zero and its upper bound is strictly greater than zero; later windows remain sealed."
+      },
+      "minimum_sample_gate": {
+        "minimum_effective_events": 60,
+        "minimum_non_overlapping_time_windows": 3,
+        "minimum_effective_events_per_window": 20,
+        "minimum_effective_events_per_comparison_cell": 30,
+        "minimum_effective_events_per_product_rank_cell": 15,
+        "minimum_effective_events_per_product_rank_cell_per_window": 5,
+        "unmet_action": "insufficient_sample_no_strategy_inference"
+      },
+      "required_data_capabilities": [
+        {
+          "capability": "hash-bound decision-time option and underlying closes with exact selected contract, strike, expiry, and timestamps",
+          "status": "required_not_accessed_in_this_issue",
+          "missing_action": "exclude_event"
+        },
+        {
+          "capability": "causal product-local signal-day IV history with availability timestamps",
+          "status": "required_not_accessed_in_this_issue",
+          "missing_action": "exclude_event"
+        },
+        {
+          "capability": "observed daily option closes through the seventeenth completed bar after decision",
+          "status": "required_not_accessed_in_this_issue",
+          "missing_action": "exclude_event"
+        }
+      ]
+    },
+    {
+      "hypothesis_id": "P1-HYP-002",
+      "title": "A no-fixed-target runner preserves option convexity relative to staged profit taking",
+      "source_status": "derived",
+      "statement": "On the same eligible event, selected option leg, entry, stop, and 17-completed-daily-bar horizon, a no-fixed-profit-target runner has higher paired mean premium R and a higher at-least-2R outcome share than a staged fixed-target policy.",
+      "selection_status": "parked",
+      "source_refs": [
+        {
+          "source_id": "SRC-DEPLOYABLE-RULES",
+          "locator": "规则 1：凸性期权用 runner，别用固定 TP1/TP2",
+          "claim": "The repository records that fixed targets can truncate the right tail of naked OTM option outcomes."
+        },
+        {
+          "source_id": "SRC-XIAO-SYSTEM",
+          "locator": "1. 核心哲学：凸性赔付 + tick 级权利金止损",
+          "claim": "The proposed mechanism depends on premium-space risk geometry rather than underlying-space direction alone."
+        },
+        {
+          "source_id": "SRC-M6-EVALUATION-SCOPE",
+          "locator": "6. 候选筛选规则",
+          "claim": "Policy comparisons require identical events, data visibility, and cost conventions."
+        }
+      ],
+      "causal_decision_time_inputs": [
+        {
+          "name": "immutable event, selected leg, entry premium, and stop risk basis",
+          "available_by": "entry decision time",
+          "rule": "Both policies must share the same hash-bound decision-time inputs.",
+          "missing_action": "exclude_unpaired_event"
+        },
+        {
+          "name": "predeclared runner and staged-target policies",
+          "available_by": "before any enrolled event outcome",
+          "rule": "No target, stop, sizing, or horizon parameter may change after outcome inspection.",
+          "missing_action": "block_experiment"
+        }
+      ],
+      "exclusions": [
+        {
+          "exclusion_id": "P1-HYP-002-EX-01",
+          "rule": "Exclude an event from both arms if either policy cannot be evaluated on identical observed premium bars.",
+          "reason": "Paired comparability is mandatory."
+        },
+        {
+          "exclusion_id": "P1-HYP-002-EX-02",
+          "rule": "Exclude outcomes whose stop risk basis was not fixed at decision time.",
+          "reason": "Premium R cannot be reconstructed after the fact."
+        },
+        {
+          "exclusion_id": "P1-HYP-002-EX-03",
+          "rule": "Treat unresolved daily-bar stop-target ordering as ambiguous in both arms.",
+          "reason": "The close cannot reveal intrabar ordering."
+        }
+      ],
+      "falsification": {
+        "primary_estimand": "paired mean premium R for runner minus staged fixed-target policy",
+        "uncertainty": "95% event-clustered bootstrap interval with 2000 replicates and seed 42002",
+        "supported_when": "The sample gate passes, both policy definitions are source-complete, the interval lower bound is strictly greater than zero, and the runner at-least-2R share is greater.",
+        "falsified_when": "The sample gate passes, both policy definitions are source-complete, the interval does not strictly straddle zero, and either its upper bound is less than or equal to zero or its lower bound is strictly greater than zero while the runner at-least-2R share is not greater.",
+        "inconclusive_when": "The minimum sample gate fails, the interval lower bound is less than or equal to zero and its upper bound is strictly greater than zero, or either policy definition remains source-incomplete."
+      },
+      "minimum_sample_gate": {
+        "minimum_effective_events": 40,
+        "minimum_non_overlapping_time_windows": 2,
+        "minimum_effective_events_per_window": 20,
+        "minimum_effective_events_per_comparison_cell": 40,
+        "unmet_action": "insufficient_sample_no_strategy_inference"
+      },
+      "required_data_capabilities": [
+        {
+          "capability": "identical observed option premium paths for both policies with decision-time entry and risk basis",
+          "status": "required_not_accessed_in_this_issue",
+          "missing_action": "exclude_unpaired_event"
+        },
+        {
+          "capability": "source-complete stop and staged-target definitions",
+          "status": "blocked_definition",
+          "missing_action": "remain_parked"
+        },
+        {
+          "capability": "bid and ask evidence when stop distance is of the same order as spread",
+          "status": "blocked_data_capability",
+          "missing_action": "no_execution_or_deployability_claim"
+        }
+      ]
+    },
+    {
+      "hypothesis_id": "P1-HYP-003",
+      "title": "A fixed W-retest DD-line proxy may isolate tight-stop convexity",
+      "source_status": "proxy",
+      "statement": "For ag and au shallow-OTM long calls, a predeclared non-authentic W-retest proxy consisting of at least a 10% premium rebound, a retest within plus or minus 3 ticks of the initial low, and a 5-tick stop has positive mean premium R under a no-fixed-target 17-bar runner.",
+      "selection_status": "blocked",
+      "source_refs": [
+        {
+          "source_id": "SRC-XIAO-SYSTEM",
+          "locator": "2. 四层机制链（核心结构）",
+          "claim": "The W-bottom retest is explicitly labelled an approximation, while authentic DD-line geometry remains unresolved."
+        },
+        {
+          "source_id": "SRC-XIAO-SYSTEM",
+          "locator": "7.3 方法论红线",
+          "claim": "A tick-scale stop requires intraday option bars and bid or ask evidence."
+        },
+        {
+          "source_id": "SRC-DEPLOYABLE-RULES",
+          "locator": "Caveat / 红线",
+          "claim": "The authentic DD-line mechanism and tick-stop cost geometry remain data-blocked."
+        }
+      ],
+      "causal_decision_time_inputs": [
+        {
+          "name": "completed option bars at 15-minute or finer cadence",
+          "available_by": "each proxy decision timestamp",
+          "rule": "Pivots, rebound, and retest may use completed bars only.",
+          "missing_action": "block_experiment"
+        },
+        {
+          "name": "contract tick size and contemporaneous bid and ask",
+          "available_by": "each candidate entry and stop timestamp",
+          "rule": "The 3-tick tolerance and 5-tick stop are contract-native and may not be replaced by percentages.",
+          "missing_action": "block_experiment"
+        }
+      ],
+      "exclusions": [
+        {
+          "exclusion_id": "P1-HYP-003-EX-01",
+          "rule": "Exclude any candidate requiring an incomplete bar or later pivot to identify the initial low.",
+          "reason": "The proxy must be causal."
+        },
+        {
+          "exclusion_id": "P1-HYP-003-EX-02",
+          "rule": "Exclude any candidate without contemporaneous bid and ask or with a spread greater than 5 ticks.",
+          "reason": "The spread would dominate the frozen stop geometry."
+        },
+        {
+          "exclusion_id": "P1-HYP-003-EX-03",
+          "rule": "Do not label this proxy authentic Feitian or use it to alter production decisions.",
+          "reason": "Authentic anchors, line construction, and tolerance semantics remain unrecovered."
+        }
+      ],
+      "falsification": {
+        "primary_estimand": "mean premium R after pessimistic spread-aware fills",
+        "uncertainty": "95% contract-and-decision-date clustered bootstrap interval with 2000 replicates and seed 42003",
+        "supported_when": "The sample gate passes, required intraday and bid or ask capabilities are available, and the interval lower bound is strictly greater than zero.",
+        "falsified_when": "The sample gate passes, required intraday and bid or ask capabilities are available, and the interval upper bound is less than or equal to zero.",
+        "inconclusive_when": "The minimum sample gate fails, required intraday and bid or ask capabilities remain blocked, or the interval lower bound is less than or equal to zero and its upper bound is strictly greater than zero."
+      },
+      "minimum_sample_gate": {
+        "minimum_effective_events": 60,
+        "minimum_non_overlapping_time_windows": 2,
+        "minimum_effective_events_per_window": 30,
+        "minimum_effective_events_per_comparison_cell": 30,
+        "unmet_action": "insufficient_sample_no_strategy_inference"
+      },
+      "required_data_capabilities": [
+        {
+          "capability": "full selected-contract option bars at 15-minute or finer cadence",
+          "status": "blocked_data_capability",
+          "missing_action": "remain_blocked"
+        },
+        {
+          "capability": "historical bid and ask plus contract-native tick size",
+          "status": "blocked_data_capability",
+          "missing_action": "remain_blocked"
+        },
+        {
+          "capability": "hash-bound selected shallow-OTM contract identity without posterior reselection",
+          "status": "required_not_accessed_in_this_issue",
+          "missing_action": "exclude_event"
+        }
+      ]
+    }
+  ],
+  "selection": {
+    "selected_hypothesis_id": "P1-HYP-001",
+    "selection_reasoning_fixed_pre_outcome": [
+      "It isolates one causal decision-time cost mechanism with an existing pure implementation and fixed 40-observation warmup and 0.66 cutoff.",
+      "It does not require the unresolved authentic DD-line, 1B or 2B, structural-stop, or staged-target definitions.",
+      "It preserves the selected event and option leg and therefore cannot rescue M6-EXP-013 by relabelling its structural proxy.",
+      "It can fail closed using observed prices, exact contract metadata, immutable decision intent, and two fixed prospective windows."
+    ],
+    "selected_experiment": {
+      "experiment_id": "P1-EXP-001",
+      "hypothesis_id": "P1-HYP-001",
+      "status": "frozen_before_enrollment_and_outcome_inspection",
+      "outcome_inspection_at_freeze": "not_started",
+      "research_label": "prospective_descriptive_non_authentic_non_executable",
+      "design": {
+        "timezone": "Asia/Shanghai",
+        "enrollment_windows": [
+          {
+            "window_id": "P1-W1",
+            "role": "training_gate",
+            "decision_date_start": "2026-07-27",
+            "decision_date_end": "2026-10-31"
+          },
+          {
+            "window_id": "P1-W2",
+            "role": "validation_gate",
+            "decision_date_start": "2026-11-01",
+            "decision_date_end": "2027-02-28"
+          },
+          {
+            "window_id": "P1-W3",
+            "role": "single_use_holdout",
+            "decision_date_start": "2027-03-01",
+            "decision_date_end": "2027-06-30"
+          }
+        ],
+        "outcome_observation_cutoff": "2027-07-31",
+        "universe": [
+          {
+            "exchange": "SHFE",
+            "product": "ag",
+            "option_type": "call"
+          },
+          {
+            "exchange": "SHFE",
+            "product": "au",
+            "option_type": "call"
+          }
+        ],
+        "event_source": {
+          "decision_intent_schema_version": "pa_feitian_decision_intent_v1",
+          "snapshot_schema_version": "pa_feitian_snapshot_v1",
+          "join_key": "signal_id",
+          "selection_rule": "Retain every finalized in-window decision intent that joins one-to-one to a snapshot signal with an already-selected long-call contract and all frozen eligibility inputs hash-bound; use only snapshot selected_option_contract plus its matching options_calls metadata and do not rerun score_today, scan contracts, or reselect a leg.",
+          "deduplication_key": [
+            "signal_id",
+            "selected_contract_symbol"
+          ],
+          "provenance_fields": [
+            "decision_intent_sha256",
+            "snapshot_sha256"
+          ],
+          "admission_deadline": "12:00:00 Asia/Shanghai on the calendar day after the decision date",
+          "admission_ledger_rule": "Before the deadline, append candidate artifact-pair hashes and decision-time fields to an immutable per-decision-date enrollment ledger; artifacts first seen after the sealed deadline are audit-only late revisions and cannot enter or alter rank history.",
+          "pre_ranking_conflict_pass": "Before computing any rank for a staged window, scan all sealed enrollment-ledger entries from history initialization through that window end by stable deduplication key.",
+          "duplicate_resolution_rule": "Within the sealed ledgers, retain one observation only when every copy has identical provenance hashes and decision-time fields; otherwise mark the stable key conflicted and exclude every copy before constructing IV history. Late audit-only revisions never trigger rollback or recomputation."
+        },
+        "ordered_eligibility": [
+          "decision date is inside exactly one frozen enrollment window",
+          "exchange, product, and option type are in the frozen universe",
+          "snapshot and decision intent are immutable and hash-bound",
+          "the artifact pair was admitted by its deadline and the global pre-ranking conflict pass retained exactly one conflict-free stable key",
+          "the selected contract, strike, exact expiry, option close, underlying futures close, and timestamps were available at the finalized decision-day close",
+          "Black-76 implied volatility with r=0.02 and option_type C is finite",
+          "at least 40 finite same-product signal-day IV observations exist strictly before the current event",
+          "the seventeenth subsequent completed daily option close exists by the outcome cutoff"
+        ],
+        "iv_rank": {
+          "implementation": "engine.options.iv_regime.causal_iv_rank",
+          "iv_inversion": "engine.options.black76.implied_vol",
+          "risk_free_rate": 0.02,
+          "time_to_expiry": {
+            "day_count_convention": "ACT/365F",
+            "expiry_timestamp_rule": "15:00:00 Asia/Shanghai on the exact recorded expiry date",
+            "decision_timestamp_rule": "timestamp of the observed decision-time option close",
+            "formula": "max((expiry_timestamp_utc - decision_time_option_close_timestamp_utc).total_seconds() / 31536000, 0)"
+          },
+          "warmup": 40,
+          "history_scope": "same_product_prior_rankable_signals_only",
+          "history_initialization": "empty_at_2026-07-27T00:00:00+08:00",
+          "history_update_eligibility": "Append every unique in-window same-product decision with a finite decision-time IV after ranking it, including warmup events and events later excluded for a missing 17-bar outcome.",
+          "same_timestamp_batch_rule": "Rank every same-product event sharing a decision timestamp against history from strictly earlier timestamps, then append the batch in deduplication-key bytewise order.",
+          "tie_rule": "strictly_lower_prior_iv_count_divided_by_all_finite_prior_ivs",
+          "current_event_in_history": false,
+          "rank_cutoff": 0.66,
+          "kept_cell": "rank<=0.66",
+          "rejected_cell": "rank>0.66",
+          "warmup_fallback": "none"
+        },
+        "outcome": {
+          "name": "seventeen_completed_daily_bar_premium_close_return",
+          "formula": "option_close_on_17th_subsequent_completed_daily_bar / decision_time_option_close - 1",
+          "stop": "none",
+          "profit_target": "none",
+          "position_sizing": "none",
+          "cost_model": "none_descriptive_response_only",
+          "underlying_return_as_option_outcome": false,
+          "execution_claim": false
+        },
+        "sample_gate": {
+          "minimum_effective_events_across_three_windows": 60,
+          "minimum_effective_events_per_window": 20,
+          "minimum_effective_events_per_rank_cell_across_three_windows": 30,
+          "minimum_effective_events_per_rank_cell_per_window": 10,
+          "minimum_effective_events_per_product_rank_cell_across_three_windows": 15,
+          "minimum_effective_events_per_product_rank_cell_per_window": 5,
+          "stage_rule": "Apply every per-window threshold independently before advancing to the next sealed window.",
+          "unmet_action": "insufficient_sample_no_strategy_inference"
+        },
+        "analysis": {
+          "primary_estimand": {
+            "name": "equal_weighted_within_product_rank_cell_mean_return_difference",
+            "product_contrasts": {
+              "ag": "mean_return_ag_rank_lte_0_66_minus_mean_return_ag_rank_gt_0_66",
+              "au": "mean_return_au_rank_lte_0_66_minus_mean_return_au_rank_gt_0_66"
+            },
+            "aggregation": "arithmetic_mean_of_ag_and_au_product_contrasts",
+            "product_weights": {
+              "ag": 0.5,
+              "au": 0.5
+            },
+            "rank_assignments": "frozen_from_original_enrollment_and_not_recomputed_during_resampling"
+          },
+          "sequential_evaluation": {
+            "window_order": [
+              "P1-W1",
+              "P1-W2",
+              "P1-W3"
+            ],
+            "training_gate": "Evaluate P1-W1 only. Advance without parameter changes only when its sample and valid-replicate gates pass and its 95% interval lower bound is strictly greater than zero; otherwise terminate as falsified when the upper bound is less than or equal to zero, or inconclusive when the gate fails or the interval strictly straddles zero.",
+            "validation_gate": "Keep P1-W2 sealed until an immutable hash-bound P1-W1 result manifest records a passing training gate. Evaluate P1-W2 once under the identical design and advance only under the identical positive-lower-bound rule; otherwise terminate and keep P1-W3 sealed.",
+            "single_use_holdout": "Keep P1-W3 sealed until immutable hash-bound P1-W1 and P1-W2 result manifests both record passing gates. Evaluate P1-W3 exactly once under the identical design; its interval and sample gate alone determine the final supported, falsified, or inconclusive classification.",
+            "window_pooling": "forbidden",
+            "adaptation_between_windows": "forbidden",
+            "result_manifest_binding": "Each stage manifest binds the registry SHA-256, canonical design SHA-256, admitted enrollment-ledger hashes, source artifact hashes, stage id, bootstrap algorithm version, seed, and result hash before the next stage is unsealed."
+          },
+          "secondary_diagnostics": [
+            "ag and au within-product rank-cell mean-return contrasts",
+            "median return by rank cell",
+            "positive-return rate by rank cell",
+            "event counts and exclusions by product and window"
+          ],
+          "bootstrap": {
+            "algorithm_version": "stratified_circular_moving_block_percentile_v1",
+            "calendar": "Every completed SHFE trading date in the one currently evaluated frozen window, including dates with zero eligible events.",
+            "application": "Run separately for P1-W1, then P1-W2 only if unlocked, then P1-W3 only if unlocked; never combine observations or replicate estimates across windows.",
+            "date_bin": "All eligible ag and au events sharing a decision date move together.",
+            "block_length_completed_trading_days": 17,
+            "block_start_rule": "Sample start indices uniformly with replacement from all completed trading dates in the window; each block wraps within that same window.",
+            "sample_length_rule": "Concatenate blocks until the original window calendar length is reached and truncate excess dates.",
+            "rank_recomputation": false,
+            "replicate_estimand": "Recompute the ag and au within-product rank-cell mean differences and their fixed 0.5/0.5 arithmetic mean.",
+            "invalid_replicate_rule": "Discard a replicate if any ag or au rank cell is empty; draw a replacement until 2000 valid replicates or 20000 total attempts.",
+            "insufficient_valid_replicates_action": "If fewer than 2000 valid replicates are produced in 20000 attempts, classify the result inconclusive.",
+            "interval": "Two-sided percentile interval over sorted valid replicate estimates with linear interpolation at p*(n-1) for p=0.025 and p=0.975.",
+            "replicates": 2000,
+            "maximum_attempts": 20000,
+            "seed": 42001,
+            "confidence_level": 0.95
+          },
+          "classification": {
+            "evaluation_order": [
+              "current_stage_sample_and_valid_replicate_gate",
+              "interval_upper_bound_lte_zero",
+              "interval_lower_bound_gt_zero",
+              "interval_strictly_straddles_zero"
+            ],
+            "supported": "P1-W1 and P1-W2 passed without adaptation, and the single-use P1-W3 sample gate passes with its 95% interval lower bound greater than zero",
+            "falsified": "the current stage sample gate passes and its 95% interval upper bound is less than or equal to zero; later stages remain sealed",
+            "inconclusive": "the current stage sample gate fails, fewer than 2000 valid replicates are produced, or its 95% interval lower bound is less than or equal to zero and its upper bound is strictly greater than zero; later stages remain sealed"
+          }
+        },
+        "prohibited_adaptations": [
+          "change the 40-observation warmup",
+          "change the 0.66 rank cutoff or rank tie rule",
+          "change stable event deduplication, conflict exclusion, or provenance bindings",
+          "change admission deadlines, sealed-ledger membership, pre-ranking conflict handling, or late-revision treatment",
+          "change the ACT/365F year fraction or expiry timestamp convention",
+          "change the products, side, training/validation/holdout window roles, dates, gates, or 17-bar horizon",
+          "change within-product contrasts, fixed 0.5/0.5 product weights, or the 17-day moving-block bootstrap",
+          "pool staged windows, inspect a sealed window early, repeat the holdout, or adapt between windows",
+          "replace observed decision-time prices or future closes with modeled prices",
+          "reselect events or option legs using outcomes",
+          "add stop, target, sizing, PnL, or execution semantics",
+          "inspect a subgroup and promote it as the primary result",
+          "reinterpret M6-EXP-013 labels, mappings, horizons, thresholds, or corpus"
+        ]
+      },
+      "material_distinction_from_m6_exp_013": [
+        "M6-EXP-013 tested a six-label structural-direction mapping; P1-EXP-001 tests decision-time implied-volatility cost rank and uses no structural-label mapping.",
+        "M6-EXP-013 used a fixed retrospective eight-series daily corpus split into training and holdout; P1-EXP-001 enrolls every eligible immutable decision intent into calendar-fixed prospective training, validation, and single-use holdout windows.",
+        "M6-EXP-013 screened 1, 3, and 5-bar directional responses; P1-EXP-001 has one frozen 17-bar premium-close response and no horizon search.",
+        "M6-EXP-013 produced an empty candidate set and remains rejected; P1-EXP-001 neither relaxes nor reuses that candidate gate."
+      ]
+    }
+  },
+  "amendment_policy": {
+    "v1_is_immutable_after_any_selected_experiment_enrollment_or_outcome_inspection": true,
+    "correction_before_enrollment": "Create a new registry version and a new freeze lock; do not edit v1 in place.",
+    "change_after_enrollment_or_outcome_inspection": "Invalidate P1-EXP-001 and register a new experiment id under a new registry version.",
+    "result_binding": "Any future result manifest must record the exact registry file SHA-256 and selected-experiment canonical-design SHA-256 from the committed freeze lock."
+  }
+}

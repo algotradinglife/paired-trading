@@ -1,0 +1,338 @@
+{
+  "schema_version": "pa_feitian_m6_historical_backtest_data_gate_contract_v1",
+  "contract_id": "pa_feitian_m6_historical_backtest_data_gate_2026_07_30",
+  "issue_number": 50,
+  "audit_as_of_local_date": "2026-07-30",
+  "timezone": "Asia/Shanghai",
+  "purpose": "Define a deterministic allow/deny data gate for formal historical replay without importing prospective append-only requirements into retrospective research.",
+  "bound_evidence": [
+    {
+      "alias": "candidate_interface_audit",
+      "path": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+      "schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+      "sha256": "sha256:becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795"
+    },
+    {
+      "alias": "candidate_capability_inventory",
+      "path": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_capability_inventory_v1.json",
+      "schema_version": "pa_feitian_phase1_data_capability_inventory_v1",
+      "sha256": "sha256:7f3be73b04c797e849daf828e0d38783b60830c0dce0dd100324f7fac822afcb"
+    },
+    {
+      "alias": "exploratory_swing_views",
+      "path": "doc/repro/pa-feitian-m6-exploratory-swing-views-2026-07-30/exploratory_swing_views_v1.json",
+      "schema_version": "pa_feitian_m6_exploratory_swing_views_v1",
+      "sha256": "sha256:e8e1e3ea2f6c6fc158055feda9a7662da6a1a16e695ea3693a1663c8cd0e1809"
+    },
+    {
+      "alias": "epistemic_replay_contract",
+      "path": "docs/research/pa-feitian-m6-epistemic-replay-contract-v1.json",
+      "schema_version": "pa_feitian_m6_epistemic_replay_contract_v1",
+      "sha256": "sha256:f6f3daa7a1dae99bc2e69a5a3471802173fad1f1333c814ec1152802592a0290"
+    },
+    {
+      "alias": "retrospective_replay_evidence",
+      "path": "doc/repro/pa-feitian-m6-retrospective-replay-2026-07-12/retrospective_replay_evidence_v1.json",
+      "schema_version": "pa_feitian_m6_retrospective_replay_evidence_v1",
+      "sha256": "sha256:eaeb6c3fffa93115c4fc7a0f8b86abbabed5e776bdd8f3c139826150f51a12fb"
+    },
+    {
+      "alias": "hypothesis_registry_v2",
+      "path": "docs/research/pa-feitian-phase1-hypothesis-registry-v2.json",
+      "schema_version": "pa_feitian_phase1_hypothesis_registry_v2",
+      "sha256": "sha256:f2b77c11317c1f98fe6d4c95f47b2213243322f2f3d4ed6dd1ccbf92d972afa0"
+    },
+    {
+      "alias": "hypothesis_registry_v2_lock",
+      "path": "docs/research/pa-feitian-phase1-hypothesis-registry-v2.lock.json",
+      "schema_version": "pa_feitian_phase1_hypothesis_registry_lock_v2",
+      "sha256": "sha256:d7e36900efb91807a0960922c5cdbc5241ec4ca1988eb477ac6bc5a32c940718"
+    }
+  ],
+  "candidate_universe": [
+    {
+      "instrument_family": "SHFE.au",
+      "role": "continuity_candidate"
+    },
+    {
+      "instrument_family": "SHFE.ag",
+      "role": "continuity_candidate"
+    },
+    {
+      "instrument_family": "CZCE.TA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "instrument_family": "CZCE.MA",
+      "role": "mainstream_candidate"
+    },
+    {
+      "instrument_family": "SHFE.cu",
+      "role": "non_czce_control"
+    },
+    {
+      "instrument_family": "DCE.i",
+      "role": "non_czce_control"
+    }
+  ],
+  "mode_policy": {
+    "historical_replay": {
+      "append_only_acquisition_manifest_required": false,
+      "finalized_immutable_snapshot_required": true,
+      "independently_approved_native_source_version_required": true,
+      "exact_filtered_content_binding_required": true,
+      "decision_timestamp_cutoff_required": true,
+      "coverage_freshness_basis": "maximum bound observation relative to the declared decision cutoff",
+      "point_in_time_vendor_observability_claim_allowed": false,
+      "status_when_all_requirements_pass": "allow_with_finalized_vintage_limitations"
+    },
+    "prospective_shadow": {
+      "append_only_acquisition_manifest_required": true,
+      "finalized_immutable_snapshot_required": true,
+      "exact_filtered_content_binding_required": true,
+      "decision_timestamp_cutoff_required": true,
+      "current_freshness_required": true,
+      "point_in_time_vendor_observability_required": true,
+      "status_when_all_requirements_pass": "allow_shadow_data_input_only"
+    },
+    "live": {
+      "authorized_by_this_gate": false,
+      "status": "deny_execution_outside_data_gate"
+    }
+  },
+  "binding_policy": {
+    "canonicalization_id": "pa_feitian_filtered_json_rows_v1",
+    "content_scope": "all fields and values of every row retained after the decision cutoff, canonically normalized and bytewise sorted",
+    "manifest_membership_hash_is_sufficient": false,
+    "source_snapshot_binding_kind": "immutable_snapshot_or_acquisition_version",
+    "filtered_content_binding_kind": "exact_causally_filtered_row_content",
+    "source_snapshot_sha256_required": true,
+    "filtered_content_sha256_required": true,
+    "row_count_required": true,
+    "filter_before_derivation": true,
+    "future_rows_in_bound_content": 0,
+    "maximum_coverage_lag_days": 7,
+    "timestamp_semantics": "exchange_observation_time_with_declared_timezone",
+    "source_timezone": "Asia/Shanghai",
+    "approved_data_gate_sha256_kind": "canonical_json_sha256",
+    "source_snapshot_schema_version": "pa_feitian_causal_underlying_snapshot_v1",
+    "source_snapshot_scope_fields": [
+      "schema_version",
+      "instrument_family",
+      "cadence",
+      "records"
+    ],
+    "approved_native_source_version_manifest_sha256": null,
+    "native_source_version_manifest_schema_version": "pa_feitian_m6_native_source_version_manifest_v1",
+    "complete_prefix_extraction": "all_approved_native_rows_from_history_start_through_decision_cutoff",
+    "calendar_versions": {
+      "XSGE": "exchange_calendars==4.13.2+XSGE+cn_night_session_v1",
+      "XZCE": "exchange_calendars==4.13.2+XZCE+cn_night_session_v1",
+      "XDCE": "exchange_calendars==4.13.2+XDCE+cn_night_session_v1"
+    },
+    "session_slot_policy": "frozen_exchange_sessions_and_family_night_segments",
+    "causal_support_artifact_schemas": {
+      "native_source_version_manifest": "pa_feitian_m6_native_source_version_manifest_v1",
+      "exchange_session_calendar": "pa_feitian_exchange_session_calendar_binding_v2",
+      "causal_roll_ledger": "pa_feitian_causal_roll_ledger_binding_v1"
+    },
+    "duplicate_identity": "composite_identity_key_fields_not_timestamp_alone",
+    "required_underlying_fields": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "open_interest"
+    ]
+  },
+  "fail_closed_policy": {
+    "null_timestamp_rows": 0,
+    "duplicate_timestamp_rows": 0,
+    "ohlc_violation_rows": 0,
+    "nonfinite_or_negative_activity_rows": 0,
+    "post_cutoff_rows_in_bound_content": 0,
+    "close_timestamp": "verified",
+    "exchange_session_calendar_binding": "verified",
+    "causal_roll_ledger_binding": "verified",
+    "option_inputs": "forbidden",
+    "synthesis_of_iv_bid_ask_or_delta": false,
+    "outcome_access_or_selection": false,
+    "source_refresh_or_mutation": false
+  },
+  "capabilities": [
+    "underlying_ohlcv_oi",
+    "exact_decision_close",
+    "exchange_session_calendar",
+    "causal_roll_ledger"
+  ],
+  "p1_exp_002_input_policy": {
+    "experiment_id": "P1-EXP-002",
+    "registry_sha256": "sha256:f2b77c11317c1f98fe6d4c95f47b2213243322f2f3d4ed6dd1ccbf92d972afa0",
+    "registry_lock_sha256": "sha256:d7e36900efb91807a0960922c5cdbc5241ec4ca1988eb477ac6bc5a32c940718",
+    "canonical_design_sha256": "sha256:4d3026e5eb398752c3c8f207cb5e21d1b2706e7fb68d40ddf31b99132486cb65",
+    "allowed_mode": "historical_replay",
+    "request_scope": "one_decision_timestamp",
+    "formal_run_coverage": "exactly_one_allow_decision_per_materialized_decision_timestamp",
+    "required_families": [
+      "SHFE.au",
+      "SHFE.ag",
+      "CZCE.TA",
+      "CZCE.MA",
+      "SHFE.cu",
+      "DCE.i"
+    ],
+    "required_underlying_cadences": [
+      "daily",
+      "hour",
+      "min15"
+    ],
+    "required_binding_matrix": "exactly_one_underlying_binding_per_family_and_required_cadence",
+    "decision_local_time": "15:00:00",
+    "history_start_inclusive": "2021-06-01T00:00:00+08:00",
+    "option_inputs_allowed": false,
+    "min5_input_allowed": false,
+    "unavailable_option_capabilities": {
+      "bid_ask": "unavailable_not_synthesized",
+      "contract_delta": "unavailable_not_synthesized",
+      "exact_exchange_expiry": "unavailable_not_consumed",
+      "iv_history": "unavailable_not_synthesized",
+      "option_premium": "unavailable_not_consumed"
+    }
+  },
+  "request_schema": {
+    "schema_version": "pa_feitian_m6_historical_backtest_gate_request_v1",
+    "exact_top_level_fields": [
+      "schema_version",
+      "request_id",
+      "experiment_id",
+      "mode",
+      "required_capabilities",
+      "frozen_design",
+      "causal_support",
+      "input_bindings",
+      "controls",
+      "operational_evidence"
+    ],
+    "exact_binding_fields": [
+      "binding_id",
+      "instrument_family",
+      "interface",
+      "cadence",
+      "source_snapshot_sha256",
+      "source_snapshot_binding_kind",
+      "filtered_content_sha256",
+      "filtered_content_binding_kind",
+      "canonicalization_id",
+      "identity_key_fields",
+      "row_count",
+      "decision_cutoff_utc",
+      "required_through_utc",
+      "minimum_observation_utc",
+      "maximum_observation_utc",
+      "timestamp_semantics",
+      "source_timezone",
+      "null_timestamp_rows",
+      "duplicate_timestamp_rows",
+      "ohlc_violation_rows",
+      "nonfinite_or_negative_activity_rows",
+      "post_cutoff_rows_in_bound_content",
+      "close_timestamp_status",
+      "raw_rows_published"
+    ],
+    "exact_frozen_design_fields": [
+      "registry_sha256",
+      "registry_lock_sha256",
+      "canonical_design_sha256"
+    ],
+    "exact_causal_support_fields": [
+      "native_source_version_manifest_sha256",
+      "exchange_session_calendar_sha256",
+      "causal_roll_ledger_sha256"
+    ],
+    "exact_control_fields": [
+      "filter_before_derivation",
+      "outcomes_accessed",
+      "instrument_selection_uses_outcomes",
+      "option_inputs_accessed",
+      "proxy_or_imputation",
+      "bid_ask_synthesized",
+      "delta_synthesized",
+      "iv_synthesized",
+      "source_refresh_performed"
+    ],
+    "exact_operational_evidence_fields": [
+      "append_only_acquisition_manifest_sha256",
+      "point_in_time_observability_verified",
+      "current_freshness_verified",
+      "execution_authorized"
+    ]
+  },
+  "decision_schema": {
+    "schema_version": "pa_feitian_m6_historical_backtest_gate_decision_v1",
+    "exact_top_level_fields": [
+      "schema_version",
+      "request_id",
+      "request_sha256",
+      "experiment_id",
+      "mode",
+      "decision",
+      "reason_codes",
+      "binding_count",
+      "evaluated_bindings",
+      "required_capabilities",
+      "manifest_binding",
+      "claim_boundary"
+    ],
+    "exact_evaluated_binding_fields": [
+      "binding_id",
+      "instrument_family",
+      "interface",
+      "cadence",
+      "source_snapshot_sha256",
+      "filtered_content_sha256",
+      "row_count",
+      "decision_cutoff_utc",
+      "maximum_observation_utc",
+      "coverage_lag_days",
+      "freshness_status"
+    ],
+    "exact_manifest_binding_fields": [
+      "registry_sha256",
+      "registry_lock_sha256",
+      "canonical_design_sha256",
+      "approved_data_gate_sha256",
+      "filtered_input_digest",
+      "native_source_version_manifest_sha256",
+      "exchange_session_calendar_sha256",
+      "causal_roll_ledger_sha256"
+    ],
+    "exact_claim_boundary_fields": [
+      "finalized_vintage_historical_replay",
+      "prospective_shadow_data_input",
+      "point_in_time_vendor_observability_claim",
+      "strategy_outcomes_authorized",
+      "issue_51_unblocked",
+      "execution_authorized"
+    ]
+  },
+  "public_safety": {
+    "raw_rows": false,
+    "raw_ohlc_values": false,
+    "source_filenames": false,
+    "raw_contract_identifiers": false,
+    "local_paths": false,
+    "credentials": false,
+    "strategy_outcomes": false,
+    "profitability_metrics": false
+  },
+  "research_boundary": {
+    "p1_exp_002_implementation_may_consume_gate": true,
+    "p1_exp_002_outcome_work_authorized": false,
+    "issue_51_unblocked": false,
+    "registry_mutation_authorized": false,
+    "causal_roll_rule_recomputation_authorized": false,
+    "causal_roll_semantic_validation_owner": "issue_51_strategy_implementation",
+    "execution_authorized": false
+  }
+}

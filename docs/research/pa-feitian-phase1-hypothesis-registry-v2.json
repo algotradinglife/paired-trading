@@ -1,0 +1,505 @@
+{
+  "schema_version": "pa_feitian_phase1_hypothesis_registry_v2",
+  "version": 2,
+  "registry_id": "pa_feitian_phase1_2026_07_30",
+  "issue_number": 49,
+  "status": "frozen_before_p1_exp_002_outcome_access",
+  "frozen_at_utc": "2026-07-30T13:37:34Z",
+  "baseline": {
+    "commit": "2fc557bf55984b83781c9ebe76e558e7896b8296",
+    "workspace": "PT-Strategy",
+    "parent_bookmark": "strategy/active",
+    "pull_request_base": "develop",
+    "parent_registry": "docs/research/pa-feitian-phase1-hypothesis-registry-v1.json"
+  },
+  "scope": {
+    "phase": "phase_1",
+    "purpose": "Freeze exactly one definition-mature historical experiment after P1-EXP-001 stopped as data-blocked.",
+    "allowed": [
+      "pre-outcome registry design",
+      "source and provenance binding",
+      "future historical underlying-only evaluation under the frozen design",
+      "negative, inconclusive, and insufficient-sample completion"
+    ],
+    "forbidden_in_this_issue": [
+      "market outcome access",
+      "parameter or horizon search",
+      "instrument or family profitability ranking",
+      "option contract selection",
+      "option-premium, PnL, win-rate, or EV calculation",
+      "M7 or M8 work",
+      "live trading or order execution",
+      "production policy mutation"
+    ]
+  },
+  "source_catalog": [
+    {
+      "source_id": "SRC-P1-REGISTRY-V1",
+      "path": "docs/research/pa-feitian-phase1-hypothesis-registry-v1.json",
+      "sha256": "sha256:8658189af71f58e665d09af6c84ee49558b41ff33b79d4aafbcc0479c5eaab57",
+      "role": "Binds the immutable P1-EXP-001 design that this revision does not edit or reinterpret."
+    },
+    {
+      "source_id": "SRC-P1-REGISTRY-V1-LOCK",
+      "path": "docs/research/pa-feitian-phase1-hypothesis-registry-v1.lock.json",
+      "sha256": "sha256:ae7f2975ef44b53f56ee28a9f6b18ca3906c828a42d30ca90cd90c6968452ee7",
+      "role": "Binds the P1-EXP-001 registry and canonical-design anchors."
+    },
+    {
+      "source_id": "SRC-P1-CAPABILITY-CONTRACT",
+      "path": "docs/research/pa-feitian-phase1-data-capability-contract-v1.json",
+      "sha256": "sha256:92a4694497228103542e23718e87018f664247b9133e6610980c2f4befe30bf4",
+      "role": "Freezes the six-family order, roles, audit surface, and prohibition on ranking."
+    },
+    {
+      "source_id": "SRC-P1-CAPABILITY-INVENTORY",
+      "path": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_capability_inventory_v1.json",
+      "sha256": "sha256:7f3be73b04c797e849daf828e0d38783b60830c0dce0dd100324f7fac822afcb",
+      "role": "Establishes broad underlying interface presence and the option, IV, freshness, and observability limitations."
+    },
+    {
+      "source_id": "SRC-P1-CANDIDATE-INTERFACE",
+      "path": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+      "sha256": "sha256:becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+      "role": "Binds the public-safe aggregate underlying coverage and quality evidence for all six families."
+    },
+    {
+      "source_id": "SRC-P1-SWING-RESEARCH",
+      "path": "doc/repro/pa-feitian-phase1-swing-regime-exploration-2026-07-30/README.md",
+      "sha256": "sha256:03c81bd957ea2e16eb49195271790166fc5345a44c639031054625b1c415e351",
+      "role": "Defines SR-01 and records SR-02 as unavailable for reuse and SR-03 as too subjective."
+    },
+    {
+      "source_id": "SRC-M6-SWING-VIEWS-CONTRACT",
+      "path": "docs/research/pa-feitian-m6-exploratory-swing-views-contract-v1.json",
+      "sha256": "sha256:ab61a0ac1418f07eba0860272e2205ea0ed8cfac5f1a67e9d5dbab4b91bfaa5c",
+      "role": "Binds future-row invariance, public-safety, deterministic regeneration, and outcome-free exploration constraints."
+    },
+    {
+      "source_id": "SRC-M6-SWING-VIEWS",
+      "path": "doc/repro/pa-feitian-m6-exploratory-swing-views-2026-07-30/exploratory_swing_views_v1.json",
+      "sha256": "sha256:e8e1e3ea2f6c6fc158055feda9a7662da6a1a16e695ea3693a1663c8cd0e1809",
+      "role": "Establishes six-family descriptive coverage without selecting or ranking a family."
+    },
+    {
+      "source_id": "SRC-M6-UNDERLYING-CONTRACT",
+      "path": "docs/research/pa-feitian-m6-underlying-corpus-contract-v1.json",
+      "sha256": "sha256:e35d4567792a386270989b47af31d4e2e23d76b632eff92cabc6188f8ba37c34",
+      "role": "Supplies the causal roll, aggregation, exact-close, breakout, and EMA conventions reused by SR-01."
+    },
+    {
+      "source_id": "SRC-M6-EXP-013-NEGATIVE",
+      "path": "doc/repro/pa-feitian-m6-premium-k-response-2026-07-13/README.md",
+      "sha256": "sha256:87092b0a1cc349e70270287ef57d36e0fd3745ea7b29abcb4bc4fe687782109d",
+      "role": "Binds the empty M6-EXP-013 candidate set and protects it from relabeling or retuning."
+    }
+  ],
+  "prior_registry_decision": {
+    "experiment_id": "P1-EXP-001",
+    "terminal_status": "data_blocked",
+    "registry_mutation": "forbidden",
+    "reason": "Zero frozen-universe families satisfied the causal option and IV capability gate.",
+    "carry_forward": "P1-EXP-001 remains immutable and is not pooled with, relabeled as, or used as a tuning surface for P1-EXP-002."
+  },
+  "candidate_decisions": [
+    {
+      "candidate_id": "SR-01",
+      "source_status": "derived_proxy",
+      "decision": "selected",
+      "reason": "It is the only candidate with a complete causal event definition and it can be tested using underlying inputs without option or IV synthesis."
+    },
+    {
+      "candidate_id": "SR-02",
+      "source_status": "proxy",
+      "decision": "rejected_for_reuse",
+      "reason": "Its directional mapping belongs to the frozen negative M6-EXP-013 family."
+    },
+    {
+      "candidate_id": "SR-03",
+      "source_status": "too_subjective",
+      "decision": "excluded",
+      "reason": "B boundaries, DD-line anchors, tolerances, confirmation, and invalidation remain discretionary."
+    }
+  ],
+  "selection": {
+    "selected_candidate_id": "SR-01",
+    "selected_experiment": {
+      "experiment_id": "P1-EXP-002",
+      "hypothesis_id": "P1-HYP-SR-01",
+      "status": "frozen_before_event_materialization_and_outcome_access",
+      "outcome_inspection_at_freeze": "not_started",
+      "research_label": "historical_underlying_directional_non_authentic_non_executable",
+      "statement": "Across the fixed six-family universe, a completed daily strict-prior-20 breakout whose direction agrees with causal EMA5 versus EMA20 alignment on D, W, 60-minute, and 15-minute views has positive five-completed-daily-bar signal-signed underlying close return.",
+      "selection_reasoning_fixed_pre_outcome": [
+        "The candidate-interface audit establishes underlying OHLCV/OI presence at every required cadence for all six predeclared families.",
+        "No family is selected or excluded using excursion, activity, option-path change, overlay availability, or outcome performance.",
+        "The selected lane does not require stale or quality-invalid option overlays, exact option expiry, delta, bid/ask, or causal IV history.",
+        "The event clauses reuse committed causal roll and aggregation conventions and leave no chart interpretation to the implementer.",
+        "One fixed five-session horizon represents one exchange week and is not searched or combined with another horizon."
+      ],
+      "design": {
+        "timezone": "Asia/Shanghai",
+        "universe": [
+          {
+            "instrument_family": "SHFE.au",
+            "role": "continuity_candidate",
+            "fixed_weight": "1/6"
+          },
+          {
+            "instrument_family": "SHFE.ag",
+            "role": "continuity_candidate",
+            "fixed_weight": "1/6"
+          },
+          {
+            "instrument_family": "CZCE.TA",
+            "role": "mainstream_candidate",
+            "fixed_weight": "1/6"
+          },
+          {
+            "instrument_family": "CZCE.MA",
+            "role": "mainstream_candidate",
+            "fixed_weight": "1/6"
+          },
+          {
+            "instrument_family": "SHFE.cu",
+            "role": "non_czce_control",
+            "fixed_weight": "1/6"
+          },
+          {
+            "instrument_family": "DCE.i",
+            "role": "non_czce_control",
+            "fixed_weight": "1/6"
+          }
+        ],
+        "causal_roll_policy": {
+          "selection": "prior_session_OI_when_all_active_positive_else_volume",
+          "active_contract_eligibility": "A contract is eligible on a session only when its prior-session row exists, is causally available before the session decision, has finite nonnegative open_interest and volume, and passes timestamp, duplicate, and OHLC coherence checks.",
+          "candidate_enumeration": "Enumerate exactly the frozen family contract universe observed in the causally filtered prior-session snapshot; never infer candidates from posterior rows or embedded calendar annotations.",
+          "prior_session_requirements": "Require one and only one causally filtered prior-session row per candidate contract with finite nonnegative volume and finite open_interest; missing, duplicate, nonfinite, or incoherent rows make that candidate ineligible.",
+          "zero_and_missing_handling": "Zero or missing open_interest makes a contract ineligible for OI leadership; zero or missing volume makes it ineligible for volume leadership. If no eligible leader remains, preserve the incumbent only when its own causal row remains valid; otherwise emit no selected contract and abstain.",
+          "leader_rule": "If every active candidate has strictly positive open_interest, choose the maximum prior-session open_interest; otherwise choose the maximum prior-session volume among candidates with strictly positive finite volume.",
+          "tie_rule": "Resolve equal leadership values by bytewise ascending contract identifier.",
+          "confirmation_sessions": 3,
+          "confirmation_rule": "The proposed leader must win on three consecutive exchange trading sessions; a missing session, ineligible proposed leader, or different leader resets the streak to zero.",
+          "streak_reset": "Reset confirmation to zero whenever the proposed leader changes, any required prior-session row is invalid, or the exchange session is absent from the bound calendar.",
+          "effective_session": "next_session_after_third_confirmation",
+          "incumbent_expiry": "An incumbent expires immediately when its next causal prior-session row is missing, invalid, or outside the frozen candidate universe; no forced roll or posterior repair is permitted.",
+          "date_semantics": "exchange_trading_date",
+          "embedded_calendar_date_annotations_consumed": false,
+          "selected_contract_fixed_through_outcome": true,
+          "initial_state": "no incumbent contract at history_start_inclusive; the first selection becomes effective only on the session after one leader satisfies all three confirmation sessions"
+        },
+        "history_initialization": {
+          "history_start_inclusive": "2021-06-01T00:00:00+08:00",
+          "rows_before_history_start": "forbidden",
+          "roll_state": "empty_no_incumbent",
+          "indicator_history_membership": "For every frozen-family contract and required level, use all causally valid contract-local completed bars at or after history_start_inclusive, regardless of whether that contract is selected at the bar timestamp; never splice bars from different contracts into one indicator series.",
+          "roll_away_behavior": "Retain each contract's causal D/W/60min/15min indicator state while it is not selected; do not update it with another contract's bars.",
+          "roll_back_behavior": "When a contract becomes selected again, resume its retained contract-local state through the current completed bar; no reset or reuse of another contract's state is permitted.",
+          "ema_rule": "For each selected contract and level independently, initialize EMA5 and EMA20 to the first finite completed close at or after history_start_inclusive, then apply adjust=false recurrences alpha=2/(span+1) in completed-bar order.",
+          "minimum_prior_completed_bars_per_level_before_event": 20,
+          "missing_or_insufficient_history_action": "abstain_event"
+        },
+        "decision_event": {
+          "decision_cadence": "every exchange trading date in the active staged window",
+          "decision_local_time": "15:00:00",
+          "exact_close_required": true,
+          "source_timestamp_cutoff": "timestamp <= decision timestamp before session mapping or aggregation",
+          "levels_in_fixed_order": [
+            "D",
+            "W",
+            "60min",
+            "15min"
+          ],
+          "daily_aggregation": "OHLCV/OI over exchange trading date; timestamp is final included period end",
+          "weekly_aggregation": "OHLCV/OI over ISO year/week of causal D bars, including the decision-time partial week",
+          "hourly_aggregation": "OHLCV/OI over consecutive 60-minute trading-session offsets anchored at night-session open",
+          "min15_aggregation": "OHLCV/OI over consecutive 15-minute trading-session offsets anchored at night-session open",
+          "ohlcv_rules": {
+            "open": "first",
+            "high": "maximum",
+            "low": "minimum",
+            "close": "last",
+            "volume": "sum",
+            "open_interest": "last"
+          },
+          "prior_20_high": "maximum high of the 20 completed D bars strictly before the current D bar",
+          "prior_20_low": "minimum low of the 20 completed D bars strictly before the current D bar",
+          "ema_5": "causal close EWM with span 5 and adjust=false through the current completed bar",
+          "ema_20": "causal close EWM with span 20 and adjust=false through the current completed bar",
+          "up_event": "D close > strict-prior-20 D high and EMA5 > EMA20 on D, W, 60min, and 15min",
+          "down_event": "D close < strict-prior-20 D low and EMA5 < EMA20 on D, W, 60min, and 15min",
+          "otherwise": "abstain",
+          "event_key": [
+            "instrument_family",
+            "selected_contract_identifier",
+            "exchange_trading_date"
+          ],
+          "duplicate_rule": "Retain one event only when every copy has identical filtered-input binding and causal fields; otherwise exclude every copy of the key.",
+          "abstain_conditions": [
+            "missing exact scheduled close",
+            "fewer than 20 completed prior bars on any required level",
+            "missing or nonfinite OHLCV/OI input used by roll, aggregation, breakout, or EMA",
+            "OHLC coherence violation in any used row",
+            "causal roll ambiguity or unavailable prior-session selection fields",
+            "more than one event direction or disagreement on any required EMA alignment",
+            "filtered input, acquisition version, calendar, session, or roll-ledger binding unavailable"
+          ]
+        },
+        "causal_inputs": [
+          {
+            "name": "exact causally filtered futures input snapshot",
+            "required_binding": "content SHA-256 or immutable acquisition-version identifier plus filtered-row digest",
+            "posterior_fields_allowed": false,
+            "missing_action": "block_run_before_event_materialization"
+          },
+          {
+            "name": "contract-local futures OHLCV/OI with source timestamps",
+            "required_cadences": [
+              "daily",
+              "hour",
+              "min15"
+            ],
+            "resampling_substitution": false,
+            "missing_action": "abstain_event"
+          },
+          {
+            "name": "causal roll ledger and exchange session calendar",
+            "availability": "bound before each decision timestamp",
+            "missing_action": "abstain_event"
+          }
+        ],
+        "pre_outcome_materialization": {
+          "field_projection": "Read only source identity, timestamps, OHLCV/OI, calendar, session, and causal roll fields needed by event construction; forward closes are inaccessible to this pass.",
+          "all_stage_membership_rule": "Materialize and hash the causal event, abstain, conflict, decision-time exclusion, family, direction, selected-contract, and decision-date fields for all three stages before reading or joining any forward close. P1-EXP-002-EX-03 is not a causal-membership exclusion and is applied only after its stage unlocks.",
+          "manifest_bindings": [
+            "registry_sha256",
+            "canonical_design_sha256",
+            "approved_data_gate_sha256",
+            "filtered_input_digest",
+            "source_commit",
+            "builder_version",
+            "arguments",
+            "stage_membership_hashes"
+          ],
+          "outcome_join_rule": "After the all-stage membership manifest is immutable, the outcome loader may join only the sealed event keys for the currently unlocked stage. It records P1-EXP-002-EX-03 outcome availability without changing causal event membership, then computes values only for the remaining effective events.",
+          "chronology_anchor_requirement": "Use the protected merged Git commit containing the exact registry and lock as the external anchor. The first-access attestation must record that commit, prove it is an ancestor of the builder source commit, and predate all event materialization and forward-outcome reads.",
+          "membership_recomputation_after_outcome_access": "forbidden",
+          "missing_action": "block_outcome_access"
+        },
+        "exclusions": [
+          {
+            "exclusion_id": "P1-EXP-002-EX-01",
+            "rule": "Exclude every event that meets an abstain condition; do not proxy, fill, switch family, or relax a clause.",
+            "reason": "SR-01 is conjunctive and fail-closed."
+          },
+          {
+            "exclusion_id": "P1-EXP-002-EX-02",
+            "rule": "Exclude a conflicted duplicate key in every copy before reading forward closes.",
+            "reason": "One causal contract-local event contributes at most one observation."
+          },
+          {
+            "exclusion_id": "P1-EXP-002-EX-03",
+            "rule": "Exclude an event without a finite strictly positive decision close and fifth subsequent completed daily close for the same contract by the stage cutoff; do not roll, shorten, fill, or substitute the outcome horizon.",
+            "reason": "The outcome contract and horizon are fixed at the event.",
+            "application_phase": "after_current_stage_unlock_before_outcome_value_calculation",
+            "attrition_gate": "Apply the predeclared stage and family-direction EX-03 attrition limits before estimating; excess attrition is insufficient_sample.",
+            "causal_event_membership_changed": false
+          },
+          {
+            "exclusion_id": "P1-EXP-002-EX-04",
+            "rule": "Exclude any row failing timestamp, duplicate, finite-value, or OHLC-coherence checks before event construction.",
+            "reason": "Current-vintage historical data remains usable only under explicit quality gates."
+          },
+          {
+            "exclusion_id": "P1-EXP-002-EX-05",
+            "rule": "Do not read or join option premiums, expiry, delta, IV, bid/ask, strategy decisions, PnL, or execution fields.",
+            "reason": "This is an underlying-only definition test and unavailable inputs may not be synthesized."
+          }
+        ],
+        "staged_windows": [
+          {
+            "window_id": "P1-EXP-002-TRAIN",
+            "role": "training_gate",
+            "decision_date_start": "2021-11-01",
+            "decision_date_end": "2023-06-30",
+            "outcome_observation_cutoff": "2023-07-07"
+          },
+          {
+            "window_id": "P1-EXP-002-VALIDATE",
+            "role": "validation_gate",
+            "decision_date_start": "2023-07-08",
+            "decision_date_end": "2024-12-31",
+            "outcome_observation_cutoff": "2025-01-10"
+          },
+          {
+            "window_id": "P1-EXP-002-HOLDOUT",
+            "role": "single_use_holdout",
+            "decision_date_start": "2025-01-11",
+            "decision_date_end": "2026-04-30",
+            "outcome_observation_cutoff": "2026-05-15"
+          }
+        ],
+        "outcome": {
+          "name": "five_completed_daily_bar_signal_signed_underlying_close_return",
+          "formula": "direction_multiplier * (same_contract_close_on_5th_subsequent_completed_daily_bar / decision_close - 1), where up=+1 and down=-1",
+          "horizon_completed_daily_bars": 5,
+          "same_contract_required": true,
+          "roll_during_outcome": false,
+          "option_outcome": false,
+          "pnl_or_execution_semantics": false,
+          "availability_rule": "The estimand is conditional on same-contract fifth-close availability. Admit an effective observation only when the decision close and fifth subsequent completed daily close are finite and strictly positive; otherwise apply EX-03.",
+          "outcome_access_boundary": "Only the separate event-keyed same-contract T+5 availability/value join may read later rows, after causal membership is sealed; later decision construction may read only rows timestamp-truncated to that later decision.",
+          "posterior_fields_forbidden": ["forward_close", "outcome_value", "pnl", "ev", "win_rate"]
+        },
+        "sample_gate": {
+          "effective_event_definition": "A sealed causal event that remains after the current unlocked stage applies P1-EXP-002-EX-03 without changing causal membership.",
+          "minimum_effective_events_per_stage": 60,
+          "minimum_distinct_decision_dates_per_stage": 20,
+          "minimum_events_per_family_direction_cell_per_stage": 5,
+          "required_family_direction_cells": 12,
+          "maximum_single_decision_date_share_of_effective_events": 0.2,
+          "maximum_ex03_attrition_share_per_stage": 0.5,
+          "maximum_ex03_attrition_share_per_family_direction_cell": 0.5,
+          "ex03_attrition_measure": "For each stage and family-direction cell, EX-03 attrition is unavailable-T+5 events divided by all causal event-membership rows in that cell; if either maximum is exceeded, classify the stage as insufficient_sample.",
+          "ex03_excess_action": "insufficient_sample_no_strategy_inference_and_later_stages_remain_sealed",
+          "unmet_action": "insufficient_sample_no_strategy_inference_and_later_stages_remain_sealed"
+        },
+        "analysis": {
+          "primary_estimand": {
+            "name": "equal_family_equal_direction_mean_signal_signed_return",
+            "within_cell": "arithmetic mean by instrument_family and event direction",
+            "within_family": "equal 0.5 weight to up and down cell means",
+            "across_families": "arithmetic mean of the six fixed-weight family means",
+            "family_weights": {
+              "SHFE.au": "1/6",
+              "SHFE.ag": "1/6",
+              "CZCE.TA": "1/6",
+              "CZCE.MA": "1/6",
+              "SHFE.cu": "1/6",
+              "DCE.i": "1/6"
+            }
+          },
+          "bootstrap": {
+            "algorithm_version": "cross_family_date_block_percentile_v1",
+            "date_bin": "All admitted events sharing an exchange trading date move together.",
+            "calendar": "Sorted union of exchange trading dates in the current staged window, including dates with zero admitted events.",
+            "block_length_dates": 5,
+            "block_start_rule": "Sample start indices uniformly with replacement and wrap only within the current staged window.",
+            "sample_length_rule": "Concatenate blocks to the original calendar length and truncate excess dates.",
+            "invalid_replicate_rule": "Discard a replicate when any fixed family-direction cell is empty; replace until 2000 valid replicates or 20000 attempts.",
+            "prng": {
+              "algorithm": "splitmix64_v1",
+              "unsigned_integer_width": 64,
+              "arithmetic": "all additions and multiplications modulo 2^64",
+              "state_transition": "state=(state+0x9E3779B97F4A7C15) mod 2^64; z=state; z=((z xor (z>>30))*0xBF58476D1CE4E5B9) mod 2^64; z=((z xor (z>>27))*0x94D049BB133111EB) mod 2^64; output=z xor (z>>31)",
+              "uniform_index_mapping": "For N possible block starts, limit=floor(2^64/N)*N; reject outputs >= limit; accepted index=output mod N.",
+              "stream_rule": "Use one continuous stream for the stage. Every attempted block start and every discarded replicate consumes draws; never reset between replicates or attempts.",
+              "golden_first_12_indices_when_n_10": [
+                8,
+                1,
+                0,
+                3,
+                9,
+                3,
+                2,
+                6,
+                9,
+                2,
+                9,
+                4
+              ]
+            },
+            "replicates": 2000,
+            "maximum_attempts": 20000,
+            "seed": 49002,
+            "interval": "two-sided percentile interval with linear interpolation at p*(n-1) for p=0.025 and p=0.975",
+            "confidence_level": 0.95
+          },
+          "sequential_evaluation": {
+            "window_order": [
+              "P1-EXP-002-TRAIN",
+              "P1-EXP-002-VALIDATE",
+              "P1-EXP-002-HOLDOUT"
+            ],
+            "advance_rule": "Advance without adaptation only when the current sample gate passes, 2000 valid replicates exist, and the interval lower bound is strictly greater than zero.",
+            "falsified_rule": "Stop as falsified when the current sample gate passes, 2000 valid replicates exist, and the interval upper bound is less than or equal to zero.",
+            "inconclusive_rule": "Stop as inconclusive when the sample or valid-replicate gate fails or the interval lower bound is less than or equal to zero and its upper bound is greater than zero.",
+            "holdout_rule": "Evaluate the holdout exactly once only after immutable training and validation manifests both record advancement.",
+            "window_pooling": "forbidden",
+            "adaptation_between_windows": "forbidden"
+          },
+          "classification": {
+            "supported": "Training and validation advance without adaptation and the single-use holdout passes its gates with interval lower bound strictly greater than zero.",
+            "falsified": "The first evaluated stage with passing sample and replicate gates has interval upper bound less than or equal to zero.",
+            "inconclusive": "The first evaluated stage fails a sample or replicate gate or has interval lower bound less than or equal to zero and upper bound greater than zero."
+          },
+          "secondary_diagnostics": [
+            "event, abstain, exclusion, and conflict counts by family, direction, stage, and reason",
+            "fixed family-direction cell means and intervals",
+            "coverage by decision date and selected contract",
+            "future-row invariance and filtered-input binding audit"
+          ],
+          "secondary_diagnostics_cannot_change": [
+            "family membership or weight",
+            "event definition or exclusions",
+            "outcome horizon",
+            "sample gate",
+            "stage decision",
+            "primary conclusion"
+          ]
+        },
+        "data_gate_dependency": {
+          "issue_number": 50,
+          "required_before_event_materialization": true,
+          "required_before_outcome_access": true,
+          "required_properties": [
+            "reviewed and merged historical-replay allow or deny surface",
+            "exact filtered-input content hash or immutable acquisition version plus filtered-row digest",
+            "causal timestamp and session semantics",
+            "future-row invariance",
+            "OHLC and duplicate-row fail-closed checks",
+            "unavailable bid/ask, delta, expiry, and IV recorded without synthesis",
+            "public-safe deterministic run manifest"
+          ],
+          "missing_action": "keep_issue_51_blocked"
+        },
+        "prohibited_adaptations": [
+          "add, drop, reorder, rank, or reweight a family",
+          "change the causal roll rule, confirmation count, tie rule, or effective session",
+          "change history start, roll initialization, EMA initialization, or warmup",
+          "change the 15:00 decision close, source cutoff, session mapping, or aggregation rules",
+          "change strict-prior-20 breakout or EMA5 versus EMA20 agreement on any level",
+          "change abstain, duplicate, exclusion, or OHLC-quality handling",
+          "change the five-completed-daily-bar horizon or selected outcome contract",
+          "change staged-window dates, roles, gates, or single-use holdout rule",
+          "change family-direction weights, bootstrap, seed, interval, or classification",
+          "change the PRNG, index mapping, stream consumption, or golden vector",
+          "pool stages, inspect sealed outcomes, repeat holdout, or adapt between stages",
+          "materialize or recompute any stage membership after forward-outcome access",
+          "select a subgroup or family as the primary result",
+          "join or synthesize option, IV, bid/ask, delta, PnL, or execution fields",
+          "reuse or reinterpret SR-02, SR-03, M6-EXP-013, or P1-EXP-001",
+          "replace an exact filtered-input binding with an anonymous membership hash"
+        ]
+      },
+      "material_distinction_from_p1_exp_001": [
+        "P1-EXP-001 is an AU/AG prospective option-IV rank experiment; P1-EXP-002 is a six-family historical underlying-only structural test.",
+        "P1-EXP-001 requires selected option legs, exact expiry, causal IV history, and a 17-bar option-premium outcome; P1-EXP-002 forbids those inputs and uses one five-bar same-contract underlying outcome.",
+        "P1-EXP-001 stopped as data-blocked and remains immutable; P1-EXP-002 receives a new registry version, experiment id, design hash, and freeze lock."
+      ],
+      "material_distinction_from_m6_exp_013": [
+        "M6-EXP-013 used causal swing-line labels and a six-label direction mapping; P1-EXP-002 uses no swing-line label and requires daily breakout plus four-view EMA agreement.",
+        "M6-EXP-013 screened 1, 3, and 5-bar horizons on a fixed AU/AG corpus; P1-EXP-002 freezes one five-bar horizon before materialization across all six audited families.",
+        "The M6-EXP-013 empty candidate set remains rejected and cannot be rescued by P1-EXP-002."
+      ]
+    }
+  },
+  "amendment_policy": {
+    "registry_v1_immutable": true,
+    "registry_v2_immutable_after_freeze": true,
+    "correction_before_any_event_materialization": "Create registry v3 and P1-EXP-003; do not edit v2 in place.",
+    "change_after_any_event_or_outcome_access": "Invalidate P1-EXP-002 and register a new experiment id under a new registry version.",
+    "result_binding": "Every stage manifest must bind the exact v2 registry SHA-256, canonical design SHA-256, protected merged registry commit, first-access chronology attestation, approved data-gate SHA-256, filtered-input digest, source commit, arguments, stage id, and output hashes."
+  }
+}
