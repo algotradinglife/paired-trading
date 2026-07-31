@@ -1,0 +1,49 @@
+{
+  "artifact_bindings": {
+    "annotation_template": {
+      "public_location": "doc/repro/pa-feitian-m6r-historical-bare-k-episode-pack-2026-07-31/blind_annotation_template_v1.json",
+      "sha256": "sha256:884edf85eec89cb55bf2648d7eae7de8111d7d9276c94d57d58f3171b218acff"
+    },
+    "blind": {
+      "public_location": "doc/repro/pa-feitian-m6r-historical-bare-k-episode-pack-2026-07-31/blind_episode_pack_v1.json",
+      "sha256": "sha256:cebfffa44871d23e9cc8883af5f5d8fa3a28fdc2e783f0776b8f62fde16d6565"
+    },
+    "coverage": {
+      "public_location": "doc/repro/pa-feitian-m6r-historical-bare-k-episode-pack-2026-07-31/coverage_and_exclusions_v1.json",
+      "sha256": "sha256:d72b317a4635720304d718fd91bf7d6fa8394e0db6fdac6f9ff40486cd6d9df5"
+    },
+    "sealed_reveal": {
+      "public_location": "doc/repro/pa-feitian-m6r-historical-bare-k-episode-pack-2026-07-31/sealed_reveal_pack_v1.json",
+      "sha256": "sha256:95b6762bba2c6e12f8ec366b589f261f903657013b3d93cf9dc7ae45e6c06f95"
+    }
+  },
+  "audit_as_of_local_date": "2026-07-31",
+  "contract": {
+    "canonical_sha256": "sha256:495c1b993e56cbf80b2f65ca24bb82bec3a6518a66c8ce30c77e9a5cbad1846a",
+    "public_location": "docs/research/pa-feitian-m6r-historical-bare-k-episode-pack-contract-v1.json",
+    "sha256": "sha256:f52e680145ef7251bab6b1d902d9604f31f361a9ac8172815ddd969c6e64308f"
+  },
+  "episode_count": 72,
+  "episode_mapping_in_manifest": false,
+  "first_pass_warning": "Do not inspect the manifest coverage details, sealed reveal, repository history, or source inventory while annotating the anonymous blind pack.",
+  "issue_number": 64,
+  "m7_authorized": false,
+  "review_order": [
+    "blind_episode_pack_v1.json",
+    "blind_annotation_template_v1.json",
+    "freeze a complete external annotation document",
+    "run the explicit reveal command"
+  ],
+  "schema_version": "pa_feitian_m6r_historical_bare_k_episode_manifest_v1",
+  "source": {
+    "access": "read_only",
+    "filesystem_timestamps_used": false,
+    "public_alias": "external://quant-data/daily/",
+    "readable_inventory_sha256": "sha256:939fed22889d7d3858024096cc81720fdd4271e8f0aaab8941f6a9909195c84c",
+    "runtime_binding": "QUANT_DATA_ROOT",
+    "source_mutation_performed": false,
+    "source_refresh_performed": false
+  },
+  "strategy_or_performance_claim": false,
+  "study_label": "blind_historical_observation_material_only"
+}

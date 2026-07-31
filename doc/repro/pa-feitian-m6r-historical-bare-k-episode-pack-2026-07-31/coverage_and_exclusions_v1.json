@@ -1,0 +1,293 @@
+{
+  "aggregate": {
+    "candidate_activity_episode_count": 36,
+    "discovered_source_count": 485,
+    "eligible_anchor_count": 12828,
+    "exchange_count": 3,
+    "family_count": 9,
+    "ordinary_control_episode_count": 36,
+    "readable_source_count": 485,
+    "selected_episode_count": 72,
+    "source_disappeared_after_discovery_count": 0,
+    "source_unreadable_after_discovery_count": 0
+  },
+  "audit_as_of_local_date": "2026-07-31",
+  "cadence": "daily",
+  "exchange_coverage": [
+    {
+      "exchange": "SHFE",
+      "family_count": 3,
+      "selected_episode_count": 24
+    },
+    {
+      "exchange": "DCE",
+      "family_count": 3,
+      "selected_episode_count": 24
+    },
+    {
+      "exchange": "CZCE",
+      "family_count": 3,
+      "selected_episode_count": 24
+    }
+  ],
+  "family_coverage": [
+    {
+      "discovered_source_count": 72,
+      "eligible_anchor_count": 2180,
+      "exchange": "SHFE",
+      "explicit_exclusion_counts": {
+        "anchor_outside_frozen_strata": 101,
+        "source_insufficient_rows_for_episode": 4
+      },
+      "instrument_family": "SHFE.cu",
+      "maximum_native_observation_date": "2026-06-08",
+      "minimum_native_observation_date": "2021-01-04",
+      "post_audit_row_count": 0,
+      "product": "cu",
+      "readable_source_count": 72,
+      "role": "non_precious_industrial_metal",
+      "selected_by_anchor_stratum": {
+        "era_1": 2,
+        "era_2": 2,
+        "era_3": 2,
+        "era_4": 2
+      },
+      "selected_by_sampling_role": {
+        "candidate_activity": 4,
+        "ordinary_control": 4
+      },
+      "selected_episode_count": 8
+    },
+    {
+      "discovered_source_count": 77,
+      "eligible_anchor_count": 1993,
+      "exchange": "SHFE",
+      "explicit_exclusion_counts": {
+        "anchor_outside_frozen_strata": 125,
+        "blind_activity_gate_failed": 137,
+        "source_insufficient_rows_for_episode": 6
+      },
+      "instrument_family": "SHFE.al",
+      "maximum_native_observation_date": "2026-06-15",
+      "minimum_native_observation_date": "2021-01-04",
+      "post_audit_row_count": 0,
+      "product": "al",
+      "readable_source_count": 77,
+      "role": "non_precious_industrial_metal",
+      "selected_by_anchor_stratum": {
+        "era_1": 2,
+        "era_2": 2,
+        "era_3": 2,
+        "era_4": 2
+      },
+      "selected_by_sampling_role": {
+        "candidate_activity": 4,
+        "ordinary_control": 4
+      },
+      "selected_episode_count": 8
+    },
+    {
+      "discovered_source_count": 77,
+      "eligible_anchor_count": 2157,
+      "exchange": "SHFE",
+      "explicit_exclusion_counts": {
+        "anchor_outside_frozen_strata": 116,
+        "source_insufficient_rows_for_episode": 6
+      },
+      "instrument_family": "SHFE.rb",
+      "maximum_native_observation_date": "2026-06-08",
+      "minimum_native_observation_date": "2021-01-04",
+      "post_audit_row_count": 0,
+      "product": "rb",
+      "readable_source_count": 77,
+      "role": "ferrous_material",
+      "selected_by_anchor_stratum": {
+        "era_1": 2,
+        "era_2": 2,
+        "era_3": 2,
+        "era_4": 2
+      },
+      "selected_by_sampling_role": {
+        "candidate_activity": 4,
+        "ordinary_control": 4
+      },
+      "selected_episode_count": 8
+    },
+    {
+      "discovered_source_count": 36,
+      "eligible_anchor_count": 1052,
+      "exchange": "DCE",
+      "explicit_exclusion_counts": {
+        "anchor_outside_frozen_strata": 61,
+        "source_insufficient_rows_for_episode": 2
+      },
+      "instrument_family": "DCE.p",
+      "maximum_native_observation_date": "2026-06-17",
+      "minimum_native_observation_date": "2021-01-04",
+      "post_audit_row_count": 0,
+      "product": "p",
+      "readable_source_count": 36,
+      "role": "agricultural",
+      "selected_by_anchor_stratum": {
+        "era_1": 2,
+        "era_2": 2,
+        "era_3": 2,
+        "era_4": 2
+      },
+      "selected_by_sampling_role": {
+        "candidate_activity": 4,
+        "ordinary_control": 4
+      },
+      "selected_episode_count": 8
+    },
+    {
+      "discovered_source_count": 38,
+      "eligible_anchor_count": 975,
+      "exchange": "DCE",
+      "explicit_exclusion_counts": {
+        "anchor_outside_frozen_strata": 58,
+        "blind_activity_gate_failed": 26,
+        "reveal_window_invalid_or_missing_row": 17,
+        "source_insufficient_rows_for_episode": 4
+      },
+      "instrument_family": "DCE.m",
+      "maximum_native_observation_date": "2026-06-08",
+      "minimum_native_observation_date": "2021-01-04",
+      "post_audit_row_count": 0,
+      "product": "m",
+      "readable_source_count": 38,
+      "role": "agricultural",
+      "selected_by_anchor_stratum": {
+        "era_1": 2,
+        "era_2": 2,
+        "era_3": 2,
+        "era_4": 2
+      },
+      "selected_by_sampling_role": {
+        "candidate_activity": 4,
+        "ordinary_control": 4
+      },
+      "selected_episode_count": 8
+    },
+    {
+      "discovered_source_count": 72,
+      "eligible_anchor_count": 1476,
+      "exchange": "DCE",
+      "explicit_exclusion_counts": {
+        "anchor_outside_frozen_strata": 70,
+        "blind_window_invalid_or_missing_row": 686,
+        "reveal_window_invalid_or_missing_row": 52,
+        "source_insufficient_rows_for_episode": 3
+      },
+      "instrument_family": "DCE.pp",
+      "maximum_native_observation_date": "2026-06-17",
+      "minimum_native_observation_date": "2021-01-04",
+      "post_audit_row_count": 0,
+      "product": "pp",
+      "readable_source_count": 72,
+      "role": "industrial_chemical",
+      "selected_by_anchor_stratum": {
+        "era_1": 2,
+        "era_2": 2,
+        "era_3": 2,
+        "era_4": 2
+      },
+      "selected_by_sampling_role": {
+        "candidate_activity": 4,
+        "ordinary_control": 4
+      },
+      "selected_episode_count": 8
+    },
+    {
+      "discovered_source_count": 36,
+      "eligible_anchor_count": 977,
+      "exchange": "CZCE",
+      "explicit_exclusion_counts": {
+        "anchor_outside_frozen_strata": 59,
+        "blind_window_invalid_or_missing_row": 100,
+        "reveal_window_invalid_or_missing_row": 9,
+        "source_insufficient_rows_for_episode": 2
+      },
+      "instrument_family": "CZCE.TA",
+      "maximum_native_observation_date": "2026-06-11",
+      "minimum_native_observation_date": "2021-01-04",
+      "post_audit_row_count": 0,
+      "product": "TA",
+      "readable_source_count": 36,
+      "role": "industrial_chemical",
+      "selected_by_anchor_stratum": {
+        "era_1": 2,
+        "era_2": 2,
+        "era_3": 2,
+        "era_4": 2
+      },
+      "selected_by_sampling_role": {
+        "candidate_activity": 4,
+        "ordinary_control": 4
+      },
+      "selected_episode_count": 8
+    },
+    {
+      "discovered_source_count": 36,
+      "eligible_anchor_count": 1020,
+      "exchange": "CZCE",
+      "explicit_exclusion_counts": {
+        "anchor_outside_frozen_strata": 55,
+        "blind_window_invalid_or_missing_row": 46,
+        "reveal_window_invalid_or_missing_row": 24,
+        "source_insufficient_rows_for_episode": 2
+      },
+      "instrument_family": "CZCE.MA",
+      "maximum_native_observation_date": "2026-06-11",
+      "minimum_native_observation_date": "2021-01-04",
+      "post_audit_row_count": 0,
+      "product": "MA",
+      "readable_source_count": 36,
+      "role": "industrial_chemical",
+      "selected_by_anchor_stratum": {
+        "era_1": 2,
+        "era_2": 2,
+        "era_3": 2,
+        "era_4": 2
+      },
+      "selected_by_sampling_role": {
+        "candidate_activity": 4,
+        "ordinary_control": 4
+      },
+      "selected_episode_count": 8
+    },
+    {
+      "discovered_source_count": 41,
+      "eligible_anchor_count": 998,
+      "exchange": "CZCE",
+      "explicit_exclusion_counts": {
+        "anchor_outside_frozen_strata": 57,
+        "blind_activity_gate_failed": 127,
+        "blind_window_invalid_or_missing_row": 17,
+        "reveal_window_invalid_or_missing_row": 5,
+        "source_insufficient_rows_for_episode": 4
+      },
+      "instrument_family": "CZCE.CF",
+      "maximum_native_observation_date": "2026-06-08",
+      "minimum_native_observation_date": "2021-01-04",
+      "post_audit_row_count": 0,
+      "product": "CF",
+      "readable_source_count": 41,
+      "role": "agricultural",
+      "selected_by_anchor_stratum": {
+        "era_1": 2,
+        "era_2": 2,
+        "era_3": 2,
+        "era_4": 2
+      },
+      "selected_by_sampling_role": {
+        "candidate_activity": 4,
+        "ordinary_control": 4
+      },
+      "selected_episode_count": 8
+    }
+  ],
+  "interpretation_boundary": "Coverage and exclusions describe input materialization only; they do not rank families, score a strategy, or expose an episode mapping.",
+  "issue_number": 64,
+  "schema_version": "pa_feitian_m6r_bare_k_episode_coverage_v1"
+}
