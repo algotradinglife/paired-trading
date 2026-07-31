@@ -1,0 +1,14 @@
+{
+  "schema_version": "pa_feitian_m6r_reveal_comparison_contract_v1",
+  "blind_annotations_sha256": "sha256:ec999de7ff0d51a9cd4c8d883ab51c694899cb82c75328149fe19e7b04f283ff",
+  "blind_pack_sha256": "sha256:cebfffa44871d23e9cc8883af5f5d8fa3a28fdc2e783f0776b8f62fde16d6565",
+  "sealed_reveal_artifact_sha256": "sha256:95b6762bba2c6e12f8ec366b589f261f903657013b3d93cf9dc7ae45e6c06f95",
+  "sealed_reveal_payload_sha256": "sha256:493e0bf04887c8ca5a0ed416da464a1360615c51ca6a5f26b7852aee9169ec6d",
+  "fixed_horizons": [1, 5, 10, 20],
+  "metrics": ["close_change_pct", "future_high_change_pct", "future_low_change_pct"],
+  "metric_formulas": {"close_change_pct": "100 * (future_close / bar_0_close - 1)", "future_high_change_pct": "100 * (max future high through horizon / bar_0_close - 1)", "future_low_change_pct": "100 * (min future low through horizon / bar_0_close - 1)"},
+  "aggregate_surface": ["sampling_role", "instrument_family", "frozen_era", "descriptor_distribution", "role_descriptor_response", "candidate_floor_audit"],
+  "candidate_floor": {"minimum_episodes": 8, "minimum_instrument_families": 3, "minimum_frozen_eras": 3},
+  "verdicts": ["no_candidate", "candidate_hypotheses_frozen"],
+  "prohibited_uses": ["outcome-derived threshold", "family identity", "sampling role", "future data", "PnL", "EV", "win rate", "M7", "execution", "authentic Feitian rule"]
+}
