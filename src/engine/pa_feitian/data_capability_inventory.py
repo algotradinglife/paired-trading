@@ -59,9 +59,7 @@ _REGISTRY_LOCK_ALIAS = "repository://paired-trading/phase1-hypothesis-registry-l
 _CANDIDATE_CONTRACT_ALIAS = (
     "repository://paired-trading/phase1-candidate-interface-audit-contract-v1"
 )
-_CANDIDATE_AUDIT_ALIAS = (
-    "repository://paired-trading/phase1-candidate-interface-audit-v1"
-)
+_CANDIDATE_AUDIT_ALIAS = "repository://paired-trading/phase1-candidate-interface-audit-v1"
 _OPTION_AUDIT_ALIAS = "repository://paired-trading/m6-option-input-capability-audit-v1"
 _LIQUID_PREMIUM_ALIAS = "repository://paired-trading/m6-liquid-premium-evidence-v1"
 _CONTINUOUS_ALIAS = "repository://paired-trading/m6-continuous-provenance-v1"
@@ -122,9 +120,7 @@ def validate_contract(contract: dict[str, Any]) -> None:
         raise DataCapabilityInventoryError("issue binding drifted")
     if contract.get("audit_as_of_local_date") != AUDIT_AS_OF_LOCAL_DATE:
         raise DataCapabilityInventoryError("fixed audit date drifted")
-    families = [
-        row.get("instrument_family") for row in contract.get("candidate_universe", [])
-    ]
+    families = [row.get("instrument_family") for row in contract.get("candidate_universe", [])]
     if families != _EXPECTED_FAMILIES:
         raise DataCapabilityInventoryError("candidate universe or order drifted")
     if contract.get("audit_cadences") != _EXPECTED_CADENCES:
@@ -271,14 +267,8 @@ def _audited_family(
     as_of: str,
     fresh_max_days: int,
 ) -> dict[str, Any]:
-    underlying = [
-        _cadence_coverage(cell, interface="underlying")
-        for cell in audited["cadences"]
-    ]
-    option = [
-        _cadence_coverage(cell, interface="option_premium")
-        for cell in audited["cadences"]
-    ]
+    underlying = [_cadence_coverage(cell, interface="underlying") for cell in audited["cadences"]]
+    option = [_cadence_coverage(cell, interface="option_premium") for cell in audited["cadences"]]
     supporting_latest = [
         row["coverage"]["maximum_observation_timestamp"]
         for row in [*underlying, *option]
@@ -291,8 +281,7 @@ def _audited_family(
         fresh_max_days=fresh_max_days,
     )
     all_interfaces_present = all(
-        row["matched_files"] > 0 and row["read_error_files"] == 0
-        for row in [*underlying, *option]
+        row["matched_files"] > 0 and row["read_error_files"] == 0 for row in [*underlying, *option]
     )
     daily_option = next(row for row in option if row["cadence"] == "daily")
     daily_ohlc_violations = daily_option.get("ohlc_quality", {}).get(
@@ -320,9 +309,7 @@ def _audited_family(
             "immutable_daily_enrollment_ledger_not_evidenced",
         ]
         if daily_ohlc_violations:
-            fail_closed_reason.append(
-                "daily_option_ohlc_coherence_violations_observed"
-            )
+            fail_closed_reason.append("daily_option_ohlc_coherence_violations_observed")
     else:
         causal_status = "not_permitted_outside_frozen_universe"
         fail_closed_reason = [
@@ -351,9 +338,7 @@ def _audited_family(
             ),
             "cadences": option,
             "premium_ohlc": (
-                "present_with_daily_quality_findings"
-                if daily_ohlc_violations
-                else "present"
+                "present_with_daily_quality_findings" if daily_ohlc_violations else "present"
             ),
             "exact_exchange_expiry": "unavailable",
             "historical_bid_ask": "unavailable_not_synthesized",
@@ -375,9 +360,7 @@ def _audited_family(
         "freshness": overall_freshness,
         "historical_research_usability": {
             "retrospective_finalized_bare_k_premium_ohlc": (
-                "usable_with_limitations"
-                if all_interfaces_present
-                else "data_blocked"
+                "usable_with_limitations" if all_interfaces_present else "data_blocked"
             ),
             "causal_p1_iv_experiment": causal_status,
             "operational_observability": "data_blocked",
@@ -400,19 +383,14 @@ def build_inventory(
     registry = payloads[_REGISTRY_ALIAS]
     experiment = registry["selection"]["selected_experiment"]
     design = experiment["design"]
-    registry_universe = sorted(
-        f"{row['exchange']}.{row['product']}" for row in design["universe"]
-    )
+    registry_universe = sorted(f"{row['exchange']}.{row['product']}" for row in design["universe"])
     if experiment["experiment_id"] != "P1-EXP-001":
         raise DataCapabilityInventoryError("selected experiment drifted")
     if registry_universe != sorted(_EXPECTED_P1_UNIVERSE):
         raise DataCapabilityInventoryError("registry experiment universe drifted")
 
     candidate_audit = payloads[_CANDIDATE_AUDIT_ALIAS]
-    audit_rows = {
-        row["instrument_family"]: row
-        for row in candidate_audit["decision_surface"]
-    }
+    audit_rows = {row["instrument_family"]: row for row in candidate_audit["decision_surface"]}
     as_of = contract["audit_as_of_local_date"]
     fresh_max_days = contract["freshness_policy"]["fresh_max_calendar_lag_days"]
     families = [
@@ -433,8 +411,7 @@ def build_inventory(
         "timezone": contract["timezone"],
         "research_boundary": {
             "evidence_mode": (
-                "explicit_read_only_candidate_interface_audit_plus_"
-                "hash_bound_repository_aggregates"
+                "explicit_read_only_candidate_interface_audit_plus_hash_bound_repository_aggregates"
             ),
             "explicit_candidate_interface_audited": True,
             "candidate_interface_access": "read_only",
@@ -453,9 +430,7 @@ def build_inventory(
             "schema_version": candidate_audit["schema_version"],
             "sha256": metadata[_CANDIDATE_AUDIT_ALIAS]["sha256"],
             "source_inventory_sha256": candidate_audit["source"]["inventory_sha256"],
-            "matched_candidate_files": candidate_audit["source"][
-                "matched_candidate_files"
-            ],
+            "matched_candidate_files": candidate_audit["source"]["matched_candidate_files"],
             "runtime_binding": "QUANT_DATA_ROOT",
             "access": "read_only",
         },
@@ -513,13 +488,9 @@ def build_inventory(
         "decision_surface": families,
         "decision": {
             "status": "data_blocked",
-            "usable_family_count": sum(
-                row["usable_for_p1_exp_001"] for row in families
-            ),
+            "usable_family_count": sum(row["usable_for_p1_exp_001"] for row in families),
             "usable_families": [
-                row["instrument_family"]
-                for row in families
-                if row["usable_for_p1_exp_001"]
+                row["instrument_family"] for row in families if row["usable_for_p1_exp_001"]
             ],
             "p1_exp_001_action": "stop_as_data_blocked",
             "issue_45_may_start_outcome_work": False,
@@ -587,9 +558,7 @@ def validate_inventory(inventory: dict[str, Any], *, contract: dict[str, Any]) -
             raise DataCapabilityInventoryError("blocked family lacks fail-closed reason")
         if len(row["underlying_coverage"]["cadences"]) != len(_EXPECTED_CADENCES):
             raise DataCapabilityInventoryError("underlying cadence surface drifted")
-        if len(row["option_premium_coverage"]["cadences"]) != len(
-            _EXPECTED_CADENCES
-        ):
+        if len(row["option_premium_coverage"]["cadences"]) != len(_EXPECTED_CADENCES):
             raise DataCapabilityInventoryError("option cadence surface drifted")
         if (
             row["instrument_family"] not in _EXPECTED_P1_UNIVERSE

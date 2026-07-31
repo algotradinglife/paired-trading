@@ -38,9 +38,7 @@ def main() -> None:
             {
                 "ok": True,
                 "families": len(audit["decision_surface"]),
-                "matched_candidate_files": audit["source"][
-                    "matched_candidate_files"
-                ],
+                "matched_candidate_files": audit["source"]["matched_candidate_files"],
                 "output": str(args.output),
             },
             sort_keys=True,

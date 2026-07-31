@@ -20,9 +20,7 @@ from engine.pa_feitian.data_capability_inventory import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CONTRACT_PATH = (
-    REPO_ROOT / "docs/research/pa-feitian-phase1-data-capability-contract-v1.json"
-)
+CONTRACT_PATH = REPO_ROOT / "docs/research/pa-feitian-phase1-data-capability-contract-v1.json"
 ARTIFACT_PATH = (
     REPO_ROOT
     / "doc/repro/pa-feitian-phase1-data-capability-2026-07-30"
@@ -44,9 +42,14 @@ def _build() -> tuple[dict, dict]:
 
 def test_contract_freezes_candidate_universe_and_experiment_scope() -> None:
     contract = load_contract(CONTRACT_PATH)
-    assert [
-        row["instrument_family"] for row in contract["candidate_universe"]
-    ] == ["SHFE.au", "SHFE.ag", "CZCE.TA", "CZCE.MA", "SHFE.cu", "DCE.i"]
+    assert [row["instrument_family"] for row in contract["candidate_universe"]] == [
+        "SHFE.au",
+        "SHFE.ag",
+        "CZCE.TA",
+        "CZCE.MA",
+        "SHFE.cu",
+        "DCE.i",
+    ]
     assert contract["p1_exp_001"]["required_universe"] == ["SHFE.ag", "SHFE.au"]
     assert contract["audit_cadences"] == ["daily", "hour", "min15", "min5"]
 
@@ -89,26 +92,18 @@ def test_inventory_separates_freshness_historical_use_and_experiment_permission(
         row = rows[family]
         assert row["freshness"]["status"] == "stale"
         assert (
-            row["historical_research_usability"][
-                "retrospective_finalized_bare_k_premium_ohlc"
-            ]
+            row["historical_research_usability"]["retrospective_finalized_bare_k_premium_ohlc"]
             == "usable_with_limitations"
         )
-        assert (
-            row["historical_research_usability"]["causal_p1_iv_experiment"]
-            == "data_blocked"
-        )
+        assert row["historical_research_usability"]["causal_p1_iv_experiment"] == "data_blocked"
         option_cadences = {
-            cadence["cadence"]: cadence
-            for cadence in row["option_premium_coverage"]["cadences"]
+            cadence["cadence"]: cadence for cadence in row["option_premium_coverage"]["cadences"]
         }
         assert (
-            option_cadences["min5"]["schema"]["fields"]["close"]
-            == "present_in_all_scanned_files"
+            option_cadences["min5"]["schema"]["fields"]["close"] == "present_in_all_scanned_files"
         )
         underlying_cadences = {
-            cadence["cadence"]: cadence
-            for cadence in row["underlying_coverage"]["cadences"]
+            cadence["cadence"]: cadence for cadence in row["underlying_coverage"]["cadences"]
         }
         assert underlying_cadences["hour"]["schema"]["fields"]["open"] == (
             "present_in_all_scanned_files"
@@ -120,14 +115,9 @@ def test_inventory_separates_freshness_historical_use_and_experiment_permission(
         row = rows[family]
         assert row["freshness"]["status"] == "stale"
         assert row["underlying_coverage"]["status"] == "present_all_declared_cadences"
+        assert row["option_premium_coverage"]["status"] == "present_all_declared_cadences"
         assert (
-            row["option_premium_coverage"]["status"]
-            == "present_all_declared_cadences"
-        )
-        assert (
-            row["historical_research_usability"][
-                "retrospective_finalized_bare_k_premium_ohlc"
-            ]
+            row["historical_research_usability"]["retrospective_finalized_bare_k_premium_ohlc"]
             == "usable_with_limitations"
         )
         assert (
@@ -158,15 +148,11 @@ def test_inventory_is_bound_to_explicit_six_family_interface_audit() -> None:
     assert inventory["research_boundary"]["explicit_candidate_interface_audited"]
     assert inventory["candidate_interface_evidence"] == {
         "access": "read_only",
-        "alias": (
-            "repository://paired-trading/phase1-candidate-interface-audit-v1"
-        ),
+        "alias": ("repository://paired-trading/phase1-candidate-interface-audit-v1"),
         "matched_candidate_files": 31_141,
         "runtime_binding": "QUANT_DATA_ROOT",
         "schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
-        "sha256": (
-            "sha256:becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795"
-        ),
+        "sha256": ("sha256:becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795"),
         "source_inventory_sha256": (
             "sha256:9bbd6c94ca9bf8228c76cd2078513b82655990c88084297d710cd83c2f33ec8f"
         ),
@@ -237,9 +223,9 @@ def test_builder_script_emits_byte_identical_artifact(tmp_path: Path) -> None:
 
 
 def test_implementation_has_no_hidden_current_time_or_market_root_discovery() -> None:
-    implementation = (
-        REPO_ROOT / "src/engine/pa_feitian/data_capability_inventory.py"
-    ).read_text(encoding="utf-8")
+    implementation = (REPO_ROOT / "src/engine/pa_feitian/data_capability_inventory.py").read_text(
+        encoding="utf-8"
+    )
     assert "date.today(" not in implementation
     assert "datetime.now(" not in implementation
     assert "time.time(" not in implementation

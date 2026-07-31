@@ -20,8 +20,7 @@ from engine.pa_feitian.candidate_interface_audit import (
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_PATH = (
-    REPO_ROOT
-    / "docs/research/pa-feitian-phase1-candidate-interface-audit-contract-v1.json"
+    REPO_ROOT / "docs/research/pa-feitian-phase1-candidate-interface-audit-contract-v1.json"
 )
 ARTIFACT_PATH = (
     REPO_ROOT
@@ -112,9 +111,14 @@ def _build(tmp_path: Path) -> tuple[dict, dict]:
 
 def test_contract_freezes_six_families_cadences_and_read_only_boundary() -> None:
     contract = load_contract(CONTRACT_PATH)
-    assert [
-        row["instrument_family"] for row in contract["candidate_universe"]
-    ] == ["SHFE.au", "SHFE.ag", "CZCE.TA", "CZCE.MA", "SHFE.cu", "DCE.i"]
+    assert [row["instrument_family"] for row in contract["candidate_universe"]] == [
+        "SHFE.au",
+        "SHFE.ag",
+        "CZCE.TA",
+        "CZCE.MA",
+        "SHFE.cu",
+        "DCE.i",
+    ]
     assert contract["cadences"] == ["daily", "hour", "min15", "min5"]
     assert contract["runtime_input"]["binding"] == "QUANT_DATA_ROOT"
     assert contract["runtime_input"]["access"] == "read_only"
@@ -125,9 +129,7 @@ def test_contract_freezes_six_families_cadences_and_read_only_boundary() -> None
         validate_contract(weakened)
 
     grammar_drift = copy.deepcopy(contract)
-    grammar_drift["filename_interface_grammar"]["case_insensitive_family_prefix"] = (
-        False
-    )
+    grammar_drift["filename_interface_grammar"]["case_insensitive_family_prefix"] = False
     with pytest.raises(CandidateInterfaceAuditError, match="grammar"):
         validate_contract(grammar_drift)
 
@@ -150,12 +152,12 @@ def test_audit_reports_freshness_schema_duplicates_ohlc_and_activity(
 ) -> None:
     _, audit = _build(tmp_path)
     rows = {row["instrument_family"]: row for row in audit["decision_surface"]}
-    au = {
-        row["cadence"]: row for row in rows["SHFE.au"]["cadences"]
-    }["min5"]["interfaces"]["option_premium"]
-    ag = {
-        row["cadence"]: row for row in rows["SHFE.ag"]["cadences"]
-    }["min15"]["interfaces"]["option_premium"]
+    au = {row["cadence"]: row for row in rows["SHFE.au"]["cadences"]}["min5"]["interfaces"][
+        "option_premium"
+    ]
+    ag = {row["cadence"]: row for row in rows["SHFE.ag"]["cadences"]}["min15"]["interfaces"][
+        "option_premium"
+    ]
 
     assert au["freshness"]["status"] == "fresh"
     assert au["schema"]["consistent"] is True
