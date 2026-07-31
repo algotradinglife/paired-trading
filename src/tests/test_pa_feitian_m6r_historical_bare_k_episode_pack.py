@@ -5,7 +5,7 @@ import os
 import subprocess
 import sys
 from dataclasses import replace
-from datetime import datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pyarrow as pa
@@ -31,7 +31,6 @@ from engine.pa_feitian.historical_bare_k_episode_pack import (
     validate_blind_pack,
     validate_reveal_payload,
 )
-
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_PATH = (
@@ -73,10 +72,10 @@ def _write_root(root: Path, *, invalid_at: int | None = None) -> None:
     daily = root / "daily"
     daily.mkdir(parents=True)
     starts = [
-        datetime(2022, 1, 3),
-        datetime(2023, 1, 3),
-        datetime(2024, 1, 3),
-        datetime(2025, 1, 3),
+        datetime(2022, 1, 3, tzinfo=UTC),
+        datetime(2023, 1, 3, tzinfo=UTC),
+        datetime(2024, 1, 3, tzinfo=UTC),
+        datetime(2025, 1, 3, tzinfo=UTC),
     ]
     for family_index, family in enumerate(contract["candidate_universe"]):
         for era, start in enumerate(starts, start=1):
@@ -178,7 +177,7 @@ def test_blind_surface_is_anonymous_and_sealed_reveal_has_mapping(tmp_path: Path
         if episode["provenance"]["instrument_family"] == first_family
     ]
     assert len(same_family) >= 2
-    tampered_same_family[0]["future_bars"][-1]["timestamp"] = "2030-01-01T00:00:00"
+    tampered_same_family[0]["future_bars"][-1]["timestamp"] = "2030-01-01T00:00:00+00:00"
     with pytest.raises(HistoricalBareKEpisodePackError, match="calendar intervals overlap"):
         validate_reveal_payload(tampered)
     tampered = copy.deepcopy(reveal)
@@ -261,7 +260,7 @@ def test_discovered_source_that_disappears_is_explicitly_excluded(tmp_path: Path
     _write_root(root)
     contract = load_contract(CONTRACT_PATH)
     pq.write_table(
-        _table(datetime(2022, 1, 3), 180),
+        _table(datetime(2022, 1, 3, tzinfo=UTC), 180),
         root / "daily" / "SHFE.cu2102.parquet",
     )
 
@@ -294,7 +293,7 @@ def test_discovered_source_that_becomes_unreadable_is_explicitly_excluded(
     _write_root(root)
     contract = load_contract(CONTRACT_PATH)
     pq.write_table(
-        _table(datetime(2022, 1, 3), 180),
+        _table(datetime(2022, 1, 3, tzinfo=UTC), 180),
         root / "daily" / "SHFE.cu2102.parquet",
     )
     import engine.pa_feitian.historical_bare_k_episode_pack as episode_pack
@@ -330,7 +329,7 @@ def test_invalid_row_blocks_any_window_that_would_cross_it(tmp_path: Path) -> No
         for task in discover_sources(root, contract)
         if task.family == "SHFE.cu" and task.source_path.name.endswith("2101.parquet")
     )
-    scan = read_source_task(task, datetime(2026, 7, 31).date())
+    scan = read_source_task(task, date(2026, 7, 31))
     candidates, exclusions = enumerate_candidates(scan, contract)
     assert exclusions["blind_window_invalid_or_missing_row"] > 0
     assert exclusions["reveal_window_invalid_or_missing_row"] > 0
@@ -376,17 +375,17 @@ def test_calendar_overlap_is_blocked_across_different_source_aliases() -> None:
     first = _candidate_for_overlap_test(
         family="CZCE.CF",
         source_alias="sha256:" + "1" * 64,
-        start=datetime(2022, 1, 1),
+        start=datetime(2022, 1, 1, tzinfo=UTC),
     )
     same_family_other_expiry = _candidate_for_overlap_test(
         family="CZCE.CF",
         source_alias="sha256:" + "2" * 64,
-        start=datetime(2022, 1, 20),
+        start=datetime(2022, 1, 20, tzinfo=UTC),
     )
     other_family = _candidate_for_overlap_test(
         family="DCE.p",
         source_alias="sha256:" + "3" * 64,
-        start=datetime(2022, 1, 20),
+        start=datetime(2022, 1, 20, tzinfo=UTC),
     )
     assert _overlaps(first, same_family_other_expiry)
     assert not _overlaps(first, other_family)
@@ -396,7 +395,7 @@ def test_anonymous_id_depends_only_on_normalized_blind_payload() -> None:
     original = _candidate_for_overlap_test(
         family="CZCE.CF",
         source_alias="sha256:" + "1" * 64,
-        start=datetime(2022, 1, 1),
+        start=datetime(2022, 1, 1, tzinfo=UTC),
     )
     future_changed = replace(
         original,

@@ -19,7 +19,7 @@ from engine.pa_feitian.historical_bare_k_episode_pack import (
 def _load_object(path: Path) -> dict:
     value = strict_json_loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
-        raise ValueError("input must be a JSON object")
+        raise TypeError("input must be a JSON object")
     return value
 
 

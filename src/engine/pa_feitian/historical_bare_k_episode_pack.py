@@ -11,16 +11,17 @@ import re
 import stat
 import tempfile
 from collections import Counter
+from collections.abc import Callable, Iterable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from datetime import date, datetime
+from itertools import pairwise
 from pathlib import Path
 from statistics import median
-from typing import Any, Callable, Iterable
+from typing import Any
 
 import pyarrow as pa
 import pyarrow.parquet as pq
-
 
 CONTRACT_SCHEMA_VERSION = "pa_feitian_m6r_historical_bare_k_episode_pack_contract_v1"
 MANIFEST_SCHEMA_VERSION = "pa_feitian_m6r_historical_bare_k_episode_manifest_v1"
@@ -426,7 +427,7 @@ def _as_datetime(value: Any) -> tuple[str | None, date | None]:
     if isinstance(value, date):
         return value.isoformat(), value
     try:
-        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(str(value))
     except (TypeError, ValueError):
         return None, None
     return parsed.isoformat(), parsed.date()
@@ -482,7 +483,7 @@ def read_source_task(task: SourceTask, audit_date: date) -> SourceScan:
         if missing:
             return SourceScan(task, source_sha256, (), "source_required_schema_missing")
         table = parquet.read(columns=REQUIRED_FIELDS)
-    except Exception:
+    except (OSError, pa.ArrowException):
         return SourceScan(task, source_sha256, (), "source_unreadable_after_discovery")
     rows: list[NativeRow] = []
     post_audit = 0
@@ -983,7 +984,7 @@ def validate_reveal_payload(payload: dict[str, Any]) -> None:
             blind_times = [datetime.fromisoformat(timestamp) for timestamp in timestamps]
         except (TypeError, ValueError) as exc:
             raise HistoricalBareKEpisodePackError("reveal blind timestamp is invalid") from exc
-        if any(left >= right for left, right in zip(blind_times, blind_times[1:])):
+        if any(left >= right for left, right in pairwise(blind_times)):
             raise HistoricalBareKEpisodePackError(
                 "reveal blind timestamps are not strictly increasing"
             )
@@ -1028,7 +1029,7 @@ def validate_reveal_payload(payload: dict[str, Any]) -> None:
                 or bar["low_index"] > bar["close_index"]
             ):
                 raise HistoricalBareKEpisodePackError("reveal normalized OHLC is incoherent")
-        if any(left >= right for left, right in zip(future_times, future_times[1:])):
+        if any(left >= right for left, right in pairwise(future_times)):
             raise HistoricalBareKEpisodePackError(
                 "reveal future timestamps are not strictly increasing"
             )
