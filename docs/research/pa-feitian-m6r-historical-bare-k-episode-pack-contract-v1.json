@@ -1,0 +1,233 @@
+{
+  "schema_version": "pa_feitian_m6r_historical_bare_k_episode_pack_contract_v1",
+  "contract_id": "pa_feitian_m6r_historical_bare_k_episode_pack_2026_07_31",
+  "issue_number": 64,
+  "audit_as_of_local_date": "2026-07-31",
+  "timezone": "Asia/Shanghai",
+  "study_label": "blind_historical_observation_material_only",
+  "purpose": "Build a deterministic reviewer-blind daily underlying bare-K episode pack for M6R hypothesis recovery without defining, scoring, or approving a strategy.",
+  "runtime_input": {
+    "binding": "QUANT_DATA_ROOT",
+    "public_alias": "external://quant-data/daily/",
+    "access": "read_only",
+    "format": "parquet",
+    "relative_root": "daily",
+    "direct_children_only": true,
+    "symlinks_allowed": false,
+    "interface": "underlying_contract_daily_ohlc_activity",
+    "required_fields": [
+      "datetime",
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "open_interest"
+    ]
+  },
+  "candidate_universe": [
+    {
+      "instrument_family": "SHFE.cu",
+      "exchange": "SHFE",
+      "product": "cu",
+      "role": "non_precious_industrial_metal"
+    },
+    {
+      "instrument_family": "SHFE.al",
+      "exchange": "SHFE",
+      "product": "al",
+      "role": "non_precious_industrial_metal"
+    },
+    {
+      "instrument_family": "SHFE.rb",
+      "exchange": "SHFE",
+      "product": "rb",
+      "role": "ferrous_material"
+    },
+    {
+      "instrument_family": "DCE.p",
+      "exchange": "DCE",
+      "product": "p",
+      "role": "agricultural"
+    },
+    {
+      "instrument_family": "DCE.m",
+      "exchange": "DCE",
+      "product": "m",
+      "role": "agricultural"
+    },
+    {
+      "instrument_family": "DCE.pp",
+      "exchange": "DCE",
+      "product": "pp",
+      "role": "industrial_chemical"
+    },
+    {
+      "instrument_family": "CZCE.TA",
+      "exchange": "CZCE",
+      "product": "TA",
+      "role": "industrial_chemical"
+    },
+    {
+      "instrument_family": "CZCE.MA",
+      "exchange": "CZCE",
+      "product": "MA",
+      "role": "industrial_chemical"
+    },
+    {
+      "instrument_family": "CZCE.CF",
+      "exchange": "CZCE",
+      "product": "CF",
+      "role": "agricultural"
+    }
+  ],
+  "episode_protocol": {
+    "blind_completed_daily_bars": 40,
+    "activity_score_trailing_daily_bars": 20,
+    "sealed_reveal_completed_daily_bars": 20,
+    "candidate_anchor_stride_bars": 5,
+    "episodes_per_family": 8,
+    "activity_episodes_per_family": 4,
+    "ordinary_control_episodes_per_family": 4,
+    "total_episode_count": 72,
+    "partition_scope": "within_each_native_underlying_contract_series",
+    "cross_contract_stitching": false,
+    "cadence_resampling": false,
+    "missing_bar_repair": false,
+    "forward_fill": false,
+    "synthetic_rows": false,
+    "anchor_strata": [
+      {
+        "stratum": "era_1",
+        "start_date_inclusive": "2021-06-01",
+        "end_date_inclusive": "2022-12-31"
+      },
+      {
+        "stratum": "era_2",
+        "start_date_inclusive": "2023-01-01",
+        "end_date_inclusive": "2023-12-31"
+      },
+      {
+        "stratum": "era_3",
+        "start_date_inclusive": "2024-01-01",
+        "end_date_inclusive": "2024-12-31"
+      },
+      {
+        "stratum": "era_4",
+        "start_date_inclusive": "2025-01-01",
+        "end_date_inclusive": "2026-04-30"
+      }
+    ],
+    "selection_per_family_stratum": [
+      "candidate_activity",
+      "ordinary_control"
+    ],
+    "candidate_activity_selection": "highest causal trailing-20-bar median normalized daily range among eligible non-overlapping anchors in the family and stratum",
+    "ordinary_control_selection": "eligible non-overlapping anchor nearest the family-and-stratum median causal trailing-20-bar median normalized daily range",
+    "reveal_eligibility_materialization_gate": "candidate eligibility and episode materialization require a complete valid 20-bar reveal window; this gate uses only row availability and quality, not future direction, magnitude, strategy outcomes, or profitability",
+    "ranking_candidate_activity_control_ids_and_tiebreaking_use_only_blind_rows": true,
+    "ranking_or_labeling_uses_reveal_direction_magnitude_metrics_outcomes_or_profitability": false,
+    "selection_uses_strategy_outcomes_or_profitability": false,
+    "same_source_selected_windows_may_overlap": false,
+    "same_family_selected_full_calendar_intervals_may_overlap_across_sources": false
+  },
+  "quality_protocol": {
+    "timestamps": "native timestamps must be non-null, unique, and strictly increasing in source order",
+    "ohlc": "all OHLC values must be finite and strictly positive; high must be at least open, close, and low; low must be at most open and close",
+    "activity": "volume and open_interest must be finite and nonnegative; every blind score window must have positive medians for both fields",
+    "post_audit_rows": "excluded before candidate enumeration",
+    "invalid_or_missing_window": "fail closed and count an explicit exclusion reason",
+    "invalid_or_missing_rows_may_be_skipped_or_concatenated_across": false,
+    "disappeared_after_discovery": "count source_disappeared_after_discovery and do not retry through another interface",
+    "unreadable_after_discovery": "count source_unreadable_after_discovery and do not retry through another interface",
+    "future_only_source": "excluded and counted",
+    "source_mutation": false
+  },
+  "public_representation": {
+    "native_source_values_mutated": false,
+    "native_slice_commitment": "SHA-256 of canonical native timestamps and source values",
+    "raw_source_rows_published": false,
+    "raw_source_values_published": false,
+    "raw_contract_identifiers_published": false,
+    "anonymous_episode_id": "opaque deterministic identifier derived only from the canonical normalized pre-anchor blind payload; no provenance or selection metadata participates",
+    "display_encoding": "each OHLC value divided by the first blind bar open and multiplied by 100",
+    "blind_bar_identity": "relative bar index only, from -39 through 0",
+    "reveal_bar_identity": "native trading date and one-based bar offset strictly after the decision timestamp"
+  },
+  "blind_reveal_protocol": {
+    "blind_episode_allowed_fields": [
+      "episode_id",
+      "bars"
+    ],
+    "blind_bar_allowed_fields": [
+      "bar_index",
+      "open_index",
+      "high_index",
+      "low_index",
+      "close_index"
+    ],
+    "blind_pack_exposes_family_exchange_or_product": false,
+    "blind_pack_exposes_contract_identity_or_source_commitment": false,
+    "blind_pack_exposes_calendar_dates_or_era": false,
+    "blind_pack_exposes_sampling_role": false,
+    "blind_pack_contains_future_dates": false,
+    "blind_pack_contains_future_paths": false,
+    "blind_pack_contains_reveal_metrics": false,
+    "blind_pack_references_sealed_reveal_location": false,
+    "annotation_template_exposes_only_episode_id_and_blank_annotation": true,
+    "sealed_reveal_encoding": "base64_canonical_json",
+    "sealed_reveal_is_encryption": false,
+    "reveal_requires_complete_blind_annotation": true,
+    "reveal_requires_explicit_first_pass_acknowledgement": true,
+    "annotation_template_contains_all_episode_ids": true,
+    "annotation_template_contains_reveal_fields": false
+  },
+  "output": {
+    "contract_path": "docs/research/pa-feitian-m6r-historical-bare-k-episode-pack-contract-v1.json",
+    "artifact_directory": "doc/repro/pa-feitian-m6r-historical-bare-k-episode-pack-2026-07-31",
+    "manifest_filename": "episode_manifest_v1.json",
+    "blind_pack_filename": "blind_episode_pack_v1.json",
+    "sealed_reveal_filename": "sealed_reveal_pack_v1.json",
+    "coverage_filename": "coverage_and_exclusions_v1.json",
+    "annotation_template_filename": "blind_annotation_template_v1.json",
+    "json_sort_keys": true,
+    "atomic_same_directory_replace": true,
+    "output_inside_data_root": false,
+    "local_paths": false,
+    "source_filenames": false,
+    "raw_contract_identifiers": false,
+    "raw_rows": false,
+    "raw_ohlc_values": false,
+    "credentials": false
+  },
+  "guardrails": {
+    "explicit_runtime_root_required": true,
+    "external_access_read_only": true,
+    "source_refresh": false,
+    "source_mutation": false,
+    "implicit_current_time": false,
+    "filesystem_timestamps_as_freshness": false,
+    "strategy_rule_definition": false,
+    "signal_threshold": false,
+    "profitability_calculation": false,
+    "pnl": false,
+    "ev": false,
+    "win_rate": false,
+    "family_performance_ranking": false,
+    "hypothesis_approval": false,
+    "outcome_informed_blind_editing": false,
+    "historical_event_recall_fields_in_blind_pack": false,
+    "selection_framing_fields_in_blind_pack": false,
+    "option_input_access": false,
+    "bid_ask_access_or_synthesis": false,
+    "orderbook_access": false,
+    "model_delta_access_or_synthesis": false,
+    "m7_authorization": false,
+    "execution": false
+  },
+  "interpretation_boundary": {
+    "allowed": "Strategy may inspect and annotate historical normalized daily candle shapes before separately revealing the descriptive future path.",
+    "not_established": "No episode, family, selection label, reveal path, or aggregate establishes a trading rule, edge, performance, hypothesis approval, M7 readiness, or execution readiness.",
+    "next_step": "Strategy may use completed blind annotations and reveal comparisons to formulate a separately reviewed hypothesis; this packet does not formulate one."
+  }
+}
