@@ -34,8 +34,7 @@ _EXPECTED_FILENAME_GRAMMAR = {
     "underlying_suffix_regex": "^[0-9]{3,4}$",
     "continuous_underlying_suffix": "0",
     "option_premium_suffix_regex": (
-        "^[0-9]{3,4}(?:[CP][0-9]+(?:\\.[0-9]+)?|"
-        "-[CP]-[0-9]+(?:\\.[0-9]+)?)$"
+        "^[0-9]{3,4}(?:[CP][0-9]+(?:\\.[0-9]+)?|-[CP]-[0-9]+(?:\\.[0-9]+)?)$"
     ),
     "greeks_sidecar_suffix": ".greeks",
     "raw_contract_identifiers_in_output": False,
@@ -123,9 +122,7 @@ def validate_contract(contract: dict[str, Any]) -> None:
         raise CandidateInterfaceAuditError("issue binding drifted")
     if contract.get("audit_as_of_local_date") != AUDIT_AS_OF_LOCAL_DATE:
         raise CandidateInterfaceAuditError("fixed audit date drifted")
-    families = [
-        row.get("instrument_family") for row in contract.get("candidate_universe", [])
-    ]
+    families = [row.get("instrument_family") for row in contract.get("candidate_universe", [])]
     if families != _EXPECTED_FAMILIES:
         raise CandidateInterfaceAuditError("candidate universe or order drifted")
     if contract.get("cadences") != _EXPECTED_CADENCES:
@@ -226,9 +223,7 @@ def _scan_file(
     activity_fields: list[str],
 ) -> dict[str, Any]:
     path, cadence, interface, candidate = task
-    path_identity = hashlib.sha256(
-        f"{cadence}\0{path.name}".encode()
-    ).hexdigest()
+    path_identity = hashlib.sha256(f"{cadence}\0{path.name}".encode()).hexdigest()
     try:
         parquet = pq.ParquetFile(path)
         schema = parquet.schema_arrow
@@ -294,9 +289,7 @@ def _scan_file(
                 "non_null_rows": non_null_rows,
                 "nonzero_rows": nonzero_rows,
             }
-        rows_with_any_nonzero_activity = (
-            _count_true(_or_all(nonzero_masks)) if nonzero_masks else 0
-        )
+        rows_with_any_nonzero_activity = _count_true(_or_all(nonzero_masks)) if nonzero_masks else 0
 
         return {
             "path_identity_sha256": path_identity,
@@ -346,9 +339,7 @@ def _freshness(
     audit_day = date.fromisoformat(as_of)
     lag = (audit_day - latest_day).days
     if lag < 0:
-        raise CandidateInterfaceAuditError(
-            "latest observation is after fixed audit date"
-        )
+        raise CandidateInterfaceAuditError("latest observation is after fixed audit date")
     return {
         "latest_observation": latest,
         "calendar_lag_days": lag,
@@ -414,18 +405,12 @@ def _summarize_interface(
                 field=field,
                 category="activity",
             ),
-            "non_null_rows": sum(
-                record["activity"][field]["non_null_rows"] for record in scanned
-            ),
-            "nonzero_rows": sum(
-                record["activity"][field]["nonzero_rows"] for record in scanned
-            ),
+            "non_null_rows": sum(record["activity"][field]["non_null_rows"] for record in scanned),
+            "nonzero_rows": sum(record["activity"][field]["nonzero_rows"] for record in scanned),
         }
         for field in activity_fields
     }
-    rows_with_activity = sum(
-        record["rows_with_any_nonzero_activity"] for record in scanned
-    )
+    rows_with_activity = sum(record["rows_with_any_nonzero_activity"] for record in scanned)
     return {
         "matched_files": len(records),
         "scanned_files": len(scanned),
@@ -458,9 +443,7 @@ def _summarize_interface(
         },
         "timestamp_quality": {
             "null_rows": sum(record["null_timestamp_rows"] for record in scanned),
-            "duplicate_rows": sum(
-                record["duplicate_timestamp_rows"] for record in scanned
-            ),
+            "duplicate_rows": sum(record["duplicate_timestamp_rows"] for record in scanned),
         },
         "ohlc_quality": {
             "fields": {
@@ -469,9 +452,7 @@ def _summarize_interface(
             },
             "rows_checked": sum(record["ohlc_rows_checked"] for record in scanned),
             "null_rows": sum(record["ohlc_null_rows"] for record in scanned),
-            "violation_rows": sum(
-                record["ohlc_violation_rows"] for record in scanned
-            ),
+            "violation_rows": sum(record["ohlc_violation_rows"] for record in scanned),
         },
         "activity_fields": activity,
         "liquidity_proxy": {
@@ -495,9 +476,7 @@ def _inventory_tasks(
     for cadence in contract["cadences"]:
         root = data_root / cadence
         if not root.is_dir():
-            raise CandidateInterfaceAuditError(
-                f"required cadence root is unavailable: {cadence}"
-            )
+            raise CandidateInterfaceAuditError(f"required cadence root is unavailable: {cadence}")
         paths = sorted(root.iterdir(), key=lambda path: path.name)
         directory_entries[cadence] = len(paths)
         for path in paths:
@@ -568,9 +547,7 @@ def build_audit(
                 "unclassified",
             ):
                 interface_records = [
-                    record
-                    for record in family_records
-                    if record["interface"] == interface
+                    record for record in family_records if record["interface"] == interface
                 ]
                 if interface_records:
                     interfaces[interface] = _summarize_interface(
@@ -596,11 +573,7 @@ def build_audit(
         )
 
     inventory_records = [
-        {
-            key: value
-            for key, value in record.items()
-            if key not in {"family", "cadence"}
-        }
+        {key: value for key, value in record.items() if key not in {"family", "cadence"}}
         | {
             "family": record["family"],
             "cadence": record["cadence"],
@@ -620,10 +593,7 @@ def build_audit(
         "audit_as_of_local_date": as_of,
         "timezone": contract["timezone"],
         "contract": {
-            "alias": (
-                "repository://paired-trading/"
-                "phase1-candidate-interface-audit-contract-v1"
-            ),
+            "alias": ("repository://paired-trading/phase1-candidate-interface-audit-contract-v1"),
             "schema_version": contract["schema_version"],
             "sha256": sha256_file(contract_path),
         },
