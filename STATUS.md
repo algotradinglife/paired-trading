@@ -1,7 +1,57 @@
 # paired-trading — project status
 
-Snapshot at 2026-06-09.  Read this first to know where the project
-stands; consult linked docs / commits for the details.
+Snapshot at 2026-08-01. Read the current research gate first. The detailed
+engine and baseline snapshot from 2026-06 is retained below as dated history;
+its measurements do not override the newer PA/Feitian research decisions.
+
+## Current research gate (2026-08-01)
+
+| Surface | State | Authoritative evidence |
+| --- | --- | --- |
+| Repository baseline | `main` and `develop` are aligned at `3413775` after M6R promotion | [PR #70](https://github.com/algotradinglife/paired-trading/pull/70) |
+| Coordination | M6R ended without an authorized successor research issue; this post-promotion documentation sync is tracked separately | [Issue #71](https://github.com/algotradinglife/paired-trading/issues/71) |
+| M6 engineering foundation | Merged; strategy screening did not pass | [`pa-feitian-m6-final-internal-review-2026-07-11.md`](doc/repro/pa-feitian-m6-final-internal-review-2026-07-11.md) |
+| P1-EXP-002 | Stopped before outcome access: `stop_p1_exp_002` | [`pa-feitian-phase1-p1-exp-002-decision-2026-07-31`](doc/repro/pa-feitian-phase1-p1-exp-002-decision-2026-07-31/README.md) |
+| M6R bare-K recovery | Complete but inconclusive: `no_candidate`, candidate count 0 | [`pa-feitian-m6r-reveal-comparison-synthesis-v1.md`](doc/repro/pa-feitian-m6r-reveal-comparison-synthesis-v1.md) |
+| M7 and downstream stages | Not authorized | M6 and M6R decisions above |
+
+### What the latest research completed
+
+- The M6R data pack contains 72 deterministic blind episodes across 9 futures
+  families and 3 exchanges: 36 candidate-activity and 36 ordinary-control
+  windows. See the [data handoff](doc/repro/pa-feitian-m6r-historical-bare-k-episode-pack-2026-07-31/README.md).
+- Strategy completed 72/72 blind first-pass annotations before reveal and
+  preserved the frozen descriptors byte-for-byte.
+- The authorized comparison audited 27 predeclared descriptor categories. Of
+  the 15 categories that passed the structural support floor, all 15 had both
+  positive and negative horizon-20 close changes. Freezing a direction,
+  horizon, or threshold from that sample would therefore be post-hoc.
+
+### Why work is stopped
+
+- P1-EXP-002 cannot be revived from the existing source snapshot. All 12
+  intraday cells lack independently approved provider/bar-end semantics,
+  521,090 intraday timestamps remain unexplained, and 169 daily OHLC findings
+  violate the accepted zero-finding gate.
+- M6R produced no candidate suitable for independent validation. The 72
+  episodes remain a discovery set and are not independent proof.
+
+### Next permitted gate
+
+No PA/Feitian candidate implementation or M7 work should start from the current
+evidence. A new, reviewed GitHub issue must first choose and preregister one
+defensible path:
+
+1. revisit P1 only with a new immutable source version, authoritative provider
+   and bar-end semantics, lossless row accounting, and a new Strategy decision;
+2. introduce a separately sourced hypothesis and an independent evaluation
+   sample without re-mining the 72 M6R episodes as validation evidence; or
+3. stop the PA/Feitian research line if neither evidence path is available.
+
+Contribution state, review, and validation routing are defined in
+[`WORKFLOW.md`](WORKFLOW.md).
+
+## Historical engine and baseline snapshot (2026-06-08 through 2026-06-12)
 
 > **Re-validation complete (2026-06-12)** — backfill done (0 required gaps);
 > dashboard **12 OK / 1 STALE**. CN cells reproduce their ORIGINAL 5.5y
@@ -149,7 +199,7 @@ the repro exit code. Mechanism:
 - Design + plan: `docs/superpowers/specs/2026-06-09-baseline-validation-schema-design.md`,
   `docs/superpowers/plans/2026-06-09-baseline-validation-schema.md`.
 
-Current dashboard (`validate_baselines.py --full`, commit `a69d7688`):
+Dashboard snapshot (`validate_baselines.py --full`, commit `a69d7688`):
 ```
 [ OK ]  bpull          cn_metal_futures  STRONG PASS         0.75
 [ OK ]  context_a      cn_metal_futures  CONDITIONAL PASS    0.60
