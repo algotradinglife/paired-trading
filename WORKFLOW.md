@@ -119,7 +119,10 @@ Findings: <none or actionable findings>
 
 ## Current Research Boundary
 
-The 2026-08-01 gate is `stop_p1_exp_002` plus M6R `no_candidate`. It does
-not authorize independent candidate evaluation, M7, M8, live/shadow trading,
-or execution. Any next lane starts with a new reviewed issue and the evidence
-requirements recorded in `STATUS.md`.
+The 2026-08-02 gate preserves `stop_p1_exp_002` and M6R `no_candidate`, and
+accepts the M6M terminal `method_reconciled_recommend_path`. The next eligible
+lane is a separately reviewed source-fidelity evidence-recovery contract at the
+measurement/construct-readiness and discovery claim level. It is not an
+experiment authorization. M7, M8, live/shadow trading, and execution remain
+blocked; the exact evidence and contamination requirements are recorded in
+`STATUS.md`.

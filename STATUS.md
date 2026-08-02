@@ -1,19 +1,20 @@
 # paired-trading — project status
 
-Snapshot at 2026-08-01. Read the current research gate first. The detailed
+Snapshot at 2026-08-02. Read the current research gate first. The detailed
 engine and baseline snapshot from 2026-06 is retained below as dated history;
 its measurements do not override the newer PA/Feitian research decisions.
 
-## Current research gate (2026-08-01)
+## Current research gate (2026-08-02)
 
 | Surface | State | Authoritative evidence |
 | --- | --- | --- |
-| Repository baseline | `main` and `develop` are aligned at `3413775` after M6R promotion | [PR #70](https://github.com/algotradinglife/paired-trading/pull/70) |
-| Coordination | M6R ended without an authorized successor research issue; this post-promotion documentation sync is tracked separately | [Issue #71](https://github.com/algotradinglife/paired-trading/issues/71) |
+| Repository baseline | Accepted M6M evidence is on `develop@7673394` and promoted to `main@87fcc91` | [PR #74](https://github.com/algotradinglife/paired-trading/pull/74), [PR #75](https://github.com/algotradinglife/paired-trading/pull/75) |
+| Coordination | M6M accepted `method_reconciled_recommend_path`; the next eligible lane is source-fidelity evidence recovery, not an experiment | [Issue #73](https://github.com/algotradinglife/paired-trading/issues/73) |
 | M6 engineering foundation | Merged; strategy screening did not pass | [`pa-feitian-m6-final-internal-review-2026-07-11.md`](doc/repro/pa-feitian-m6-final-internal-review-2026-07-11.md) |
 | P1-EXP-002 | Stopped before outcome access: `stop_p1_exp_002` | [`pa-feitian-phase1-p1-exp-002-decision-2026-07-31`](doc/repro/pa-feitian-phase1-p1-exp-002-decision-2026-07-31/README.md) |
 | M6R bare-K recovery | Complete but inconclusive: `no_candidate`, candidate count 0 | [`pa-feitian-m6r-reveal-comparison-synthesis-v1.md`](doc/repro/pa-feitian-m6r-reveal-comparison-synthesis-v1.md) |
-| M7 and downstream stages | Not authorized | M6 and M6R decisions above |
+| M6M method reconciliation | Accepted: source-fidelity recovery first; bare-K only as an explicitly non-authentic fallback | [`pa-feitian-m6m-method-reconciliation-2026-08-02`](doc/repro/pa-feitian-m6m-method-reconciliation-2026-08-02/README.md) |
+| Experiment, M7, and downstream stages | Not authorized | M6M PI decision above |
 
 ### What the latest research completed
 
@@ -26,8 +27,14 @@ its measurements do not override the newer PA/Feitian research decisions.
   the 15 categories that passed the structural support floor, all 15 had both
   positive and negative horizon-20 close changes. Freezing a direction,
   horizon, or threshold from that sample would therefore be post-hoc.
+- M6M reconciled the source-defined Feitian option decision chain, the explicitly
+  non-authentic M6 bare-K proxy, and the M6R discovery object without rewriting
+  any frozen result. The attached
+  [fresh Strategist EV receipt](doc/repro/pa-feitian-m6m-method-reconciliation-2026-08-02/independent-evidence-validation-receipt.md)
+  records PASS for transitions A/B/C and the terminal
+  `method_reconciled_recommend_path`, with no unresolved critical finding.
 
-### Why work is stopped
+### Why experiment work remains stopped
 
 - P1-EXP-002 cannot be revived from the existing source snapshot. All 12
   intraday cells lack independently approved provider/bar-end semantics,
@@ -35,18 +42,34 @@ its measurements do not override the newer PA/Feitian research decisions.
   violate the accepted zero-finding gate.
 - M6R produced no candidate suitable for independent validation. The 72
   episodes remain a discovery set and are not independent proof.
+- M6 and M6R did not measure the full source-defined option decision chain.
+  Their results cannot falsify that chain, but neither do they support it. The
+  construct and its causal measurement must be recovered before experimental
+  design is defensible.
 
 ### Next permitted gate
 
-No PA/Feitian candidate implementation or M7 work should start from the current
-evidence. A new, reviewed GitHub issue must first choose and preregister one
-defensible path:
+No PA/Feitian experiment, candidate implementation, or M7 work may start from
+the current evidence. The next reviewed Issue may authorize only a
+**source-fidelity evidence-recovery contract** at the
+measurement/construct-readiness and discovery claim level. It must:
 
-1. revisit P1 only with a new immutable source version, authoritative provider
-   and bar-end semantics, lossless row accounting, and a new Strategy decision;
-2. introduce a separately sourced hypothesis and an independent evaluation
-   sample without re-mining the 72 M6R episodes as validation evidence; or
-3. stop the PA/Feitian research line if neither evidence path is available.
+1. recover or fail closed on source-authorized chart, option-contract,
+   direction, DD/descending-line, 1B/2B, holistic-quality, premium, and roll
+   semantics;
+2. bind causally available inputs, provenance, unresolved fields, abstention
+   rules, and an append-only contamination ledger; source semantics must not be
+   tuned or reinterpreted against known M6/M6R outcomes;
+3. keep all 72 M6R episodes outside confirmation for any claim they helped
+   induce; and
+4. stop as `measurement_failure` / `unrecoverable_construct` if source semantics
+   or causal premium measurement cannot pass their gates.
+
+Do not open a preregistered experiment Issue until that recovery contract has a
+reviewable construct, an admissible evidence source, and an independent
+confirmation reserve. If source fidelity is infeasible, PI may separately
+authorize a clearly named non-authentic bare-K discovery line; it must not be
+called authentic Feitian or Xiao-plus by inheritance.
 
 Contribution state, review, and validation routing are defined in
 [`WORKFLOW.md`](WORKFLOW.md).
