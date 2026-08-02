@@ -1090,10 +1090,12 @@ const positiveClaimPatterns = [
   /\bPI\s+may\s+(?:now\s+)?open\s+(?:a\s+)?(?:separate\s+)?preregistration-design\s+Issue\b/i
 ];
 
-function validatePublicSafety(content, claimContent = content, { javascriptSource = false, baselineVerifier = false } = {}) {
-  const pathValueContent = javascriptSource ? maskJavaScriptRegexLiterals(content) : content;
+function validatePublicSafety(content, claimContent = content, { javascriptSource = false } = {}) {
+  const pathValueContent = javascriptSource
+    ? maskJavaScriptRegexLiterals(content).replace(/\/(?:\\.|[^/\\\n"'`])+\/[dgimsuvy]*/g, (token) => " ".repeat(token.length))
+    : content;
   for (const [label, pattern] of pathValueSafetyPatterns) {
-    if (!(javascriptSource && baselineVerifier)) assert.equal(pattern.test(pathValueContent), false, `public-safe scan: ${label}`);
+    assert.equal(pattern.test(pathValueContent), false, `public-safe scan: ${label}`);
   }
   for (const [label, pattern] of publicSafetyPatterns) {
     assert.doesNotMatch(content, pattern, `public-safe scan: ${label}`);
@@ -1113,7 +1115,10 @@ function collectPackageText(overrides = {}, includeVerifier = true) {
 function validatePackagePublicSafety(overrides = {}) {
   for (const name of actualFiles) {
     const content = overrides[name] ?? text(name);
-    validatePublicSafety(content, "", { javascriptSource: name === names.verify, baselineVerifier: name === names.verify && !overrides[name] });
+    if (name === names.verify && overrides[name]) {
+      for (const [, pattern] of pathValueSafetyPatterns) assert.doesNotMatch(content, pattern, "public-safe raw verifier mutation");
+    }
+    validatePublicSafety(content, "", { javascriptSource: name === names.verify });
   }
   for (const pattern of positiveClaimPatterns) {
     assert.doesNotMatch(

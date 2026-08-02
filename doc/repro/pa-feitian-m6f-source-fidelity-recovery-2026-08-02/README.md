@@ -10,7 +10,7 @@ Governance baseline: `main@4fa3dc4c3df59fa545a15fb48e01d42f95ff4d07`
 
 Current terminal state: **`source_fidelity_measurement_failure`**
 
-Manifest SHA-256: `6a4b9e330caff23491a81319bcaf344e23b1cedd0565c8816c16e78d837c0606`
+Manifest SHA-256: `a42a1d9bbd002d66a49173b71960e1e107df76700c34da96c9169663196184e7`
 
 ## Decision
 

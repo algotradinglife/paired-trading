@@ -37,9 +37,9 @@
       "sha256": "7aef92ff3df85e8e3abf1a6ef347fca738b0eeafe842cd0feab7da5875a9cc34"
     },
     {
-      "byte_length": 78150,
+      "byte_length": 78302,
       "path": "verify.mjs",
-      "sha256": "9a752d42692af7500a380d28e2c1c18b09a618c44cce072567132a3f9a1c749f"
+      "sha256": "d641f0f53c9f11fc04cc9dd07e5b1e29c363323dfce9d8d626a6d5b3043c5a7a"
     }
   ],
   "hash_scope_exclusions": [
