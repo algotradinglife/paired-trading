@@ -49,7 +49,7 @@
 - 代码和数据彻底分离——**永不提交数据文件**
 - PI 是唯一 merge authority；完整路由见 [`WORKFLOW.md`](WORKFLOW.md)
 
-## 当前策略状态（截至 2026-08-01）
+## 当前策略状态（截至 2026-08-02）
 
 以 [`STATUS.md`](STATUS.md) 为当前研究门的单一入口，以
 [`WORKFLOW.md`](WORKFLOW.md) 为 Issue、PR、PI review 和独立验证流程。
@@ -59,7 +59,12 @@
   不满足时间戳语义、逐行对账和 OHLC 质量门。
 - M6R 已完成 72/72 盲标注和揭示比较，冻结结论为 `no_candidate`，
   candidate count 为 0；原 72 个 episode 不能改作独立验证样本。
-- 当前没有获准实施的后续研究 Issue。M7、M8、shadow/live 和执行均未授权。
+- M6M 已接受 `method_reconciled_recommend_path`：先恢复 source-fidelity
+  Feitian 构念及其因果测量；只有 PI 明确终止该路径后，才可另开明确命名的
+  non-authentic bare-K discovery 路径。
+- 下一 Issue 只可覆盖 measurement/construct readiness 与 discovery；不得直接
+  创建实验、冻结参数或复用 72 个 M6R episode 作 confirmation。
+- M7、M8、shadow/live 和执行均未授权。
 
 ### 历史实现快照（2026-06-12）
 
