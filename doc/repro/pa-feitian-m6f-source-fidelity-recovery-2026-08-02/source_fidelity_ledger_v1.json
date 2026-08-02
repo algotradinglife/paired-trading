@@ -1,0 +1,227 @@
+{
+  "acquisition_cutoff": "2026-08-02T06:30:04Z",
+  "artifact_type": "pa_feitian_m6f_source_fidelity_ledger",
+  "nodes": [
+    {
+      "abstention_rule": "Do not emit call or put bias until the original source author supplies a versioned causal direction protocol.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "Required at the decision cutoff, but the pinned source does not identify the underlying or regime fields that determine the bias.",
+      "conflicting_evidence": "The M6 proxy inferred a generic mirror without the source direction input; that proxy is not source evidence.",
+      "contamination_entry_ids": [
+        "CONTAM-0002",
+        "CONTAM-0005"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "perception",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L20-L22",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-01-UNDERLYING-DIRECTION",
+      "public_safe_claim": "The source says an underlying or regime view supplies call-versus-put direction, but gives no deterministic or authorized direction protocol.",
+      "resolution_state": "critical_semantic_gap_no_authorized_route",
+      "status": "unresolved"
+    },
+    {
+      "abstention_rule": "Do not select an option contract until lifecycle, eligibility, tie-breaking, and as-of selection semantics are source-authorized.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "Contract attributes must be available before selection; the source gives indicative moneyness and time-to-expiry only.",
+      "conflicting_evidence": "Any historical eligibility implementation or provider inventory is measurement evidence, not authorization of source semantics.",
+      "contamination_entry_ids": [
+        "CONTAM-0005"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "decision",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L20-L23",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-02-OPTION-CONTRACT",
+      "public_safe_claim": "The source describes a shallow out-of-the-money option with remaining life, but does not fully specify a reproducible contract-selection rule.",
+      "resolution_state": "critical_semantic_gap_no_authorized_route",
+      "status": "provisional_gap"
+    },
+    {
+      "abstention_rule": "Accept only completed daily option candles; abstain if exchange session, timezone, close boundary, or as-of availability is not independently bound.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "A completed daily option candle is required at its exchange-defined publication boundary before the decision.",
+      "conflicting_evidence": "The source rejects an intraday reinterpretation, but does not supply provider or exchange bar-end semantics.",
+      "contamination_entry_ids": [
+        "CONTAM-0005"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "event",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L16-L20",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-03-DAILY-CHART",
+      "public_safe_claim": "Completed option daily candles are the pinned operating cadence; exact exchange and provider completion semantics remain a measurement requirement.",
+      "resolution_state": "semantic_claim_pinned_measurement_not_proven",
+      "status": "source_pinned"
+    },
+    {
+      "abstention_rule": "Do not draw or trade a DD low-line until anchor selection, tie handling, touch count, projection, and tolerance are source-authorized.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "Only completed candles at the decision cutoff may supply anchors; no causal anchor-selection protocol is pinned.",
+      "conflicting_evidence": "M6 used latest strict local pivots and a two-point projection as an invented auditable proxy.",
+      "contamination_entry_ids": [
+        "CONTAM-0002",
+        "CONTAM-0005"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "perception",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L23-L34",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-04-DD-LOW-LINE",
+      "public_safe_claim": "The DD line extends lows as the preferred left-side target, but its anchors and construction are not deterministically specified.",
+      "resolution_state": "critical_semantic_gap_no_authorized_route",
+      "status": "unresolved"
+    },
+    {
+      "abstention_rule": "Do not classify a right-side break until high anchors, line construction, break evaluation, and chart source are source-authorized.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "Only completed candles may form the high-line and break; the pinned source leaves the underlying-versus-option chart choice open.",
+      "conflicting_evidence": "The source proposes an A/B comparison between option and underlying charts; outcome comparison cannot choose source semantics here.",
+      "contamination_entry_ids": [
+        "CONTAM-0002",
+        "CONTAM-0005"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "perception",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L34-L50",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-05-DESCENDING-HIGH-LINE",
+      "public_safe_claim": "A descending-high extension supplies the alternate right-side confirmation path, but its anchors, construction, and chart plane are unresolved.",
+      "resolution_state": "critical_semantic_gap_no_authorized_route",
+      "status": "unresolved"
+    },
+    {
+      "abstention_rule": "Return unknown rather than classify 1B or 2B without an original-trader protocol or labels frozen before outcome comparison.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "The classification must use only context visible by the completed decision candle; no exact state machine is authorized.",
+      "conflicting_evidence": "The narrative says 2B is usually higher quality than 1B, while the M6 ledger explicitly records the absent deterministic definition.",
+      "contamination_entry_ids": [
+        "CONTAM-0002",
+        "CONTAM-0005"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "perception",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L26-L33",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-06-ONE-B-TWO-B",
+      "public_safe_claim": "The source ranks second-pullback quality above first-pullback quality but does not define a reproducible 1B/2B classifier.",
+      "resolution_state": "critical_semantic_gap_no_authorized_route",
+      "status": "unresolved"
+    },
+    {
+      "abstention_rule": "Return unknown rather than synthesize a quality score, weights, thresholds, or LLM consensus label.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "Judgment must be made from the completed decision-time context; no exact source-authorized annotation protocol exists.",
+      "conflicting_evidence": "The pinned source explicitly describes holistic context and rejects a hard conjunction, while leaving weights and thresholds for later calibration.",
+      "contamination_entry_ids": [
+        "CONTAM-0002",
+        "CONTAM-0005",
+        "CONTAM-0006"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "perception",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L28-L33",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-07-HOLISTIC-QUALITY",
+      "public_safe_claim": "The source calls for a holistic exhaustion or pullback-strength judgment, not five independently tuned hard thresholds; no adjudication protocol is authorized.",
+      "resolution_state": "critical_semantic_gap_no_authorized_route",
+      "status": "unresolved"
+    },
+    {
+      "abstention_rule": "Honor the pinned left preference only after both paths are valid; abstain on all other simultaneous, degenerate, or conflicting states.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "Both path states and any fill state must be available by the decision cutoff without future-bar confirmation.",
+      "conflicting_evidence": "M6 invented invalidation-first and conflict ordering beyond the source-pinned left preference.",
+      "contamination_entry_ids": [
+        "CONTAM-0002",
+        "CONTAM-0005"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "decision",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L23-L38",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-08-ENTRY-ORDERING",
+      "public_safe_claim": "The left-side path is preferred and the right-side path is a fallback; complete conflict and fill ordering is not source-specified.",
+      "resolution_state": "critical_semantic_gap_no_authorized_route",
+      "status": "provisional_gap"
+    },
+    {
+      "abstention_rule": "Do not emit an invalidation price or state until reference structure, distance unit, buffer, gap handling, and evaluation convention are authorized.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "The structural reference must pre-exist the decision and evaluation must use only an available completed candle.",
+      "conflicting_evidence": "M6 used a completed close with no buffer solely as a provisional parameter-free proxy.",
+      "contamination_entry_ids": [
+        "CONTAM-0002",
+        "CONTAM-0005"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "decision",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L36-L39",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-09-STRUCTURAL-INVALIDATION",
+      "public_safe_claim": "The source requires strict structural invalidation below the DD or reversal structure, but its buffer and bar-path convention remain unspecified.",
+      "resolution_state": "critical_semantic_gap_no_authorized_route",
+      "status": "provisional_gap"
+    },
+    {
+      "abstention_rule": "Do not simulate premium exits, runner behavior, expiry transitions, or rolls until all price, target, trend-line, and contract-mapping semantics are authorized and measurable.",
+      "acquisition_or_authorization_at": "2026-08-02T06:30:04Z",
+      "causal_availability": "Every management decision needs a causally available premium candle and contract state; later path values are outcome-plane only.",
+      "conflicting_evidence": "The source names three tranches and two roll triggers but explicitly leaves target magnitudes and implementation details for later empirical calibration.",
+      "contamination_entry_ids": [
+        "CONTAM-0001",
+        "CONTAM-0005"
+      ],
+      "critical_to_construct": true,
+      "decision_plane": "decision",
+      "evidence": {
+        "authorization_class": "pinned_existing_source_not_authorized",
+        "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L39-L48",
+        "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
+      },
+      "node_id": "SF-10-PREMIUM-MANAGEMENT",
+      "public_safe_claim": "Premium-space tranche exits, a structural runner, and rolls are source-named, but target magnitudes, trend construction, lifecycle mapping, and execution semantics are not fixed.",
+      "resolution_state": "critical_semantic_gap_no_authorized_route",
+      "status": "provisional_gap"
+    }
+  ],
+  "schema_version": "pa_feitian_m6f_source_fidelity_ledger_v1",
+  "terminal_result": "source_fidelity_unrecoverable_construct"
+}

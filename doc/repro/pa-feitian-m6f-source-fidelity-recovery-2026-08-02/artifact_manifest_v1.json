@@ -1,0 +1,46 @@
+{
+  "artifact_type": "pa_feitian_m6f_artifact_manifest",
+  "entries": [
+    {
+      "byte_length": 1644,
+      "path": "confirmation_reserve_contract_v1.json",
+      "sha256": "b840769c7ff51e6fc266a6b4f81e4a8a05065fe36096c01fd940d4d5c4c6f923"
+    },
+    {
+      "byte_length": 7885,
+      "path": "construct_dag_v1.json",
+      "sha256": "8a1cae136a4eee981c270ab4149b2d5ad924479fda1492a7a049e7851f30d304"
+    },
+    {
+      "byte_length": 3687,
+      "path": "contamination_ledger_v1.jsonl",
+      "sha256": "82e2d078ae955264e0d449b4e2a12b58df8432a7f46941d341765f588bacdb11"
+    },
+    {
+      "byte_length": 16984,
+      "path": "measurement_readiness_v1.json",
+      "sha256": "f380b0e1934a286461392a2f3d843bc766f13c4e4cba157bbe5655c5477b45c3"
+    },
+    {
+      "byte_length": 14139,
+      "path": "schema_v1.json",
+      "sha256": "982452c72544811d561cb4c4d20dbb33710c34658e0c04cc17a27e07f377f18d"
+    },
+    {
+      "byte_length": 14329,
+      "path": "source_fidelity_ledger_v1.json",
+      "sha256": "56a4bd0c7072e15a14c0251bfaf269ad479e8e24737e9f74691481175e482b5f"
+    },
+    {
+      "byte_length": 16527,
+      "path": "verify.mjs",
+      "sha256": "7948e2e8f05ee527ab85cf585cb086246ea7c6db95427d4a9c155f0c8414d208"
+    }
+  ],
+  "hash_scope_exclusions": [
+    "artifact_manifest_v1.json",
+    "README.md",
+    "independent-evidence-validation-receipt.md"
+  ],
+  "schema_version": "pa_feitian_m6f_artifact_manifest_v1"
+}

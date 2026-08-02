@@ -1,0 +1,587 @@
+{
+  "$defs": {
+    "artifact_manifest": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "const": "pa_feitian_m6f_artifact_manifest"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/manifest_entry"
+          },
+          "maxItems": 7,
+          "minItems": 7,
+          "type": "array"
+        },
+        "hash_scope_exclusions": {
+          "$ref": "#/$defs/string_array"
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_artifact_manifest_v1"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "entries",
+        "hash_scope_exclusions",
+        "schema_version"
+      ],
+      "type": "object"
+    },
+    "confirmation_reserve_contract": {
+      "additionalProperties": false,
+      "properties": {
+        "access_log_locator": {
+          "const": "contamination_ledger_v1.jsonl"
+        },
+        "artifact_type": {
+          "const": "pa_feitian_m6f_confirmation_reserve_contract"
+        },
+        "custodian_role": {
+          "type": "string"
+        },
+        "eligibility_rule": {
+          "type": "string"
+        },
+        "eligibility_rule_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "exclusion_rule": {
+          "type": "string"
+        },
+        "exclusion_set_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "mechanically_enforceable": {
+          "type": "boolean"
+        },
+        "permitted_metadata_visible_to_strategy": {
+          "$ref": "#/$defs/string_array"
+        },
+        "release_authority_role": {
+          "enum": [
+            "pi"
+          ]
+        },
+        "required_releasing_issue_type": {
+          "const": "pi_approved_preregistration_design"
+        },
+        "reserve_id": {
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_confirmation_reserve_contract_v1"
+        },
+        "sealed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "sealed",
+            "unavailable_no_custodian_or_sealed_identity_manifest"
+          ]
+        },
+        "strategy_visibility_prohibition": {
+          "type": "string"
+        },
+        "terminal_effect": {
+          "enum": [
+            "none",
+            "readiness_cannot_pass"
+          ]
+        }
+      },
+      "required": [
+        "access_log_locator",
+        "artifact_type",
+        "custodian_role",
+        "eligibility_rule",
+        "eligibility_rule_sha256",
+        "exclusion_rule",
+        "exclusion_set_sha256",
+        "mechanically_enforceable",
+        "permitted_metadata_visible_to_strategy",
+        "release_authority_role",
+        "required_releasing_issue_type",
+        "reserve_id",
+        "schema_version",
+        "sealed_at",
+        "status",
+        "strategy_visibility_prohibition",
+        "terminal_effect"
+      ],
+      "type": "object"
+    },
+    "construct_dag": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "const": "pa_feitian_m6f_construct_dag"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/dag_edge"
+          },
+          "type": "array"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/dag_node"
+          },
+          "type": "array"
+        },
+        "plane_order": {
+          "items": {
+            "enum": [
+              "event",
+              "perception",
+              "decision",
+              "outcome"
+            ]
+          },
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_construct_dag_v1"
+        },
+        "terminal_result": {
+          "$ref": "#/$defs/terminal_result"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "edges",
+        "nodes",
+        "plane_order",
+        "schema_version",
+        "terminal_result"
+      ],
+      "type": "object"
+    },
+    "contamination_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "access_class": {
+          "type": "string"
+        },
+        "actor_role": {
+          "enum": [
+            "strategist",
+            "independent_reviewer",
+            "pi",
+            "data_custodian",
+            "source_author"
+          ]
+        },
+        "entry_id": {
+          "pattern": "^CONTAM-[0-9]{4}$",
+          "type": "string"
+        },
+        "entry_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "evidence_id": {
+          "type": "string"
+        },
+        "permitted_use": {
+          "type": "string"
+        },
+        "prior_entry_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "sequence": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "timestamp": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "access_class",
+        "actor_role",
+        "entry_id",
+        "entry_sha256",
+        "evidence_id",
+        "permitted_use",
+        "prior_entry_sha256",
+        "sequence",
+        "timestamp"
+      ],
+      "type": "object"
+    },
+    "dag_edge": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "type": "object"
+    },
+    "dag_node": {
+      "additionalProperties": false,
+      "properties": {
+        "abstention_behavior": {
+          "type": "string"
+        },
+        "causal_cutoff": {
+          "type": "string"
+        },
+        "conflict_behavior": {
+          "type": "string"
+        },
+        "inputs": {
+          "$ref": "#/$defs/string_array"
+        },
+        "ledger_node_id": {
+          "type": "string"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "output": {
+          "type": "string"
+        },
+        "plane": {
+          "enum": [
+            "event",
+            "perception",
+            "decision",
+            "outcome"
+          ]
+        },
+        "readiness": {
+          "enum": [
+            "deterministic_rule",
+            "source_authorized_protocol",
+            "fail_closed"
+          ]
+        }
+      },
+      "required": [
+        "abstention_behavior",
+        "causal_cutoff",
+        "conflict_behavior",
+        "inputs",
+        "ledger_node_id",
+        "node_id",
+        "output",
+        "plane",
+        "readiness"
+      ],
+      "type": "object"
+    },
+    "hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ledger_node": {
+      "additionalProperties": false,
+      "properties": {
+        "abstention_rule": {
+          "type": "string"
+        },
+        "acquisition_or_authorization_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "causal_availability": {
+          "type": "string"
+        },
+        "conflicting_evidence": {
+          "type": "string"
+        },
+        "contamination_entry_ids": {
+          "$ref": "#/$defs/string_array"
+        },
+        "critical_to_construct": {
+          "type": "boolean"
+        },
+        "decision_plane": {
+          "enum": [
+            "event",
+            "perception",
+            "decision",
+            "outcome"
+          ]
+        },
+        "evidence": {
+          "$ref": "#/$defs/source_evidence"
+        },
+        "node_id": {
+          "pattern": "^SF-[0-9]{2}-[A-Z0-9-]+$",
+          "type": "string"
+        },
+        "public_safe_claim": {
+          "type": "string"
+        },
+        "resolution_state": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "source_pinned",
+            "source_authorized",
+            "method_constraint",
+            "provisional_gap",
+            "unresolved"
+          ]
+        }
+      },
+      "required": [
+        "abstention_rule",
+        "acquisition_or_authorization_at",
+        "causal_availability",
+        "conflicting_evidence",
+        "contamination_entry_ids",
+        "critical_to_construct",
+        "decision_plane",
+        "evidence",
+        "node_id",
+        "public_safe_claim",
+        "resolution_state",
+        "status"
+      ],
+      "type": "object"
+    },
+    "manifest_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_length": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/hash"
+        }
+      },
+      "required": [
+        "byte_length",
+        "path",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "measurement_field": {
+      "additionalProperties": false,
+      "properties": {
+        "available_at_and_decision_cutoff": {
+          "type": "string"
+        },
+        "bar_open_and_end_semantics": {
+          "type": "string"
+        },
+        "evidence_locator": {
+          "type": "string"
+        },
+        "exchange_timezone_and_session": {
+          "type": "string"
+        },
+        "expiry_and_roll_mapping": {
+          "type": "string"
+        },
+        "fail_closed_behavior": {
+          "type": "string"
+        },
+        "field_id": {
+          "pattern": "^MEAS-[0-9]{2}-[A-Z0-9-]+$",
+          "type": "string"
+        },
+        "missing_and_rejected_row_accounting": {
+          "type": "string"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "option_lifecycle_and_selection_state": {
+          "type": "string"
+        },
+        "premium_price_basis": {
+          "type": "string"
+        },
+        "provenance_and_replay_binding": {
+          "type": "string"
+        },
+        "readiness_status": {
+          "enum": [
+            "pass",
+            "blocked",
+            "fail",
+            "not_applicable"
+          ]
+        },
+        "required_fields": {
+          "$ref": "#/$defs/string_array"
+        },
+        "source_class": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "available_at_and_decision_cutoff",
+        "bar_open_and_end_semantics",
+        "evidence_locator",
+        "exchange_timezone_and_session",
+        "expiry_and_roll_mapping",
+        "fail_closed_behavior",
+        "field_id",
+        "missing_and_rejected_row_accounting",
+        "node_id",
+        "option_lifecycle_and_selection_state",
+        "premium_price_basis",
+        "provenance_and_replay_binding",
+        "readiness_status",
+        "required_fields",
+        "source_class"
+      ],
+      "type": "object"
+    },
+    "measurement_readiness": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "const": "pa_feitian_m6f_measurement_readiness"
+        },
+        "audit_boundary": {
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/measurement_field"
+          },
+          "minItems": 10,
+          "type": "array"
+        },
+        "measurement_result": {
+          "enum": [
+            "pass",
+            "blocked",
+            "fail"
+          ]
+        },
+        "open_external_dependency": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_measurement_readiness_v1"
+        },
+        "terminal_precedence_applied": {
+          "type": "string"
+        },
+        "terminal_result": {
+          "$ref": "#/$defs/terminal_result"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "audit_boundary",
+        "fields",
+        "measurement_result",
+        "open_external_dependency",
+        "schema_version",
+        "terminal_precedence_applied",
+        "terminal_result"
+      ],
+      "type": "object"
+    },
+    "source_evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "authorization_class": {
+          "enum": [
+            "pinned_existing_source_not_authorized",
+            "explicit_source_authorization"
+          ]
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "locator": {
+          "type": "string"
+        },
+        "repository_revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authorization_class",
+        "file_sha256",
+        "locator",
+        "repository_revision"
+      ],
+      "type": "object"
+    },
+    "source_fidelity_ledger": {
+      "additionalProperties": false,
+      "properties": {
+        "acquisition_cutoff": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "artifact_type": {
+          "const": "pa_feitian_m6f_source_fidelity_ledger"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/ledger_node"
+          },
+          "maxItems": 10,
+          "minItems": 10,
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_source_fidelity_ledger_v1"
+        },
+        "terminal_result": {
+          "$ref": "#/$defs/terminal_result"
+        }
+      },
+      "required": [
+        "acquisition_cutoff",
+        "artifact_type",
+        "nodes",
+        "schema_version",
+        "terminal_result"
+      ],
+      "type": "object"
+    },
+    "string_array": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "terminal_result": {
+      "enum": [
+        "source_fidelity_ready_for_preregistration_design",
+        "source_fidelity_unrecoverable_construct",
+        "source_fidelity_measurement_failure",
+        "source_fidelity_recovery_blocked"
+      ]
+    },
+    "timestamp": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "type": "string"
+    }
+  },
+  "$id": "https://github.com/algotradinglife/paired-trading/schema/pa-feitian-m6f-source-fidelity-recovery-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PA Feitian M6F source-fidelity recovery package"
+}

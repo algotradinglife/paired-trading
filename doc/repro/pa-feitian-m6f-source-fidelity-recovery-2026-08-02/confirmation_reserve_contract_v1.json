@@ -1,0 +1,28 @@
+{
+  "access_log_locator": "contamination_ledger_v1.jsonl",
+  "artifact_type": "pa_feitian_m6f_confirmation_reserve_contract",
+  "custodian_role": "unassigned_pi_approved_non_strategy_custodian",
+  "eligibility_rule": "Future evidence identity manifest selected by PI-approved non-Strategy custodian after construct freeze under a later preregistration-design Issue; Strategy receives no identities or outcomes before authorized release.",
+  "eligibility_rule_sha256": "0a9cab614107bcf9bdb23bcba4e531cd8cb8a00c6b0396870bcae6976b90b914",
+  "exclusion_rule": "Exclude every P1, M6, M6R, M6M, and M6F construct-recovery or discovery evidence item, including all 72 M6R episode IDs and any derivative or overlapping episode.",
+  "exclusion_set_sha256": "5bbdfb22ff9b383e9623227835ca56493b7e22a1b5fb51944ef3f185bd19bf08",
+  "mechanically_enforceable": false,
+  "permitted_metadata_visible_to_strategy": [
+    "reserve_id",
+    "eligibility_rule_sha256",
+    "exclusion_set_sha256",
+    "custodian_role",
+    "sealed_at",
+    "release_authority_role",
+    "required_releasing_issue_type",
+    "access_log_locator"
+  ],
+  "release_authority_role": "pi",
+  "required_releasing_issue_type": "pi_approved_preregistration_design",
+  "reserve_id": "M6F-CONFIRMATION-RESERVE-V1",
+  "schema_version": "pa_feitian_m6f_confirmation_reserve_contract_v1",
+  "sealed_at": null,
+  "status": "unavailable_no_custodian_or_sealed_identity_manifest",
+  "strategy_visibility_prohibition": "Strategy must receive neither reserve identities nor outcomes before a later PI-approved preregistration Issue authorizes release.",
+  "terminal_effect": "readiness_cannot_pass"
+}
