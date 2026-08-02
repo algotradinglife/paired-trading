@@ -10,8 +10,8 @@
           "items": {
             "$ref": "#/$defs/manifest_entry"
           },
-          "maxItems": 7,
-          "minItems": 7,
+          "maxItems": 8,
+          "minItems": 8,
           "type": "array"
         },
         "hash_scope_exclusions": {
@@ -31,18 +31,158 @@
     },
     "confirmation_reserve_contract": {
       "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "accepted_custody_receipt_schema_version": {
+              "const": "pa_feitian_m6f_confirmation_reserve_custody_receipt_v2"
+            },
+            "access_log_chain_head_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "access_log_locator": {
+              "const": "custody://data-owner/M6F-CONFIRMATION-RESERVE-V1/append-only-access-log-v1.jsonl"
+            },
+            "dependency_status": {
+              "const": "closed_accepted"
+            },
+            "exclusion_registry_envelope_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "exclusion_registry_plaintext_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "identity_manifest_envelope_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "identity_manifest_plaintext_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "permitted_metadata_visible_to_strategy": {
+              "const": [
+                "access_log_chain_head_sha256",
+                "access_log_locator",
+                "custodian_role",
+                "eligibility_rule_sha256",
+                "exclusion_registry_envelope_sha256",
+                "exclusion_registry_plaintext_sha256",
+                "exclusion_set_sha256",
+                "identity_manifest_envelope_sha256",
+                "identity_manifest_plaintext_sha256",
+                "release_authority_role",
+                "required_releasing_issue_type",
+                "reserve_id",
+                "schema_version",
+                "sealed_at"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "accepted_custody_receipt_schema_version": {
+              "const": null
+            },
+            "access_log_chain_head_sha256": {
+              "const": null
+            },
+            "access_log_locator": {
+              "const": null
+            },
+            "dependency_status": {
+              "enum": [
+                "open",
+                "closed_failed"
+              ]
+            },
+            "exclusion_registry_envelope_sha256": {
+              "const": null
+            },
+            "exclusion_registry_plaintext_sha256": {
+              "const": null
+            },
+            "identity_manifest_envelope_sha256": {
+              "const": null
+            },
+            "identity_manifest_plaintext_sha256": {
+              "const": null
+            },
+            "permitted_metadata_visible_to_strategy": {
+              "const": [
+                "reserve_id",
+                "eligibility_rule_sha256",
+                "exclusion_set_sha256",
+                "custodian_role",
+                "sealed_at",
+                "release_authority_role",
+                "required_releasing_issue_type",
+                "access_log_locator"
+              ]
+            }
+          }
+        }
+      ],
       "properties": {
+        "accepted_custody_receipt_schema_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "access_log_chain_head_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "access_log_locator": {
-          "const": "contamination_ledger_v1.jsonl"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "artifact_type": {
           "const": "pa_feitian_m6f_confirmation_reserve_contract"
         },
+        "closure_evidence": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/external_dependency_closure_evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "custodian_role": {
           "enum": [
+            "data_owner",
             "data_custodian",
             "pi_approved_external_custodian",
             "unassigned_pi_approved_non_strategy_custodian"
+          ]
+        },
+        "dependency_contract_locator": {
+          "const": "https://github.com/algotradinglife/paired-trading/issues/80#issuecomment-5156235454"
+        },
+        "dependency_id": {
+          "const": "M6F-CONFIRMATION-RESERVE-01"
+        },
+        "dependency_issue": {
+          "const": 80
+        },
+        "dependency_locator": {
+          "const": "https://github.com/algotradinglife/paired-trading/issues/80"
+        },
+        "dependency_status": {
+          "enum": [
+            "open",
+            "closed_accepted",
+            "closed_failed"
           ]
         },
         "eligibility_rule": {
@@ -51,11 +191,51 @@
         "eligibility_rule_sha256": {
           "$ref": "#/$defs/hash"
         },
+        "exclusion_registry_envelope_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exclusion_registry_plaintext_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "exclusion_rule": {
           "type": "string"
         },
         "exclusion_set_sha256": {
           "$ref": "#/$defs/hash"
+        },
+        "identity_manifest_envelope_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "identity_manifest_plaintext_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "mechanically_enforceable": {
           "type": "boolean"
@@ -86,6 +266,7 @@
         "status": {
           "enum": [
             "sealed",
+            "blocked_pending_data_custodian_receipt",
             "unavailable_no_custodian_or_sealed_identity_manifest"
           ]
         },
@@ -100,13 +281,25 @@
         }
       },
       "required": [
+        "accepted_custody_receipt_schema_version",
+        "access_log_chain_head_sha256",
         "access_log_locator",
         "artifact_type",
+        "closure_evidence",
         "custodian_role",
+        "dependency_contract_locator",
+        "dependency_id",
+        "dependency_issue",
+        "dependency_locator",
+        "dependency_status",
         "eligibility_rule",
         "eligibility_rule_sha256",
+        "exclusion_registry_envelope_sha256",
+        "exclusion_registry_plaintext_sha256",
         "exclusion_rule",
         "exclusion_set_sha256",
+        "identity_manifest_envelope_sha256",
+        "identity_manifest_plaintext_sha256",
         "mechanically_enforceable",
         "permitted_metadata_visible_to_strategy",
         "release_authority_role",
@@ -175,14 +368,21 @@
       "properties": {
         "access_class": {
           "enum": [
-            "boundary_and_reserve_audit",
-            "governance_evidence",
             "known_prior_conclusion_exposure",
             "known_prior_discovery_conclusion_exposure",
+            "known_prior_governance_scoping_exposure",
             "known_prior_method_decision_exposure",
+            "known_prior_method_scoping_exposure",
             "known_prior_proxy_exposure",
-            "pinned_method_constraint_evidence",
-            "pinned_source_recovery_evidence"
+            "known_prior_source_scoping_exposure",
+            "post_gate_evidence_recovery",
+            "pre_gate_boundary_scoping_only",
+            "source_authorization_request",
+            "source_authorization_protocol",
+            "source_authorization_provenance",
+            "external_dependency_opened",
+            "external_dependency_closed_negative",
+            "external_dependency_closed_accepted"
           ]
         },
         "actor_role": {
@@ -300,6 +500,122 @@
       ],
       "type": "object"
     },
+    "external_dependency": {
+      "additionalProperties": false,
+      "properties": {
+        "closure_evidence": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/external_dependency_closure_evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "contract_locator": {
+          "pattern": "^https://github\\.com/algotradinglife/paired-trading/issues/(79#issuecomment-5156235447|80#issuecomment-5156235454)$",
+          "type": "string"
+        },
+        "dependency_class": {
+          "enum": [
+            "measurement_capability",
+            "confirmation_reserve"
+          ]
+        },
+        "dependency_id": {
+          "enum": [
+            "M6F-DATA-CAPABILITY-01",
+            "M6F-CONFIRMATION-RESERVE-01"
+          ]
+        },
+        "issue": {
+          "enum": [
+            79,
+            80
+          ]
+        },
+        "locator": {
+          "pattern": "^https://github\\.com/algotradinglife/paired-trading/issues/(79|80)$",
+          "type": "string"
+        },
+        "owner_role": {
+          "const": "data"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "closed_accepted",
+            "closed_failed"
+          ]
+        }
+      },
+      "required": [
+        "closure_evidence",
+        "contract_locator",
+        "dependency_class",
+        "dependency_id",
+        "issue",
+        "locator",
+        "owner_role",
+        "status"
+      ],
+      "type": "object"
+    },
+    "external_dependency_closure_evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance_locator": {
+          "pattern": "^https://github\\.com/algotradinglife/paired-trading/issues/(79|80)#issuecomment-[0-9]+$",
+          "type": "string"
+        },
+        "accepted_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "accepted_head": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "artifact_locator": {
+          "type": "string"
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "contamination_entry_id": {
+          "pattern": "^CONTAM-[0-9]{4}$",
+          "type": "string"
+        },
+        "independent_attestation_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "manifest_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "merged_revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail",
+            "unavailable"
+          ]
+        }
+      },
+      "required": [
+        "acceptance_locator",
+        "accepted_at",
+        "artifact_locator",
+        "artifact_sha256",
+        "contamination_entry_id",
+        "manifest_sha256",
+        "merged_revision",
+        "result"
+      ],
+      "type": "object"
+    },
     "hash": {
       "pattern": "^[0-9a-f]{64}$",
       "type": "string"
@@ -312,6 +628,16 @@
         },
         "acquisition_or_authorization_at": {
           "$ref": "#/$defs/timestamp"
+        },
+        "authorization": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/node_authorization"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "causal_availability": {
           "type": "string"
@@ -359,6 +685,7 @@
       "required": [
         "abstention_rule",
         "acquisition_or_authorization_at",
+        "authorization",
         "causal_availability",
         "conflicting_evidence",
         "contamination_entry_ids",
@@ -476,6 +803,14 @@
         "audit_boundary": {
           "type": "string"
         },
+        "external_dependencies": {
+          "items": {
+            "$ref": "#/$defs/external_dependency"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
         "fields": {
           "items": {
             "$ref": "#/$defs/measurement_field"
@@ -491,11 +826,8 @@
             "fail"
           ]
         },
-        "open_external_dependency": {
-          "type": [
-            "string",
-            "null"
-          ]
+        "open_external_dependencies": {
+          "$ref": "#/$defs/string_array"
         },
         "schema_version": {
           "const": "pa_feitian_m6f_measurement_readiness_v1"
@@ -510,12 +842,247 @@
       "required": [
         "artifact_type",
         "audit_boundary",
+        "external_dependencies",
         "fields",
         "measurement_result",
-        "open_external_dependency",
+        "open_external_dependencies",
         "schema_version",
         "terminal_precedence_applied",
         "terminal_result"
+      ],
+      "type": "object"
+    },
+    "node_authorization": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_disposition": {
+          "const": "prospective_source_authorized_annotation_adjudication_protocol"
+        },
+        "authorization_class": {
+          "const": "explicit_source_authorization"
+        },
+        "authorization_received_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "protocol_body_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "protocol_locator": {
+          "const": "https://github.com/algotradinglife/paired-trading/issues/77#issuecomment-5156155428"
+        },
+        "receipt_path": {
+          "const": "source_author_provenance_receipt_v1.json"
+        },
+        "receipt_sha256": {
+          "$ref": "#/$defs/hash"
+        }
+      },
+      "required": [
+        "approved_disposition",
+        "authorization_class",
+        "authorization_received_at",
+        "protocol_body_sha256",
+        "protocol_locator",
+        "receipt_path",
+        "receipt_sha256"
+      ],
+      "type": "object"
+    },
+    "source_author_provenance_receipt": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_protocol": {
+          "additionalProperties": false,
+          "properties": {
+            "body_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "body_utf8_byte_length": {
+              "const": 2874
+            },
+            "created_at": {
+              "$ref": "#/$defs/timestamp"
+            },
+            "github_comment_id": {
+              "const": 5156155428
+            },
+            "locator": {
+              "const": "https://github.com/algotradinglife/paired-trading/issues/77#issuecomment-5156155428"
+            },
+            "updated_at": {
+              "$ref": "#/$defs/timestamp"
+            }
+          },
+          "required": [
+            "body_sha256",
+            "body_utf8_byte_length",
+            "created_at",
+            "github_comment_id",
+            "locator",
+            "updated_at"
+          ],
+          "type": "object"
+        },
+        "artifact_type": {
+          "const": "m6f_source_author_provenance_receipt"
+        },
+        "authorization_class": {
+          "const": "explicit_source_authorization"
+        },
+        "authorization_received_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "authorization_scope": {
+          "additionalProperties": false,
+          "properties": {
+            "approved_disposition": {
+              "const": "prospective_source_authorized_annotation_adjudication_protocol"
+            },
+            "approved_nodes": {
+              "$ref": "#/$defs/string_array"
+            },
+            "source_author_amendments": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "approved_disposition",
+            "approved_nodes",
+            "source_author_amendments"
+          ],
+          "type": "object"
+        },
+        "dependency_id": {
+          "const": "M6F-SOURCE-AUTH-01"
+        },
+        "issue": {
+          "const": 77
+        },
+        "provenance_acceptance": {
+          "type": "string"
+        },
+        "public_safety": {
+          "additionalProperties": false,
+          "properties": {
+            "identity": {
+              "const": "withheld"
+            },
+            "raw_transcript": {
+              "const": "not_recorded"
+            },
+            "sensitive_contact_detail": {
+              "const": "not_recorded"
+            }
+          },
+          "required": [
+            "identity",
+            "raw_transcript",
+            "sensitive_contact_detail"
+          ],
+          "type": "object"
+        },
+        "schema_version": {
+          "const": "m6f_source_author_provenance_receipt_v1"
+        },
+        "semantic_boundary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "approved_protocol",
+        "artifact_type",
+        "authorization_class",
+        "authorization_received_at",
+        "authorization_scope",
+        "dependency_id",
+        "issue",
+        "provenance_acceptance",
+        "public_safety",
+        "schema_version",
+        "semantic_boundary"
+      ],
+      "type": "object"
+    },
+    "source_authorization_closure_evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "authorization_class": {
+          "enum": [
+            "closed_no_route",
+            "explicit_source_authorization",
+            "refused",
+            "unreachable"
+          ]
+        },
+        "authorization_received_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "locator": {
+          "type": "string"
+        },
+        "recorded_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "authorization_class",
+        "authorization_received_at",
+        "file_sha256",
+        "locator",
+        "recorded_at"
+      ],
+      "type": "object"
+    },
+    "source_authorization_dependency": {
+      "additionalProperties": false,
+      "properties": {
+        "closed_evidence": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/source_authorization_closure_evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dependency_id": {
+          "const": "M6F-SOURCE-AUTH-01"
+        },
+        "opened_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "request_body_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "request_locator": {
+          "pattern": "^https://github\\.com/algotradinglife/paired-trading/issues/77#issuecomment-[0-9]+$",
+          "type": "string"
+        },
+        "requested_node_ids": {
+          "$ref": "#/$defs/string_array"
+        },
+        "status": {
+          "enum": [
+            "closed_authorized",
+            "closed_no_route",
+            "closed_refused",
+            "closed_unreachable",
+            "open"
+          ]
+        }
+      },
+      "required": [
+        "closed_evidence",
+        "dependency_id",
+        "opened_at",
+        "request_body_sha256",
+        "request_locator",
+        "requested_node_ids",
+        "status"
       ],
       "type": "object"
     },
@@ -568,6 +1135,9 @@
         "schema_version": {
           "const": "pa_feitian_m6f_source_fidelity_ledger_v1"
         },
+        "source_authorization_dependency": {
+          "$ref": "#/$defs/source_authorization_dependency"
+        },
         "terminal_result": {
           "$ref": "#/$defs/terminal_result"
         }
@@ -577,6 +1147,7 @@
         "artifact_type",
         "nodes",
         "schema_version",
+        "source_authorization_dependency",
         "terminal_result"
       ],
       "type": "object"

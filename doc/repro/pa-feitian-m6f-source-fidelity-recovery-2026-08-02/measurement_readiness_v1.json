@@ -1,10 +1,52 @@
 {
   "artifact_type": "pa_feitian_m6f_measurement_readiness",
   "audit_boundary": "Interface-only audit from committed public-safe evidence; no raw rows, provider implementation, credentials, quant_data, or data CLI were accessed.",
+  "external_dependencies": [
+    {
+      "closure_evidence": {
+        "acceptance_locator": "https://github.com/algotradinglife/paired-trading/issues/79#issuecomment-5156979858",
+        "accepted_at": "2026-08-02T09:52:11Z",
+        "artifact_locator": "doc/repro/pa-feitian-m6f-causal-measurement-capability-2026-08-02/causal_measurement_capability_receipt_v1.json",
+        "artifact_sha256": "3b706bd7e5d2c5a488d1f580c947c3676f9762ea7c44b7ea65082b5c9929568f",
+        "contamination_entry_id": "CONTAM-0015",
+        "manifest_sha256": "504f488d2168d537cc21a68812252fb94d87288a818357a04cfa9545774e7faa",
+        "merged_revision": "8f2c5fb54160a1c61ef6db13d6048e690eb560b1",
+        "result": "fail"
+      },
+      "contract_locator": "https://github.com/algotradinglife/paired-trading/issues/79#issuecomment-5156235447",
+      "dependency_class": "measurement_capability",
+      "dependency_id": "M6F-DATA-CAPABILITY-01",
+      "issue": 79,
+      "locator": "https://github.com/algotradinglife/paired-trading/issues/79",
+      "owner_role": "data",
+      "status": "closed_failed"
+    },
+    {
+      "closure_evidence": {
+        "acceptance_locator": "https://github.com/algotradinglife/paired-trading/issues/80#issuecomment-5157958443",
+        "accepted_at": "2026-08-02T12:44:53Z",
+        "accepted_head": "81ef05de9a71dfb332fa28f86e2702c5a5252a66",
+        "artifact_locator": "doc/repro/pa-feitian-m6f-confirmation-reserve-2026-08-02/confirmation_reserve_custody_receipt_v2.json",
+        "artifact_sha256": "1a4baa1a72d5c7090397f2619429308679d9efa0d25c38dc50207c01da072610",
+        "contamination_entry_id": "CONTAM-0016",
+        "independent_attestation_sha256": "d1929acdea17db8c7dc25458b179959fe0044d7e1e7d51dd95630aff4cb4e062",
+        "manifest_sha256": "0ff05ae1e3cc309ab4e903e42ca6bec004de0b7b06e6f72b03f16685f96e6b0f",
+        "merged_revision": "5da299892514c7ca2d7bf1c77baba32f9df9753b",
+        "result": "pass"
+      },
+      "contract_locator": "https://github.com/algotradinglife/paired-trading/issues/80#issuecomment-5156235454",
+      "dependency_class": "confirmation_reserve",
+      "dependency_id": "M6F-CONFIRMATION-RESERVE-01",
+      "issue": 80,
+      "locator": "https://github.com/algotradinglife/paired-trading/issues/80",
+      "owner_role": "data",
+      "status": "closed_accepted"
+    }
+  ],
   "fields": [
     {
       "available_at_and_decision_cutoff": "Direction inputs must be published and immutable no later than the option decision cutoff.",
-      "bar_open_and_end_semantics": "Required semantics are not source-authorized or independently evidenced.",
+      "bar_open_and_end_semantics": "The prospective source protocol is authorized, but exact exchange and provider semantics are not independently evidenced.",
       "evidence_locator": "source_fidelity_ledger_v1.json#SF-01-UNDERLYING-DIRECTION",
       "exchange_timezone_and_session": "Required exchange timezone, holiday calendar, session segments, and trading-date assignment are unbound.",
       "expiry_and_roll_mapping": "Not applicable to direction input, but any underlying continuity mapping must be causal and versioned.",
@@ -14,7 +56,7 @@
       "node_id": "SF-01-UNDERLYING-DIRECTION",
       "option_lifecycle_and_selection_state": "Not applicable before contract selection.",
       "premium_price_basis": "Not applicable.",
-      "provenance_and_replay_binding": "No committed capability receipt binds fields, provider semantics, availability, row accounting, and a replay hash.",
+      "provenance_and_replay_binding": "The accepted M6F-DATA-CAPABILITY-01 receipt is replay-bound and returns fail for this field; its field_result and failure_reasons are the capability evidence.",
       "readiness_status": "fail",
       "required_fields": [
         "underlying_identity",
@@ -35,7 +77,7 @@
       "node_id": "SF-02-OPTION-CONTRACT",
       "option_lifecycle_and_selection_state": "Required: immutable as-of universe, call/put, strike, expiry, listed-at, delisted-at, exercise state, moneyness input, selection rank, and tie rule.",
       "premium_price_basis": "Not yet used for selection unless explicitly source-authorized; any such use would need its own causal basis.",
-      "provenance_and_replay_binding": "No Data-owner receipt supplies provider identity, source-version hash, lifecycle semantics, or lossless universe accounting.",
+      "provenance_and_replay_binding": "The accepted M6F-DATA-CAPABILITY-01 receipt is replay-bound and returns fail for this field; its field_result and failure_reasons are the capability evidence.",
       "readiness_status": "fail",
       "required_fields": [
         "contract_identity",
@@ -52,7 +94,7 @@
       "available_at_and_decision_cutoff": "The daily candle is usable only after its complete exchange session is finalized and published.",
       "bar_open_and_end_semantics": "Required: exact included session segments, open definition, close definition, adjustment policy, and finalization time; currently unbound.",
       "evidence_locator": "source_fidelity_ledger_v1.json#SF-03-DAILY-CHART",
-      "exchange_timezone_and_session": "The source pins daily cadence but no committed capability receipt binds exchange timezone or session convention.",
+      "exchange_timezone_and_session": "The accepted capability receipt confirms that daily cadence is pinned but exchange timezone/session assignment remains insufficiently bound.",
       "expiry_and_roll_mapping": "Each candle must remain attached to one immutable contract identity; no continuous option splice is permitted.",
       "fail_closed_behavior": "Reject incomplete, revised-without-version, cross-contract-spliced, or availability-ambiguous candles.",
       "field_id": "MEAS-03-DAILY-OPTION-CANDLE",
@@ -60,7 +102,7 @@
       "node_id": "SF-03-DAILY-CHART",
       "option_lifecycle_and_selection_state": "Every candle must bind to the selected listed contract and valid trading date.",
       "premium_price_basis": "OHLC basis and any settlement-versus-trade close distinction must be explicit.",
-      "provenance_and_replay_binding": "No accepted public-safe receipt establishes the exact fields, bar-end semantics, availability rule, row accounting, and provenance hash.",
+      "provenance_and_replay_binding": "The accepted M6F-DATA-CAPABILITY-01 receipt is replay-bound and returns fail for this field; its field_result and failure_reasons are the capability evidence.",
       "readiness_status": "fail",
       "required_fields": [
         "contract_identity",
@@ -86,7 +128,7 @@
       "node_id": "SF-04-DD-LOW-LINE",
       "option_lifecycle_and_selection_state": "Geometry remains scoped to one selected contract unless the source later authorizes another convention.",
       "premium_price_basis": "Raw contract candle prices under a future authorized convention; no normalized proxy is authorized.",
-      "provenance_and_replay_binding": "No deterministic source rule or source-authorized annotation protocol exists, so replay identity cannot be established.",
+      "provenance_and_replay_binding": "The source protocol is authorized; the accepted Data receipt is replay-bound and returns fail because a protocol-compliant causal trace is not proven.",
       "readiness_status": "fail",
       "required_fields": [
         "anchor_ids",
@@ -108,7 +150,7 @@
       "node_id": "SF-05-DESCENDING-HIGH-LINE",
       "option_lifecycle_and_selection_state": "Chart-source choice and contract continuity must be explicit before measurement.",
       "premium_price_basis": "Required only if the option chart is authorized; otherwise not applicable to underlying geometry.",
-      "provenance_and_replay_binding": "No source-authorized chart choice or deterministic construction exists.",
+      "provenance_and_replay_binding": "The source protocol is authorized; the accepted Data receipt is replay-bound and returns fail because a protocol-compliant causal trace is not proven.",
       "readiness_status": "fail",
       "required_fields": [
         "chart_source",
@@ -125,13 +167,13 @@
       "evidence_locator": "source_fidelity_ledger_v1.json#SF-06-ONE-B-TWO-B",
       "exchange_timezone_and_session": "Inherited from the selected option chart and currently unbound.",
       "expiry_and_roll_mapping": "A pullback sequence may not bridge contracts unless source-authorized.",
-      "fail_closed_behavior": "Emit unknown when no source-authorized classifier or annotation protocol exists.",
+      "fail_closed_behavior": "Emit unknown until the approved protocol is implemented with blinded labels, adjudication, and a causal replay trace.",
       "field_id": "MEAS-06-ONE-B-TWO-B",
       "missing_and_rejected_row_accounting": "A future protocol must retain unknown, ambiguous, rejected, and adjudicated cases without forced labels.",
       "node_id": "SF-06-ONE-B-TWO-B",
       "option_lifecycle_and_selection_state": "Classification binds to one selected contract context.",
       "premium_price_basis": "Uses candle geometry only after its premium basis is bound.",
-      "provenance_and_replay_binding": "No original-trader labels or source-authorized adjudication protocol are committed.",
+      "provenance_and_replay_binding": "The source protocol is authorized; the accepted Data receipt is replay-bound and returns fail because a protocol-compliant label/adjudication trace is not proven.",
       "readiness_status": "fail",
       "required_fields": [
         "classification",
@@ -154,7 +196,7 @@
       "node_id": "SF-07-HOLISTIC-QUALITY",
       "option_lifecycle_and_selection_state": "Judgment binds to the selected contract and decision timestamp.",
       "premium_price_basis": "Uses bound candle fields only; no outcome or future premium path may enter the judgment.",
-      "provenance_and_replay_binding": "No source-authorized protocol, source-author label set, or adjudication hash exists.",
+      "provenance_and_replay_binding": "The source protocol is authorized; the accepted Data receipt is replay-bound and returns fail because a protocol-compliant label/adjudication trace is not proven.",
       "readiness_status": "fail",
       "required_fields": [
         "quality_state",
@@ -176,7 +218,7 @@
       "node_id": "SF-08-ENTRY-ORDERING",
       "option_lifecycle_and_selection_state": "Exact contract identity and eligibility state are mandatory.",
       "premium_price_basis": "Entry-price basis, order convention, and availability are unbound.",
-      "provenance_and_replay_binding": "No source-authorized complete ordering or fill convention exists.",
+      "provenance_and_replay_binding": "The source protocol is authorized; the accepted Data receipt is replay-bound and returns fail because a protocol-compliant ordering/fill trace is not proven.",
       "readiness_status": "fail",
       "required_fields": [
         "entry_path",
@@ -199,7 +241,7 @@
       "node_id": "SF-09-STRUCTURAL-INVALIDATION",
       "option_lifecycle_and_selection_state": "Reference binds to the selected contract unless a roll protocol explicitly transfers it.",
       "premium_price_basis": "Exact traded, quoted, settlement, or candle-price basis is unbound.",
-      "provenance_and_replay_binding": "No exact source buffer or causal evaluation convention exists.",
+      "provenance_and_replay_binding": "The source protocol is authorized; the accepted Data receipt is replay-bound and returns fail because a protocol-compliant invalidation/evaluation trace is not proven.",
       "readiness_status": "fail",
       "required_fields": [
         "reference_structure",
@@ -221,7 +263,7 @@
       "node_id": "SF-10-PREMIUM-MANAGEMENT",
       "option_lifecycle_and_selection_state": "Every action must bind old and new contract identities, as-of selection state, and expiry status.",
       "premium_price_basis": "Entry, exits, runner, and rolls require a single declared causal price basis plus explicit cost and unavailable-quote handling.",
-      "provenance_and_replay_binding": "No accepted public-safe Data-owner receipt binds premium fields, provider/bar-end semantics, availability, lossless row accounting, and provenance hash.",
+      "provenance_and_replay_binding": "The accepted M6F-DATA-CAPABILITY-01 receipt is replay-bound and returns fail for this field; its field_result and failure_reasons are the capability evidence.",
       "readiness_status": "fail",
       "required_fields": [
         "contract_identity",
@@ -237,8 +279,8 @@
     }
   ],
   "measurement_result": "fail",
-  "open_external_dependency": null,
+  "open_external_dependencies": [],
   "schema_version": "pa_feitian_m6f_measurement_readiness_v1",
-  "terminal_precedence_applied": "Unresolved critical source semantics require source_fidelity_unrecoverable_construct before measurement_failure can be terminal.",
-  "terminal_result": "source_fidelity_unrecoverable_construct"
+  "terminal_precedence_applied": "Source authorization and both named Data dependencies are closed. Confirmation-reserve Issue #80 is accepted, sealed, and mechanically enforceable, while accepted capability Issue #79 remains fail for all ten fields. With no open dependency, that measurement failure takes terminal precedence as source_fidelity_measurement_failure.",
+  "terminal_result": "source_fidelity_measurement_failure"
 }
