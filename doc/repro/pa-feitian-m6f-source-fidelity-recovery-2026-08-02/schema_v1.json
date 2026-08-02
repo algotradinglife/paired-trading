@@ -39,7 +39,11 @@
           "const": "pa_feitian_m6f_confirmation_reserve_contract"
         },
         "custodian_role": {
-          "type": "string"
+          "enum": [
+            "data_custodian",
+            "pi_approved_external_custodian",
+            "unassigned_pi_approved_non_strategy_custodian"
+          ]
         },
         "eligibility_rule": {
           "type": "string"
@@ -126,12 +130,16 @@
           "items": {
             "$ref": "#/$defs/dag_edge"
           },
+          "maxItems": 11,
+          "minItems": 11,
           "type": "array"
         },
         "nodes": {
           "items": {
             "$ref": "#/$defs/dag_node"
           },
+          "maxItems": 11,
+          "minItems": 11,
           "type": "array"
         },
         "plane_order": {
@@ -166,7 +174,16 @@
       "additionalProperties": false,
       "properties": {
         "access_class": {
-          "type": "string"
+          "enum": [
+            "boundary_and_reserve_audit",
+            "governance_evidence",
+            "known_prior_conclusion_exposure",
+            "known_prior_discovery_conclusion_exposure",
+            "known_prior_method_decision_exposure",
+            "known_prior_proxy_exposure",
+            "pinned_method_constraint_evidence",
+            "pinned_source_recovery_evidence"
+          ]
         },
         "actor_role": {
           "enum": [
@@ -463,6 +480,7 @@
           "items": {
             "$ref": "#/$defs/measurement_field"
           },
+          "maxItems": 10,
           "minItems": 10,
           "type": "array"
         },
@@ -514,6 +532,7 @@
           "$ref": "#/$defs/hash"
         },
         "locator": {
+          "pattern": "^trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17\\.md#L[0-9]+(?:-L[0-9]+)?(?:;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17\\.md#L[0-9]+(?:-L[0-9]+)?)*$",
           "type": "string"
         },
         "repository_revision": {

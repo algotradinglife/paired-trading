@@ -2,19 +2,19 @@
   "artifact_type": "pa_feitian_m6f_construct_dag",
   "edges": [
     {
-      "from": "DAG-01-DAILY-EVENT",
-      "to": "DAG-02-UNDERLYING-DIRECTION"
+      "from": "DAG-01-UNDERLYING-DIRECTION",
+      "to": "DAG-02-OPTION-CONTEXT"
     },
     {
-      "from": "DAG-02-UNDERLYING-DIRECTION",
-      "to": "DAG-03-OPTION-CONTEXT"
+      "from": "DAG-02-OPTION-CONTEXT",
+      "to": "DAG-03-DAILY-EVENT"
     },
     {
-      "from": "DAG-03-OPTION-CONTEXT",
+      "from": "DAG-03-DAILY-EVENT",
       "to": "DAG-04-DD-GEOMETRY"
     },
     {
-      "from": "DAG-03-OPTION-CONTEXT",
+      "from": "DAG-03-DAILY-EVENT",
       "to": "DAG-05-HIGH-LINE-GEOMETRY"
     },
     {
@@ -48,20 +48,6 @@
   ],
   "nodes": [
     {
-      "abstention_behavior": "Reject any incomplete, unavailable, or not-yet-completed candle.",
-      "causal_cutoff": "Exchange-defined completed daily option candle available before the decision.",
-      "conflict_behavior": "Exchange and provider completion disagreement fails closed.",
-      "inputs": [
-        "option daily candle fields",
-        "exchange session metadata"
-      ],
-      "ledger_node_id": "SF-03-DAILY-CHART",
-      "node_id": "DAG-01-DAILY-EVENT",
-      "output": "causally available completed daily-candle event",
-      "plane": "event",
-      "readiness": "fail_closed"
-    },
-    {
       "abstention_behavior": "Emit no directional bias.",
       "causal_cutoff": "All direction inputs available no later than the decision cutoff.",
       "conflict_behavior": "Any inconsistent or absent source-authorized direction state yields abstention.",
@@ -69,7 +55,7 @@
         "completed underlying or regime state"
       ],
       "ledger_node_id": "SF-01-UNDERLYING-DIRECTION",
-      "node_id": "DAG-02-UNDERLYING-DIRECTION",
+      "node_id": "DAG-01-UNDERLYING-DIRECTION",
       "output": "call bias, put bias, or abstain",
       "plane": "perception",
       "readiness": "fail_closed"
@@ -84,9 +70,24 @@
         "selection fields"
       ],
       "ledger_node_id": "SF-02-OPTION-CONTRACT",
-      "node_id": "DAG-03-OPTION-CONTEXT",
+      "node_id": "DAG-02-OPTION-CONTEXT",
       "output": "selected option context or abstain",
       "plane": "decision",
+      "readiness": "fail_closed"
+    },
+    {
+      "abstention_behavior": "Reject any incomplete, unavailable, not-yet-completed, or wrong-contract candle.",
+      "causal_cutoff": "Exchange-defined completed daily candle for the selected option contract available before geometry is read.",
+      "conflict_behavior": "Contract identity, exchange, or provider completion disagreement fails closed.",
+      "inputs": [
+        "selected option context",
+        "option daily candle fields",
+        "exchange session metadata"
+      ],
+      "ledger_node_id": "SF-03-DAILY-CHART",
+      "node_id": "DAG-03-DAILY-EVENT",
+      "output": "causally available completed selected-contract daily-candle event",
+      "plane": "event",
       "readiness": "fail_closed"
     },
     {

@@ -10,7 +10,7 @@ Governance baseline: `main@4fa3dc4c3df59fa545a15fb48e01d42f95ff4d07`
 
 Terminal: **`source_fidelity_unrecoverable_construct`**
 
-Manifest SHA-256: `def1f629dedbcf2d8994c71d0343e5dd00f76132127740f966acfccd6f70286c`
+Manifest SHA-256: `625025b3acb52d73f0cef5b45b99a6fa3fc2c76b2276bc9dea0bc5339f50ca11`
 
 ## Decision
 

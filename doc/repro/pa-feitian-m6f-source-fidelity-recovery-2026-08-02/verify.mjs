@@ -148,62 +148,131 @@ const expectedLedgerIds = [
   "SF-09-STRUCTURAL-INVALIDATION",
   "SF-10-PREMIUM-MANAGEMENT"
 ];
-assert.deepEqual(ledger.nodes.map((node) => node.node_id), expectedLedgerIds, "exact ledger node order/set");
-assert.equal(new Set(expectedLedgerIds).size, 10);
-assert.ok(ledger.nodes.every((node) => node.critical_to_construct), "all ten nodes are critical");
-assert.ok(ledger.nodes.every((node) => node.abstention_rule.length > 0), "every node fails closed");
-assert.ok(ledger.nodes.every((node) => node.evidence.file_sha256 === "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263"));
-assert.ok(ledger.nodes.every((node) => node.evidence.repository_revision === "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"));
-assert.ok(ledger.nodes.every((node) => node.evidence.locator.startsWith("trade-philosopher:doc/")));
-for (const node of ledger.nodes) {
-  if (node.status === "source_authorized") {
-    assert.equal(node.evidence.authorization_class, "explicit_source_authorization", `${node.node_id}: authorization class`);
-  }
-  assert.notEqual(node.status, "method_constraint", `${node.node_id}: critical method proxy prohibited`);
-}
+const sourcePath = "doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md";
+const expectedLocators = [
+  `trade-philosopher:${sourcePath}#L33`,
+  `trade-philosopher:${sourcePath}#L34`,
+  `trade-philosopher:${sourcePath}#L30-L32`,
+  `trade-philosopher:${sourcePath}#L36-L37;${sourcePath}#L57-L62;${sourcePath}#L127-L128`,
+  `trade-philosopher:${sourcePath}#L43-L44;${sourcePath}#L57-L62;${sourcePath}#L66-L74;${sourcePath}#L127-L128`,
+  `trade-philosopher:${sourcePath}#L38-L42;${sourcePath}#L128-L129`,
+  `trade-philosopher:${sourcePath}#L39-L42;${sourcePath}#L128-L129`,
+  `trade-philosopher:${sourcePath}#L35-L44;${sourcePath}#L57-L62`,
+  `trade-philosopher:${sourcePath}#L37-L45`,
+  `trade-philosopher:${sourcePath}#L46-L55;${sourcePath}#L119-L129`
+];
 
-const ledgerIds = new Set(expectedLedgerIds);
-const dagIds = new Set(construct.nodes.map((node) => node.node_id));
-const boundLedgerIds = new Set(construct.nodes.map((node) => node.ledger_node_id));
-assert.deepEqual(construct.plane_order, ["event", "perception", "decision", "outcome"]);
-assert.deepEqual(new Set(construct.nodes.map((node) => node.plane)), new Set(construct.plane_order), "four planes are distinct and present");
-assert.deepEqual(boundLedgerIds, ledgerIds, "DAG binds every ledger node");
-assert.ok(construct.nodes.every((node) => ["deterministic_rule", "source_authorized_protocol", "fail_closed"].includes(node.readiness)));
-for (const edge of construct.edges) {
-  assert.ok(dagIds.has(edge.from), `unknown edge source ${edge.from}`);
-  assert.ok(dagIds.has(edge.to), `unknown edge target ${edge.to}`);
-}
-const indegree = new Map([...dagIds].map((id) => [id, 0]));
-for (const edge of construct.edges) indegree.set(edge.to, indegree.get(edge.to) + 1);
-const queue = [...indegree].filter(([, degree]) => degree === 0).map(([id]) => id);
-let visited = 0;
-while (queue.length) {
-  const id = queue.shift();
-  visited += 1;
-  for (const edge of construct.edges.filter((candidate) => candidate.from === id)) {
-    indegree.set(edge.to, indegree.get(edge.to) - 1);
-    if (indegree.get(edge.to) === 0) queue.push(edge.to);
+function validateSourceBindings(currentLedger) {
+  assert.deepEqual(currentLedger.nodes.map((node) => node.node_id), expectedLedgerIds, "exact ledger node order/set");
+  assert.deepEqual(currentLedger.nodes.map((node) => node.evidence.locator), expectedLocators, "exact source locators");
+  assert.equal(new Set(expectedLedgerIds).size, 10);
+  assert.ok(currentLedger.nodes.every((node) => node.critical_to_construct), "all ten nodes are critical");
+  assert.ok(currentLedger.nodes.every((node) => node.abstention_rule.length > 0), "every node fails closed");
+  assert.ok(currentLedger.nodes.every((node) => node.evidence.file_sha256 === "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263"));
+  assert.ok(currentLedger.nodes.every((node) => node.evidence.repository_revision === "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"));
+  for (const node of currentLedger.nodes) {
+    if (node.status === "source_authorized") {
+      assert.equal(node.evidence.authorization_class, "explicit_source_authorization", `${node.node_id}: authorization class`);
+    }
+    assert.notEqual(node.status, "method_constraint", `${node.node_id}: critical method proxy prohibited`);
   }
 }
-assert.equal(visited, dagIds.size, "construct graph must be acyclic");
 
-assert.deepEqual(measurement.fields.map((field) => field.node_id), expectedLedgerIds, "measurement node order/set");
-assert.equal(new Set(measurement.fields.map((field) => field.field_id)).size, expectedLedgerIds.length);
-assert.ok(measurement.fields.every((field) => field.required_fields.length > 0));
-for (const field of measurement.fields) {
-  for (const key of [
-    "available_at_and_decision_cutoff",
-    "bar_open_and_end_semantics",
-    "exchange_timezone_and_session",
-    "expiry_and_roll_mapping",
-    "fail_closed_behavior",
-    "missing_and_rejected_row_accounting",
-    "option_lifecycle_and_selection_state",
-    "premium_price_basis",
-    "provenance_and_replay_binding",
-    "source_class"
-  ]) assert.ok(field[key].length > 0, `${field.field_id}: ${key}`);
+validateSourceBindings(ledger);
+
+const expectedDagBindings = [
+  ["DAG-01-UNDERLYING-DIRECTION", "SF-01-UNDERLYING-DIRECTION", "perception"],
+  ["DAG-02-OPTION-CONTEXT", "SF-02-OPTION-CONTRACT", "decision"],
+  ["DAG-03-DAILY-EVENT", "SF-03-DAILY-CHART", "event"],
+  ["DAG-04-DD-GEOMETRY", "SF-04-DD-LOW-LINE", "perception"],
+  ["DAG-05-HIGH-LINE-GEOMETRY", "SF-05-DESCENDING-HIGH-LINE", "perception"],
+  ["DAG-06-ONE-B-TWO-B", "SF-06-ONE-B-TWO-B", "perception"],
+  ["DAG-07-HOLISTIC-QUALITY", "SF-07-HOLISTIC-QUALITY", "perception"],
+  ["DAG-08-ENTRY-PATH", "SF-08-ENTRY-ORDERING", "decision"],
+  ["DAG-09-INVALIDATION", "SF-09-STRUCTURAL-INVALIDATION", "decision"],
+  ["DAG-10-MANAGEMENT", "SF-10-PREMIUM-MANAGEMENT", "decision"],
+  ["DAG-11-OUTCOME-OBSERVATION", "SF-10-PREMIUM-MANAGEMENT", "outcome"]
+];
+const expectedDagEdges = [
+  ["DAG-01-UNDERLYING-DIRECTION", "DAG-02-OPTION-CONTEXT"],
+  ["DAG-02-OPTION-CONTEXT", "DAG-03-DAILY-EVENT"],
+  ["DAG-03-DAILY-EVENT", "DAG-04-DD-GEOMETRY"],
+  ["DAG-03-DAILY-EVENT", "DAG-05-HIGH-LINE-GEOMETRY"],
+  ["DAG-04-DD-GEOMETRY", "DAG-06-ONE-B-TWO-B"],
+  ["DAG-05-HIGH-LINE-GEOMETRY", "DAG-06-ONE-B-TWO-B"],
+  ["DAG-06-ONE-B-TWO-B", "DAG-07-HOLISTIC-QUALITY"],
+  ["DAG-07-HOLISTIC-QUALITY", "DAG-08-ENTRY-PATH"],
+  ["DAG-08-ENTRY-PATH", "DAG-09-INVALIDATION"],
+  ["DAG-09-INVALIDATION", "DAG-10-MANAGEMENT"],
+  ["DAG-10-MANAGEMENT", "DAG-11-OUTCOME-OBSERVATION"]
+];
+
+function validateConstructBindings(currentConstruct) {
+  assert.deepEqual(
+    currentConstruct.nodes.map((node) => [node.node_id, node.ledger_node_id, node.plane]),
+    expectedDagBindings,
+    "exact staged DAG node order/bindings/planes"
+  );
+  assert.deepEqual(currentConstruct.edges.map((edge) => [edge.from, edge.to]), expectedDagEdges, "exact staged DAG edges");
+  assert.deepEqual(currentConstruct.plane_order, ["event", "perception", "decision", "outcome"]);
+  assert.deepEqual(new Set(currentConstruct.nodes.map((node) => node.plane)), new Set(currentConstruct.plane_order), "four planes are distinct and present");
+  assert.deepEqual(new Set(currentConstruct.nodes.map((node) => node.ledger_node_id)), new Set(expectedLedgerIds), "DAG binds every ledger node");
+  assert.ok(currentConstruct.nodes.every((node) => ["deterministic_rule", "source_authorized_protocol", "fail_closed"].includes(node.readiness)));
 }
+
+validateConstructBindings(construct);
+
+const expectedMeasurementIds = [
+  "MEAS-01-UNDERLYING-DIRECTION",
+  "MEAS-02-OPTION-CONTRACT",
+  "MEAS-03-DAILY-OPTION-CANDLE",
+  "MEAS-04-DD-GEOMETRY",
+  "MEAS-05-DESCENDING-HIGH-GEOMETRY",
+  "MEAS-06-ONE-B-TWO-B",
+  "MEAS-07-HOLISTIC-QUALITY",
+  "MEAS-08-ENTRY-DECISION",
+  "MEAS-09-STRUCTURAL-INVALIDATION",
+  "MEAS-10-PREMIUM-MANAGEMENT"
+];
+
+function deriveMeasurementResult(currentMeasurement) {
+  const statuses = currentMeasurement.fields.map((field) => field.readiness_status);
+  if (currentMeasurement.open_external_dependency !== null) {
+    assert.ok(statuses.includes("blocked"), "open dependency requires a blocked measurement field");
+    return "blocked";
+  }
+  assert.ok(!statuses.includes("blocked"), "blocked field requires an open dependency");
+  return statuses.every((status) => ["pass", "not_applicable"].includes(status)) ? "pass" : "fail";
+}
+
+function validateMeasurementBindings(currentMeasurement) {
+  assert.deepEqual(currentMeasurement.fields.map((field) => field.node_id), expectedLedgerIds, "measurement node order/set");
+  assert.deepEqual(currentMeasurement.fields.map((field) => field.field_id), expectedMeasurementIds, "measurement field order/set");
+  assert.deepEqual(
+    currentMeasurement.fields.map((field) => field.evidence_locator),
+    expectedLedgerIds.map((nodeId) => `${names.ledger}#${nodeId}`),
+    "exact measurement-to-ledger locators"
+  );
+  assert.equal(new Set(currentMeasurement.fields.map((field) => field.field_id)).size, expectedLedgerIds.length);
+  assert.ok(currentMeasurement.fields.every((field) => field.required_fields.length > 0));
+  for (const field of currentMeasurement.fields) {
+    for (const key of [
+      "available_at_and_decision_cutoff",
+      "bar_open_and_end_semantics",
+      "exchange_timezone_and_session",
+      "expiry_and_roll_mapping",
+      "fail_closed_behavior",
+      "missing_and_rejected_row_accounting",
+      "option_lifecycle_and_selection_state",
+      "premium_price_basis",
+      "provenance_and_replay_binding",
+      "source_class"
+    ]) assert.ok(field[key].length > 0, `${field.field_id}: ${key}`);
+  }
+  assert.equal(currentMeasurement.measurement_result, deriveMeasurementResult(currentMeasurement), "derived measurement aggregate");
+}
+
+validateMeasurementBindings(measurement);
 
 const contaminationRaw = text(names.contamination);
 assert.ok(!contaminationRaw.startsWith("\ufeff"));
@@ -216,6 +285,26 @@ const contamination = contaminationRaw.trimEnd().split("\n").map((line, index) =
   return entry;
 });
 assert.equal(contamination.length, 8);
+const expectedContaminationSequence = [
+  ["CONTAM-0001", "known_prior_conclusion_exposure", "P1-EXP-002-stop_p1_exp_002"],
+  ["CONTAM-0002", "known_prior_proxy_exposure", "M6-operationalized_hypothesis_not_authentic"],
+  ["CONTAM-0003", "known_prior_discovery_conclusion_exposure", "M6R-72-episodes-no_candidate"],
+  ["CONTAM-0004", "known_prior_method_decision_exposure", "M6M-method_reconciled_recommend_path"],
+  ["CONTAM-0005", "pinned_source_recovery_evidence", "trade-philosopher-715ffec-source-narrative"],
+  ["CONTAM-0006", "pinned_method_constraint_evidence", "trade-philosopher-5802d0f-and-7691c31-method-sources"],
+  ["CONTAM-0007", "governance_evidence", "paired-trading-main-4fa3dc4-governance"],
+  ["CONTAM-0008", "boundary_and_reserve_audit", "M6F-no-new-authorization-no-sealed-reserve"]
+];
+
+function validateContaminationRequirements(currentContamination) {
+  assert.deepEqual(
+    currentContamination.map((entry) => [entry.entry_id, entry.access_class, entry.evidence_id]),
+    expectedContaminationSequence,
+    "complete contamination evidence sequence"
+  );
+}
+
+validateContaminationRequirements(contamination);
 let priorHash = "0".repeat(64);
 let priorTimestamp = "";
 for (const [index, entry] of contamination.entries()) {
@@ -238,36 +327,55 @@ const m6rEntry = contamination.find((entry) => entry.entry_id === "CONTAM-0003")
 assert.match(m6rEntry.evidence_id, /72-episodes-no_candidate/);
 assert.match(m6rEntry.permitted_use, /not_inspected_or_used_for_confirmation/);
 
-assert.equal(reserve.eligibility_rule_sha256, digest(reserve.eligibility_rule));
-assert.equal(reserve.exclusion_set_sha256, digest(reserve.exclusion_rule));
-assert.match(reserve.exclusion_rule, /all 72 M6R episode IDs/);
-assert.equal(reserve.access_log_locator, names.contamination);
-if (reserve.status === "sealed") {
-  assert.equal(reserve.mechanically_enforceable, true);
-  assert.match(reserve.sealed_at, /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/);
-} else {
-  assert.equal(reserve.mechanically_enforceable, false);
-  assert.equal(reserve.sealed_at, null);
-  assert.equal(reserve.terminal_effect, "readiness_cannot_pass");
+const expectedVisibleReserveMetadata = [
+  "reserve_id",
+  "eligibility_rule_sha256",
+  "exclusion_set_sha256",
+  "custodian_role",
+  "sealed_at",
+  "release_authority_role",
+  "required_releasing_issue_type",
+  "access_log_locator"
+];
+
+function validateReserveState(currentReserve) {
+  assert.equal(currentReserve.eligibility_rule_sha256, digest(currentReserve.eligibility_rule));
+  assert.equal(currentReserve.exclusion_set_sha256, digest(currentReserve.exclusion_rule));
+  assert.match(currentReserve.exclusion_rule, /all 72 M6R episode IDs/);
+  assert.equal(currentReserve.access_log_locator, names.contamination);
+  assert.deepEqual(currentReserve.permitted_metadata_visible_to_strategy, expectedVisibleReserveMetadata);
+  if (currentReserve.status === "sealed") {
+    assert.equal(currentReserve.mechanically_enforceable, true);
+    assert.ok(["data_custodian", "pi_approved_external_custodian"].includes(currentReserve.custodian_role), "sealed reserve needs a PI-approved non-Strategy custodian");
+    assert.match(currentReserve.sealed_at, /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/);
+    assert.equal(currentReserve.terminal_effect, "none");
+  } else {
+    assert.equal(currentReserve.custodian_role, "unassigned_pi_approved_non_strategy_custodian");
+    assert.equal(currentReserve.mechanically_enforceable, false);
+    assert.equal(currentReserve.sealed_at, null);
+    assert.equal(currentReserve.terminal_effect, "readiness_cannot_pass");
+  }
 }
 
-function recomputeTerminal(currentLedger, currentMeasurement, currentReserve) {
+validateReserveState(reserve);
+
+function recomputeTerminal(currentLedger, currentConstruct, currentMeasurement, currentReserve) {
   if (currentMeasurement.open_external_dependency !== null) return "source_fidelity_recovery_blocked";
   const unresolvedCritical = currentLedger.nodes.some(
     (node) => node.critical_to_construct && !["source_pinned", "source_authorized"].includes(node.status)
   );
   const incompleteCriticalProtocol = currentLedger.nodes.some((node) => {
     if (!node.critical_to_construct) return false;
-    const bindings = construct.nodes.filter((candidate) => candidate.ledger_node_id === node.node_id);
+    const bindings = currentConstruct.nodes.filter((candidate) => candidate.ledger_node_id === node.node_id);
     return !bindings.some((binding) => ["deterministic_rule", "source_authorized_protocol"].includes(binding.readiness));
   });
   if (unresolvedCritical || incompleteCriticalProtocol) return "source_fidelity_unrecoverable_construct";
-  if (currentMeasurement.measurement_result !== "pass") return "source_fidelity_measurement_failure";
+  if (deriveMeasurementResult(currentMeasurement) !== "pass") return "source_fidelity_measurement_failure";
   if (!currentReserve.mechanically_enforceable || currentReserve.status !== "sealed") return "source_fidelity_measurement_failure";
   return "source_fidelity_ready_for_preregistration_design";
 }
 
-const recomputedTerminal = recomputeTerminal(ledger, measurement, reserve);
+const recomputedTerminal = recomputeTerminal(ledger, construct, measurement, reserve);
 assert.equal(recomputedTerminal, "source_fidelity_unrecoverable_construct");
 assert.equal(ledger.terminal_result, recomputedTerminal);
 assert.equal(construct.terminal_result, recomputedTerminal);
@@ -326,9 +434,14 @@ if (negativeMode) {
     validate(mutated, schema.$defs.source_fidelity_ledger, "negative.extra_key");
   }, /extra unexpected/);
   assert.throws(() => {
-    const mutated = clone(ledger.nodes[0]);
-    mutated.status = "source_authorized";
-    assert.equal(mutated.evidence.authorization_class, "explicit_source_authorization");
+    const mutated = clone(ledger);
+    mutated.nodes[0].status = "source_authorized";
+    validateSourceBindings(mutated);
+  });
+  assert.throws(() => {
+    const mutated = clone(ledger);
+    mutated.nodes[0].evidence.locator = `trade-philosopher:${sourcePath}#L20-L22`;
+    validateSourceBindings(mutated);
   });
   assert.throws(() => {
     const mutated = clone(contamination[3]);
@@ -340,17 +453,40 @@ if (negativeMode) {
   assert.throws(() => {
     const mutated = clone(construct);
     mutated.nodes = mutated.nodes.filter((node) => node.plane !== "outcome");
-    assert.deepEqual(new Set(mutated.nodes.map((node) => node.plane)), new Set(mutated.plane_order));
+    validateConstructBindings(mutated);
+  });
+  assert.throws(() => {
+    const mutated = clone(construct);
+    mutated.edges[0] = { from: "DAG-03-DAILY-EVENT", to: "DAG-02-OPTION-CONTEXT" };
+    validateConstructBindings(mutated);
+  });
+  assert.throws(() => {
+    const mutated = clone(measurement);
+    mutated.measurement_result = "pass";
+    validateMeasurementBindings(mutated);
+  });
+  assert.throws(() => {
+    const mutated = clone(measurement);
+    mutated.fields[0].evidence_locator = `${names.ledger}#SF-02-OPTION-CONTRACT`;
+    validateMeasurementBindings(mutated);
+  });
+  assert.throws(() => {
+    const mutated = clone(contamination);
+    mutated.splice(4, 1);
+    validateContaminationRequirements(mutated);
   });
   assert.throws(() => {
     const mutated = clone(reserve);
     mutated.status = "sealed";
-    assert.equal(mutated.mechanically_enforceable, true);
+    mutated.mechanically_enforceable = true;
+    mutated.sealed_at = "2026-08-02T07:00:00Z";
+    mutated.terminal_effect = "none";
+    validateReserveState(mutated);
   });
   assert.throws(() => {
     assert.equal("source_fidelity_ready_for_preregistration_design", recomputedTerminal);
   });
-  console.log("negative mutations: PASS (6/6 rejected)");
+  console.log("negative mutations: PASS (11/11 rejected)");
 }
 
 console.log(`M6F source-fidelity verification: PASS (${recomputedTerminal}; ${evidenceHeadMode ? "evidence-head" : "final-head"})`);

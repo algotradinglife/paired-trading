@@ -16,7 +16,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L20-L22",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L33",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-01-UNDERLYING-DIRECTION",
@@ -37,7 +37,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L20-L23",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L34",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-02-OPTION-CONTRACT",
@@ -58,7 +58,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L16-L20",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L30-L32",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-03-DAILY-CHART",
@@ -80,7 +80,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L23-L34",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L36-L37;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L57-L62;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L127-L128",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-04-DD-LOW-LINE",
@@ -102,7 +102,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L34-L50",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L43-L44;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L57-L62;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L66-L74;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L127-L128",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-05-DESCENDING-HIGH-LINE",
@@ -124,7 +124,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L26-L33",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L38-L42;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L128-L129",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-06-ONE-B-TWO-B",
@@ -147,7 +147,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L28-L33",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L39-L42;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L128-L129",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-07-HOLISTIC-QUALITY",
@@ -169,7 +169,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L23-L38",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L35-L44;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L57-L62",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-08-ENTRY-ORDERING",
@@ -191,7 +191,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L36-L39",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L37-L45",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-09-STRUCTURAL-INVALIDATION",
@@ -213,7 +213,7 @@
       "evidence": {
         "authorization_class": "pinned_existing_source_not_authorized",
         "file_sha256": "2ea78aa6e6addc24bbb132dc2d104d182ce24060e6a8be72ad120063fa4ed263",
-        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L39-L48",
+        "locator": "trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L46-L55;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17.md#L119-L129",
         "repository_revision": "715ffec5b6549c5cc9ff1d0d39dc2224a62bbe4a"
       },
       "node_id": "SF-10-PREMIUM-MANAGEMENT",
