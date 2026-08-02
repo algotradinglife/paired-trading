@@ -898,7 +898,7 @@ if (!evidenceHeadMode) {
   const receipt = text(names.receipt);
   const fields = validateReceipt(receipt, parentHead);
   const packetPath = "doc/repro/pa-feitian-m6f-source-fidelity-recovery-2026-08-02";
-  const readParentBytes = (name) => execFileSync("git", ["show", `${parentHead}:${packetPath}/${name}`], { cwd: repoRoot });
+  const readParentBytes = (name) => execFileSync("git", ["show", `${parentHead}:${join(packetPath, name)}`], { cwd: repoRoot });
   validateFinalTopology({
     diffPaths: git("diff", "--name-only", parentHead, finalHead).split("\n").filter(Boolean),
     finalHead,
@@ -987,7 +987,9 @@ function maskJavaScriptRegexLiterals(source) {
     while (index < source.length) {
       const character = source[index];
       if (index === 0 && source.startsWith("#!")) {
-        index = lineCommentEnd(0);
+        const end = lineCommentEnd(0);
+        blank(0, end);
+        index = end;
         continue;
       }
       if (/\s/.test(character)) {
@@ -1061,11 +1063,11 @@ function maskJavaScriptRegexLiterals(source) {
 }
 
 const pathValueSafetyPatterns = [
-  ["generic absolute POSIX path in public text", /(?:^|[\s"'`()\[=,:;!?>\}])\/(?![\/()[*+?^$|{])(?!\/)(?=[^\s"'`])[^\s"'`\])}>;,!?#]*/m],
+  ["generic absolute POSIX path in public text", /(?:^|[\s"'`()\[\]{}=,:;!?> <])\/(?!\/)(?=[^\s"'`])[^\s"'`\])}>;,!?#]*/m],
 ];
 const publicSafetyPatterns = [
   ["established private/local root", /(?:^|[\s"'`(=:])\/(?:home|Users|root|mnt|tmp|var|srv|opt)\//m],
-  ["forward-slash UNC local path", /(?:^|[\s"'`()\[=;!?>\}])\/\/(?=[^\s"'`])[^\s"'`\])}>;,!?#]*/m],
+  ["forward-slash UNC local path", /(?:^|[\s"'`()\[\]{}=;!?> <])\/\/(?=[^\s"'`])[^\s"'`\])}>;,!?#]*/m],
   ["Windows or backslash UNC local path", /(?:^|[\s"'`(=])(?:[A-Za-z]:[\\/]|\\\\[^\\\s]+\\[^\\\s]+)[^\s"'`]*/m],
   ["local file URI", /\bfile:\/{1,3}[^\s"'`]+/i],
   ["private data-file extension", /\.(?:csv|parquet)\b/i],
@@ -1090,10 +1092,30 @@ const positiveClaimPatterns = [
   /\bPI\s+may\s+(?:now\s+)?open\s+(?:a\s+)?(?:separate\s+)?preregistration-design\s+Issue\b/i
 ];
 
+const maskerProbePath = ["", "data", "private"].join("/");
+const maskerProbeSlash = String.fromCharCode(47);
+const maskerProbeContexts = [
+  `const stringProbe = "${maskerProbePath}";`,
+  `const templateProbe = \`${maskerProbePath}\`;`,
+  `${maskerProbeSlash}${maskerProbeSlash} line probe ${maskerProbePath}`,
+  `${maskerProbeSlash}* block probe ${maskerProbePath} *${maskerProbeSlash}`
+];
+const maskerProbeRegexes = [
+  `const regexA = ${maskerProbeSlash}implementer${maskerProbeSlash}i;`,
+  `const regexB = ${maskerProbeSlash}foo_bar${maskerProbeSlash}gm;`
+];
+const maskedProbeSource = maskJavaScriptRegexLiterals(
+  [...maskerProbeContexts, ...maskerProbeRegexes].join("\n")
+);
+for (const context of maskerProbeContexts) {
+  assert.ok(maskedProbeSource.includes(context), `masker must preserve non-regex context: ${context.split(" ")[1]}`);
+}
+for (const regex of maskerProbeRegexes) {
+  assert.ok(!maskedProbeSource.includes(regex), "masker must blank an actual JavaScript regex token");
+}
+
 function validatePublicSafety(content, claimContent = content, { javascriptSource = false } = {}) {
-  const pathValueContent = javascriptSource
-    ? maskJavaScriptRegexLiterals(content).replace(/\/(?:\\.|[^/\\\n"'`])+\/[dgimsuvy]*/g, (token) => " ".repeat(token.length))
-    : content;
+  const pathValueContent = javascriptSource ? maskJavaScriptRegexLiterals(content) : content;
   for (const [label, pattern] of pathValueSafetyPatterns) {
     assert.equal(pattern.test(pathValueContent), false, `public-safe scan: ${label}`);
   }
@@ -1115,9 +1137,6 @@ function collectPackageText(overrides = {}, includeVerifier = true) {
 function validatePackagePublicSafety(overrides = {}) {
   for (const name of actualFiles) {
     const content = overrides[name] ?? text(name);
-    if (name === names.verify && overrides[name]) {
-      for (const [, pattern] of pathValueSafetyPatterns) assert.doesNotMatch(content, pattern, "public-safe raw verifier mutation");
-    }
     validatePublicSafety(content, "", { javascriptSource: name === names.verify });
   }
   for (const pattern of positiveClaimPatterns) {
@@ -1504,6 +1523,9 @@ if (negativeMode) {
       (component) => ["", "data", `private${component}share`, "source.dat"].join("/")
     )
   ];
+  const pairedDelimiterBoundaryFragments = ["{", "}", "]", "<"].map(
+    (delimiter) => `x${delimiter}${genericPosixPath}`
+  );
   for (const injectedReadme of [
     `${readme}\nInternal replay is stored at ${genericPosixPath}\n`,
     `${readme}\n${genericPosixPath}\n`,
@@ -1531,6 +1553,33 @@ if (negativeMode) {
       [names.verify]: `${verifierSource}\n/* public-safety block-comment probe: ${pathFragment} */\n`
     }));
   }
+  for (const pathFragment of pairedDelimiterBoundaryFragments) {
+    for (const injectedVerifier of [
+      `${verifierSource}\nconst pairedBoundaryStringProbe = "${pathFragment}";\n`,
+      `${verifierSource}\nconst pairedBoundaryTemplateProbe = \`${pathFragment}\`;\n`,
+      `${verifierSource}\n// paired-boundary line probe: ${pathFragment}\n`,
+      `${verifierSource}\n/* paired-boundary block probe: ${pathFragment} */\n`
+    ]) {
+      reject(() => validatePackagePublicSafety({ [names.verify]: injectedVerifier }));
+    }
+  }
+  const committedVerifierLeakPath = ["", "data", "private"].join("/");
+  const committedVerifierLeakValue = `x}${committedVerifierLeakPath}`;
+  const reboundVerifier = `${verifierSource}\nconst committedVerifierLeakProbe = "${committedVerifierLeakValue}";\n`;
+  const reboundManifest = clone(manifest);
+  const reboundVerifierEntry = reboundManifest.entries.find((entry) => entry.path === names.verify);
+  reboundVerifierEntry.byte_length = Buffer.byteLength(reboundVerifier);
+  reboundVerifierEntry.sha256 = digest(reboundVerifier);
+  const reboundManifestText = `${JSON.stringify(sortKeys(reboundManifest), null, 2)}\n`;
+  const reboundReadme = readme.replace(manifestBinding[1], digest(reboundManifestText));
+  assert.equal(reboundVerifierEntry.byte_length, Buffer.byteLength(reboundVerifier), "rebound verifier byte binding");
+  assert.equal(reboundVerifierEntry.sha256, digest(reboundVerifier), "rebound verifier hash binding");
+  assert.match(reboundReadme, new RegExp(digest(reboundManifestText)), "rebound README manifest binding");
+  reject(() => validatePackagePublicSafety({
+    [names.manifest]: reboundManifestText,
+    [names.readme]: reboundReadme,
+    [names.verify]: reboundVerifier
+  }));
   validatePublicSafety(
     "https://github.com/algotradinglife/paired-trading custody://data-owner/M6F-CONFIRMATION-RESERVE-V1/log relative/path/file"
   );
@@ -1545,7 +1594,7 @@ if (negativeMode) {
   ];
   for (const bypass of positiveClaimBypasses) reject(() => validatePublicSafety("safe", bypass));
 
-  console.log(`negative mutations: PASS (${rejected}/${rejected} rejected)`);
+  console.log("negative mutations: PASS (" + rejected + "/" + rejected + " rejected)");
 }
 
 console.log(`M6F source-fidelity verification: PASS (${recomputedTerminal}; ${evidenceHeadMode ? "evidence-head" : "final-head"})`);
