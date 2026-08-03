@@ -1,0 +1,99 @@
+{
+  "schema_version": "pa_decision_graph_source_manifest_v1",
+  "manifest_id": "pa-decision-graph-source-manifest-v1",
+  "upstream": {
+    "repository": "https://github.com/rosemarycox5334-debug/PA_Agent",
+    "commit": "d92ecd827fe671a589b7fdfdbba41e5e98081d87",
+    "commit_is_immutable": true
+  },
+  "fixtures_are_byte_exact_snapshots": true,
+  "selected_files": [
+    {
+      "source_path": "prompt_engineering/二元决策.txt",
+      "fixture_path": "fixtures/upstream/binary_decision.txt",
+      "byte_length": 42207,
+      "sha256": "875a1a210b990ff2ade05c01fdfa8e93abccd87480e0e5dcd3d76f68e9d0fda5",
+      "provenance_class": "upstream_pa",
+      "selected_branch_ids": [
+        "BD-0.1-readability",
+        "BD-1.1-data-sufficiency",
+        "BD-1.2-cycle-identification",
+        "BD-1.3-market-clarity",
+        "BD-2.1-inertia",
+        "BD-2.3-direction",
+        "BD-2.4-always-in",
+        "BD-2.5-momentum-support",
+        "BD-3.1-spike",
+        "BD-4.1-channel",
+        "BD-6.1-range-boundaries",
+        "BD-7-reversal-diagnostic",
+        "BD-9.0-closed-signal",
+        "BD-9.2-direction-alignment",
+        "BD-10.1-stop-defined",
+        "BD-10.2-stop-size",
+        "BD-10.3-trader-equation",
+        "BD-11-order-route"
+      ]
+    },
+    {
+      "source_path": "prompt_engineering/文件17-止损和止盈与仓位管理.txt",
+      "fixture_path": "fixtures/upstream/stop_target_risk.txt",
+      "byte_length": 3979,
+      "sha256": "e953072fccb182bd391511132fa924ca5b2c5711292051348446df1da7b2a805",
+      "provenance_class": "upstream_pa",
+      "selected_branch_ids": [
+        "ST-1-structural-stop",
+        "ST-2-tp1",
+        "ST-2-tp2",
+        "ST-3-risk-distance",
+        "ST-4-trader-equation"
+      ]
+    },
+    {
+      "source_path": "prompt_engineering/逐棒分析检查单.txt",
+      "fixture_path": "fixtures/upstream/bar_by_bar_checklist.txt",
+      "byte_length": 2304,
+      "sha256": "4e867202df9cba4dcb5a74a6c122bb112880534f9cfeeb24e6ca25df8ab996ea",
+      "provenance_class": "upstream_pa",
+      "selected_branch_ids": [
+        "CK-1-close-bar-flow",
+        "CK-4-watch-invalidation",
+        "CK-6-follow-through"
+      ]
+    }
+  ],
+  "existing_paired_trading_references": [
+    {
+      "path": "doc/design/pa-feitian-decision-trace-v1-2026-07-08.md",
+      "sha256_required_at_verification": true,
+      "purpose": "reference-only structured trace shape; historical v0 contract is not rewritten",
+      "sha256": "030da71cac2efd61c9e1f0ca21e0656db0bf1a4366ee4face0bf90f1e83470e8"
+    },
+    {
+      "path": "doc/schemas/pa_feitian_evaluation_dataset_v1.schema.json",
+      "sha256_required_at_verification": true,
+      "purpose": "reference-only outcome field names; no historical schema mutation",
+      "sha256": "4a918b37b1f50bddb73476dc381b9b5c98bff9987e3443e81e2a43bf53877346"
+    }
+  ],
+  "selected_branch_policy": "Only the branch IDs listed on selected_files are selected for this bounded M6P graph. Every selected branch must resolve to exactly one registry node and at least one registry edge.",
+  "unmapped_branches": [],
+  "excluded_source_material": [
+    {
+      "material": "All PA_Agent prompt_engineering files other than the three selected files",
+      "status": "not_inspected",
+      "reason": "Outside the bounded source-pinned baseline; no semantics are inferred from uninspected material."
+    },
+    {
+      "material": "Sections 12-13 of prompt_engineering/二元决策.txt",
+      "status": "inspected_and_excluded",
+      "reason": "The source explicitly says PA Agent does not manage a position after entry; replaced only by explicit PI-policy-extension rows, never by an implicit upstream default."
+    },
+    {
+      "material": "Position sizing, volume dependence, and automatic routing behavior",
+      "status": "inspected_and_excluded",
+      "reason": "Explicit upstream prohibitions and Issue #85 out-of-scope boundary."
+    }
+  ],
+  "integrity_rule": "A missing fixture, byte-length mismatch, SHA-256 mismatch, commit mismatch, unknown provenance class, duplicate branch ID, or non-empty unmapped_branches fails verification."
+}
