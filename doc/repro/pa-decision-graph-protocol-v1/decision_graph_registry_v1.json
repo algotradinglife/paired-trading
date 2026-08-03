@@ -1,0 +1,1853 @@
+{
+  "schema_version": "pa_decision_graph_registry_v1",
+  "graph_id": "pa-decision-graph-v1",
+  "graph_version": "1.0.0",
+  "topology_status": "frozen_within_protocol",
+  "weight_mutability": "weights_only_between_declared_batches",
+  "source_manifest": "source_manifest_v1.json",
+  "nodes": [
+    {
+      "node_id": "action.order_route",
+      "kind": "decision",
+      "label": "Select a permitted order route",
+      "branch_id": "BD-11-order-route",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§11"
+      ],
+      "required_closed_bar_inputs": [
+        "regime.closed_only",
+        "signal.closed_only",
+        "risk.closed_only"
+      ],
+      "semantics": "The route is a policy action, never automatic routing or capital authorization."
+    },
+    {
+      "node_id": "bar.close_flow",
+      "kind": "decision",
+      "label": "Closed-bar classification flow completed",
+      "branch_id": "CK-1-close-bar-flow",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1"
+      ],
+      "required_closed_bar_inputs": [
+        "bar_classification.closed_only",
+        "bar_role.closed_only",
+        "context.closed_only"
+      ],
+      "semantics": "Each transition consumes only bars closed at or before the transition timestamp."
+    },
+    {
+      "node_id": "bar.follow_through",
+      "kind": "decision",
+      "label": "Follow-through is observed after a closed bar",
+      "branch_id": "CK-6-follow-through",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1-§2"
+      ],
+      "required_closed_bar_inputs": [
+        "follow_through.next_closed_bars"
+      ],
+      "semantics": "No follow-through cannot be treated as a high-probability entry."
+    },
+    {
+      "node_id": "bar.watch_invalidation",
+      "kind": "decision",
+      "label": "Watch point and invalidation are recorded",
+      "branch_id": "CK-4-watch-invalidation",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§4"
+      ],
+      "required_closed_bar_inputs": [
+        "failed_signal_extreme.closed_only",
+        "failed_entry_price.closed_only"
+      ],
+      "semantics": "Watch points are observations, not hidden position-management commands."
+    },
+    {
+      "node_id": "diagnosis.clear",
+      "kind": "decision",
+      "label": "Market is not extremely confused",
+      "branch_id": "BD-1.3-market-clarity",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§1.3"
+      ],
+      "required_closed_bar_inputs": [
+        "overlap.closed_only",
+        "ema_slope.closed_only",
+        "structure.closed_only"
+      ],
+      "semantics": "A confused market is a terminal no-trade observation."
+    },
+    {
+      "node_id": "diagnosis.cycle",
+      "kind": "decision",
+      "label": "Cycle is identifiable",
+      "branch_id": "BD-1.2-cycle-identification",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§1.2"
+      ],
+      "required_closed_bar_inputs": [
+        "cycle.features.closed_only"
+      ],
+      "semantics": "Cycle must be one declared regime; unknown routes to wait."
+    },
+    {
+      "node_id": "diagnosis.reversal",
+      "kind": "decision",
+      "label": "Reversal attempt diagnostic",
+      "branch_id": "BD-7-reversal-diagnostic",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§7"
+      ],
+      "required_closed_bar_inputs": [
+        "trendline_test.closed_only",
+        "prior_extreme_test.closed_only"
+      ],
+      "semantics": "Reversal is diagnostic only and never creates an inverse order without a separately admitted direction."
+    },
+    {
+      "node_id": "direction.always_in",
+      "kind": "decision",
+      "label": "Always-In context",
+      "branch_id": "BD-2.4-always-in",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§2.4"
+      ],
+      "required_closed_bar_inputs": [
+        "ema_side_counts.closed_only",
+        "pullback_depth.closed_only",
+        "swing_order.closed_only"
+      ],
+      "semantics": "Always-In constrains the first plan to the prevailing direction."
+    },
+    {
+      "node_id": "direction.current",
+      "kind": "decision",
+      "label": "Current direction is identified",
+      "branch_id": "BD-2.3-direction",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§2.3"
+      ],
+      "required_closed_bar_inputs": [
+        "ema_slope.closed_only",
+        "swing_order.closed_only",
+        "close_centroid.closed_only"
+      ],
+      "semantics": "Direction is long, short, or neutral; neutral cannot create a directional order."
+    },
+    {
+      "node_id": "direction.inertia",
+      "kind": "decision",
+      "label": "Directional inertia exists",
+      "branch_id": "BD-2.1-inertia",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§2.1"
+      ],
+      "required_closed_bar_inputs": [
+        "ema_slope.closed_only",
+        "swing_order.closed_only",
+        "trend_bar_balance.closed_only"
+      ],
+      "semantics": "Absent inertia selects range or wait logic rather than trend chasing."
+    },
+    {
+      "node_id": "direction.momentum_support",
+      "kind": "decision",
+      "label": "Momentum support is sufficient",
+      "branch_id": "BD-2.5-momentum-support",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#2.5"
+      ],
+      "required_closed_bar_inputs": [
+        "bar_overlap.closed_only",
+        "pullback_bars.closed_only",
+        "direction_bar_closes.closed_only"
+      ],
+      "semantics": "Strong inertia requires low overlap, a short pullback, and consecutive directional closes near the directional extreme."
+    },
+    {
+      "node_id": "gate.data_sufficient",
+      "kind": "decision",
+      "label": "At least twenty quality bars are available",
+      "branch_id": "BD-1.1-data-sufficiency",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§1.1"
+      ],
+      "required_closed_bar_inputs": [
+        "bars.closed_through_decision_bar",
+        "bars.count"
+      ],
+      "semantics": "Insufficient or poor-quality bars route to no-trade."
+    },
+    {
+      "node_id": "lifecycle.armed",
+      "kind": "state",
+      "label": "Entry is armed and version-bound",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-01-invalidation"
+      ],
+      "required_closed_bar_inputs": [
+        "graph_path.closed_only",
+        "policy_version.bound",
+        "entry_contract.ready"
+      ],
+      "semantics": "A route may arm an entry, but the lifecycle still requires an explicit enter action before any post-entry event."
+    },
+    {
+      "node_id": "lifecycle.condition_exit",
+      "kind": "state",
+      "label": "Failed-follow-through or weakening exit",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#2-confirmation-and-weakening"
+      ],
+      "required_closed_bar_inputs": [
+        "second_adverse_close.closed_only",
+        "pa_context_guard.closed_only"
+      ],
+      "semantics": "Condition exit is only failed two-bar follow-through or confirmed weakening."
+    },
+    {
+      "node_id": "lifecycle.confirmed",
+      "kind": "state",
+      "label": "Confirmed continuation",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#2-confirmation-and-weakening"
+      ],
+      "required_closed_bar_inputs": [
+        "post_entry_bar.closed_only",
+        "entry_direction",
+        "pa_trace.closed_only"
+      ],
+      "semantics": "Two aligned directional closes confirm; one adverse bar remains an ordinary pullback."
+    },
+    {
+      "node_id": "lifecycle.entered",
+      "kind": "state",
+      "label": "Entered lifecycle",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "trade_lifecycle_contract_v1.json#entered"
+      ],
+      "required_closed_bar_inputs": [
+        "entry_fill.closed_only",
+        "entry_plan.version"
+      ],
+      "semantics": "Entry is a single policy action after all upstream gates pass."
+    },
+    {
+      "node_id": "lifecycle.invalidated",
+      "kind": "state",
+      "label": "Structural invalidation",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#1-structural-invalidation"
+      ],
+      "required_closed_bar_inputs": [
+        "hard_stop_event.event_time",
+        "structural_stop.version"
+      ],
+      "semantics": "First hard touch or breach immediately exits; close does not delay protection."
+    },
+    {
+      "node_id": "lifecycle.partial_exit",
+      "kind": "state",
+      "label": "Fixed half partial exit action",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#3-tp1--tp2"
+      ],
+      "required_closed_bar_inputs": [
+        "tp1_fraction=0.5",
+        "runner_quantity=0.5"
+      ],
+      "semantics": "No discretionary fraction, scaling, or resizing."
+    },
+    {
+      "node_id": "lifecycle.protective_stop",
+      "kind": "state",
+      "label": "Protective stop action",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#0-event-time-and-integrity-precedence"
+      ],
+      "required_closed_bar_inputs": [
+        "stop_fill.event_time",
+        "fill_price"
+      ],
+      "semantics": "Hard-touch execution uses stop price or adverse bar open."
+    },
+    {
+      "node_id": "lifecycle.right_censored",
+      "kind": "state",
+      "label": "Open episode at study cutoff",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#5-condition-and-time-exit"
+      ],
+      "required_closed_bar_inputs": [
+        "study_cutoff.closed_only",
+        "open_quantity",
+        "censoring_timestamp"
+      ],
+      "semantics": "Right censoring is not an exit and is excluded from completed-outcome learning."
+    },
+    {
+      "node_id": "lifecycle.tp1_touch",
+      "kind": "state",
+      "label": "TP1 touch observation",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#3-tp1--tp2"
+      ],
+      "required_closed_bar_inputs": [
+        "tp1_touch.event_time",
+        "same_bar_collision_check"
+      ],
+      "semantics": "First valid TP1 touch exits exactly normalized 0.5 and retains a 0.5 runner."
+    },
+    {
+      "node_id": "lifecycle.trailing",
+      "kind": "state",
+      "label": "Three-bar pivot trailing action",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#4-protective-stop-and-trailing"
+      ],
+      "required_closed_bar_inputs": [
+        "pivot_i_minus_1.closed",
+        "pivot_i.closed",
+        "pivot_i_plus_1.closed",
+        "previous_stop"
+      ],
+      "semantics": "Long max/min short ratchet is known only after the third bar and never loosens."
+    },
+    {
+      "node_id": "lifecycle.unconfirmed",
+      "kind": "state",
+      "label": "Entered but not yet confirmed",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#2-confirmation-and-weakening"
+      ],
+      "required_closed_bar_inputs": [
+        "two_post_entry_bars.closed_only",
+        "entry_direction",
+        "hard_stop_events.precede_close"
+      ],
+      "semantics": "Two-bar follow-through is required; failure exits at the second close."
+    },
+    {
+      "node_id": "lifecycle.weakened",
+      "kind": "state",
+      "label": "Weakened continuation",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#2-confirmation-and-weakening"
+      ],
+      "required_closed_bar_inputs": [
+        "two_adverse_bars.closed_only",
+        "pa_context_guard.closed_only"
+      ],
+      "semantics": "Two adverse closes plus PA context failure are required."
+    },
+    {
+      "node_id": "observe.readable",
+      "kind": "decision",
+      "label": "Market is readable",
+      "branch_id": "BD-0.1-readability",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§0.1"
+      ],
+      "required_closed_bar_inputs": [
+        "bars.closed_through_decision_bar",
+        "context.window_present"
+      ],
+      "semantics": "If the market cannot be described, wait without direction or order."
+    },
+    {
+      "node_id": "regime.channel",
+      "kind": "decision",
+      "label": "Ordered channel",
+      "branch_id": "BD-4.1-channel",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§4.1"
+      ],
+      "required_closed_bar_inputs": [
+        "swing_order.closed_only",
+        "channel_bounds.closed_only"
+      ],
+      "semantics": "Channel plans wait for a boundary or declared pullback signal."
+    },
+    {
+      "node_id": "regime.range",
+      "kind": "decision",
+      "label": "Range boundaries are clear",
+      "branch_id": "BD-6.1-range-boundaries",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§6.1"
+      ],
+      "required_closed_bar_inputs": [
+        "range_high.closed_only",
+        "range_low.closed_only",
+        "price_location.closed_only"
+      ],
+      "semantics": "Range middle is no-trade; only a boundary plan may continue."
+    },
+    {
+      "node_id": "regime.spike",
+      "kind": "decision",
+      "label": "Spike or fast market",
+      "branch_id": "BD-3.1-spike",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§3.1"
+      ],
+      "required_closed_bar_inputs": [
+        "trend_bar_run.closed_only",
+        "bar_overlap.closed_only"
+      ],
+      "semantics": "Spike handling forbids chasing a climax and waits for a permitted pullback."
+    },
+    {
+      "node_id": "risk.distance",
+      "kind": "decision",
+      "label": "Risk distance is narrated without position sizing",
+      "branch_id": "ST-3-risk-distance",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#三"
+      ],
+      "required_closed_bar_inputs": [
+        "atr.closed_only",
+        "channel_width.closed_only",
+        "signal_range.closed_only"
+      ],
+      "semantics": "The graph never emits quantity, capital, or percentage sizing."
+    },
+    {
+      "node_id": "risk.equation_crosscheck",
+      "kind": "decision",
+      "label": "TP1-based equation cross-check",
+      "branch_id": "ST-4-trader-equation",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#四"
+      ],
+      "required_closed_bar_inputs": [
+        "tp1_plan.closed_only",
+        "stop_plan.closed_only",
+        "win_rate_estimate.closed_only"
+      ],
+      "semantics": "Duplicate source rule is cross-checked against BD-10.3; disagreement fails closed."
+    },
+    {
+      "node_id": "risk.stop_defined",
+      "kind": "decision",
+      "label": "Structural stop is explicit",
+      "branch_id": "BD-10.1-stop-defined",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§10.1",
+        "fixtures/upstream/stop_target_risk.txt#§一"
+      ],
+      "required_closed_bar_inputs": [
+        "signal_extreme.closed_only",
+        "structure_extreme.closed_only",
+        "entry_plan.closed_only"
+      ],
+      "semantics": "No explicit stop means no entry."
+    },
+    {
+      "node_id": "risk.stop_size",
+      "kind": "decision",
+      "label": "Stop distance is acceptable",
+      "branch_id": "BD-10.2-stop-size",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§10.2",
+        "fixtures/upstream/stop_target_risk.txt#§三"
+      ],
+      "required_closed_bar_inputs": [
+        "entry_plan.closed_only",
+        "stop_plan.closed_only",
+        "atr.closed_only"
+      ],
+      "semantics": "Oversized risk routes to wait or reject; it does not get a fabricated fixed stop."
+    },
+    {
+      "node_id": "risk.structural_stop",
+      "kind": "decision",
+      "label": "Structural stop follows the frozen extreme rule",
+      "branch_id": "ST-1-structural-stop",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一"
+      ],
+      "required_closed_bar_inputs": [
+        "signal_extreme.closed_only",
+        "structure_extreme.closed_only",
+        "tick_size.closed_only"
+      ],
+      "semantics": "Stop is outside the signal or swing extreme; no fixed-size or position-sizing substitute is permitted."
+    },
+    {
+      "node_id": "risk.tp1",
+      "kind": "decision",
+      "label": "TP1 is a fixed near structural target",
+      "branch_id": "ST-2-tp1",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二"
+      ],
+      "required_closed_bar_inputs": [
+        "entry_plan.closed_only",
+        "near_structure.closed_only"
+      ],
+      "semantics": "TP1 participates in RR and is fixed at entry."
+    },
+    {
+      "node_id": "risk.tp2",
+      "kind": "decision",
+      "label": "TP2 is a fixed extended structural target",
+      "branch_id": "ST-2-tp2",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二"
+      ],
+      "required_closed_bar_inputs": [
+        "entry_plan.closed_only",
+        "far_structure.closed_only"
+      ],
+      "semantics": "TP2 is fixed at entry and is not substituted into the trader equation."
+    },
+    {
+      "node_id": "risk.trader_equation",
+      "kind": "decision",
+      "label": "Trader equation passes",
+      "branch_id": "BD-10.3-trader-equation",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§10.3",
+        "fixtures/upstream/stop_target_risk.txt#§四"
+      ],
+      "required_closed_bar_inputs": [
+        "entry_plan.closed_only",
+        "stop_plan.closed_only",
+        "tp1_plan.closed_only",
+        "win_rate_estimate.closed_only"
+      ],
+      "semantics": "The equation uses TP1 only and must pass before order selection."
+    },
+    {
+      "node_id": "signal.closed_quality",
+      "kind": "decision",
+      "label": "Closed signal bar has sufficient quality",
+      "branch_id": "BD-9.0-closed-signal",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§9.0"
+      ],
+      "required_closed_bar_inputs": [
+        "signal_bar.closed",
+        "signal_quality.closed_only"
+      ],
+      "semantics": "An open or weak signal cannot arm an entry."
+    },
+    {
+      "node_id": "signal.direction_aligned",
+      "kind": "decision",
+      "label": "Signal agrees with plan direction",
+      "branch_id": "BD-9.2-direction-alignment",
+      "provenance_class": "upstream_pa",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§9.2"
+      ],
+      "required_closed_bar_inputs": [
+        "signal_direction.closed_only",
+        "plan_direction.closed_only"
+      ],
+      "semantics": "Misaligned signals wait or reject rather than reverse the baseline."
+    },
+    {
+      "node_id": "terminal.exited",
+      "kind": "terminal",
+      "label": "Exited trade lifecycle",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "trade_lifecycle_contract_v1.json#exited"
+      ],
+      "required_closed_bar_inputs": [
+        "exit_bar.closed_only",
+        "outcome_timestamp.closed_only"
+      ],
+      "semantics": "Exit records one terminal reason and outcome timestamp."
+    },
+    {
+      "node_id": "terminal.reject",
+      "kind": "terminal",
+      "label": "Reject candidate",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "trade_lifecycle_contract_v1.json#no_trade"
+      ],
+      "required_closed_bar_inputs": [
+        "terminal_bar.closed_only"
+      ],
+      "semantics": "A failed gate terminates the candidate without entry."
+    },
+    {
+      "node_id": "terminal.wait",
+      "kind": "terminal",
+      "label": "Wait / no decision",
+      "provenance_class": "pi_policy_extension",
+      "source_refs": [
+        "trade_lifecycle_contract_v1.json#no_trade"
+      ],
+      "required_closed_bar_inputs": [
+        "terminal_bar.closed_only"
+      ],
+      "semantics": "No trade and no directional guess."
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": "e.align.stop",
+      "from": "signal.direction_aligned",
+      "to": "risk.stop_defined",
+      "when": "aligned=true",
+      "branch_id": "BD-9.2-direction-alignment",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§9.2"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to risk.stop_defined when aligned=true."
+    },
+    {
+      "edge_id": "e.align.wait",
+      "from": "signal.direction_aligned",
+      "to": "terminal.wait",
+      "when": "aligned=false",
+      "branch_id": "BD-9.2-direction-alignment",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§9.2"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when aligned=false."
+    },
+    {
+      "edge_id": "e.always.momentum",
+      "from": "direction.always_in",
+      "to": "direction.momentum_support",
+      "when": "always_in_context=true",
+      "branch_id": "BD-2.4-always-in",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§2.4"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to direction.momentum_support when always_in_context=true."
+    },
+    {
+      "edge_id": "e.always.wait",
+      "from": "direction.always_in",
+      "to": "terminal.wait",
+      "when": "always_in_context=false",
+      "branch_id": "BD-2.4-always-in",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§2.4"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when the always-in context is not established."
+    },
+    {
+      "edge_id": "e.armed.enter",
+      "from": "lifecycle.armed",
+      "to": "lifecycle.entered",
+      "when": "entry_version_bound=true",
+      "action": "enter",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-01-invalidation"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.entered only after the armed entry has a bound version and causal trigger."
+    },
+    {
+      "edge_id": "e.channel.signal",
+      "from": "regime.channel",
+      "to": "signal.closed_quality",
+      "when": "channel_plan_allowed=true",
+      "branch_id": "BD-4.1-channel",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§4.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to signal.closed_quality when channel_plan_allowed=true."
+    },
+    {
+      "edge_id": "e.channel.wait",
+      "from": "regime.channel",
+      "to": "terminal.wait",
+      "when": "channel_plan_allowed=false",
+      "branch_id": "BD-4.1-channel",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§4.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when channel_plan_allowed=false."
+    },
+    {
+      "edge_id": "e.clear.inertia",
+      "from": "diagnosis.clear",
+      "to": "direction.inertia",
+      "when": "clear=true",
+      "branch_id": "BD-1.3-market-clarity",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§1.3"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to direction.inertia when clear=true."
+    },
+    {
+      "edge_id": "e.clear.wait",
+      "from": "diagnosis.clear",
+      "to": "terminal.wait",
+      "when": "clear=false",
+      "branch_id": "BD-1.3-market-clarity",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§1.3"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when clear=false."
+    },
+    {
+      "edge_id": "e.close.follow",
+      "from": "bar.close_flow",
+      "to": "bar.follow_through",
+      "when": "confirmation_window=true",
+      "branch_id": "CK-6-follow-through",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1-§2"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to bar.follow_through when confirmation_window=true."
+    },
+    {
+      "edge_id": "e.close.wait",
+      "from": "bar.close_flow",
+      "to": "terminal.wait",
+      "when": "close_bar_flow_unavailable=true",
+      "branch_id": "CK-1-close-bar-flow",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to terminal.wait when close_bar_flow_unavailable=true."
+    },
+    {
+      "edge_id": "e.close.watch",
+      "from": "bar.close_flow",
+      "to": "bar.watch_invalidation",
+      "when": "invalidation_watch=true",
+      "branch_id": "CK-4-watch-invalidation",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§4"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to bar.watch_invalidation when invalidation_watch=true."
+    },
+    {
+      "edge_id": "e.condition.exit",
+      "from": "lifecycle.condition_exit",
+      "to": "terminal.exited",
+      "when": "condition_exit_filled=true",
+      "branch_id": "CK-4-watch-invalidation",
+      "action": "exit",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§4",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to terminal.exited when condition_exit_filled=true."
+    },
+    {
+      "edge_id": "e.confirmed.censor",
+      "from": "lifecycle.confirmed",
+      "to": "lifecycle.right_censored",
+      "when": "study_cutoff_before_terminal",
+      "branch_id": "CK-1-close-bar-flow",
+      "action": "right_censor",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.right_censored when study_cutoff_before_terminal."
+    },
+    {
+      "edge_id": "e.confirmed.invalidated",
+      "from": "lifecycle.confirmed",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_touch=true",
+      "branch_id": "CK-4-watch-invalidation",
+      "action": "hard_stop_touch",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§4",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_touch_or_gap=true."
+    },
+    {
+      "edge_id": "e.confirmed.invalidated_gap",
+      "from": "lifecycle.confirmed",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_gap=true",
+      "action": "hard_stop_gap",
+      "branch_id": "CK-4-watch-invalidation",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-02-confirmation-weakening"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_gap=true."
+    },
+    {
+      "edge_id": "e.confirmed.pullback",
+      "from": "lifecycle.confirmed",
+      "to": "lifecycle.confirmed",
+      "when": "one_adverse_close_without_pa_failure=true",
+      "action": "ordinary_pullback",
+      "branch_id": "CK-6-follow-through",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-02-confirmation-weakening"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.confirmed when one_adverse_close_without_pa_failure=true."
+    },
+    {
+      "edge_id": "e.confirmed.tp1",
+      "from": "lifecycle.confirmed",
+      "to": "lifecycle.tp1_touch",
+      "when": "tp1_touched=true",
+      "branch_id": "ST-2-tp1",
+      "action": "tp1_touch",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.tp1_touch when tp1_touched=true."
+    },
+    {
+      "edge_id": "e.confirmed.weak",
+      "from": "lifecycle.confirmed",
+      "to": "lifecycle.weakened",
+      "when": "two_adverse_closes_and_pa_failure=true",
+      "branch_id": "CK-6-follow-through",
+      "action": "weakening",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1-§2",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.weakened when two_adverse_closes_and_pa_failure=true."
+    },
+    {
+      "edge_id": "e.crosscheck.reject",
+      "from": "risk.equation_crosscheck",
+      "to": "terminal.reject",
+      "when": "crosscheck_match=false",
+      "branch_id": "ST-4-trader-equation",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#四"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.reject when crosscheck_match=false."
+    },
+    {
+      "edge_id": "e.crosscheck.route",
+      "from": "risk.equation_crosscheck",
+      "to": "action.order_route",
+      "when": "crosscheck_match=true",
+      "branch_id": "ST-4-trader-equation",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#四"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to action.order_route when crosscheck_match=true."
+    },
+    {
+      "edge_id": "e.cycle.clear",
+      "from": "diagnosis.cycle",
+      "to": "diagnosis.clear",
+      "when": "cycle_known=true",
+      "branch_id": "BD-1.2-cycle-identification",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§1.2"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to diagnosis.clear when cycle_known=true."
+    },
+    {
+      "edge_id": "e.cycle.wait",
+      "from": "diagnosis.cycle",
+      "to": "terminal.wait",
+      "when": "cycle_known=false",
+      "branch_id": "BD-1.2-cycle-identification",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§1.2"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when cycle_known=false."
+    },
+    {
+      "edge_id": "e.data.cycle",
+      "from": "gate.data_sufficient",
+      "to": "diagnosis.cycle",
+      "when": "data_sufficient=true",
+      "branch_id": "BD-1.1-data-sufficiency",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§1.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to diagnosis.cycle when data_sufficient=true."
+    },
+    {
+      "edge_id": "e.data.reject",
+      "from": "gate.data_sufficient",
+      "to": "terminal.reject",
+      "when": "data_sufficient=false",
+      "branch_id": "BD-1.1-data-sufficiency",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§1.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.reject when data_sufficient=false."
+    },
+    {
+      "edge_id": "e.direction.always",
+      "from": "direction.current",
+      "to": "direction.always_in",
+      "when": "direction in {long,short}",
+      "branch_id": "BD-2.3-direction",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§2.3"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to direction.always_in when direction in {long,short}."
+    },
+    {
+      "edge_id": "e.direction.reversal",
+      "from": "direction.current",
+      "to": "diagnosis.reversal",
+      "when": "direction=neutral",
+      "branch_id": "BD-2.3-direction",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§2.3"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to diagnosis.reversal when direction=neutral."
+    },
+    {
+      "edge_id": "e.distance.size",
+      "from": "risk.distance",
+      "to": "risk.stop_size",
+      "when": "distance_narrated=true",
+      "branch_id": "ST-3-risk-distance",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#三"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to risk.stop_size when distance_narrated=true."
+    },
+    {
+      "edge_id": "e.distance.wait",
+      "from": "risk.distance",
+      "to": "terminal.wait",
+      "when": "distance_narrated=false",
+      "branch_id": "ST-3-risk-distance",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#三"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when distance_narrated=false."
+    },
+    {
+      "edge_id": "e.enter.censor",
+      "from": "lifecycle.entered",
+      "to": "lifecycle.right_censored",
+      "when": "study_cutoff_before_terminal",
+      "branch_id": "CK-1-close-bar-flow",
+      "action": "right_censor",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.right_censored when study_cutoff_before_terminal."
+    },
+    {
+      "edge_id": "e.enter.close_flow",
+      "from": "lifecycle.entered",
+      "to": "bar.close_flow",
+      "when": "entry_recorded=true",
+      "branch_id": "CK-1-close-bar-flow",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to bar.close_flow when entry_recorded=true."
+    },
+    {
+      "edge_id": "e.enter.invalidated",
+      "from": "lifecycle.entered",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_touch=true",
+      "branch_id": "CK-4-watch-invalidation",
+      "action": "hard_stop_touch",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§4",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_touch_or_gap=true."
+    },
+    {
+      "edge_id": "e.enter.invalidated_gap",
+      "from": "lifecycle.entered",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_gap=true",
+      "action": "hard_stop_gap",
+      "branch_id": "CK-4-watch-invalidation",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-02-confirmation-weakening"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_gap=true."
+    },
+    {
+      "edge_id": "e.enter.unconfirmed",
+      "from": "lifecycle.entered",
+      "to": "lifecycle.unconfirmed",
+      "when": "confirmation_not_yet_met",
+      "branch_id": "CK-1-close-bar-flow",
+      "action": "start_confirmation_window",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.unconfirmed when confirmation_not_yet_met."
+    },
+    {
+      "edge_id": "e.equation.crosscheck",
+      "from": "risk.trader_equation",
+      "to": "risk.equation_crosscheck",
+      "when": "equation_pass=true",
+      "branch_id": "BD-10.3-trader-equation",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§10.3"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to risk.equation_crosscheck when equation_pass=true."
+    },
+    {
+      "edge_id": "e.equation.reject",
+      "from": "risk.trader_equation",
+      "to": "terminal.reject",
+      "when": "equation_pass=false",
+      "branch_id": "BD-10.3-trader-equation",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§10.3"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.reject when equation_pass=false."
+    },
+    {
+      "edge_id": "e.follow.unconfirmed",
+      "from": "bar.follow_through",
+      "to": "lifecycle.unconfirmed",
+      "when": "post_entry_bars_available=true",
+      "branch_id": "CK-6-follow-through",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1-§2",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.unconfirmed when post_entry_bars_available=true."
+    },
+    {
+      "edge_id": "e.follow.wait",
+      "from": "bar.follow_through",
+      "to": "terminal.wait",
+      "when": "post_entry_bars_unavailable=true",
+      "branch_id": "CK-6-follow-through",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§6"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when post_entry_bars_unavailable=true."
+    },
+    {
+      "edge_id": "e.inertia.direction",
+      "from": "direction.inertia",
+      "to": "direction.current",
+      "when": "inertia=true",
+      "branch_id": "BD-2.1-inertia",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§2.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to direction.current when inertia=true."
+    },
+    {
+      "edge_id": "e.inertia.range",
+      "from": "direction.inertia",
+      "to": "regime.range",
+      "when": "inertia=false",
+      "branch_id": "BD-2.1-inertia",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§2.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to regime.range when inertia=false."
+    },
+    {
+      "edge_id": "e.invalidated.stop",
+      "from": "lifecycle.invalidated",
+      "to": "lifecycle.protective_stop",
+      "when": "protective_stop=true",
+      "branch_id": "ST-1-structural-stop",
+      "action": "protective_stop",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.protective_stop when protective_stop=true."
+    },
+    {
+      "edge_id": "e.momentum.channel",
+      "from": "direction.momentum_support",
+      "to": "regime.channel",
+      "when": "momentum_supported=true and spike=false and channel=true",
+      "branch_id": "BD-2.5-momentum-support",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#2.5"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to regime.channel when momentum_supported=true and spike=false and channel=true."
+    },
+    {
+      "edge_id": "e.momentum.range",
+      "from": "direction.momentum_support",
+      "to": "regime.range",
+      "when": "momentum_supported=false or (spike=false and channel=false)",
+      "branch_id": "BD-2.5-momentum-support",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#2.5"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to regime.range when momentum_supported=false or (spike=false and channel=false)."
+    },
+    {
+      "edge_id": "e.momentum.spike",
+      "from": "direction.momentum_support",
+      "to": "regime.spike",
+      "when": "momentum_supported=true and spike=true",
+      "branch_id": "BD-2.5-momentum-support",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#2.5"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to regime.spike when momentum_supported=true and spike=true."
+    },
+    {
+      "edge_id": "e.observe.data",
+      "from": "observe.readable",
+      "to": "gate.data_sufficient",
+      "when": "readable=true",
+      "branch_id": "BD-0.1-readability",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§0.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to gate.data_sufficient when readable=true."
+    },
+    {
+      "edge_id": "e.observe.wait",
+      "from": "observe.readable",
+      "to": "terminal.wait",
+      "when": "readable=false",
+      "branch_id": "BD-0.1-readability",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§0.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when readable=false."
+    },
+    {
+      "edge_id": "e.partial.censor",
+      "from": "lifecycle.partial_exit",
+      "to": "lifecycle.right_censored",
+      "when": "study_cutoff_before_runner_terminal",
+      "branch_id": "CK-1-close-bar-flow",
+      "action": "right_censor",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.right_censored when study_cutoff_before_runner_terminal."
+    },
+    {
+      "edge_id": "e.partial.confirmed",
+      "from": "lifecycle.partial_exit",
+      "to": "lifecycle.confirmed",
+      "when": "runner_held=true",
+      "branch_id": "ST-2-tp2",
+      "action": "runner_hold",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.confirmed when runner_held=true."
+    },
+    {
+      "edge_id": "e.partial.exit",
+      "from": "lifecycle.partial_exit",
+      "to": "terminal.exited",
+      "when": "tp2_terminal=true",
+      "branch_id": "ST-2-tp2",
+      "action": "tp2",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to terminal.exited when tp2_terminal=true."
+    },
+    {
+      "edge_id": "e.partial.invalidated",
+      "from": "lifecycle.partial_exit",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_touch=true",
+      "branch_id": "ST-1-structural-stop",
+      "action": "hard_stop_touch",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_touch_or_gap=true."
+    },
+    {
+      "edge_id": "e.partial.invalidated_gap",
+      "from": "lifecycle.partial_exit",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_gap=true",
+      "action": "hard_stop_gap",
+      "branch_id": "ST-1-structural-stop",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-02-confirmation-weakening"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_gap=true."
+    },
+    {
+      "edge_id": "e.partial.trailing",
+      "from": "lifecycle.partial_exit",
+      "to": "lifecycle.trailing",
+      "when": "pivot_ratchet=true",
+      "branch_id": "ST-1-structural-stop",
+      "action": "trailing_ratchet",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.trailing when pivot_ratchet=true."
+    },
+    {
+      "edge_id": "e.partial.weakened",
+      "from": "lifecycle.partial_exit",
+      "to": "lifecycle.weakened",
+      "when": "two_adverse_closes_and_pa_failure=true",
+      "branch_id": "CK-6-follow-through",
+      "action": "weakening",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1-§2",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.weakened when two_adverse_closes_and_pa_failure=true."
+    },
+    {
+      "edge_id": "e.range.signal",
+      "from": "regime.range",
+      "to": "signal.closed_quality",
+      "when": "boundary_plan_allowed=true",
+      "branch_id": "BD-6.1-range-boundaries",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§6.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to signal.closed_quality when boundary_plan_allowed=true."
+    },
+    {
+      "edge_id": "e.range.wait",
+      "from": "regime.range",
+      "to": "terminal.wait",
+      "when": "boundary_plan_allowed=false",
+      "branch_id": "BD-6.1-range-boundaries",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§6.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when boundary_plan_allowed=false."
+    },
+    {
+      "edge_id": "e.reversal.wait",
+      "from": "diagnosis.reversal",
+      "to": "terminal.wait",
+      "when": "reversal_only=true",
+      "branch_id": "BD-7-reversal-diagnostic",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§7"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when reversal_only=true."
+    },
+    {
+      "edge_id": "e.route.enter",
+      "from": "action.order_route",
+      "to": "lifecycle.armed",
+      "when": "route_permitted=true",
+      "branch_id": "BD-11-order-route",
+      "action": "arm_entry",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§11",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.armed when route_permitted=true; entry remains a separate lifecycle action."
+    },
+    {
+      "edge_id": "e.route.reject",
+      "from": "action.order_route",
+      "to": "terminal.reject",
+      "when": "route_permitted=false",
+      "branch_id": "BD-11-order-route",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§11"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.reject when route_permitted=false."
+    },
+    {
+      "edge_id": "e.signal.align",
+      "from": "signal.closed_quality",
+      "to": "signal.direction_aligned",
+      "when": "closed_quality=true",
+      "branch_id": "BD-9.0-closed-signal",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§9.0"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to signal.direction_aligned when closed_quality=true."
+    },
+    {
+      "edge_id": "e.signal.wait",
+      "from": "signal.closed_quality",
+      "to": "terminal.wait",
+      "when": "closed_quality=false",
+      "branch_id": "BD-9.0-closed-signal",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§9.0"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when closed_quality=false."
+    },
+    {
+      "edge_id": "e.size.equation",
+      "from": "risk.stop_size",
+      "to": "risk.trader_equation",
+      "when": "size_ok=true",
+      "branch_id": "BD-10.2-stop-size",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§10.2"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to risk.trader_equation when size_ok=true."
+    },
+    {
+      "edge_id": "e.size.wait",
+      "from": "risk.stop_size",
+      "to": "terminal.wait",
+      "when": "size_ok=false",
+      "branch_id": "BD-10.2-stop-size",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§10.2"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when size_ok=false."
+    },
+    {
+      "edge_id": "e.spike.signal",
+      "from": "regime.spike",
+      "to": "signal.closed_quality",
+      "when": "spike_plan_allowed=true",
+      "branch_id": "BD-3.1-spike",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§3.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to signal.closed_quality when spike_plan_allowed=true."
+    },
+    {
+      "edge_id": "e.spike.wait",
+      "from": "regime.spike",
+      "to": "terminal.wait",
+      "when": "spike_plan_allowed=false",
+      "branch_id": "BD-3.1-spike",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§3.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when spike_plan_allowed=false."
+    },
+    {
+      "edge_id": "e.stop.exit",
+      "from": "lifecycle.protective_stop",
+      "to": "terminal.exited",
+      "when": "stop_filled=true",
+      "branch_id": "ST-1-structural-stop",
+      "action": "exit",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to terminal.exited when stop_filled=true."
+    },
+    {
+      "edge_id": "e.stop.reject",
+      "from": "risk.stop_defined",
+      "to": "terminal.reject",
+      "when": "stop_defined=false",
+      "branch_id": "BD-10.1-stop-defined",
+      "source_refs": [
+        "fixtures/upstream/binary_decision.txt#§10.1"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.reject when stop_defined=false."
+    },
+    {
+      "edge_id": "e.stop.structural",
+      "from": "risk.stop_defined",
+      "to": "risk.structural_stop",
+      "when": "stop_defined=true",
+      "branch_id": "ST-1-structural-stop",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to risk.structural_stop when stop_defined=true."
+    },
+    {
+      "edge_id": "e.structural.reject",
+      "from": "risk.structural_stop",
+      "to": "terminal.reject",
+      "when": "structural_stop_valid=false",
+      "branch_id": "ST-1-structural-stop",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.reject when structural_stop_valid=false."
+    },
+    {
+      "edge_id": "e.structural.tp1",
+      "from": "risk.structural_stop",
+      "to": "risk.tp1",
+      "when": "structural_stop_valid=true",
+      "branch_id": "ST-1-structural-stop",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to risk.tp1 when structural_stop_valid=true."
+    },
+    {
+      "edge_id": "e.tp1.invalidated_gap",
+      "from": "lifecycle.tp1_touch",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_gap=true",
+      "action": "hard_stop_gap",
+      "branch_id": "ST-1-structural-stop",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-02-confirmation-weakening"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_gap=true."
+    },
+    {
+      "edge_id": "e.tp1.invalidated_touch",
+      "from": "lifecycle.tp1_touch",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_touch=true",
+      "action": "hard_stop_touch",
+      "branch_id": "ST-1-structural-stop",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一",
+        "pi_management_adjudication_v1.md#MA-01-invalidation"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_touch=true."
+    },
+    {
+      "edge_id": "e.tp1.partial",
+      "from": "lifecycle.tp1_touch",
+      "to": "lifecycle.partial_exit",
+      "when": "fixed_half_partial_exit=true",
+      "branch_id": "ST-2-tp1",
+      "action": "tp1_half_exit",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.partial_exit when fixed_half_partial_exit=true."
+    },
+    {
+      "edge_id": "e.tp1.reject",
+      "from": "risk.tp1",
+      "to": "terminal.reject",
+      "when": "tp1_defined=false",
+      "branch_id": "ST-2-tp1",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.reject when tp1_defined=false."
+    },
+    {
+      "edge_id": "e.tp1.tp2",
+      "from": "risk.tp1",
+      "to": "risk.tp2",
+      "when": "tp1_defined=true",
+      "branch_id": "ST-2-tp1",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to risk.tp2 when tp1_defined=true."
+    },
+    {
+      "edge_id": "e.tp2.distance",
+      "from": "risk.tp2",
+      "to": "risk.distance",
+      "when": "tp2_defined=true",
+      "branch_id": "ST-2-tp2",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to risk.distance when tp2_defined=true."
+    },
+    {
+      "edge_id": "e.tp2.reject",
+      "from": "risk.tp2",
+      "to": "terminal.reject",
+      "when": "tp2_defined=false",
+      "branch_id": "ST-2-tp2",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.reject when tp2_defined=false."
+    },
+    {
+      "edge_id": "e.trailing.censor",
+      "from": "lifecycle.trailing",
+      "to": "lifecycle.right_censored",
+      "when": "study_cutoff_before_runner_terminal",
+      "branch_id": "CK-1-close-bar-flow",
+      "action": "right_censor",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.right_censored when study_cutoff_before_runner_terminal."
+    },
+    {
+      "edge_id": "e.trailing.confirmed",
+      "from": "lifecycle.trailing",
+      "to": "lifecycle.confirmed",
+      "when": "runner_held=true",
+      "branch_id": "ST-2-tp2",
+      "action": "runner_hold",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.confirmed when runner_held=true."
+    },
+    {
+      "edge_id": "e.trailing.exit",
+      "from": "lifecycle.trailing",
+      "to": "terminal.exited",
+      "when": "tp2_terminal=true",
+      "branch_id": "ST-2-tp2",
+      "action": "tp2",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#二",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to terminal.exited when tp2_terminal=true."
+    },
+    {
+      "edge_id": "e.trailing.invalidated",
+      "from": "lifecycle.trailing",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_touch=true",
+      "branch_id": "ST-1-structural-stop",
+      "action": "hard_stop_touch",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_touch_or_gap=true."
+    },
+    {
+      "edge_id": "e.trailing.invalidated_gap",
+      "from": "lifecycle.trailing",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_gap=true",
+      "action": "hard_stop_gap",
+      "branch_id": "ST-1-structural-stop",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-02-confirmation-weakening"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_gap=true."
+    },
+    {
+      "edge_id": "e.trailing.self",
+      "from": "lifecycle.trailing",
+      "to": "lifecycle.trailing",
+      "when": "pivot_ratchet=true",
+      "branch_id": "ST-1-structural-stop",
+      "action": "trailing_ratchet",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.trailing when pivot_ratchet=true."
+    },
+    {
+      "edge_id": "e.trailing.weakened",
+      "from": "lifecycle.trailing",
+      "to": "lifecycle.weakened",
+      "when": "two_adverse_closes_and_pa_failure=true",
+      "branch_id": "CK-6-follow-through",
+      "action": "weakening",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1-§2",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.weakened when two_adverse_closes_and_pa_failure=true."
+    },
+    {
+      "edge_id": "e.unconfirmed.censor",
+      "from": "lifecycle.unconfirmed",
+      "to": "lifecycle.right_censored",
+      "when": "study_cutoff_before_terminal",
+      "action": "right_censor",
+      "branch_id": "CK-1-close-bar-flow",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1",
+        "pi_management_adjudication_v1.md#MA-05-time-exit"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.right_censored when study_cutoff_before_terminal."
+    },
+    {
+      "edge_id": "e.unconfirmed.confirmed",
+      "from": "lifecycle.unconfirmed",
+      "to": "lifecycle.confirmed",
+      "when": "two_bar_confirmation=true",
+      "branch_id": "CK-6-follow-through",
+      "action": "confirm",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1-§2",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.confirmed when two_bar_confirmation=true."
+    },
+    {
+      "edge_id": "e.unconfirmed.failed",
+      "from": "lifecycle.unconfirmed",
+      "to": "lifecycle.condition_exit",
+      "when": "failed_follow_through=true",
+      "branch_id": "CK-6-follow-through",
+      "action": "failed_follow_through",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1-§2",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.condition_exit when failed_follow_through=true."
+    },
+    {
+      "edge_id": "e.unconfirmed.invalidated",
+      "from": "lifecycle.unconfirmed",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_touch=true",
+      "branch_id": "CK-4-watch-invalidation",
+      "action": "hard_stop_touch",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§4",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_touch_or_gap=true."
+    },
+    {
+      "edge_id": "e.unconfirmed.invalidated_gap",
+      "from": "lifecycle.unconfirmed",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_gap=true",
+      "action": "hard_stop_gap",
+      "branch_id": "CK-4-watch-invalidation",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-02-confirmation-weakening"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_gap=true."
+    },
+    {
+      "edge_id": "e.unconfirmed.window",
+      "from": "lifecycle.unconfirmed",
+      "to": "lifecycle.unconfirmed",
+      "when": "confirmation_window_continues=true",
+      "action": "start_confirmation_window",
+      "branch_id": "CK-6-follow-through",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-02-confirmation-weakening"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.unconfirmed when confirmation_window_continues=true."
+    },
+    {
+      "edge_id": "e.watch.invalidated",
+      "from": "bar.watch_invalidation",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_watch=true",
+      "branch_id": "CK-4-watch-invalidation",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§4",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_watch=true."
+    },
+    {
+      "edge_id": "e.watch.wait",
+      "from": "bar.watch_invalidation",
+      "to": "terminal.wait",
+      "when": "hard_stop_watch=false",
+      "branch_id": "CK-4-watch-invalidation",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§4"
+      ],
+      "provenance_class": "upstream_pa",
+      "semantics": "Transition to terminal.wait when hard_stop_watch=false."
+    },
+    {
+      "edge_id": "e.weak.censor",
+      "from": "lifecycle.weakened",
+      "to": "lifecycle.right_censored",
+      "when": "study_cutoff_before_terminal",
+      "action": "right_censor",
+      "branch_id": "CK-1-close-bar-flow",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§1",
+        "pi_management_adjudication_v1.md#MA-05-time-exit"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.right_censored when study_cutoff_before_terminal."
+    },
+    {
+      "edge_id": "e.weak.condition",
+      "from": "lifecycle.weakened",
+      "to": "lifecycle.condition_exit",
+      "when": "condition_exit=true",
+      "branch_id": "CK-4-watch-invalidation",
+      "action": "condition_exit",
+      "source_refs": [
+        "fixtures/upstream/bar_by_bar_checklist.txt#§4",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.condition_exit when condition_exit=true."
+    },
+    {
+      "edge_id": "e.weak.gap",
+      "from": "lifecycle.weakened",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_gap=true",
+      "action": "hard_stop_gap",
+      "branch_id": "ST-1-structural-stop",
+      "source_refs": [
+        "pi_management_adjudication_v1.md#MA-02-confirmation-weakening"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_gap=true."
+    },
+    {
+      "edge_id": "e.weak.stop",
+      "from": "lifecycle.weakened",
+      "to": "lifecycle.invalidated",
+      "when": "hard_stop_touch=true",
+      "branch_id": "ST-1-structural-stop",
+      "action": "hard_stop_touch",
+      "source_refs": [
+        "fixtures/upstream/stop_target_risk.txt#一",
+        "pi_management_adjudication_v1.md#promotion-and-audit-binding"
+      ],
+      "provenance_class": "pi_policy_extension",
+      "semantics": "Transition to lifecycle.invalidated when hard_stop_touch=true."
+    }
+  ],
+  "selected_branch_coverage": {
+    "unmapped_branch_ids": [],
+    "every_selected_branch_has_node": true,
+    "every_selected_branch_has_edge": true
+  }
+}

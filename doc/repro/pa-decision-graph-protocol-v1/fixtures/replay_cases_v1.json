@@ -1,0 +1,1362 @@
+{
+  "schema_version": "pa_decision_graph_replay_fixtures_v1",
+  "policy_version": "pa-policy-v1-semantic-repair",
+  "graph_version": "1.0.0",
+  "cases": [
+    {
+      "kind": "no_trade",
+      "case_id": "no-trade-insufficient-data",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-02T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-02T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "wait"
+        }
+      ],
+      "expected_terminal": "no_trade",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "wait",
+        "seal_no_trade"
+      ],
+      "expected_path": [
+        "observe",
+        "no_trade"
+      ],
+      "eligible_for_learning": false
+    },
+    {
+      "kind": "valid_stop",
+      "case_id": "valid-policy-stop",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-03T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-03T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-03T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "stop_touch",
+          "ts": "2026-01-03T00:03:00Z",
+          "closed": false,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "low": 99,
+          "high": 102,
+          "open": 101.5,
+          "stop": 100
+        }
+      ],
+      "expected_terminal": "exited",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "hard_stop_touch",
+        "protective_stop",
+        "exit",
+        "seal_outcome"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "invalidated",
+        "protective_stop",
+        "exited"
+      ],
+      "eligible_for_learning": true
+    },
+    {
+      "kind": "valid_trend",
+      "case_id": "valid-policy-trend",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-04T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-04T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-04T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-04T00:03:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 1,
+          "directional": true,
+          "pa_aligned": true,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 101,
+          "close": 102,
+          "pa_direction": "long"
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-04T00:04:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 2,
+          "directional": true,
+          "pa_aligned": true,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 101,
+          "close": 102,
+          "pa_direction": "long"
+        },
+        {
+          "event": "tp1_touch",
+          "ts": "2026-01-04T00:05:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "same_bar_collision": false
+        },
+        {
+          "event": "partial_exit",
+          "ts": "2026-01-04T00:06:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "fraction": 0.5,
+          "runner_fraction": 0.5
+        },
+        {
+          "event": "exit",
+          "ts": "2026-01-04T00:07:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "reason": "tp2_terminal",
+          "r": 2
+        }
+      ],
+      "expected_terminal": "exited",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "start_confirmation_window",
+        "start_confirmation_window",
+        "confirm",
+        "tp1_touch",
+        "tp1_half_exit",
+        "tp2",
+        "seal_outcome"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "unconfirmed",
+        "confirmed",
+        "tp1_touch",
+        "partial_exit",
+        "exited"
+      ],
+      "eligible_for_learning": true
+    },
+    {
+      "kind": "human_override",
+      "case_id": "declared-human-override",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-05T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-05T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "human_override",
+          "ts": "2026-01-05T00:01:30Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "rationale": "manual departure recorded",
+          "overridden_action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-05T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101,
+          "human_override": true
+        },
+        {
+          "event": "stop_touch",
+          "ts": "2026-01-05T00:03:00Z",
+          "closed": false,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "low": 99,
+          "high": 102,
+          "open": 101.5,
+          "stop": 100
+        }
+      ],
+      "expected_terminal": "exited",
+      "expected_integrity": "valid_human_override_episode",
+      "expected_actions": [
+        "arm_entry",
+        "override",
+        "enter",
+        "hard_stop_touch",
+        "protective_stop",
+        "exit",
+        "seal_outcome"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "invalidated",
+        "protective_stop",
+        "exited"
+      ],
+      "eligible_for_learning": false
+    },
+    {
+      "kind": "illegal_transition",
+      "case_id": "illegal-transition",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-06T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-06T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "exit",
+          "ts": "2026-01-06T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "reason": "structural_stop",
+          "r": -1
+        }
+      ],
+      "expected_terminal": "invalid_state_transition",
+      "expected_integrity": "invalid_state_transition",
+      "expected_actions": [
+        "arm_entry",
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe",
+        "armed"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "illegal_transition: the replay must reject this exact illegal or ambiguous event sequence before any outcome is admitted."
+    },
+    {
+      "kind": "lookahead",
+      "case_id": "look-ahead-input",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-07T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-07T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "management_input",
+          "ts": "2026-01-07T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "observed_at": "2026-01-07T00:03:00Z",
+          "future_input": true
+        },
+        {
+          "event": "human_override",
+          "ts": "2026-01-07T00:04:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "rationale": "late repair attempt",
+          "overridden_action": "enter"
+        }
+      ],
+      "expected_terminal": "invalid_causality",
+      "expected_integrity": "invalid_causality",
+      "expected_actions": [
+        "arm_entry",
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe",
+        "armed"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "A future management input is followed by a human override; the later override cannot repair invalid causality."
+    },
+    {
+      "kind": "version_mismatch",
+      "case_id": "version-mismatch",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-08T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-08T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-other",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        }
+      ],
+      "expected_terminal": "invalid_version_binding",
+      "expected_integrity": "invalid_version_binding",
+      "expected_actions": [
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "version_mismatch: the replay must reject this exact illegal or ambiguous event sequence before any outcome is admitted."
+    },
+    {
+      "kind": "hard_stop_touch",
+      "case_id": "hard-stop-touch-event-time",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-09T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-09T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-09T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "stop_touch",
+          "ts": "2026-01-09T00:03:00Z",
+          "closed": false,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "low": 99,
+          "high": 102,
+          "open": 101.5,
+          "stop": 100
+        }
+      ],
+      "expected_terminal": "exited",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "hard_stop_touch",
+        "protective_stop",
+        "exit",
+        "seal_outcome"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "invalidated",
+        "protective_stop",
+        "exited"
+      ],
+      "eligible_for_learning": true
+    },
+    {
+      "kind": "hard_stop_gap",
+      "case_id": "adverse-gap-through-stop",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-10T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-10T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-10T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "stop_gap",
+          "ts": "2026-01-10T00:03:00Z",
+          "closed": false,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "open": 98,
+          "high": 101,
+          "low": 97,
+          "stop": 100,
+          "fill": 98
+        }
+      ],
+      "expected_terminal": "exited",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "hard_stop_gap",
+        "protective_stop",
+        "exit",
+        "seal_outcome"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "invalidated",
+        "protective_stop",
+        "exited"
+      ],
+      "eligible_for_learning": true
+    },
+    {
+      "kind": "same_bar_collision",
+      "case_id": "ambiguous-same-bar-stop-target",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-11T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-11T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-11T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "stop_touch",
+          "ts": "2026-01-11T00:03:00Z",
+          "closed": false,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "low": 99,
+          "high": 105,
+          "open": 101.5,
+          "stop": 100,
+          "tp1": 104
+        }
+      ],
+      "expected_terminal": "invalid_data",
+      "expected_integrity": "invalid_data",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "same_bar_collision: the replay must reject this exact illegal or ambiguous event sequence before any outcome is admitted."
+    },
+    {
+      "kind": "single_pullback",
+      "case_id": "single-adverse-pullback",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-12T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-12T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-12T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-12T00:03:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 1,
+          "directional": true,
+          "pa_aligned": true,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 101,
+          "close": 102,
+          "pa_direction": "long"
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-12T00:04:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 2,
+          "directional": true,
+          "pa_aligned": true,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 101,
+          "close": 102,
+          "pa_direction": "long"
+        },
+        {
+          "event": "adverse_close",
+          "ts": "2026-01-12T00:05:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "count": 1,
+          "pa_context_supports": true
+        },
+        {
+          "event": "tp1_touch",
+          "ts": "2026-01-12T00:06:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "same_bar_collision": false
+        },
+        {
+          "event": "partial_exit",
+          "ts": "2026-01-12T00:07:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "fraction": 0.5,
+          "runner_fraction": 0.5
+        },
+        {
+          "event": "exit",
+          "ts": "2026-01-12T00:08:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "reason": "tp2_terminal",
+          "r": 1.5
+        }
+      ],
+      "expected_terminal": "exited",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "start_confirmation_window",
+        "start_confirmation_window",
+        "confirm",
+        "ordinary_pullback",
+        "tp1_touch",
+        "tp1_half_exit",
+        "tp2",
+        "seal_outcome"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "unconfirmed",
+        "confirmed",
+        "tp1_touch",
+        "partial_exit",
+        "exited"
+      ],
+      "eligible_for_learning": true
+    },
+    {
+      "kind": "failed_follow_through",
+      "case_id": "failed-two-bar-follow-through",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-13T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-13T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-13T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-13T00:03:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 1,
+          "directional": false,
+          "pa_aligned": false,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 102,
+          "close": 101,
+          "pa_direction": "neutral"
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-13T00:04:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 2,
+          "directional": false,
+          "pa_aligned": false,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 102,
+          "close": 101,
+          "pa_direction": "neutral"
+        }
+      ],
+      "expected_terminal": "exited",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "start_confirmation_window",
+        "start_confirmation_window",
+        "failed_follow_through",
+        "exit",
+        "seal_outcome"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "unconfirmed",
+        "condition_exit",
+        "exited"
+      ],
+      "eligible_for_learning": true
+    },
+    {
+      "kind": "tp1_runner",
+      "case_id": "tp1-half-runner",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-14T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-14T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-14T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-14T00:03:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 1,
+          "directional": true,
+          "pa_aligned": true,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 101,
+          "close": 102,
+          "pa_direction": "long"
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-14T00:04:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 2,
+          "directional": true,
+          "pa_aligned": true,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 101,
+          "close": 102,
+          "pa_direction": "long"
+        },
+        {
+          "event": "tp1_touch",
+          "ts": "2026-01-14T00:05:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "same_bar_collision": false
+        },
+        {
+          "event": "partial_exit",
+          "ts": "2026-01-14T00:06:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "fraction": 0.5,
+          "runner_fraction": 0.5
+        },
+        {
+          "event": "exit",
+          "ts": "2026-01-14T00:07:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "reason": "tp2_terminal",
+          "r": 2
+        }
+      ],
+      "expected_terminal": "exited",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "start_confirmation_window",
+        "start_confirmation_window",
+        "confirm",
+        "tp1_touch",
+        "tp1_half_exit",
+        "tp2",
+        "seal_outcome"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "unconfirmed",
+        "confirmed",
+        "tp1_touch",
+        "partial_exit",
+        "exited"
+      ],
+      "eligible_for_learning": true
+    },
+    {
+      "kind": "pivot_ratchet",
+      "case_id": "post-tp1-pivot-ratchet",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-15T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-15T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-15T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-15T00:03:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 1,
+          "directional": true,
+          "pa_aligned": true,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 101,
+          "close": 102,
+          "pa_direction": "long"
+        },
+        {
+          "event": "confirmation_bar",
+          "ts": "2026-01-15T00:04:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "index": 2,
+          "directional": true,
+          "pa_aligned": true,
+          "hard_stop_triggered": false,
+          "direction": "long",
+          "entry_price": 101,
+          "preceding_close": 101,
+          "close": 102,
+          "pa_direction": "long"
+        },
+        {
+          "event": "tp1_touch",
+          "ts": "2026-01-15T00:05:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "same_bar_collision": false
+        },
+        {
+          "event": "partial_exit",
+          "ts": "2026-01-15T00:06:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "fraction": 0.5,
+          "runner_fraction": 0.5
+        },
+        {
+          "event": "pivot_confirmed",
+          "ts": "2026-01-15T00:07:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "low_prev": 101,
+          "low_i": 99,
+          "low_next": 102,
+          "previous_stop": 98,
+          "tick_size": 0.5,
+          "candidate_stop": 98.5
+        },
+        {
+          "event": "exit",
+          "ts": "2026-01-15T00:08:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "reason": "tp2_terminal",
+          "r": 2.5
+        }
+      ],
+      "expected_terminal": "exited",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "start_confirmation_window",
+        "start_confirmation_window",
+        "confirm",
+        "tp1_touch",
+        "tp1_half_exit",
+        "trailing_ratchet",
+        "tp2",
+        "seal_outcome"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "unconfirmed",
+        "confirmed",
+        "tp1_touch",
+        "partial_exit",
+        "trailing",
+        "exited"
+      ],
+      "eligible_for_learning": true
+    },
+    {
+      "kind": "right_censored",
+      "case_id": "right-censored-open-episode",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-16T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-16T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-16T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "study_cutoff",
+          "ts": "2026-01-16T00:03:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "open_quantity": 1,
+          "right_censored": true
+        }
+      ],
+      "expected_terminal": "right_censored",
+      "expected_integrity": "valid_policy_episode",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "right_censor",
+        "record_right_censor"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered",
+        "right_censored"
+      ],
+      "eligible_for_learning": false
+    },
+    {
+      "kind": "human_override_lookahead",
+      "case_id": "human-override-lookahead",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-17T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-17T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "human_override",
+          "ts": "2026-01-17T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "observed_at": "2026-01-17T00:03:00Z",
+          "future_input": true,
+          "rationale": "late",
+          "overridden_action": "enter"
+        }
+      ],
+      "expected_terminal": "invalid_causality",
+      "expected_integrity": "invalid_causality",
+      "expected_actions": [
+        "arm_entry",
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe",
+        "armed"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "human_override_lookahead: the replay must reject this exact illegal or ambiguous event sequence before any outcome is admitted."
+    },
+    {
+      "kind": "tp1_before_entry",
+      "case_id": "tp1-before-entry",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-18T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-18T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "tp1_touch",
+          "ts": "2026-01-18T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "same_bar_collision": false
+        }
+      ],
+      "expected_terminal": "invalid_state_transition",
+      "expected_integrity": "invalid_state_transition",
+      "expected_actions": [
+        "arm_entry",
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe",
+        "armed"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "tp1_before_entry: the replay must reject this exact illegal or ambiguous event sequence before any outcome is admitted."
+    },
+    {
+      "kind": "weakening_before_confirmation",
+      "case_id": "weakening-before-confirmation",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-19T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-19T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-19T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "weakening",
+          "ts": "2026-01-19T00:03:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0"
+        }
+      ],
+      "expected_terminal": "invalid_state_transition",
+      "expected_integrity": "invalid_state_transition",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "weakening_before_confirmation: the replay must reject this exact illegal or ambiguous event sequence before any outcome is admitted."
+    },
+    {
+      "kind": "trailing_before_tp1",
+      "case_id": "trailing-before-tp1",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-20T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-20T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-20T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "trailing_ratchet",
+          "ts": "2026-01-20T00:03:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0"
+        }
+      ],
+      "expected_terminal": "invalid_state_transition",
+      "expected_integrity": "invalid_state_transition",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "trailing_before_tp1: the replay must reject this exact illegal or ambiguous event sequence before any outcome is admitted."
+    },
+    {
+      "kind": "direct_structural_exit",
+      "case_id": "direct-structural-exit",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-21T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-21T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-21T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "exit",
+          "ts": "2026-01-21T00:03:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "reason": "structural_stop",
+          "r": -1
+        }
+      ],
+      "expected_terminal": "invalid_state_transition",
+      "expected_integrity": "invalid_state_transition",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "direct_structural_exit: the replay must reject this exact illegal or ambiguous event sequence before any outcome is admitted."
+    },
+    {
+      "kind": "stop_target_collision",
+      "case_id": "derived-stop-target-collision",
+      "events": [
+        {
+          "event": "observe",
+          "ts": "2026-01-22T00:00:00Z",
+          "closed": true,
+          "bar_count": 40
+        },
+        {
+          "event": "recommendation",
+          "ts": "2026-01-22T00:01:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "action": "enter"
+        },
+        {
+          "event": "entry",
+          "ts": "2026-01-22T00:02:00Z",
+          "closed": true,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "entry_price": 101
+        },
+        {
+          "event": "stop_touch",
+          "ts": "2026-01-22T00:03:00Z",
+          "closed": false,
+          "policy_version": "pa-policy-v1-semantic-repair",
+          "graph_version": "1.0.0",
+          "direction": "long",
+          "low": 99,
+          "high": 105,
+          "open": 101.5,
+          "stop": 100,
+          "tp1": 104
+        }
+      ],
+      "expected_terminal": "invalid_data",
+      "expected_integrity": "invalid_data",
+      "expected_actions": [
+        "arm_entry",
+        "enter",
+        "quarantine"
+      ],
+      "expected_path": [
+        "observe",
+        "armed",
+        "entered"
+      ],
+      "eligible_for_learning": false,
+      "counterexample": "stop_target_collision: the replay must reject this exact illegal or ambiguous event sequence before any outcome is admitted."
+    }
+  ]
+}
