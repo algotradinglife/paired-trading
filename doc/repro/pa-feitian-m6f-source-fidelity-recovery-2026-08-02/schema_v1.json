@@ -1,0 +1,1177 @@
+{
+  "$defs": {
+    "artifact_manifest": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "const": "pa_feitian_m6f_artifact_manifest"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/manifest_entry"
+          },
+          "maxItems": 8,
+          "minItems": 8,
+          "type": "array"
+        },
+        "hash_scope_exclusions": {
+          "$ref": "#/$defs/string_array"
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_artifact_manifest_v1"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "entries",
+        "hash_scope_exclusions",
+        "schema_version"
+      ],
+      "type": "object"
+    },
+    "confirmation_reserve_contract": {
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "accepted_custody_receipt_schema_version": {
+              "const": "pa_feitian_m6f_confirmation_reserve_custody_receipt_v2"
+            },
+            "access_log_chain_head_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "access_log_locator": {
+              "const": "custody://data-owner/M6F-CONFIRMATION-RESERVE-V1/append-only-access-log-v1.jsonl"
+            },
+            "dependency_status": {
+              "const": "closed_accepted"
+            },
+            "exclusion_registry_envelope_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "exclusion_registry_plaintext_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "identity_manifest_envelope_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "identity_manifest_plaintext_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "permitted_metadata_visible_to_strategy": {
+              "const": [
+                "access_log_chain_head_sha256",
+                "access_log_locator",
+                "custodian_role",
+                "eligibility_rule_sha256",
+                "exclusion_registry_envelope_sha256",
+                "exclusion_registry_plaintext_sha256",
+                "exclusion_set_sha256",
+                "identity_manifest_envelope_sha256",
+                "identity_manifest_plaintext_sha256",
+                "release_authority_role",
+                "required_releasing_issue_type",
+                "reserve_id",
+                "schema_version",
+                "sealed_at"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "accepted_custody_receipt_schema_version": {
+              "const": null
+            },
+            "access_log_chain_head_sha256": {
+              "const": null
+            },
+            "access_log_locator": {
+              "const": null
+            },
+            "dependency_status": {
+              "enum": [
+                "open",
+                "closed_failed"
+              ]
+            },
+            "exclusion_registry_envelope_sha256": {
+              "const": null
+            },
+            "exclusion_registry_plaintext_sha256": {
+              "const": null
+            },
+            "identity_manifest_envelope_sha256": {
+              "const": null
+            },
+            "identity_manifest_plaintext_sha256": {
+              "const": null
+            },
+            "permitted_metadata_visible_to_strategy": {
+              "const": [
+                "reserve_id",
+                "eligibility_rule_sha256",
+                "exclusion_set_sha256",
+                "custodian_role",
+                "sealed_at",
+                "release_authority_role",
+                "required_releasing_issue_type",
+                "access_log_locator"
+              ]
+            }
+          }
+        }
+      ],
+      "properties": {
+        "accepted_custody_receipt_schema_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "access_log_chain_head_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "access_log_locator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "artifact_type": {
+          "const": "pa_feitian_m6f_confirmation_reserve_contract"
+        },
+        "closure_evidence": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/external_dependency_closure_evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "custodian_role": {
+          "enum": [
+            "data_owner",
+            "data_custodian",
+            "pi_approved_external_custodian",
+            "unassigned_pi_approved_non_strategy_custodian"
+          ]
+        },
+        "dependency_contract_locator": {
+          "const": "https://github.com/algotradinglife/paired-trading/issues/80#issuecomment-5156235454"
+        },
+        "dependency_id": {
+          "const": "M6F-CONFIRMATION-RESERVE-01"
+        },
+        "dependency_issue": {
+          "const": 80
+        },
+        "dependency_locator": {
+          "const": "https://github.com/algotradinglife/paired-trading/issues/80"
+        },
+        "dependency_status": {
+          "enum": [
+            "open",
+            "closed_accepted",
+            "closed_failed"
+          ]
+        },
+        "eligibility_rule": {
+          "type": "string"
+        },
+        "eligibility_rule_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "exclusion_registry_envelope_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exclusion_registry_plaintext_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exclusion_rule": {
+          "type": "string"
+        },
+        "exclusion_set_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "identity_manifest_envelope_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "identity_manifest_plaintext_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mechanically_enforceable": {
+          "type": "boolean"
+        },
+        "permitted_metadata_visible_to_strategy": {
+          "$ref": "#/$defs/string_array"
+        },
+        "release_authority_role": {
+          "enum": [
+            "pi"
+          ]
+        },
+        "required_releasing_issue_type": {
+          "const": "pi_approved_preregistration_design"
+        },
+        "reserve_id": {
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_confirmation_reserve_contract_v1"
+        },
+        "sealed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "sealed",
+            "blocked_pending_data_custodian_receipt",
+            "unavailable_no_custodian_or_sealed_identity_manifest"
+          ]
+        },
+        "strategy_visibility_prohibition": {
+          "type": "string"
+        },
+        "terminal_effect": {
+          "enum": [
+            "none",
+            "readiness_cannot_pass"
+          ]
+        }
+      },
+      "required": [
+        "accepted_custody_receipt_schema_version",
+        "access_log_chain_head_sha256",
+        "access_log_locator",
+        "artifact_type",
+        "closure_evidence",
+        "custodian_role",
+        "dependency_contract_locator",
+        "dependency_id",
+        "dependency_issue",
+        "dependency_locator",
+        "dependency_status",
+        "eligibility_rule",
+        "eligibility_rule_sha256",
+        "exclusion_registry_envelope_sha256",
+        "exclusion_registry_plaintext_sha256",
+        "exclusion_rule",
+        "exclusion_set_sha256",
+        "identity_manifest_envelope_sha256",
+        "identity_manifest_plaintext_sha256",
+        "mechanically_enforceable",
+        "permitted_metadata_visible_to_strategy",
+        "release_authority_role",
+        "required_releasing_issue_type",
+        "reserve_id",
+        "schema_version",
+        "sealed_at",
+        "status",
+        "strategy_visibility_prohibition",
+        "terminal_effect"
+      ],
+      "type": "object"
+    },
+    "construct_dag": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "const": "pa_feitian_m6f_construct_dag"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/dag_edge"
+          },
+          "maxItems": 11,
+          "minItems": 11,
+          "type": "array"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/dag_node"
+          },
+          "maxItems": 11,
+          "minItems": 11,
+          "type": "array"
+        },
+        "plane_order": {
+          "items": {
+            "enum": [
+              "event",
+              "perception",
+              "decision",
+              "outcome"
+            ]
+          },
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_construct_dag_v1"
+        },
+        "terminal_result": {
+          "$ref": "#/$defs/terminal_result"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "edges",
+        "nodes",
+        "plane_order",
+        "schema_version",
+        "terminal_result"
+      ],
+      "type": "object"
+    },
+    "contamination_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "access_class": {
+          "enum": [
+            "known_prior_conclusion_exposure",
+            "known_prior_discovery_conclusion_exposure",
+            "known_prior_governance_scoping_exposure",
+            "known_prior_method_decision_exposure",
+            "known_prior_method_scoping_exposure",
+            "known_prior_proxy_exposure",
+            "known_prior_source_scoping_exposure",
+            "post_gate_evidence_recovery",
+            "pre_gate_boundary_scoping_only",
+            "source_authorization_request",
+            "source_authorization_protocol",
+            "source_authorization_provenance",
+            "external_dependency_opened",
+            "external_dependency_closed_negative",
+            "external_dependency_closed_accepted"
+          ]
+        },
+        "actor_role": {
+          "enum": [
+            "strategist",
+            "independent_reviewer",
+            "pi",
+            "data_custodian",
+            "source_author"
+          ]
+        },
+        "entry_id": {
+          "pattern": "^CONTAM-[0-9]{4}$",
+          "type": "string"
+        },
+        "entry_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "evidence_id": {
+          "type": "string"
+        },
+        "permitted_use": {
+          "type": "string"
+        },
+        "prior_entry_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "sequence": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "timestamp": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "access_class",
+        "actor_role",
+        "entry_id",
+        "entry_sha256",
+        "evidence_id",
+        "permitted_use",
+        "prior_entry_sha256",
+        "sequence",
+        "timestamp"
+      ],
+      "type": "object"
+    },
+    "dag_edge": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "type": "object"
+    },
+    "dag_node": {
+      "additionalProperties": false,
+      "properties": {
+        "abstention_behavior": {
+          "type": "string"
+        },
+        "causal_cutoff": {
+          "type": "string"
+        },
+        "conflict_behavior": {
+          "type": "string"
+        },
+        "inputs": {
+          "$ref": "#/$defs/string_array"
+        },
+        "ledger_node_id": {
+          "type": "string"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "output": {
+          "type": "string"
+        },
+        "plane": {
+          "enum": [
+            "event",
+            "perception",
+            "decision",
+            "outcome"
+          ]
+        },
+        "readiness": {
+          "enum": [
+            "deterministic_rule",
+            "source_authorized_protocol",
+            "fail_closed"
+          ]
+        }
+      },
+      "required": [
+        "abstention_behavior",
+        "causal_cutoff",
+        "conflict_behavior",
+        "inputs",
+        "ledger_node_id",
+        "node_id",
+        "output",
+        "plane",
+        "readiness"
+      ],
+      "type": "object"
+    },
+    "external_dependency": {
+      "additionalProperties": false,
+      "properties": {
+        "closure_evidence": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/external_dependency_closure_evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "contract_locator": {
+          "pattern": "^https://github\\.com/algotradinglife/paired-trading/issues/(79#issuecomment-5156235447|80#issuecomment-5156235454)$",
+          "type": "string"
+        },
+        "dependency_class": {
+          "enum": [
+            "measurement_capability",
+            "confirmation_reserve"
+          ]
+        },
+        "dependency_id": {
+          "enum": [
+            "M6F-DATA-CAPABILITY-01",
+            "M6F-CONFIRMATION-RESERVE-01"
+          ]
+        },
+        "issue": {
+          "enum": [
+            79,
+            80
+          ]
+        },
+        "locator": {
+          "pattern": "^https://github\\.com/algotradinglife/paired-trading/issues/(79|80)$",
+          "type": "string"
+        },
+        "owner_role": {
+          "const": "data"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "closed_accepted",
+            "closed_failed"
+          ]
+        }
+      },
+      "required": [
+        "closure_evidence",
+        "contract_locator",
+        "dependency_class",
+        "dependency_id",
+        "issue",
+        "locator",
+        "owner_role",
+        "status"
+      ],
+      "type": "object"
+    },
+    "external_dependency_closure_evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance_locator": {
+          "pattern": "^https://github\\.com/algotradinglife/paired-trading/issues/(79|80)#issuecomment-[0-9]+$",
+          "type": "string"
+        },
+        "accepted_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "accepted_head": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "artifact_locator": {
+          "type": "string"
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "contamination_entry_id": {
+          "pattern": "^CONTAM-[0-9]{4}$",
+          "type": "string"
+        },
+        "independent_attestation_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "manifest_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "merged_revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail",
+            "unavailable"
+          ]
+        }
+      },
+      "required": [
+        "acceptance_locator",
+        "accepted_at",
+        "artifact_locator",
+        "artifact_sha256",
+        "contamination_entry_id",
+        "manifest_sha256",
+        "merged_revision",
+        "result"
+      ],
+      "type": "object"
+    },
+    "hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ledger_node": {
+      "additionalProperties": false,
+      "properties": {
+        "abstention_rule": {
+          "type": "string"
+        },
+        "acquisition_or_authorization_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "authorization": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/node_authorization"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "causal_availability": {
+          "type": "string"
+        },
+        "conflicting_evidence": {
+          "type": "string"
+        },
+        "contamination_entry_ids": {
+          "$ref": "#/$defs/string_array"
+        },
+        "critical_to_construct": {
+          "type": "boolean"
+        },
+        "decision_plane": {
+          "enum": [
+            "event",
+            "perception",
+            "decision",
+            "outcome"
+          ]
+        },
+        "evidence": {
+          "$ref": "#/$defs/source_evidence"
+        },
+        "node_id": {
+          "pattern": "^SF-[0-9]{2}-[A-Z0-9-]+$",
+          "type": "string"
+        },
+        "public_safe_claim": {
+          "type": "string"
+        },
+        "resolution_state": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "source_pinned",
+            "source_authorized",
+            "method_constraint",
+            "provisional_gap",
+            "unresolved"
+          ]
+        }
+      },
+      "required": [
+        "abstention_rule",
+        "acquisition_or_authorization_at",
+        "authorization",
+        "causal_availability",
+        "conflicting_evidence",
+        "contamination_entry_ids",
+        "critical_to_construct",
+        "decision_plane",
+        "evidence",
+        "node_id",
+        "public_safe_claim",
+        "resolution_state",
+        "status"
+      ],
+      "type": "object"
+    },
+    "manifest_entry": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_length": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/hash"
+        }
+      },
+      "required": [
+        "byte_length",
+        "path",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "measurement_field": {
+      "additionalProperties": false,
+      "properties": {
+        "available_at_and_decision_cutoff": {
+          "type": "string"
+        },
+        "bar_open_and_end_semantics": {
+          "type": "string"
+        },
+        "evidence_locator": {
+          "type": "string"
+        },
+        "exchange_timezone_and_session": {
+          "type": "string"
+        },
+        "expiry_and_roll_mapping": {
+          "type": "string"
+        },
+        "fail_closed_behavior": {
+          "type": "string"
+        },
+        "field_id": {
+          "pattern": "^MEAS-[0-9]{2}-[A-Z0-9-]+$",
+          "type": "string"
+        },
+        "missing_and_rejected_row_accounting": {
+          "type": "string"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "option_lifecycle_and_selection_state": {
+          "type": "string"
+        },
+        "premium_price_basis": {
+          "type": "string"
+        },
+        "provenance_and_replay_binding": {
+          "type": "string"
+        },
+        "readiness_status": {
+          "enum": [
+            "pass",
+            "blocked",
+            "fail",
+            "not_applicable"
+          ]
+        },
+        "required_fields": {
+          "$ref": "#/$defs/string_array"
+        },
+        "source_class": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "available_at_and_decision_cutoff",
+        "bar_open_and_end_semantics",
+        "evidence_locator",
+        "exchange_timezone_and_session",
+        "expiry_and_roll_mapping",
+        "fail_closed_behavior",
+        "field_id",
+        "missing_and_rejected_row_accounting",
+        "node_id",
+        "option_lifecycle_and_selection_state",
+        "premium_price_basis",
+        "provenance_and_replay_binding",
+        "readiness_status",
+        "required_fields",
+        "source_class"
+      ],
+      "type": "object"
+    },
+    "measurement_readiness": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "const": "pa_feitian_m6f_measurement_readiness"
+        },
+        "audit_boundary": {
+          "type": "string"
+        },
+        "external_dependencies": {
+          "items": {
+            "$ref": "#/$defs/external_dependency"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/measurement_field"
+          },
+          "maxItems": 10,
+          "minItems": 10,
+          "type": "array"
+        },
+        "measurement_result": {
+          "enum": [
+            "pass",
+            "blocked",
+            "fail"
+          ]
+        },
+        "open_external_dependencies": {
+          "$ref": "#/$defs/string_array"
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_measurement_readiness_v1"
+        },
+        "terminal_precedence_applied": {
+          "type": "string"
+        },
+        "terminal_result": {
+          "$ref": "#/$defs/terminal_result"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "audit_boundary",
+        "external_dependencies",
+        "fields",
+        "measurement_result",
+        "open_external_dependencies",
+        "schema_version",
+        "terminal_precedence_applied",
+        "terminal_result"
+      ],
+      "type": "object"
+    },
+    "node_authorization": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_disposition": {
+          "const": "prospective_source_authorized_annotation_adjudication_protocol"
+        },
+        "authorization_class": {
+          "const": "explicit_source_authorization"
+        },
+        "authorization_received_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "protocol_body_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "protocol_locator": {
+          "const": "https://github.com/algotradinglife/paired-trading/issues/77#issuecomment-5156155428"
+        },
+        "receipt_path": {
+          "const": "source_author_provenance_receipt_v1.json"
+        },
+        "receipt_sha256": {
+          "$ref": "#/$defs/hash"
+        }
+      },
+      "required": [
+        "approved_disposition",
+        "authorization_class",
+        "authorization_received_at",
+        "protocol_body_sha256",
+        "protocol_locator",
+        "receipt_path",
+        "receipt_sha256"
+      ],
+      "type": "object"
+    },
+    "source_author_provenance_receipt": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_protocol": {
+          "additionalProperties": false,
+          "properties": {
+            "body_sha256": {
+              "$ref": "#/$defs/hash"
+            },
+            "body_utf8_byte_length": {
+              "const": 2874
+            },
+            "created_at": {
+              "$ref": "#/$defs/timestamp"
+            },
+            "github_comment_id": {
+              "const": 5156155428
+            },
+            "locator": {
+              "const": "https://github.com/algotradinglife/paired-trading/issues/77#issuecomment-5156155428"
+            },
+            "updated_at": {
+              "$ref": "#/$defs/timestamp"
+            }
+          },
+          "required": [
+            "body_sha256",
+            "body_utf8_byte_length",
+            "created_at",
+            "github_comment_id",
+            "locator",
+            "updated_at"
+          ],
+          "type": "object"
+        },
+        "artifact_type": {
+          "const": "m6f_source_author_provenance_receipt"
+        },
+        "authorization_class": {
+          "const": "explicit_source_authorization"
+        },
+        "authorization_received_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "authorization_scope": {
+          "additionalProperties": false,
+          "properties": {
+            "approved_disposition": {
+              "const": "prospective_source_authorized_annotation_adjudication_protocol"
+            },
+            "approved_nodes": {
+              "$ref": "#/$defs/string_array"
+            },
+            "source_author_amendments": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "approved_disposition",
+            "approved_nodes",
+            "source_author_amendments"
+          ],
+          "type": "object"
+        },
+        "dependency_id": {
+          "const": "M6F-SOURCE-AUTH-01"
+        },
+        "issue": {
+          "const": 77
+        },
+        "provenance_acceptance": {
+          "type": "string"
+        },
+        "public_safety": {
+          "additionalProperties": false,
+          "properties": {
+            "identity": {
+              "const": "withheld"
+            },
+            "raw_transcript": {
+              "const": "not_recorded"
+            },
+            "sensitive_contact_detail": {
+              "const": "not_recorded"
+            }
+          },
+          "required": [
+            "identity",
+            "raw_transcript",
+            "sensitive_contact_detail"
+          ],
+          "type": "object"
+        },
+        "schema_version": {
+          "const": "m6f_source_author_provenance_receipt_v1"
+        },
+        "semantic_boundary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "approved_protocol",
+        "artifact_type",
+        "authorization_class",
+        "authorization_received_at",
+        "authorization_scope",
+        "dependency_id",
+        "issue",
+        "provenance_acceptance",
+        "public_safety",
+        "schema_version",
+        "semantic_boundary"
+      ],
+      "type": "object"
+    },
+    "source_authorization_closure_evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "authorization_class": {
+          "enum": [
+            "closed_no_route",
+            "explicit_source_authorization",
+            "refused",
+            "unreachable"
+          ]
+        },
+        "authorization_received_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "locator": {
+          "type": "string"
+        },
+        "recorded_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      },
+      "required": [
+        "authorization_class",
+        "authorization_received_at",
+        "file_sha256",
+        "locator",
+        "recorded_at"
+      ],
+      "type": "object"
+    },
+    "source_authorization_dependency": {
+      "additionalProperties": false,
+      "properties": {
+        "closed_evidence": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/source_authorization_closure_evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dependency_id": {
+          "const": "M6F-SOURCE-AUTH-01"
+        },
+        "opened_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "request_body_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "request_locator": {
+          "pattern": "^https://github\\.com/algotradinglife/paired-trading/issues/77#issuecomment-[0-9]+$",
+          "type": "string"
+        },
+        "requested_node_ids": {
+          "$ref": "#/$defs/string_array"
+        },
+        "status": {
+          "enum": [
+            "closed_authorized",
+            "closed_no_route",
+            "closed_refused",
+            "closed_unreachable",
+            "open"
+          ]
+        }
+      },
+      "required": [
+        "closed_evidence",
+        "dependency_id",
+        "opened_at",
+        "request_body_sha256",
+        "request_locator",
+        "requested_node_ids",
+        "status"
+      ],
+      "type": "object"
+    },
+    "source_evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "authorization_class": {
+          "enum": [
+            "pinned_existing_source_not_authorized",
+            "explicit_source_authorization"
+          ]
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "locator": {
+          "pattern": "^trade-philosopher:doc/pa-replication/feitian-option-decision-tree-design-2026-06-17\\.md#L[0-9]+(?:-L[0-9]+)?(?:;doc/pa-replication/feitian-option-decision-tree-design-2026-06-17\\.md#L[0-9]+(?:-L[0-9]+)?)*$",
+          "type": "string"
+        },
+        "repository_revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authorization_class",
+        "file_sha256",
+        "locator",
+        "repository_revision"
+      ],
+      "type": "object"
+    },
+    "source_fidelity_ledger": {
+      "additionalProperties": false,
+      "properties": {
+        "acquisition_cutoff": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "artifact_type": {
+          "const": "pa_feitian_m6f_source_fidelity_ledger"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/ledger_node"
+          },
+          "maxItems": 10,
+          "minItems": 10,
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "pa_feitian_m6f_source_fidelity_ledger_v1"
+        },
+        "source_authorization_dependency": {
+          "$ref": "#/$defs/source_authorization_dependency"
+        },
+        "terminal_result": {
+          "$ref": "#/$defs/terminal_result"
+        }
+      },
+      "required": [
+        "acquisition_cutoff",
+        "artifact_type",
+        "nodes",
+        "schema_version",
+        "source_authorization_dependency",
+        "terminal_result"
+      ],
+      "type": "object"
+    },
+    "string_array": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "terminal_result": {
+      "enum": [
+        "source_fidelity_ready_for_preregistration_design",
+        "source_fidelity_unrecoverable_construct",
+        "source_fidelity_measurement_failure",
+        "source_fidelity_recovery_blocked"
+      ]
+    },
+    "timestamp": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "type": "string"
+    }
+  },
+  "$id": "https://github.com/algotradinglife/paired-trading/schema/pa-feitian-m6f-source-fidelity-recovery-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PA Feitian M6F source-fidelity recovery package"
+}

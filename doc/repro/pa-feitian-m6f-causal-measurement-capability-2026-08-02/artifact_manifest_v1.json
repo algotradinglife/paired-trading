@@ -1,0 +1,26 @@
+{
+  "issue_number": 79,
+  "payloads": [
+    {
+      "byte_length": 18581,
+      "path": "upstream_measurement_readiness_v2.json",
+      "raw_byte_sha256": "2ab764f77c90bf8ac979be7dde58a8d7352552d146d117cda3a8850c0b66e480"
+    },
+    {
+      "byte_length": 17729,
+      "path": "measurement_interface_requirements_v1.json",
+      "raw_byte_sha256": "86b5307ef9b0f6dd361f8018a67af93eba5056932df9a6191f8d3799a23cccbe"
+    },
+    {
+      "byte_length": 116238,
+      "path": "causal_measurement_capability_receipt_v1.json",
+      "raw_byte_sha256": "3b706bd7e5d2c5a488d1f580c947c3676f9762ea7c44b7ea65082b5c9929568f"
+    },
+    {
+      "byte_length": 54268,
+      "path": "verify.mjs",
+      "raw_byte_sha256": "314c07a3e2282a0a93f2dc1480a97e809b137058e1ad7a70f016bc6b22387f48"
+    }
+  ],
+  "schema_version": "pa_feitian_m6f_causal_measurement_capability_manifest_v1"
+}

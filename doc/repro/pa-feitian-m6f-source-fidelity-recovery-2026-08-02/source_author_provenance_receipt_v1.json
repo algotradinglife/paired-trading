@@ -1,0 +1,38 @@
+{
+  "approved_protocol": {
+    "body_sha256": "dfd44c8eb6127a9dfaf6a872811144acd74e011add4e88d29bc002b5db635d83",
+    "body_utf8_byte_length": 2874,
+    "created_at": "2026-08-02T07:17:40Z",
+    "github_comment_id": 5156155428,
+    "locator": "https://github.com/algotradinglife/paired-trading/issues/77#issuecomment-5156155428",
+    "updated_at": "2026-08-02T07:17:40Z"
+  },
+  "artifact_type": "m6f_source_author_provenance_receipt",
+  "authorization_class": "explicit_source_authorization",
+  "authorization_received_at": "2026-08-02T07:23:23Z",
+  "authorization_scope": {
+    "approved_disposition": "prospective_source_authorized_annotation_adjudication_protocol",
+    "approved_nodes": [
+      "SF-01-UNDERLYING-DIRECTION",
+      "SF-02-OPTION-CONTRACT",
+      "SF-04-DD-LOW-LINE",
+      "SF-05-DESCENDING-HIGH-LINE",
+      "SF-06-ONE-B-TWO-B",
+      "SF-07-HOLISTIC-QUALITY",
+      "SF-08-ENTRY-ORDERING",
+      "SF-09-STRUCTURAL-INVALIDATION",
+      "SF-10-PREMIUM-MANAGEMENT"
+    ],
+    "source_author_amendments": "none"
+  },
+  "dependency_id": "M6F-SOURCE-AUTH-01",
+  "issue": 77,
+  "provenance_acceptance": "PI verified in an authenticated private collaboration channel that the responding party is the original source author/trader and explicitly approved the exact protocol locator without amendment.",
+  "public_safety": {
+    "identity": "withheld",
+    "raw_transcript": "not_recorded",
+    "sensitive_contact_detail": "not_recorded"
+  },
+  "schema_version": "m6f_source_author_provenance_receipt_v1",
+  "semantic_boundary": "PI accepts provenance only and did not originate, complete, reinterpret, or silently fill source semantics."
+}
