@@ -1,0 +1,2410 @@
+{
+  "artifact_type": "pa_feitian_m6f_causal_measurement_capability_receipt",
+  "binding_profiles": [
+    {
+      "available_at_and_decision_cutoff": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-UNDERLYING-AVAILABLE-AT-ABSENT"
+        ],
+        "statement": "Observation timestamps exist, but historical acquisition timestamps, query cutoffs and row-level available_at are absent; filesystem timestamps are inadmissible.",
+        "status": "fail"
+      },
+      "bar_open_end_and_finalization": {
+        "evidence_ids": [
+          "EVIDENCE-NATIVE-REGISTRATION"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-NATIVE-DAILY-BAR-END-NORMALIZED-PROVIDER-LINEAGE-UNBOUND",
+          "PRED-NATIVE-PROVIDER-METADATA-ABSENT"
+        ],
+        "statement": "All audited daily native cells use the frozen session-close normalization, but embedded provider finalization, revision and publication-lineage metadata are absent.",
+        "status": "fail"
+      },
+      "deterministic_replay_rule": "Verify the bound public evidence bytes, select daily underlying interface aggregates in declared family order, and fail whenever requested, missing or late denominators or available_at are unavailable.",
+      "exchange_timezone_session_and_trading_date": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-NATIVE-TIMEZONE-NAIVE"
+        ],
+        "statement": "Asia/Shanghai is the audit timezone, but exchange holiday, night-session and provider trading-date assignment are not bound at row level.",
+        "status": "fail"
+      },
+      "expiry_and_roll_mapping": {
+        "evidence_ids": [
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-CONTINUOUS-PROVENANCE-VERSIONED"
+        ],
+        "statement": "Not applicable to a single underlying observation, while any continuity mapping remains a separately versioned causal input.",
+        "status": "not_applicable"
+      },
+      "fail_closed_behavior": "Emit no direction state and permit no downstream contract selection when bar finalization, available_at or accounting is incomplete.",
+      "option_lifecycle_and_asof_selection": {
+        "evidence_ids": [],
+        "evidence_predicate_ids": [],
+        "statement": "Not applicable before option selection.",
+        "status": "not_applicable"
+      },
+      "premium_price_basis": {
+        "evidence_ids": [],
+        "evidence_predicate_ids": [],
+        "statement": "Not applicable to the underlying direction input.",
+        "status": "not_applicable"
+      },
+      "profile_id": "BP-UNDERLYING-DAILY",
+      "profile_result": "fail",
+      "provider_source_version_and_provenance": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-NATIVE-PROVIDER-METADATA-ABSENT",
+          "PRED-NATIVE-DATA-BLOCKED"
+        ],
+        "statement": "Public inventory and raw-byte evidence hashes are bound, but embedded provider version and acquisition lineage are absent.",
+        "status": "fail"
+      },
+      "row_accounting": {
+        "accepted_rows": 66625,
+        "accounting_status": "fail_missing_requested_missing_and_late_denominators",
+        "duplicate_rows": 0,
+        "evidence_predicate_ids": [
+          "PRED-CANDIDATE-DAILY-UNDERLYING-ACCOUNTING",
+          "PRED-UNDERLYING-ROW-DENOMINATORS-INCOMPLETE"
+        ],
+        "late_rows": null,
+        "missing_rows": null,
+        "observed_rows": 66720,
+        "rejected_rows": 95,
+        "requested_rows": null,
+        "scope": "six-family daily underlying interface in the bound candidate audit"
+      }
+    },
+    {
+      "available_at_and_decision_cutoff": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-DECISION-TIME-UNPROVEN"
+        ],
+        "statement": "Decision-time chain membership, listed_at, delisted_at and selection_available_at are absent.",
+        "status": "fail"
+      },
+      "bar_open_end_and_finalization": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND"
+        ],
+        "statement": "A selected candle cannot be authorized because provider period and finalization semantics are unbound.",
+        "status": "fail"
+      },
+      "deterministic_replay_rule": "Verify the exact option-input audit bytes and parsed-contract-set hash; reject the interface because filename parsing is not an as-of contract master.",
+      "exchange_timezone_session_and_trading_date": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-TIMEZONE-UNBOUND"
+        ],
+        "statement": "Stored timestamps are timezone-naive and no exact option exchange session or trading-date assignment is declared.",
+        "status": "fail"
+      },
+      "expiry_and_roll_mapping": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-EXACT-EXPIRY-MISSING"
+        ],
+        "statement": "Underlying month parsed from a filename is not exact exchange expiry; last trading date, exercise state and successor mapping are absent.",
+        "status": "fail"
+      },
+      "fail_closed_behavior": "Select no option contract when any lifecycle, expiry, eligibility, availability or tie field is missing.",
+      "option_lifecycle_and_asof_selection": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+        ],
+        "statement": "Product, month, option type and strike parse from filenames; immutable as-of universe, listing state, delisting state, exercise state, rank and tie rules are absent.",
+        "status": "fail"
+      },
+      "premium_price_basis": {
+        "evidence_ids": [],
+        "evidence_predicate_ids": [],
+        "statement": "Not applicable unless premium is later authorized as a selection input.",
+        "status": "not_applicable"
+      },
+      "profile_id": "BP-OPTION-CONTRACT",
+      "profile_result": "fail",
+      "provider_source_version_and_provenance": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PROVIDER-LINEAGE-UNBOUND"
+        ],
+        "statement": "The parsed contract set and source files are hash-bound, but provider version and append-only as-of membership lineage are absent.",
+        "status": "fail"
+      },
+      "row_accounting": {
+        "accepted_rows": null,
+        "accounting_status": "fail_no_asof_contract_master_row_denominator",
+        "duplicate_rows": null,
+        "evidence_predicate_ids": [
+          "PRED-OPTION-FILE-INVENTORY-ACCOUNTING",
+          "PRED-OPTION-ROW-DENOMINATORS-INCOMPLETE"
+        ],
+        "inventory_units": {
+          "accepted_parsed_files": 4935,
+          "candidate_files": 5040,
+          "rejected_files": 105
+        },
+        "late_rows": null,
+        "missing_rows": null,
+        "observed_rows": null,
+        "rejected_rows": null,
+        "requested_rows": null,
+        "scope": "AU/AG filename-derived contract inventory; not an as-of contract-master row stream"
+      }
+    },
+    {
+      "available_at_and_decision_cutoff": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-DECISION-TIME-UNPROVEN"
+        ],
+        "statement": "Observation timestamps exist but historical acquisition time, query cutoff and bar_available_at are absent.",
+        "status": "fail"
+      },
+      "bar_open_end_and_finalization": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND"
+        ],
+        "statement": "OHLC is present, but exact included sessions, period-end stamps, trade-versus-settlement close and revision finalization are unbound.",
+        "status": "fail"
+      },
+      "deterministic_replay_rule": "Verify the bound audits, reproduce six-family daily option aggregates in declared order, and reject because availability and complete row-accounting denominators cannot be reconstructed.",
+      "exchange_timezone_session_and_trading_date": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-TIMEZONE-UNBOUND"
+        ],
+        "statement": "All audited option bar files are timezone-naive; exchange session and night-session trading-date assignment are not declared in the bar schema.",
+        "status": "fail"
+      },
+      "expiry_and_roll_mapping": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-EXACT-EXPIRY-MISSING"
+        ],
+        "statement": "Exact expiry, last trading date, exercise convention and roll lineage are absent.",
+        "status": "fail"
+      },
+      "fail_closed_behavior": "Reject the candle and every dependent perception or decision when finalization, lifecycle, price basis, available_at or accounting is incomplete.",
+      "option_lifecycle_and_asof_selection": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+        ],
+        "statement": "A candle can be filename-bound to a contract-like identity, but no exact selected listed contract state exists at the cutoff.",
+        "status": "fail"
+      },
+      "premium_price_basis": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+        ],
+        "statement": "OHLC values are observed, but trade, quote or settlement basis and unavailable-quote handling are not bound.",
+        "status": "fail"
+      },
+      "profile_id": "BP-OPTION-DAILY",
+      "profile_result": "fail",
+      "provider_source_version_and_provenance": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PROVIDER-LINEAGE-UNBOUND"
+        ],
+        "statement": "Public inventory hashes exist; provider metadata, source version at observation time and append-only acquisition lineage do not.",
+        "status": "fail"
+      },
+      "row_accounting": {
+        "accepted_rows": 416764,
+        "accounting_status": "fail_missing_requested_missing_and_late_denominators",
+        "duplicate_rows": 0,
+        "evidence_predicate_ids": [
+          "PRED-CANDIDATE-DAILY-OPTION-ACCOUNTING",
+          "PRED-OPTION-ROW-DENOMINATORS-INCOMPLETE"
+        ],
+        "late_rows": null,
+        "missing_rows": null,
+        "observed_rows": 798548,
+        "rejected_rows": 381784,
+        "requested_rows": null,
+        "scope": "six-family daily option-premium interface in the bound candidate audit"
+      }
+    },
+    {
+      "available_at_and_decision_cutoff": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+        ],
+        "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a derived trace with a causal available_at or decision cutoff.",
+        "status": "fail"
+      },
+      "bar_open_end_and_finalization": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND",
+          "PRED-OPTION-CORPUS-BLOCKED"
+        ],
+        "statement": "The required upstream completed option-candle convention fails.",
+        "status": "fail"
+      },
+      "deterministic_replay_rule": "Verify that no bound evidence artifact materializes the required derived trace, then emit fail without constructing, imputing or outcome-tuning one.",
+      "exchange_timezone_session_and_trading_date": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-TIMEZONE-UNBOUND"
+        ],
+        "statement": "Inherited option exchange session and trading-date semantics are unbound.",
+        "status": "fail"
+      },
+      "expiry_and_roll_mapping": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-EXACT-EXPIRY-MISSING"
+        ],
+        "statement": "No cross-contract trace is permitted and no exact lifecycle mapping is bound.",
+        "status": "fail"
+      },
+      "fail_closed_behavior": "Emit unknown or no trace; do not synthesize anchors, geometry, labels or decisions.",
+      "option_lifecycle_and_asof_selection": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+        ],
+        "statement": "No admitted immutable public-safe evidence bound at this cutoff binds exact selected-contract lifecycle state to a trace.",
+        "status": "fail"
+      },
+      "premium_price_basis": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+        ],
+        "statement": "The upstream option candle premium basis is unbound.",
+        "status": "fail"
+      },
+      "profile_id": "BP-DERIVED-TRACE",
+      "profile_result": "fail",
+      "provider_source_version_and_provenance": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+        ],
+        "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a trace version, input lineage hash or replay identity.",
+        "status": "fail"
+      },
+      "row_accounting": {
+        "accepted_rows": null,
+        "accounting_status": "fail_no_admitted_interface_or_denominator",
+        "duplicate_rows": null,
+        "evidence_predicate_ids": [
+          "PRED-DERIVED-ROW-DENOMINATOR-ABSENT"
+        ],
+        "late_rows": null,
+        "missing_rows": null,
+        "observed_rows": null,
+        "rejected_rows": null,
+        "requested_rows": null,
+        "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes a derived causal trace"
+      }
+    },
+    {
+      "available_at_and_decision_cutoff": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+          "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+        ],
+        "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes the chart-source selection or a derived high-line trace with causal availability.",
+        "status": "fail"
+      },
+      "bar_open_end_and_finalization": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+          "PRED-NATIVE-DAILY-BAR-END-NORMALIZED-PROVIDER-LINEAGE-UNBOUND",
+          "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND"
+        ],
+        "statement": "The chart plane is unresolved: an underlying plane has frozen daily session-close normalization without embedded provider revision lineage, while an option plane lacks bound period/finalization semantics.",
+        "status": "fail"
+      },
+      "deterministic_replay_rule": "Verify that no admitted evidence selects an option-versus-underlying chart source or materializes the required trace; evaluate both conditional branches and fail without selecting a chart plane.",
+      "exchange_timezone_session_and_trading_date": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+          "PRED-NATIVE-TIMEZONE-NAIVE",
+          "PRED-OPTION-TIMEZONE-UNBOUND"
+        ],
+        "statement": "The chart plane is unresolved; underlying storage is timezone-naive and option exchange session/trading-date semantics are unbound, so neither branch is authorized.",
+        "status": "fail"
+      },
+      "expiry_and_roll_mapping": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+          "PRED-OPTION-EXACT-EXPIRY-MISSING",
+          "PRED-CONTINUOUS-PROVENANCE-VERSIONED"
+        ],
+        "statement": "The chart plane is unresolved: an option plane lacks exact expiry/roll mapping, while any underlying continuity mapping remains a separate versioned input.",
+        "status": "fail"
+      },
+      "fail_closed_behavior": "Emit no line or break state while chart source, inherited candle semantics, causal provenance or trace accounting is unresolved.",
+      "option_lifecycle_and_asof_selection": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+          "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+        ],
+        "statement": "Conditional on an option chart, exact selected-contract lifecycle state is unverified; no admitted evidence selects that option branch over an underlying chart.",
+        "status": "fail"
+      },
+      "premium_price_basis": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+          "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+        ],
+        "statement": "Conditional on an option chart, premium basis is unbound; for an underlying chart it would be not applicable, but no admitted evidence selects either branch.",
+        "status": "fail"
+      },
+      "profile_id": "BP-DERIVED-TRACE-CONDITIONAL-CHART",
+      "profile_result": "fail",
+      "provider_source_version_and_provenance": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+          "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE",
+          "PRED-NATIVE-PROVIDER-METADATA-ABSENT",
+          "PRED-OPTION-PROVIDER-LINEAGE-UNBOUND"
+        ],
+        "statement": "No admitted evidence selects the chart plane or materializes its trace; underlying embedded provider lineage and option provider availability lineage also remain unbound.",
+        "status": "fail"
+      },
+      "row_accounting": {
+        "accepted_rows": null,
+        "accounting_status": "fail_no_admitted_interface_or_denominator",
+        "duplicate_rows": null,
+        "evidence_predicate_ids": [
+          "PRED-DERIVED-ROW-DENOMINATOR-ABSENT"
+        ],
+        "late_rows": null,
+        "missing_rows": null,
+        "observed_rows": null,
+        "rejected_rows": null,
+        "requested_rows": null,
+        "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes a derived causal trace"
+      }
+    },
+    {
+      "available_at_and_decision_cutoff": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-PREMIUM-ACTION-TRACE-ABSENT"
+        ],
+        "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes an action-time premium observation with row-level available_at and an immutable decision cutoff.",
+        "status": "fail"
+      },
+      "bar_open_end_and_finalization": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND"
+        ],
+        "statement": "Premium bar finalization, gap treatment and trade-versus-settlement semantics are unbound.",
+        "status": "fail"
+      },
+      "deterministic_replay_rule": "Verify the bound option evidence and reject management measurement because price availability, exact lifecycle transitions and complete action accounting are absent.",
+      "exchange_timezone_session_and_trading_date": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-TIMEZONE-UNBOUND"
+        ],
+        "statement": "Option exchange session, expiry-day boundary and night-session trading date are unbound.",
+        "status": "fail"
+      },
+      "expiry_and_roll_mapping": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-EXACT-EXPIRY-MISSING"
+        ],
+        "statement": "Exact expiry state, successor eligibility, synchronized old/new observations and roll lineage are absent.",
+        "status": "fail"
+      },
+      "fail_closed_behavior": "Emit no exit, runner, roll or management measurement when premium, availability, lifecycle or accounting fields are incomplete.",
+      "option_lifecycle_and_asof_selection": {
+        "evidence_ids": [
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+        ],
+        "statement": "No admitted immutable public-safe evidence bound at this cutoff binds old/new contract selection state at each management action.",
+        "status": "fail"
+      },
+      "premium_price_basis": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-OPTION-INPUT"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+        ],
+        "statement": "OHLC is present, but one causal price basis, costs and unavailable-quote handling are not declared.",
+        "status": "fail"
+      },
+      "profile_id": "BP-PREMIUM-LIFECYCLE",
+      "profile_result": "fail",
+      "provider_source_version_and_provenance": {
+        "evidence_ids": [
+          "EVIDENCE-CANDIDATE-INTERFACE",
+          "EVIDENCE-NATIVE-REGISTRATION",
+          "EVIDENCE-OPTION-INPUT",
+          "EVIDENCE-CONTINUOUS-PROVENANCE"
+        ],
+        "evidence_predicate_ids": [
+          "PRED-OPTION-PROVIDER-LINEAGE-UNBOUND",
+          "PRED-PREMIUM-ACTION-TRACE-ABSENT"
+        ],
+        "statement": "The bound inventory hashes exist, but no admitted immutable public-safe evidence at this cutoff binds an action-time provider version, append-only lineage or lossless lifecycle replay.",
+        "status": "fail"
+      },
+      "row_accounting": {
+        "accepted_rows": null,
+        "accounting_status": "fail_no_admitted_action_interface_or_denominator",
+        "duplicate_rows": null,
+        "evidence_predicate_ids": [
+          "PRED-CANDIDATE-DAILY-OPTION-ACCOUNTING",
+          "PRED-OPTION-ROW-DENOMINATORS-INCOMPLETE",
+          "PRED-PREMIUM-ACTION-TRACE-ABSENT"
+        ],
+        "late_rows": null,
+        "missing_rows": null,
+        "observed_rows": null,
+        "rejected_rows": null,
+        "requested_rows": null,
+        "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes management-action records or lifecycle transitions",
+        "support_surface": {
+          "daily_option_ohlc_quality": {
+            "duplicate_timestamp_rows": 0,
+            "observed_rows": 798548,
+            "quality_passing_rows": 416764,
+            "quality_rejected_rows": 381784
+          }
+        }
+      }
+    }
+  ],
+  "capability_aggregate": {
+    "capability_result": "fail",
+    "fail_count": 10,
+    "failed_field_ids": [
+      "MEAS-01-UNDERLYING-DIRECTION",
+      "MEAS-02-OPTION-CONTRACT",
+      "MEAS-03-DAILY-OPTION-CANDLE",
+      "MEAS-04-DD-GEOMETRY",
+      "MEAS-05-DESCENDING-HIGH-GEOMETRY",
+      "MEAS-06-ONE-B-TWO-B",
+      "MEAS-07-HOLISTIC-QUALITY",
+      "MEAS-08-ENTRY-DECISION",
+      "MEAS-09-STRUCTURAL-INVALIDATION",
+      "MEAS-10-PREMIUM-MANAGEMENT"
+    ],
+    "field_count": 10,
+    "pass_count": 0
+  },
+  "claim_boundary": {
+    "backtest_or_experiment_authorized": false,
+    "execution_authorized": false,
+    "m6r_episode_payloads_included": false,
+    "m7_authorized": false,
+    "outcomes_or_profitability_inspected": false,
+    "provider_implementation_included": false,
+    "raw_or_licensed_rows_included": false,
+    "reserve_identities_included": false,
+    "strategy_parameters_selected": false
+  },
+  "dependency_id": "M6F-DATA-CAPABILITY-01",
+  "deterministic_verifier": {
+    "commands": [
+      "node doc/repro/pa-feitian-m6f-causal-measurement-capability-2026-08-02/verify.mjs",
+      "node doc/repro/pa-feitian-m6f-causal-measurement-capability-2026-08-02/verify.mjs --negative"
+    ],
+    "network_access_required": false
+  },
+  "evidence_cutoff_utc": "2026-08-02T08:09:41Z",
+  "field_results": [
+    {
+      "binding_profile_id": "BP-UNDERLYING-DAILY",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-30T15:45:00Z",
+          "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+          "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+          "raw_byte_length": 73689,
+          "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "source-version, provenance and source-to-candidate accounting evidence"
+        },
+        {
+          "audit_as_of": "2026-07-11T00:00:00Z",
+          "evidence_id": "EVIDENCE-CONTINUOUS-PROVENANCE",
+          "evidence_schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+          "locator": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+          "raw_byte_length": 55353,
+          "raw_byte_sha256": "a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "existing causal continuous-roll provenance boundary"
+        }
+      ],
+      "failure_reasons": [
+        "no_admitted_evidence_materializes_direction_state",
+        "direction_available_at_missing",
+        "session_and_trading_date_unbound",
+        "row_accounting_not_lossless"
+      ],
+      "field_id": "MEAS-01-UNDERLYING-DIRECTION",
+      "field_result": "fail",
+      "node_id": "SF-01-UNDERLYING-DIRECTION",
+      "required_fields": [
+        "underlying_identity",
+        "direction_state",
+        "direction_available_at"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-UNDERLYING-AVAILABLE-AT-ABSENT"
+          ],
+          "statement": "Observation timestamps exist, but historical acquisition timestamps, query cutoffs and row-level available_at are absent; filesystem timestamps are inadmissible.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-NATIVE-REGISTRATION"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-NATIVE-DAILY-BAR-END-NORMALIZED-PROVIDER-LINEAGE-UNBOUND",
+            "PRED-NATIVE-PROVIDER-METADATA-ABSENT"
+          ],
+          "statement": "All audited daily native cells use the frozen session-close normalization, but embedded provider finalization, revision and publication-lineage metadata are absent.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify the bound public evidence bytes, select daily underlying interface aggregates in declared family order, and fail whenever requested, missing or late denominators or available_at are unavailable.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-NATIVE-TIMEZONE-NAIVE"
+          ],
+          "statement": "Asia/Shanghai is the audit timezone, but exchange holiday, night-session and provider trading-date assignment are not bound at row level.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-CONTINUOUS-PROVENANCE-VERSIONED"
+          ],
+          "statement": "Not applicable to a single underlying observation, while any continuity mapping remains a separately versioned causal input.",
+          "status": "not_applicable"
+        },
+        "fail_closed_behavior": "Emit no direction state and permit no downstream contract selection when bar finalization, available_at or accounting is incomplete.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [],
+          "evidence_predicate_ids": [],
+          "statement": "Not applicable before option selection.",
+          "status": "not_applicable"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [],
+          "evidence_predicate_ids": [],
+          "statement": "Not applicable to the underlying direction input.",
+          "status": "not_applicable"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-NATIVE-PROVIDER-METADATA-ABSENT",
+            "PRED-NATIVE-DATA-BLOCKED"
+          ],
+          "statement": "Public inventory and raw-byte evidence hashes are bound, but embedded provider version and acquisition lineage are absent.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": 66625,
+          "accounting_status": "fail_missing_requested_missing_and_late_denominators",
+          "duplicate_rows": 0,
+          "evidence_predicate_ids": [
+            "PRED-CANDIDATE-DAILY-UNDERLYING-ACCOUNTING",
+            "PRED-UNDERLYING-ROW-DENOMINATORS-INCOMPLETE"
+          ],
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": 66720,
+          "rejected_rows": 95,
+          "requested_rows": null,
+          "scope": "six-family daily underlying interface in the bound candidate audit"
+        }
+      },
+      "source_class": "causally_available_underlying_or_regime_record",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "Direction inputs must be published and immutable no later than the option decision cutoff.",
+        "bar_open_and_end_semantics": "The prospective source protocol is authorized, but exact exchange and provider semantics are not independently evidenced.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-01-UNDERLYING-DIRECTION",
+        "exchange_timezone_and_session": "Required exchange timezone, holiday calendar, session segments, and trading-date assignment are unbound.",
+        "expiry_and_roll_mapping": "Not applicable to direction input, but any underlying continuity mapping must be causal and versioned.",
+        "fail_closed_behavior": "No direction output and no downstream contract selection.",
+        "missing_and_rejected_row_accounting": "A future receipt must count all requested, accepted, missing, duplicate, late, and rejected direction rows without silent dropping.",
+        "option_lifecycle_and_selection_state": "Not applicable before contract selection.",
+        "premium_price_basis": "Not applicable.",
+        "provenance_and_replay_binding": "No committed capability receipt binds fields, provider semantics, availability, row accounting, and a replay hash."
+      }
+    },
+    {
+      "binding_profile_id": "BP-OPTION-CONTRACT",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-12",
+          "evidence_id": "EVIDENCE-OPTION-INPUT",
+          "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+          "raw_byte_length": 11542,
+          "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+        }
+      ],
+      "failure_reasons": [
+        "asof_contract_master_missing",
+        "exact_expiry_and_lifecycle_missing",
+        "selection_available_at_missing",
+        "row_accounting_not_lossless"
+      ],
+      "field_id": "MEAS-02-OPTION-CONTRACT",
+      "field_result": "fail",
+      "node_id": "SF-02-OPTION-CONTRACT",
+      "required_fields": [
+        "contract_identity",
+        "option_type",
+        "strike",
+        "expiry",
+        "listed_at",
+        "delisted_at",
+        "selection_available_at"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-DECISION-TIME-UNPROVEN"
+          ],
+          "statement": "Decision-time chain membership, listed_at, delisted_at and selection_available_at are absent.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND"
+          ],
+          "statement": "A selected candle cannot be authorized because provider period and finalization semantics are unbound.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify the exact option-input audit bytes and parsed-contract-set hash; reject the interface because filename parsing is not an as-of contract master.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-TIMEZONE-UNBOUND"
+          ],
+          "statement": "Stored timestamps are timezone-naive and no exact option exchange session or trading-date assignment is declared.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-EXACT-EXPIRY-MISSING"
+          ],
+          "statement": "Underlying month parsed from a filename is not exact exchange expiry; last trading date, exercise state and successor mapping are absent.",
+          "status": "fail"
+        },
+        "fail_closed_behavior": "Select no option contract when any lifecycle, expiry, eligibility, availability or tie field is missing.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+          ],
+          "statement": "Product, month, option type and strike parse from filenames; immutable as-of universe, listing state, delisting state, exercise state, rank and tie rules are absent.",
+          "status": "fail"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [],
+          "evidence_predicate_ids": [],
+          "statement": "Not applicable unless premium is later authorized as a selection input.",
+          "status": "not_applicable"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PROVIDER-LINEAGE-UNBOUND"
+          ],
+          "statement": "The parsed contract set and source files are hash-bound, but provider version and append-only as-of membership lineage are absent.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": null,
+          "accounting_status": "fail_no_asof_contract_master_row_denominator",
+          "duplicate_rows": null,
+          "evidence_predicate_ids": [
+            "PRED-OPTION-FILE-INVENTORY-ACCOUNTING",
+            "PRED-OPTION-ROW-DENOMINATORS-INCOMPLETE"
+          ],
+          "inventory_units": {
+            "accepted_parsed_files": 4935,
+            "candidate_files": 5040,
+            "rejected_files": 105
+          },
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": null,
+          "rejected_rows": null,
+          "requested_rows": null,
+          "scope": "AU/AG filename-derived contract inventory; not an as-of contract-master row stream"
+        }
+      },
+      "source_class": "as_of_option_contract_master_and_selection_state",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "All contract metadata and eligibility state must be known before selection.",
+        "bar_open_and_end_semantics": "Selection may not use a contract candle whose exchange-defined close is unavailable at the cutoff.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-02-OPTION-CONTRACT",
+        "exchange_timezone_and_session": "The option exchange timezone, night-session trading-date assignment, holidays, and close boundary are unbound.",
+        "expiry_and_roll_mapping": "Expiry calendar, last trading date, exercise convention, multiplier changes, and successor mapping are unbound.",
+        "fail_closed_behavior": "Select no contract when any lifecycle, eligibility, tie, or availability field is missing.",
+        "missing_and_rejected_row_accounting": "A future receipt must reconcile the full eligible universe and every rejection reason at each as-of cutoff.",
+        "option_lifecycle_and_selection_state": "Required: immutable as-of universe, call/put, strike, expiry, listed-at, delisted-at, exercise state, moneyness input, selection rank, and tie rule.",
+        "premium_price_basis": "Not yet used for selection unless explicitly source-authorized; any such use would need its own causal basis.",
+        "provenance_and_replay_binding": "No Data-owner receipt supplies provider identity, source-version hash, lifecycle semantics, or lossless universe accounting."
+      }
+    },
+    {
+      "binding_profile_id": "BP-OPTION-DAILY",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-30T15:45:00Z",
+          "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+          "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+          "raw_byte_length": 73689,
+          "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "source-version, provenance and source-to-candidate accounting evidence"
+        },
+        {
+          "audit_as_of": "2026-07-12",
+          "evidence_id": "EVIDENCE-OPTION-INPUT",
+          "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+          "raw_byte_length": 11542,
+          "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+        }
+      ],
+      "failure_reasons": [
+        "bar_available_at_missing",
+        "bar_finalization_unbound",
+        "premium_basis_unbound",
+        "ohlc_quality_rejections_present",
+        "row_accounting_not_lossless"
+      ],
+      "field_id": "MEAS-03-DAILY-OPTION-CANDLE",
+      "field_result": "fail",
+      "node_id": "SF-03-DAILY-CHART",
+      "required_fields": [
+        "contract_identity",
+        "trading_date",
+        "open",
+        "high",
+        "low",
+        "close",
+        "bar_available_at",
+        "source_version"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-DECISION-TIME-UNPROVEN"
+          ],
+          "statement": "Observation timestamps exist but historical acquisition time, query cutoff and bar_available_at are absent.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND"
+          ],
+          "statement": "OHLC is present, but exact included sessions, period-end stamps, trade-versus-settlement close and revision finalization are unbound.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify the bound audits, reproduce six-family daily option aggregates in declared order, and reject because availability and complete row-accounting denominators cannot be reconstructed.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-TIMEZONE-UNBOUND"
+          ],
+          "statement": "All audited option bar files are timezone-naive; exchange session and night-session trading-date assignment are not declared in the bar schema.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-EXACT-EXPIRY-MISSING"
+          ],
+          "statement": "Exact expiry, last trading date, exercise convention and roll lineage are absent.",
+          "status": "fail"
+        },
+        "fail_closed_behavior": "Reject the candle and every dependent perception or decision when finalization, lifecycle, price basis, available_at or accounting is incomplete.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+          ],
+          "statement": "A candle can be filename-bound to a contract-like identity, but no exact selected listed contract state exists at the cutoff.",
+          "status": "fail"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+          ],
+          "statement": "OHLC values are observed, but trade, quote or settlement basis and unavailable-quote handling are not bound.",
+          "status": "fail"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PROVIDER-LINEAGE-UNBOUND"
+          ],
+          "statement": "Public inventory hashes exist; provider metadata, source version at observation time and append-only acquisition lineage do not.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": 416764,
+          "accounting_status": "fail_missing_requested_missing_and_late_denominators",
+          "duplicate_rows": 0,
+          "evidence_predicate_ids": [
+            "PRED-CANDIDATE-DAILY-OPTION-ACCOUNTING",
+            "PRED-OPTION-ROW-DENOMINATORS-INCOMPLETE"
+          ],
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": 798548,
+          "rejected_rows": 381784,
+          "requested_rows": null,
+          "scope": "six-family daily option-premium interface in the bound candidate audit"
+        }
+      },
+      "source_class": "completed_exchange_option_daily_candle",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "The daily candle is usable only after its complete exchange session is finalized and published.",
+        "bar_open_and_end_semantics": "Required: exact included session segments, open definition, close definition, adjustment policy, and finalization time; currently unbound.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-03-DAILY-CHART",
+        "exchange_timezone_and_session": "The source pins daily cadence but no committed capability receipt binds exchange timezone or session convention.",
+        "expiry_and_roll_mapping": "Each candle must remain attached to one immutable contract identity; no continuous option splice is permitted.",
+        "fail_closed_behavior": "Reject incomplete, revised-without-version, cross-contract-spliced, or availability-ambiguous candles.",
+        "missing_and_rejected_row_accounting": "A future receipt must reconcile requested trading dates to accepted, missing, duplicate, partial-session, revised, and rejected candles.",
+        "option_lifecycle_and_selection_state": "Every candle must bind to the selected listed contract and valid trading date.",
+        "premium_price_basis": "OHLC basis and any settlement-versus-trade close distinction must be explicit.",
+        "provenance_and_replay_binding": "No accepted public-safe receipt establishes the exact fields, bar-end semantics, availability rule, row accounting, and provenance hash."
+      }
+    },
+    {
+      "binding_profile_id": "BP-DERIVED-TRACE",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-30T15:45:00Z",
+          "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+          "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+          "raw_byte_length": 73689,
+          "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "source-version, provenance and source-to-candidate accounting evidence"
+        },
+        {
+          "audit_as_of": "2026-07-12",
+          "evidence_id": "EVIDENCE-OPTION-INPUT",
+          "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+          "raw_byte_length": 11542,
+          "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+        },
+        {
+          "audit_as_of": "2026-07-11T00:00:00Z",
+          "evidence_id": "EVIDENCE-CONTINUOUS-PROVENANCE",
+          "evidence_schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+          "locator": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+          "raw_byte_length": 55353,
+          "raw_byte_sha256": "a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "existing causal continuous-roll provenance boundary"
+        }
+      ],
+      "failure_reasons": [
+        "no_admitted_evidence_materializes_derived_trace",
+        "upstream_candle_capability_failed",
+        "geometry_available_at_missing",
+        "row_accounting_not_available"
+      ],
+      "field_id": "MEAS-04-DD-GEOMETRY",
+      "field_result": "fail",
+      "node_id": "SF-04-DD-LOW-LINE",
+      "required_fields": [
+        "anchor_ids",
+        "construction_version",
+        "projected_value",
+        "geometry_available_at"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a derived trace with a causal available_at or decision cutoff.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND",
+            "PRED-OPTION-CORPUS-BLOCKED"
+          ],
+          "statement": "The required upstream completed option-candle convention fails.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify that no bound evidence artifact materializes the required derived trace, then emit fail without constructing, imputing or outcome-tuning one.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-TIMEZONE-UNBOUND"
+          ],
+          "statement": "Inherited option exchange session and trading-date semantics are unbound.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-EXACT-EXPIRY-MISSING"
+          ],
+          "statement": "No cross-contract trace is permitted and no exact lifecycle mapping is bound.",
+          "status": "fail"
+        },
+        "fail_closed_behavior": "Emit unknown or no trace; do not synthesize anchors, geometry, labels or decisions.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff binds exact selected-contract lifecycle state to a trace.",
+          "status": "fail"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+          ],
+          "statement": "The upstream option candle premium basis is unbound.",
+          "status": "fail"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a trace version, input lineage hash or replay identity.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": null,
+          "accounting_status": "fail_no_admitted_interface_or_denominator",
+          "duplicate_rows": null,
+          "evidence_predicate_ids": [
+            "PRED-DERIVED-ROW-DENOMINATOR-ABSENT"
+          ],
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": null,
+          "rejected_rows": null,
+          "requested_rows": null,
+          "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes a derived causal trace"
+        }
+      },
+      "source_class": "derived_causal_perception_trace",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "All candidate anchors and projected values must derive only from accepted candles available by the decision cutoff.",
+        "bar_open_and_end_semantics": "Uses completed-candle semantics from MEAS-03; no intrabar reconstruction is permitted.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-04-DD-LOW-LINE",
+        "exchange_timezone_and_session": "Inherited from the selected option candle and currently unbound.",
+        "expiry_and_roll_mapping": "A line may not silently cross contract identities or rolls.",
+        "fail_closed_behavior": "Emit no DD line when semantics, inputs, or causal provenance are missing.",
+        "missing_and_rejected_row_accounting": "Every input candle and rejected anchor candidate must remain traceable in a future deterministic trace.",
+        "option_lifecycle_and_selection_state": "Geometry remains scoped to one selected contract unless the source later authorizes another convention.",
+        "premium_price_basis": "Raw contract candle prices under a future authorized convention; no normalized proxy is authorized.",
+        "provenance_and_replay_binding": "The prospective annotation/adjudication protocol is source-authorized, but no Data-owner capability receipt or protocol-compliant replay trace exists."
+      }
+    },
+    {
+      "binding_profile_id": "BP-DERIVED-TRACE-CONDITIONAL-CHART",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-30T15:45:00Z",
+          "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+          "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+          "raw_byte_length": 73689,
+          "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "source-version, provenance and source-to-candidate accounting evidence"
+        },
+        {
+          "audit_as_of": "2026-07-12",
+          "evidence_id": "EVIDENCE-OPTION-INPUT",
+          "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+          "raw_byte_length": 11542,
+          "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+        },
+        {
+          "audit_as_of": "2026-07-11T00:00:00Z",
+          "evidence_id": "EVIDENCE-CONTINUOUS-PROVENANCE",
+          "evidence_schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+          "locator": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+          "raw_byte_length": 55353,
+          "raw_byte_sha256": "a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "existing causal continuous-roll provenance boundary"
+        }
+      ],
+      "failure_reasons": [
+        "no_admitted_evidence_materializes_derived_trace",
+        "chart_source_unresolved",
+        "break_available_at_missing",
+        "row_accounting_not_available"
+      ],
+      "field_id": "MEAS-05-DESCENDING-HIGH-GEOMETRY",
+      "field_result": "fail",
+      "node_id": "SF-05-DESCENDING-HIGH-LINE",
+      "required_fields": [
+        "chart_source",
+        "anchor_ids",
+        "construction_version",
+        "break_state",
+        "break_available_at"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes the chart-source selection or a derived high-line trace with causal availability.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+            "PRED-NATIVE-DAILY-BAR-END-NORMALIZED-PROVIDER-LINEAGE-UNBOUND",
+            "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND"
+          ],
+          "statement": "The chart plane is unresolved: an underlying plane has frozen daily session-close normalization without embedded provider revision lineage, while an option plane lacks bound period/finalization semantics.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify that no admitted evidence selects an option-versus-underlying chart source or materializes the required trace; evaluate both conditional branches and fail without selecting a chart plane.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+            "PRED-NATIVE-TIMEZONE-NAIVE",
+            "PRED-OPTION-TIMEZONE-UNBOUND"
+          ],
+          "statement": "The chart plane is unresolved; underlying storage is timezone-naive and option exchange session/trading-date semantics are unbound, so neither branch is authorized.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+            "PRED-OPTION-EXACT-EXPIRY-MISSING",
+            "PRED-CONTINUOUS-PROVENANCE-VERSIONED"
+          ],
+          "statement": "The chart plane is unresolved: an option plane lacks exact expiry/roll mapping, while any underlying continuity mapping remains a separate versioned input.",
+          "status": "fail"
+        },
+        "fail_closed_behavior": "Emit no line or break state while chart source, inherited candle semantics, causal provenance or trace accounting is unresolved.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+            "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+          ],
+          "statement": "Conditional on an option chart, exact selected-contract lifecycle state is unverified; no admitted evidence selects that option branch over an underlying chart.",
+          "status": "fail"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+            "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+          ],
+          "statement": "Conditional on an option chart, premium basis is unbound; for an underlying chart it would be not applicable, but no admitted evidence selects either branch.",
+          "status": "fail"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-CHART-SOURCE-SELECTION",
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE",
+            "PRED-NATIVE-PROVIDER-METADATA-ABSENT",
+            "PRED-OPTION-PROVIDER-LINEAGE-UNBOUND"
+          ],
+          "statement": "No admitted evidence selects the chart plane or materializes its trace; underlying embedded provider lineage and option provider availability lineage also remain unbound.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": null,
+          "accounting_status": "fail_no_admitted_interface_or_denominator",
+          "duplicate_rows": null,
+          "evidence_predicate_ids": [
+            "PRED-DERIVED-ROW-DENOMINATOR-ABSENT"
+          ],
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": null,
+          "rejected_rows": null,
+          "requested_rows": null,
+          "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes a derived causal trace"
+        }
+      },
+      "source_class": "derived_causal_perception_trace",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "All high anchors and break inputs must be available by the decision cutoff.",
+        "bar_open_and_end_semantics": "Uses completed daily candles; break-on-close versus other evaluation remains unresolved.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-05-DESCENDING-HIGH-LINE",
+        "exchange_timezone_and_session": "Inherited from an as-yet unauthorized option or underlying chart source.",
+        "expiry_and_roll_mapping": "Option-chart geometry may not cross contracts without an authorized mapping.",
+        "fail_closed_behavior": "Emit no high-line or break state when chart plane, anchors, construction, or availability is unresolved.",
+        "missing_and_rejected_row_accounting": "A future trace must retain every input, candidate anchor, rejection, and chart-plane choice.",
+        "option_lifecycle_and_selection_state": "Chart-source choice and contract continuity must be explicit before measurement.",
+        "premium_price_basis": "Required only if the option chart is authorized; otherwise not applicable to underlying geometry.",
+        "provenance_and_replay_binding": "The prospective annotation/adjudication protocol is source-authorized, but no Data-owner capability receipt or protocol-compliant replay trace exists."
+      }
+    },
+    {
+      "binding_profile_id": "BP-DERIVED-TRACE",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-30T15:45:00Z",
+          "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+          "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+          "raw_byte_length": 73689,
+          "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "source-version, provenance and source-to-candidate accounting evidence"
+        },
+        {
+          "audit_as_of": "2026-07-12",
+          "evidence_id": "EVIDENCE-OPTION-INPUT",
+          "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+          "raw_byte_length": 11542,
+          "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+        },
+        {
+          "audit_as_of": "2026-07-11T00:00:00Z",
+          "evidence_id": "EVIDENCE-CONTINUOUS-PROVENANCE",
+          "evidence_schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+          "locator": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+          "raw_byte_length": 55353,
+          "raw_byte_sha256": "a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "existing causal continuous-roll provenance boundary"
+        }
+      ],
+      "failure_reasons": [
+        "source_authorization_does_not_materialize_measurement_rows",
+        "upstream_candle_capability_failed",
+        "classification_available_at_missing",
+        "row_accounting_not_available"
+      ],
+      "field_id": "MEAS-06-ONE-B-TWO-B",
+      "field_result": "fail",
+      "node_id": "SF-06-ONE-B-TWO-B",
+      "required_fields": [
+        "classification",
+        "context_start",
+        "context_end",
+        "annotator_authorization_class",
+        "classification_available_at"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a derived trace with a causal available_at or decision cutoff.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND",
+            "PRED-OPTION-CORPUS-BLOCKED"
+          ],
+          "statement": "The required upstream completed option-candle convention fails.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify that no bound evidence artifact materializes the required derived trace, then emit fail without constructing, imputing or outcome-tuning one.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-TIMEZONE-UNBOUND"
+          ],
+          "statement": "Inherited option exchange session and trading-date semantics are unbound.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-EXACT-EXPIRY-MISSING"
+          ],
+          "statement": "No cross-contract trace is permitted and no exact lifecycle mapping is bound.",
+          "status": "fail"
+        },
+        "fail_closed_behavior": "Emit unknown or no trace; do not synthesize anchors, geometry, labels or decisions.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff binds exact selected-contract lifecycle state to a trace.",
+          "status": "fail"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+          ],
+          "statement": "The upstream option candle premium basis is unbound.",
+          "status": "fail"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a trace version, input lineage hash or replay identity.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": null,
+          "accounting_status": "fail_no_admitted_interface_or_denominator",
+          "duplicate_rows": null,
+          "evidence_predicate_ids": [
+            "PRED-DERIVED-ROW-DENOMINATOR-ABSENT"
+          ],
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": null,
+          "rejected_rows": null,
+          "requested_rows": null,
+          "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes a derived causal trace"
+        }
+      },
+      "source_class": "source_authorized_perception_annotation_or_rule",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "The classification may use only completed context visible by the decision cutoff.",
+        "bar_open_and_end_semantics": "Inherited from MEAS-03; any multi-candle sequence must specify inclusive endpoints.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-06-ONE-B-TWO-B",
+        "exchange_timezone_and_session": "Inherited from the selected option chart and currently unbound.",
+        "expiry_and_roll_mapping": "A pullback sequence may not bridge contracts unless source-authorized.",
+        "fail_closed_behavior": "Emit unknown until the approved protocol is implemented with blinded labels, adjudication, and a causal replay trace.",
+        "missing_and_rejected_row_accounting": "A future protocol must retain unknown, ambiguous, rejected, and adjudicated cases without forced labels.",
+        "option_lifecycle_and_selection_state": "Classification binds to one selected contract context.",
+        "premium_price_basis": "Uses candle geometry only after its premium basis is bound.",
+        "provenance_and_replay_binding": "The prospective blinded annotation/adjudication protocol is source-authorized, but no protocol-compliant label set, adjudication trace, or Data-owner capability receipt exists."
+      }
+    },
+    {
+      "binding_profile_id": "BP-DERIVED-TRACE",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-30T15:45:00Z",
+          "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+          "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+          "raw_byte_length": 73689,
+          "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "source-version, provenance and source-to-candidate accounting evidence"
+        },
+        {
+          "audit_as_of": "2026-07-12",
+          "evidence_id": "EVIDENCE-OPTION-INPUT",
+          "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+          "raw_byte_length": 11542,
+          "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+        },
+        {
+          "audit_as_of": "2026-07-11T00:00:00Z",
+          "evidence_id": "EVIDENCE-CONTINUOUS-PROVENANCE",
+          "evidence_schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+          "locator": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+          "raw_byte_length": 55353,
+          "raw_byte_sha256": "a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "existing causal continuous-roll provenance boundary"
+        }
+      ],
+      "failure_reasons": [
+        "source_authorization_does_not_materialize_measurement_rows",
+        "upstream_candle_capability_failed",
+        "decision_cutoff_binding_missing",
+        "row_accounting_not_available"
+      ],
+      "field_id": "MEAS-07-HOLISTIC-QUALITY",
+      "field_result": "fail",
+      "node_id": "SF-07-HOLISTIC-QUALITY",
+      "required_fields": [
+        "quality_state",
+        "context_ref",
+        "authorization_class",
+        "decision_cutoff"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a derived trace with a causal available_at or decision cutoff.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND",
+            "PRED-OPTION-CORPUS-BLOCKED"
+          ],
+          "statement": "The required upstream completed option-candle convention fails.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify that no bound evidence artifact materializes the required derived trace, then emit fail without constructing, imputing or outcome-tuning one.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-TIMEZONE-UNBOUND"
+          ],
+          "statement": "Inherited option exchange session and trading-date semantics are unbound.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-EXACT-EXPIRY-MISSING"
+          ],
+          "statement": "No cross-contract trace is permitted and no exact lifecycle mapping is bound.",
+          "status": "fail"
+        },
+        "fail_closed_behavior": "Emit unknown or no trace; do not synthesize anchors, geometry, labels or decisions.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff binds exact selected-contract lifecycle state to a trace.",
+          "status": "fail"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+          ],
+          "statement": "The upstream option candle premium basis is unbound.",
+          "status": "fail"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a trace version, input lineage hash or replay identity.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": null,
+          "accounting_status": "fail_no_admitted_interface_or_denominator",
+          "duplicate_rows": null,
+          "evidence_predicate_ids": [
+            "PRED-DERIVED-ROW-DENOMINATOR-ABSENT"
+          ],
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": null,
+          "rejected_rows": null,
+          "requested_rows": null,
+          "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes a derived causal trace"
+        }
+      },
+      "source_class": "source_authorized_perception_annotation_or_rule",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "The judgment must be frozen from context visible at the decision cutoff before any future outcome is accessible.",
+        "bar_open_and_end_semantics": "Inherited from MEAS-03 with an exact context window required.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-07-HOLISTIC-QUALITY",
+        "exchange_timezone_and_session": "Inherited from the selected option chart and currently unbound.",
+        "expiry_and_roll_mapping": "No cross-contract context aggregation is authorized.",
+        "fail_closed_behavior": "Emit unknown; model or multi-model agreement cannot substitute for source authorization.",
+        "missing_and_rejected_row_accounting": "A future protocol must count agreement, disagreement, abstention, missing context, and adjudication separately.",
+        "option_lifecycle_and_selection_state": "Judgment binds to the selected contract and decision timestamp.",
+        "premium_price_basis": "Uses bound candle fields only; no outcome or future premium path may enter the judgment.",
+        "provenance_and_replay_binding": "The prospective blinded annotation/adjudication protocol is source-authorized, but no protocol-compliant label set, adjudication trace, or Data-owner capability receipt exists."
+      }
+    },
+    {
+      "binding_profile_id": "BP-DERIVED-TRACE",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-30T15:45:00Z",
+          "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+          "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+          "raw_byte_length": 73689,
+          "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "source-version, provenance and source-to-candidate accounting evidence"
+        },
+        {
+          "audit_as_of": "2026-07-12",
+          "evidence_id": "EVIDENCE-OPTION-INPUT",
+          "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+          "raw_byte_length": 11542,
+          "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+        },
+        {
+          "audit_as_of": "2026-07-11T00:00:00Z",
+          "evidence_id": "EVIDENCE-CONTINUOUS-PROVENANCE",
+          "evidence_schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+          "locator": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+          "raw_byte_length": 55353,
+          "raw_byte_sha256": "a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "existing causal continuous-roll provenance boundary"
+        }
+      ],
+      "failure_reasons": [
+        "no_admitted_evidence_materializes_derived_decision_trace",
+        "upstream_measurement_capability_failed",
+        "fill_and_conflict_state_unbound",
+        "row_accounting_not_available"
+      ],
+      "field_id": "MEAS-08-ENTRY-DECISION",
+      "field_result": "fail",
+      "node_id": "SF-08-ENTRY-ORDERING",
+      "required_fields": [
+        "entry_path",
+        "contract_identity",
+        "decision_at",
+        "fill_state",
+        "conflict_state"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a derived trace with a causal available_at or decision cutoff.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND",
+            "PRED-OPTION-CORPUS-BLOCKED"
+          ],
+          "statement": "The required upstream completed option-candle convention fails.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify that no bound evidence artifact materializes the required derived trace, then emit fail without constructing, imputing or outcome-tuning one.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-TIMEZONE-UNBOUND"
+          ],
+          "statement": "Inherited option exchange session and trading-date semantics are unbound.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-EXACT-EXPIRY-MISSING"
+          ],
+          "statement": "No cross-contract trace is permitted and no exact lifecycle mapping is bound.",
+          "status": "fail"
+        },
+        "fail_closed_behavior": "Emit unknown or no trace; do not synthesize anchors, geometry, labels or decisions.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff binds exact selected-contract lifecycle state to a trace.",
+          "status": "fail"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+          ],
+          "statement": "The upstream option candle premium basis is unbound.",
+          "status": "fail"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a trace version, input lineage hash or replay identity.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": null,
+          "accounting_status": "fail_no_admitted_interface_or_denominator",
+          "duplicate_rows": null,
+          "evidence_predicate_ids": [
+            "PRED-DERIVED-ROW-DENOMINATOR-ABSENT"
+          ],
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": null,
+          "rejected_rows": null,
+          "requested_rows": null,
+          "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes a derived causal trace"
+        }
+      },
+      "source_class": "derived_causal_decision_trace",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "Every prerequisite and any fill state must be available at or before the entry decision.",
+        "bar_open_and_end_semantics": "No future-bar fill confirmation or close may be back-projected into the decision.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-08-ENTRY-ORDERING",
+        "exchange_timezone_and_session": "Inherited from all upstream inputs; disagreement fails closed.",
+        "expiry_and_roll_mapping": "Entry must bind to the exact selected contract and lifecycle state.",
+        "fail_closed_behavior": "Emit abstain whenever prerequisites, fill semantics, or full conflict ordering are unresolved.",
+        "missing_and_rejected_row_accounting": "A future trace must account for every candidate state, conflict, unfilled path, and abstention.",
+        "option_lifecycle_and_selection_state": "Exact contract identity and eligibility state are mandatory.",
+        "premium_price_basis": "Entry-price basis, order convention, and availability are unbound.",
+        "provenance_and_replay_binding": "The prospective annotation/adjudication protocol is source-authorized, but no protocol-compliant ordering trace, fill convention evidence, or Data-owner capability receipt exists."
+      }
+    },
+    {
+      "binding_profile_id": "BP-DERIVED-TRACE",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-30T15:45:00Z",
+          "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+          "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+          "raw_byte_length": 73689,
+          "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "source-version, provenance and source-to-candidate accounting evidence"
+        },
+        {
+          "audit_as_of": "2026-07-12",
+          "evidence_id": "EVIDENCE-OPTION-INPUT",
+          "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+          "raw_byte_length": 11542,
+          "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+        },
+        {
+          "audit_as_of": "2026-07-11T00:00:00Z",
+          "evidence_id": "EVIDENCE-CONTINUOUS-PROVENANCE",
+          "evidence_schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+          "locator": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+          "raw_byte_length": 55353,
+          "raw_byte_sha256": "a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "existing causal continuous-roll provenance boundary"
+        }
+      ],
+      "failure_reasons": [
+        "no_admitted_evidence_materializes_derived_invalidation_trace",
+        "upstream_measurement_capability_failed",
+        "evaluation_semantics_unbound",
+        "row_accounting_not_available"
+      ],
+      "field_id": "MEAS-09-STRUCTURAL-INVALIDATION",
+      "field_result": "fail",
+      "node_id": "SF-09-STRUCTURAL-INVALIDATION",
+      "required_fields": [
+        "reference_structure",
+        "invalidation_value",
+        "evaluation_rule",
+        "available_at"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a derived trace with a causal available_at or decision cutoff.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND",
+            "PRED-OPTION-CORPUS-BLOCKED"
+          ],
+          "statement": "The required upstream completed option-candle convention fails.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify that no bound evidence artifact materializes the required derived trace, then emit fail without constructing, imputing or outcome-tuning one.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-TIMEZONE-UNBOUND"
+          ],
+          "statement": "Inherited option exchange session and trading-date semantics are unbound.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-EXACT-EXPIRY-MISSING"
+          ],
+          "statement": "No cross-contract trace is permitted and no exact lifecycle mapping is bound.",
+          "status": "fail"
+        },
+        "fail_closed_behavior": "Emit unknown or no trace; do not synthesize anchors, geometry, labels or decisions.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff binds exact selected-contract lifecycle state to a trace.",
+          "status": "fail"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+          ],
+          "statement": "The upstream option candle premium basis is unbound.",
+          "status": "fail"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-BOUND-EVIDENCE-HAS-NO-DERIVED-TRACE"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes a trace version, input lineage hash or replay identity.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": null,
+          "accounting_status": "fail_no_admitted_interface_or_denominator",
+          "duplicate_rows": null,
+          "evidence_predicate_ids": [
+            "PRED-DERIVED-ROW-DENOMINATOR-ABSENT"
+          ],
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": null,
+          "rejected_rows": null,
+          "requested_rows": null,
+          "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes a derived causal trace"
+        }
+      },
+      "source_class": "derived_causal_decision_trace",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "The invalidation reference must be frozen before entry and evaluated only from available observations.",
+        "bar_open_and_end_semantics": "Evaluation-on-close, gap handling, and intrabar treatment are unresolved.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-09-STRUCTURAL-INVALIDATION",
+        "exchange_timezone_and_session": "Inherited from the selected option candle and currently unbound.",
+        "expiry_and_roll_mapping": "Invalidation ownership across a roll is unresolved.",
+        "fail_closed_behavior": "Emit no executable invalidation level or outcome when reference or evaluation semantics are missing.",
+        "missing_and_rejected_row_accounting": "A future trace must retain gaps, missing bars, ambiguous touches, and every rejected evaluation.",
+        "option_lifecycle_and_selection_state": "Reference binds to the selected contract unless a roll protocol explicitly transfers it.",
+        "premium_price_basis": "Exact traded, quoted, settlement, or candle-price basis is unbound.",
+        "provenance_and_replay_binding": "The prospective annotation/adjudication protocol is source-authorized, but no protocol-compliant invalidation trace, causal evaluation evidence, or Data-owner capability receipt exists."
+      }
+    },
+    {
+      "binding_profile_id": "BP-PREMIUM-LIFECYCLE",
+      "evidence_bindings": [
+        {
+          "audit_as_of": "2026-07-30",
+          "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+          "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+          "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+          "raw_byte_length": 158609,
+          "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "six-family interface schema, quality, timestamp and row-count evidence"
+        },
+        {
+          "audit_as_of": "2026-07-30T15:45:00Z",
+          "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+          "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+          "raw_byte_length": 73689,
+          "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "source-version, provenance and source-to-candidate accounting evidence"
+        },
+        {
+          "audit_as_of": "2026-07-12",
+          "evidence_id": "EVIDENCE-OPTION-INPUT",
+          "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+          "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+          "raw_byte_length": 11542,
+          "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+        },
+        {
+          "audit_as_of": "2026-07-11T00:00:00Z",
+          "evidence_id": "EVIDENCE-CONTINUOUS-PROVENANCE",
+          "evidence_schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+          "locator": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+          "raw_byte_length": 55353,
+          "raw_byte_sha256": "a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3",
+          "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+          "role": "existing causal continuous-roll provenance boundary"
+        }
+      ],
+      "failure_reasons": [
+        "action_time_available_at_missing",
+        "premium_basis_unbound",
+        "expiry_and_roll_lifecycle_missing",
+        "row_accounting_not_lossless"
+      ],
+      "field_id": "MEAS-10-PREMIUM-MANAGEMENT",
+      "field_result": "fail",
+      "node_id": "SF-10-PREMIUM-MANAGEMENT",
+      "required_fields": [
+        "contract_identity",
+        "premium_price",
+        "price_basis",
+        "available_at",
+        "expiry_state",
+        "roll_from",
+        "roll_to",
+        "row_disposition"
+      ],
+      "semantic_answers": {
+        "available_at_and_decision_cutoff": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-PREMIUM-ACTION-TRACE-ABSENT"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff materializes an action-time premium observation with row-level available_at and an immutable decision cutoff.",
+          "status": "fail"
+        },
+        "bar_open_end_and_finalization": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PERIOD-SEMANTICS-UNBOUND"
+          ],
+          "statement": "Premium bar finalization, gap treatment and trade-versus-settlement semantics are unbound.",
+          "status": "fail"
+        },
+        "deterministic_replay_rule": "Verify the bound option evidence and reject management measurement because price availability, exact lifecycle transitions and complete action accounting are absent.",
+        "exchange_timezone_session_and_trading_date": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-TIMEZONE-UNBOUND"
+          ],
+          "statement": "Option exchange session, expiry-day boundary and night-session trading date are unbound.",
+          "status": "fail"
+        },
+        "expiry_and_roll_mapping": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-EXACT-EXPIRY-MISSING"
+          ],
+          "statement": "Exact expiry state, successor eligibility, synchronized old/new observations and roll lineage are absent.",
+          "status": "fail"
+        },
+        "fail_closed_behavior": "Emit no exit, runner, roll or management measurement when premium, availability, lifecycle or accounting fields are incomplete.",
+        "option_lifecycle_and_asof_selection": {
+          "evidence_ids": [
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-CONTRACT-LINEAGE-UNVERIFIED"
+          ],
+          "statement": "No admitted immutable public-safe evidence bound at this cutoff binds old/new contract selection state at each management action.",
+          "status": "fail"
+        },
+        "premium_price_basis": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-OPTION-INPUT"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PREMIUM-BASIS-UNBOUND"
+          ],
+          "statement": "OHLC is present, but one causal price basis, costs and unavailable-quote handling are not declared.",
+          "status": "fail"
+        },
+        "provider_source_version_and_provenance": {
+          "evidence_ids": [
+            "EVIDENCE-CANDIDATE-INTERFACE",
+            "EVIDENCE-NATIVE-REGISTRATION",
+            "EVIDENCE-OPTION-INPUT",
+            "EVIDENCE-CONTINUOUS-PROVENANCE"
+          ],
+          "evidence_predicate_ids": [
+            "PRED-OPTION-PROVIDER-LINEAGE-UNBOUND",
+            "PRED-PREMIUM-ACTION-TRACE-ABSENT"
+          ],
+          "statement": "The bound inventory hashes exist, but no admitted immutable public-safe evidence at this cutoff binds an action-time provider version, append-only lineage or lossless lifecycle replay.",
+          "status": "fail"
+        },
+        "row_accounting": {
+          "accepted_rows": null,
+          "accounting_status": "fail_no_admitted_action_interface_or_denominator",
+          "duplicate_rows": null,
+          "evidence_predicate_ids": [
+            "PRED-CANDIDATE-DAILY-OPTION-ACCOUNTING",
+            "PRED-OPTION-ROW-DENOMINATORS-INCOMPLETE",
+            "PRED-PREMIUM-ACTION-TRACE-ABSENT"
+          ],
+          "late_rows": null,
+          "missing_rows": null,
+          "observed_rows": null,
+          "rejected_rows": null,
+          "requested_rows": null,
+          "scope": "no admitted immutable public-safe evidence bound at this cutoff materializes management-action records or lifecycle transitions",
+          "support_surface": {
+            "daily_option_ohlc_quality": {
+              "duplicate_timestamp_rows": 0,
+              "observed_rows": 798548,
+              "quality_passing_rows": 416764,
+              "quality_rejected_rows": 381784
+            }
+          }
+        }
+      },
+      "source_class": "causal_option_premium_and_lifecycle_observation",
+      "upstream_semantics": {
+        "available_at_and_decision_cutoff": "Each management action may use only premium and lifecycle state available at that action time; future path is outcome-only.",
+        "bar_open_and_end_semantics": "Premium candle finalization, trade-versus-settlement basis, and gap execution are unbound.",
+        "evidence_locator": "source_fidelity_ledger_v1.json#SF-10-PREMIUM-MANAGEMENT",
+        "exchange_timezone_and_session": "Option exchange session, expiry-day handling, and publication boundary are unbound.",
+        "expiry_and_roll_mapping": "Successor eligibility, roll timestamp, old/new price synchronization, costs, and identity lineage are unbound.",
+        "fail_closed_behavior": "Emit no exit, runner, roll, or outcome record if any premium, lifecycle, or accounting field is unavailable.",
+        "missing_and_rejected_row_accounting": "A future receipt must reconcile every requested observation, contract transition, accepted row, missing row, rejected row, and terminal state.",
+        "option_lifecycle_and_selection_state": "Every action must bind old and new contract identities, as-of selection state, and expiry status.",
+        "premium_price_basis": "Entry, exits, runner, and rolls require a single declared causal price basis plus explicit cost and unavailable-quote handling.",
+        "provenance_and_replay_binding": "No accepted public-safe Data-owner receipt binds premium fields, provider/bar-end semantics, availability, lossless row accounting, and provenance hash."
+      }
+    }
+  ],
+  "handoff": {
+    "artifact_locator": "doc/repro/pa-feitian-m6f-causal-measurement-capability-2026-08-02/causal_measurement_capability_receipt_v1.json",
+    "dependency_id": "M6F-DATA-CAPABILITY-01",
+    "pi_acceptance_required": true,
+    "strategy_may_consume_only_public_receipt": true,
+    "strategy_recomputation_required": true
+  },
+  "issue_number": 79,
+  "measurement_contract_binding": {
+    "artifact_path": "doc/repro/pa-feitian-m6f-source-fidelity-recovery-2026-08-02/measurement_readiness_v1.json",
+    "issue_number": 77,
+    "pull_request_number": 78,
+    "raw_byte_length": 18581,
+    "raw_byte_sha256": "2ab764f77c90bf8ac979be7dde58a8d7352552d146d117cda3a8850c0b66e480",
+    "revision": "c10d4ccd462e7fb6369d6e1a25aeb7a5a622b2c2"
+  },
+  "public_safety_attestation": {
+    "assertions": [
+      "no_raw_or_licensed_rows",
+      "no_credentials_or_tokens",
+      "no_private_or_local_paths",
+      "no_provider_implementation",
+      "no_reserve_identities",
+      "no_outcomes_or_profitability",
+      "no_m6r_episode_payloads"
+    ],
+    "status": "pass"
+  },
+  "receipt_created_at_utc": "2026-08-02T08:21:20Z",
+  "schema_version": "pa_feitian_m6f_causal_measurement_capability_receipt_v1",
+  "source_evidence": [
+    {
+      "audit_as_of": "2026-07-30",
+      "evidence_id": "EVIDENCE-CANDIDATE-INTERFACE",
+      "evidence_schema_version": "pa_feitian_phase1_candidate_interface_audit_v1",
+      "locator": "doc/repro/pa-feitian-phase1-data-capability-2026-07-30/candidate_interface_audit_v1.json",
+      "raw_byte_length": 158609,
+      "raw_byte_sha256": "becb9bc6b65c54908eac7ad4d3e39a3591d92e65e1e07f2a3b086e096a39f795",
+      "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+      "role": "six-family interface schema, quality, timestamp and row-count evidence"
+    },
+    {
+      "audit_as_of": "2026-07-30T15:45:00Z",
+      "evidence_id": "EVIDENCE-NATIVE-REGISTRATION",
+      "evidence_schema_version": "pa_feitian_m6_native_source_registration_audit_v1",
+      "locator": "doc/repro/pa-feitian-m6-native-source-registration-2026-07-30/native_source_registration_audit_v1.json",
+      "raw_byte_length": 73689,
+      "raw_byte_sha256": "93f39fe6a7badbed7400dd1719195fd64cd9ed817ba2140aa4ee4b8df1a44fee",
+      "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+      "role": "source-version, provenance and source-to-candidate accounting evidence"
+    },
+    {
+      "audit_as_of": "2026-07-12",
+      "evidence_id": "EVIDENCE-OPTION-INPUT",
+      "evidence_schema_version": "pa_feitian_m6_option_input_capability_audit_v1",
+      "locator": "doc/repro/pa-feitian-m6-option-input-audit-2026-07-12/option_input_capability_audit_v1.json",
+      "raw_byte_length": 11542,
+      "raw_byte_sha256": "892b0926913bff0665c080dd6a5ba8459ccfe0ca3c4e91cb1441706a778b2753",
+      "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+      "role": "option contract parsing, timestamp, availability and expiry-gap evidence"
+    },
+    {
+      "audit_as_of": "2026-07-11T00:00:00Z",
+      "evidence_id": "EVIDENCE-CONTINUOUS-PROVENANCE",
+      "evidence_schema_version": "pa_feitian_continuous_provenance_manifest_v1",
+      "locator": "doc/repro/pa-feitian-m6-continuous-provenance-2026-07-11/continuous_provenance_manifest_v1.json",
+      "raw_byte_length": 55353,
+      "raw_byte_sha256": "a239a15d7f11bfacac0565a32e6f6bb5895ff8c5815cf5138926722590ffd3a3",
+      "repository_revision": "7673394a9710036bf7ea9fb79d515b8a6beb0290",
+      "role": "existing causal continuous-roll provenance boundary"
+    }
+  ],
+  "source_version": {
+    "candidate_interface_inventory_sha256": "sha256:9bbd6c94ca9bf8228c76cd2078513b82655990c88084297d710cd83c2f33ec8f",
+    "native_complete_private_inventory_sha256": "sha256:13e00e03007e47525bdeac9e5fddb81d222375d7921557b9b1569fe2bd17b819",
+    "native_public_membership_sha256": "sha256:2cdcd4e6ef456885d59fd89125099e3f1ceb0c27b82a849db45e298f2b1e310d",
+    "option_parsed_contract_set_sha256": "sha256:1763a5d704c4a03ce7a930db00cdbfd784edbeed86c23803c77c651e7e8408ec",
+    "provider_identity_publication": "not_required_and_not_published",
+    "provider_semantics_status": "unbound",
+    "public_alias": "external://quant-data/",
+    "source_file_count": 978,
+    "source_row_count": 2702545
+  }
+}
