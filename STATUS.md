@@ -1,75 +1,76 @@
 # paired-trading — project status
 
-Snapshot at 2026-08-02. Read the current research gate first. The detailed
+Snapshot at 2026-08-03. Read the current research gate first. The detailed
 engine and baseline snapshot from 2026-06 is retained below as dated history;
 its measurements do not override the newer PA/Feitian research decisions.
 
-## Current research gate (2026-08-02)
+## Current research gate (2026-08-03)
 
 | Surface | State | Authoritative evidence |
 | --- | --- | --- |
-| Repository baseline | Accepted M6M evidence is on `develop@7673394` and promoted to `main@87fcc91` | [PR #74](https://github.com/algotradinglife/paired-trading/pull/74), [PR #75](https://github.com/algotradinglife/paired-trading/pull/75) |
-| Coordination | M6M accepted `method_reconciled_recommend_path`; the next eligible lane is source-fidelity evidence recovery, not an experiment | [Issue #73](https://github.com/algotradinglife/paired-trading/issues/73) |
+| Repository baseline | Accepted M6F evidence is on `develop@bbaef61` and promoted to `main@506fcdf` | [PR #78](https://github.com/algotradinglife/paired-trading/pull/78), [PR #83](https://github.com/algotradinglife/paired-trading/pull/83) |
 | M6 engineering foundation | Merged; strategy screening did not pass | [`pa-feitian-m6-final-internal-review-2026-07-11.md`](doc/repro/pa-feitian-m6-final-internal-review-2026-07-11.md) |
 | P1-EXP-002 | Stopped before outcome access: `stop_p1_exp_002` | [`pa-feitian-phase1-p1-exp-002-decision-2026-07-31`](doc/repro/pa-feitian-phase1-p1-exp-002-decision-2026-07-31/README.md) |
 | M6R bare-K recovery | Complete but inconclusive: `no_candidate`, candidate count 0 | [`pa-feitian-m6r-reveal-comparison-synthesis-v1.md`](doc/repro/pa-feitian-m6r-reveal-comparison-synthesis-v1.md) |
 | M6M method reconciliation | Accepted: source-fidelity recovery first; bare-K only as an explicitly non-authentic fallback | [`pa-feitian-m6m-method-reconciliation-2026-08-02`](doc/repro/pa-feitian-m6m-method-reconciliation-2026-08-02/README.md) |
-| Experiment, M7, and downstream stages | Not authorized | M6M PI decision above |
+| M6F source construct | Nine nodes have an approved prospective source-author annotation/adjudication protocol; `SF-03-DAILY-CHART` is independently `source_pinned` | [Issue #77](https://github.com/algotradinglife/paired-trading/issues/77), [`source_fidelity_ledger_v1.json`](doc/repro/pa-feitian-m6f-source-fidelity-recovery-2026-08-02/source_fidelity_ledger_v1.json) |
+| M6F causal measurement | Accepted closed-negative: `fail`, 0 pass / 10 fail | [Issue #79](https://github.com/algotradinglife/paired-trading/issues/79), [`causal_measurement_capability_receipt_v1.json`](doc/repro/pa-feitian-m6f-causal-measurement-capability-2026-08-02/causal_measurement_capability_receipt_v1.json) |
+| M6F confirmation reserve | Accepted custody route: 10/10 assertions, blinded `reserve_nonempty: true`; reserve remains sealed, unseen, and unreleased | [Issue #80](https://github.com/algotradinglife/paired-trading/issues/80), [`confirmation_reserve_custody_receipt_v2.json`](doc/repro/pa-feitian-m6f-confirmation-reserve-2026-08-02/confirmation_reserve_custody_receipt_v2.json) |
+| M6F terminal | Accepted closed-negative: `source_fidelity_measurement_failure`; this packet cannot open a preregistration-design Issue | [`pa-feitian-m6f-source-fidelity-recovery-2026-08-02`](doc/repro/pa-feitian-m6f-source-fidelity-recovery-2026-08-02/README.md) |
+| Experiment, reserve release, M7/M8/M9, and execution | Not authorized | M6F terminal decision above |
 
 ### What the latest research completed
 
-- The M6R data pack contains 72 deterministic blind episodes across 9 futures
-  families and 3 exchanges: 36 candidate-activity and 36 ordinary-control
-  windows. See the [data handoff](doc/repro/pa-feitian-m6r-historical-bare-k-episode-pack-2026-07-31/README.md).
-- Strategy completed 72/72 blind first-pass annotations before reveal and
-  preserved the frozen descriptors byte-for-byte.
-- The authorized comparison audited 27 predeclared descriptor categories. Of
-  the 15 categories that passed the structural support floor, all 15 had both
-  positive and negative horizon-20 close changes. Freezing a direction,
-  horizon, or threshold from that sample would therefore be post-hoc.
-- M6M reconciled the source-defined Feitian option decision chain, the explicitly
-  non-authentic M6 bare-K proxy, and the M6R discovery object without rewriting
-  any frozen result. The attached
-  [fresh Strategist EV receipt](doc/repro/pa-feitian-m6m-method-reconciliation-2026-08-02/independent-evidence-validation-receipt.md)
-  records PASS for transitions A/B/C and the terminal
-  `method_reconciled_recommend_path`, with no unresolved critical finding.
+- The original source author approved the exact prospective blinded annotation
+  and adjudication protocol for nine previously unresolved semantic nodes;
+  `SF-03-DAILY-CHART` remains independently source-pinned. This recovers a
+  versioned construct definition, not measurement or performance evidence.
+- The construct DAG separates event, perception, decision, management, and
+  outcome planes. `DAG-10-MANAGEMENT` carries the approved SF-10 protocol;
+  `DAG-11-OUTCOME-OBSERVATION` remains explicitly fail-closed.
+- The accepted Data capability receipt evaluated all ten causal interfaces and
+  returned `fail` for every one. Historical OHLC presence did not supply the
+  required causal availability, lifecycle, provenance, premium-basis, or
+  lossless accounting evidence.
+- The accepted confirmation-reserve package proves a sealed, non-overlapping,
+  nonempty route without revealing identities, rows, counts, or outcomes. It
+  remains unavailable to Strategy and does not repair the measurement failure.
+- Fresh independent validation at exact Strategy head `0673385` reproduced the
+  terminal `source_fidelity_measurement_failure`; the final verifier rejected
+  all 242 negative mutations.
 
 ### Why experiment work remains stopped
 
-- P1-EXP-002 cannot be revived from the existing source snapshot. All 12
-  intraday cells lack independently approved provider/bar-end semantics,
-  521,090 intraday timestamps remain unexplained, and 169 daily OHLC findings
-  violate the accepted zero-finding gate.
-- M6R produced no candidate suitable for independent validation. The 72
-  episodes remain a discovery set and are not independent proof.
-- M6 and M6R did not measure the full source-defined option decision chain.
-  Their results cannot falsify that chain, but neither do they support it. The
-  construct and its causal measurement must be recovered before experimental
-  design is defensible.
+- Source authorization resolved the meaning of a prospective protocol, but it
+  did not create causally available rows, labels, replay traces, lifecycle
+  state, premium measurement, or outcome evidence.
+- All ten required measurement interfaces failed the accepted readiness gate.
+  The positive reserve-custody result cannot override that closed-negative
+  dependency, so the reserve cannot be released or used for confirmation.
+- M6 and M6R still do not test the authentic source-defined chain. Their frozen
+  negative/inconclusive results remain valid for their own declared objects,
+  while the 72 M6R episodes remain discovery-only and outside confirmation.
+- `source_fidelity_measurement_failure` means the authentic construct is not
+  causally testable with the admitted evidence. It is not a finding that the
+  authentic strategy fails or succeeds.
 
 ### Next permitted gate
 
-No PA/Feitian experiment, candidate implementation, or M7 work may start from
-the current evidence. The next reviewed Issue may authorize only a
-**source-fidelity evidence-recovery contract** at the
-measurement/construct-readiness and discovery claim level. It must:
+No PA/Feitian experiment, preregistration-design Issue, reserve release,
+candidate implementation, or M7 work may start from the current evidence. M6F
+has ended at a closed-negative terminal; it does not automatically create a
+successor research lane.
 
-1. recover or fail closed on source-authorized chart, option-contract,
-   direction, DD/descending-line, 1B/2B, holistic-quality, premium, and roll
-   semantics;
-2. bind causally available inputs, provenance, unresolved fields, abstention
-   rules, and an append-only contamination ledger; source semantics must not be
-   tuned or reinterpreted against known M6/M6R outcomes;
-3. keep all 72 M6R episodes outside confirmation for any claim they helped
-   induce; and
-4. stop as `measurement_failure` / `unrecoverable_construct` if source semantics
-   or causal premium measurement cannot pass their gates.
+The next permitted action is a PI strategy/method decision about disposition.
+The decision may consider pausing the authentic Feitian line, commissioning a
+separate causal-measurement recovery contract, or separately naming a
+non-authentic bare-K discovery line. These are options for review, not current
+authorizations. Any later work requires its own narrow Issue, start state,
+owner, evidence boundary, acceptance criteria, and PI approval.
 
-Do not open a preregistered experiment Issue until that recovery contract has a
-reviewable construct, an admissible evidence source, and an independent
-confirmation reserve. If source fidelity is infeasible, PI may separately
-authorize a clearly named non-authentic bare-K discovery line; it must not be
-called authentic Feitian or Xiao-plus by inheritance.
+Even if causal measurement capability is later recovered, an experiment still
+requires a separate preregistration-design gate. The confirmation reserve stays
+sealed and unseen until an explicit later release condition is accepted.
 
 Contribution state, review, and validation routing are defined in
 [`WORKFLOW.md`](WORKFLOW.md).
