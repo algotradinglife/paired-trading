@@ -1,0 +1,218 @@
+{
+  "artifact_type": "pa_feitian_m6f_construct_dag",
+  "edges": [
+    {
+      "from": "DAG-01-UNDERLYING-DIRECTION",
+      "to": "DAG-02-OPTION-CONTEXT"
+    },
+    {
+      "from": "DAG-02-OPTION-CONTEXT",
+      "to": "DAG-03-DAILY-EVENT"
+    },
+    {
+      "from": "DAG-03-DAILY-EVENT",
+      "to": "DAG-04-DD-GEOMETRY"
+    },
+    {
+      "from": "DAG-03-DAILY-EVENT",
+      "to": "DAG-05-HIGH-LINE-GEOMETRY"
+    },
+    {
+      "from": "DAG-04-DD-GEOMETRY",
+      "to": "DAG-06-ONE-B-TWO-B"
+    },
+    {
+      "from": "DAG-05-HIGH-LINE-GEOMETRY",
+      "to": "DAG-06-ONE-B-TWO-B"
+    },
+    {
+      "from": "DAG-06-ONE-B-TWO-B",
+      "to": "DAG-07-HOLISTIC-QUALITY"
+    },
+    {
+      "from": "DAG-07-HOLISTIC-QUALITY",
+      "to": "DAG-08-ENTRY-PATH"
+    },
+    {
+      "from": "DAG-08-ENTRY-PATH",
+      "to": "DAG-09-INVALIDATION"
+    },
+    {
+      "from": "DAG-09-INVALIDATION",
+      "to": "DAG-10-MANAGEMENT"
+    },
+    {
+      "from": "DAG-10-MANAGEMENT",
+      "to": "DAG-11-OUTCOME-OBSERVATION"
+    }
+  ],
+  "nodes": [
+    {
+      "abstention_behavior": "Emit no directional bias.",
+      "causal_cutoff": "All direction inputs available no later than the decision cutoff.",
+      "conflict_behavior": "Any inconsistent or absent source-authorized direction state yields abstention.",
+      "inputs": [
+        "completed underlying or regime state"
+      ],
+      "ledger_node_id": "SF-01-UNDERLYING-DIRECTION",
+      "node_id": "DAG-01-UNDERLYING-DIRECTION",
+      "output": "call bias, put bias, or abstain",
+      "plane": "perception",
+      "readiness": "source_authorized_protocol"
+    },
+    {
+      "abstention_behavior": "Select no contract.",
+      "causal_cutoff": "Contract lifecycle and selection fields available before selection.",
+      "conflict_behavior": "Missing or tied eligibility state yields abstention.",
+      "inputs": [
+        "direction state",
+        "contract lifecycle fields",
+        "selection fields"
+      ],
+      "ledger_node_id": "SF-02-OPTION-CONTRACT",
+      "node_id": "DAG-02-OPTION-CONTEXT",
+      "output": "selected option context or abstain",
+      "plane": "decision",
+      "readiness": "source_authorized_protocol"
+    },
+    {
+      "abstention_behavior": "Reject any incomplete, unavailable, not-yet-completed, or wrong-contract candle.",
+      "causal_cutoff": "Exchange-defined completed daily candle for the selected option contract available before geometry is read.",
+      "conflict_behavior": "Contract identity, exchange, or provider completion disagreement fails closed.",
+      "inputs": [
+        "selected option context",
+        "option daily candle fields",
+        "exchange session metadata"
+      ],
+      "ledger_node_id": "SF-03-DAILY-CHART",
+      "node_id": "DAG-03-DAILY-EVENT",
+      "output": "causally available completed selected-contract daily-candle event",
+      "plane": "event",
+      "readiness": "deterministic_rule"
+    },
+    {
+      "abstention_behavior": "Emit unknown DD geometry.",
+      "causal_cutoff": "Only completed selected-option candles through the decision cutoff.",
+      "conflict_behavior": "Anchor ties or incompatible valid lines yield unknown.",
+      "inputs": [
+        "selected-option completed daily candles"
+      ],
+      "ledger_node_id": "SF-04-DD-LOW-LINE",
+      "node_id": "DAG-04-DD-GEOMETRY",
+      "output": "DD low-line state or unknown",
+      "plane": "perception",
+      "readiness": "source_authorized_protocol"
+    },
+    {
+      "abstention_behavior": "Emit unknown descending-high geometry.",
+      "causal_cutoff": "Only completed authorized-chart candles through the decision cutoff.",
+      "conflict_behavior": "Chart-source ambiguity, anchor ties, or incompatible lines yield unknown.",
+      "inputs": [
+        "authorized chart completed daily candles"
+      ],
+      "ledger_node_id": "SF-05-DESCENDING-HIGH-LINE",
+      "node_id": "DAG-05-HIGH-LINE-GEOMETRY",
+      "output": "descending-high-line state or unknown",
+      "plane": "perception",
+      "readiness": "source_authorized_protocol"
+    },
+    {
+      "abstention_behavior": "Emit unknown pullback class.",
+      "causal_cutoff": "Only completed candles and geometry visible through the decision cutoff.",
+      "conflict_behavior": "Ambiguous sequence or a missing protocol-compliant blinded annotation/adjudication trace yields unknown.",
+      "inputs": [
+        "DD geometry",
+        "descending-high geometry",
+        "completed option context"
+      ],
+      "ledger_node_id": "SF-06-ONE-B-TWO-B",
+      "node_id": "DAG-06-ONE-B-TWO-B",
+      "output": "1B, 2B, other, or unknown",
+      "plane": "perception",
+      "readiness": "source_authorized_protocol"
+    },
+    {
+      "abstention_behavior": "Emit unknown quality; do not substitute model consensus.",
+      "causal_cutoff": "Only the completed decision-time candle context.",
+      "conflict_behavior": "Annotator or dimension disagreement yields unknown unless resolved by the approved prospective adjudication protocol.",
+      "inputs": [
+        "pullback class",
+        "completed candle context"
+      ],
+      "ledger_node_id": "SF-07-HOLISTIC-QUALITY",
+      "node_id": "DAG-07-HOLISTIC-QUALITY",
+      "output": "source-authorized quality state or unknown",
+      "plane": "perception",
+      "readiness": "source_authorized_protocol"
+    },
+    {
+      "abstention_behavior": "Emit no entry when any prerequisite or ordering state is unresolved.",
+      "causal_cutoff": "Perception states and any admissible fill state available by the decision cutoff.",
+      "conflict_behavior": "Only the pinned left preference is retained; every other simultaneous state abstains.",
+      "inputs": [
+        "direction",
+        "contract context",
+        "geometry",
+        "pullback class",
+        "quality"
+      ],
+      "ledger_node_id": "SF-08-ENTRY-ORDERING",
+      "node_id": "DAG-08-ENTRY-PATH",
+      "output": "left entry, right entry, or abstain",
+      "plane": "decision",
+      "readiness": "source_authorized_protocol"
+    },
+    {
+      "abstention_behavior": "Emit no executable invalidation level.",
+      "causal_cutoff": "Reference geometry must be fixed before entry and evaluated from causally available candles.",
+      "conflict_behavior": "Reference, buffer, or gap ambiguity yields abstention.",
+      "inputs": [
+        "entry path",
+        "source-authorized reference structure"
+      ],
+      "ledger_node_id": "SF-09-STRUCTURAL-INVALIDATION",
+      "node_id": "DAG-09-INVALIDATION",
+      "output": "structural invalidation state or abstain",
+      "plane": "decision",
+      "readiness": "source_authorized_protocol"
+    },
+    {
+      "abstention_behavior": "Emit no management instruction.",
+      "causal_cutoff": "Premium and lifecycle states available at each management decision without future path access.",
+      "conflict_behavior": "Exit, runner, expiry, or roll ambiguity yields abstention and no synthetic continuation.",
+      "inputs": [
+        "entry state",
+        "invalidation state",
+        "premium state",
+        "contract lifecycle state"
+      ],
+      "ledger_node_id": "SF-10-PREMIUM-MANAGEMENT",
+      "node_id": "DAG-10-MANAGEMENT",
+      "output": "management decision or abstain",
+      "plane": "decision",
+      "readiness": "source_authorized_protocol"
+    },
+    {
+      "abstention_behavior": "Record no outcome: future outcome observation is outside the approved source protocol and remains fail closed until separately measurable.",
+      "causal_cutoff": "Available only after the relevant future path; prohibited from perception and decision inputs.",
+      "conflict_behavior": "The approved source protocol cannot authorize future outcomes; any provider, lifecycle, reconstruction, or authorization ambiguity rejects the outcome row.",
+      "inputs": [
+        "frozen management decision",
+        "later premium observations"
+      ],
+      "ledger_node_id": "SF-10-PREMIUM-MANAGEMENT",
+      "node_id": "DAG-11-OUTCOME-OBSERVATION",
+      "output": "future outcome observation or rejected row",
+      "plane": "outcome",
+      "readiness": "fail_closed"
+    }
+  ],
+  "plane_order": [
+    "event",
+    "perception",
+    "decision",
+    "outcome"
+  ],
+  "schema_version": "pa_feitian_m6f_construct_dag_v1",
+  "terminal_result": "source_fidelity_measurement_failure"
+}
