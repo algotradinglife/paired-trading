@@ -119,10 +119,20 @@ Findings: <none or actionable findings>
 
 ## Current Research Boundary
 
-The 2026-08-02 gate preserves `stop_p1_exp_002` and M6R `no_candidate`, and
-accepts the M6M terminal `method_reconciled_recommend_path`. The next eligible
-lane is a separately reviewed source-fidelity evidence-recovery contract at the
-measurement/construct-readiness and discovery claim level. It is not an
-experiment authorization. M7, M8, live/shadow trading, and execution remain
-blocked; the exact evidence and contamination requirements are recorded in
-`STATUS.md`.
+The 2026-08-03 gate preserves `stop_p1_exp_002`, M6R `no_candidate`, and the
+M6M decision `method_reconciled_recommend_path`. M6F then recovered a
+source-authorized prospective construct protocol and an accepted sealed
+confirmation-reserve route, but the accepted causal-measurement capability
+receipt failed all ten interfaces. Its terminal is therefore
+`source_fidelity_measurement_failure`.
+
+This is a closed-negative research result. It does not falsify or validate the
+authentic Feitian chain, and it cannot open a preregistration-design Issue. No
+follow-on research task is automatically authorized. The next permitted action
+is a PI strategy/method disposition decision; any later execution of that
+decision requires its own reviewed Issue and exact boundary.
+
+The reserve remains sealed, unseen, and unreleased. Experiment, backtest,
+preregistration design, M7, M8, M9, implementation, live/shadow trading, and
+execution remain blocked. The exact evidence, contamination, and disposition
+options are recorded in `STATUS.md`.
